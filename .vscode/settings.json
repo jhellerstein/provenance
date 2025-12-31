@@ -1,0 +1,105 @@
+{
+  // LaTeX Workshop Configuration
+  
+  // Build on save
+  "latex-workshop.latex.autoBuild.run": "onSave",
+  
+  // Enable SyncTeX
+  "latex-workshop.synctex.afterBuild.enabled": true,
+  
+  // LaTeX recipes (build sequences)
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "pdflatex → bibtex → pdflatex × 2",
+      "tools": [
+        "pdflatex",
+        "bibtex",
+        "pdflatex",
+        "pdflatex"
+      ]
+    },
+    {
+      "name": "pdflatex",
+      "tools": [
+        "pdflatex"
+      ]
+    },
+    {
+      "name": "latexmk",
+      "tools": [
+        "latexmk"
+      ]
+    }
+  ],
+  
+  // LaTeX tools (individual commands)
+  "latex-workshop.latex.tools": [
+    {
+      "name": "pdflatex",
+      "command": "pdflatex",
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "%DOC%"
+      ]
+    },
+    {
+      "name": "bibtex",
+      "command": "bibtex",
+      "args": [
+        "%DOCFILE%"
+      ]
+    },
+    {
+      "name": "latexmk",
+      "command": "latexmk",
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "-pdf",
+        "%DOC%"
+      ]
+    }
+  ],
+  
+  // PDF viewer settings
+  "latex-workshop.view.pdf.viewer": "tab",
+  "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
+  
+  // Clean auxiliary files
+  "latex-workshop.latex.clean.fileTypes": [
+    "*.aux",
+    "*.bbl",
+    "*.blg",
+    "*.idx",
+    "*.ind",
+    "*.lof",
+    "*.lot",
+    "*.out",
+    "*.toc",
+    "*.acn",
+    "*.acr",
+    "*.alg",
+    "*.glg",
+    "*.glo",
+    "*.gls",
+    "*.fls",
+    "*.log",
+    "*.fdb_latexmk",
+    "*.snm",
+    "*.synctex.gz",
+    "*.nav"
+  ],
+  
+  // Auto-clean on successful build
+  "latex-workshop.latex.autoClean.run": "onBuilt",
+  
+  // Intellisense settings
+  "latex-workshop.intellisense.package.enabled": true,
+  "latex-workshop.intellisense.citation.backend": "bibtex",
+  
+  // Forward and reverse search (SyncTeX)
+  "latex-workshop.synctex.synctexjs.enabled": true
+}

@@ -1,0 +1,510 @@
+\documentclass[acmsmall,nonacm,anonymous]{acmart}
+
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{amsthm}
+
+% ---------- Simple block bracketing ----------
+\newenvironment{bracketlines}{%
+  \par\medskip\hrule\medskip\noindent
+}{%
+  \par\medskip\hrule\medskip
+}
+
+% ---------- Theorem environments ----------
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+\newtheorem{example}{Example}
+\newtheorem{observation}{Observation}
+\newtheorem{assumption}{Assumption}
+
+\numberwithin{definition}{section}
+\numberwithin{theorem}{section}
+\numberwithin{lemma}{section}
+\numberwithin{corollary}{section}
+\numberwithin{remark}{section}
+\numberwithin{example}{section}
+\numberwithin{observation}{section}
+\numberwithin{assumption}{section}
+
+% ---------- Notation ----------
+\newcommand{\Hist}{\mathcal{H}}
+\newcommand{\Proc}{\mathcal{P}}
+\newcommand{\Obs}{\mathsf{Obs}}
+\newcommand{\Spec}{\mathsf{Spec}}
+\newcommand{\Term}{\mathsf{Term}}
+\newcommand{\Ord}{\preceq}
+\newcommand{\cost}{\mathsf{cost}}
+\newcommand{\Cost}{\mathsf{Cost}}
+\newcommand{\depth}{\mathsf{depth}}
+\newcommand{\sqsubseteqh}{\sqsubseteq_h}
+\newcommand{\Aop}{\mathsf{A}}
+\newcommand{\Depth}{\mathsf{Depth}}
+\newcommand{\Resolve}{\mathsf{Resolve}}
+\newcommand{\view}{\mathsf{view}}
+\newcommand{\Ag}{\mathcal{A}g}
+\newcommand{\CoordCost}{\mathsf{CoordCost}}
+\newcommand{\CoordDepth}{\mathsf{CoordDepth}}
+\newcommand{\ICost}{\mathsf{ICost}}
+\newcommand{\IDepth}{\mathsf{IDepth}}
+\newcommand{\Atoms}{\mathsf{Atoms}}
+\newcommand{\Out}{\mathcal{O}}
+
+% ---------- Comments, etc. ----------
+\newenvironment{commentary}{%
+  \begin{quote}\itshape\small\color{gray}
+}{%
+  \end{quote}
+}
+
+\title{Provenance Interpretations: From Ambiguity to Algebra}
+\author{Joseph M. Hellerstein}
+\date{\today}
+
+\acmConference[Conference]{Full Conference Name}{Month Year}{Location}
+\acmBooktitle{Proceedings of the Conference}
+\acmYear{2024}
+\acmISBN{123-4-56789-012-3}
+
+\begin{document}
+
+% ================================================================
+% Paper outline (LaTeX skeleton)
+% ================================================================
+
+\begin{abstract}
+% Problem: provenance excels in resolved / algebraic settings, but many modern
+% semantics are inherently ambiguous (multi-valued).
+% Contribution: model "quotient engineering" via interpretations (semantic commitments),
+% quantify commitments by cost/depth, show how classic semantics (negation, PDBs, etc.)
+% fit, and recover semiring provenance after resolution.
+% Results: (i) framework + measures, (ii) quotient families / design space,
+% (iii) worked sandbox (Datalog+negation and/or PDBs), (iv) case studies/examples.
+\end{abstract}
+
+\maketitle
+
+% ================================================================
+\section{Introduction}
+\label{sec:intro}
+
+Algebraic provenance is one of the major success stories of database theory.
+By representing query results as elements of a commutative semiring—most famously
+as provenance polynomials—researchers have obtained a uniform account of
+\emph{why}- and \emph{how}-provenance, explanations, uncertainty propagation, and
+query optimization across a wide range of query languages
+\cite{green2007provenance,suciu2011probabilistic}.
+This algebraic view has proved remarkably robust: once query semantics are
+single-valued and monotone, provenance reduces to arithmetic.
+
+Yet this success rests on a strong and often implicit assumption:
+that query semantics are already \emph{resolved}.
+That is, for each input history or database instance, the specification admits a
+single semantic outcome (or a single equivalence class of outcomes).
+In practice, many of the most important semantic settings in databases and
+distributed systems violate this assumption.
+
+Modern systems routinely operate in settings that are intrinsically
+\emph{ambiguous}.
+Negation in logic programming admits multiple models.
+Snapshot isolation admits multiple concurrent futures.
+Distributed coordination and failure semantics admit multiple consistent
+interpretations.
+Probabilistic databases and Monte Carlo methods explicitly reason over sets of
+possible worlds.
+In all of these cases, the semantic object of interest is not a single outcome,
+but a \emph{set} of admissible outcomes.
+Algebraic provenance, in its classical form, has little to say in such spaces.
+
+\medskip
+
+\paragraph{Thesis.}
+This paper argues that the gap between ambiguous semantics and algebraic
+provenance is not accidental.
+Rather, provenance succeeds precisely because it operates \emph{after} a class
+of semantic commitments has been made.
+These commitments—about negation, ordering, visibility, membership, or
+consistency—are what collapse a multi-valued specification into a resolved one.
+We call such a collection of commitments an \emph{interpretation}.
+
+We build on the framework of \emph{interpretation complexity} introduced
+in~\cite{hellerstein2026interpretation}, which models interpretation as a semantic
+refinement process with measurable structure.
+An interpretation induces a \emph{quotient} on the space of admissible outcomes,
+collapsing ambiguity into a resolved semantic space.
+This paper shows that algebraic provenance applies precisely in these induced
+quotient spaces.
+
+\medskip
+
+\paragraph{Interpretation as quotient engineering.}
+Viewed through this lens, provenance is not a primitive feature of query
+semantics, but a consequence of \emph{quotient engineering}.
+Different choices of interpretation induce different quotients:
+some collapse ambiguity cheaply, others require deep chains of dependent
+commitments.
+We characterize interpretations along two independent axes:
+\emph{cost}, measuring how many semantic commitments are introduced, and
+\emph{depth}, measuring their irreducible dependency structure.
+Cost captures the \emph{volume} of commitment; depth captures its
+\emph{semantic entanglement}.
+
+This distinction is crucial.
+Two interpretations may have the same cost but radically different depth,
+corresponding to whether commitments commute or must be staged.
+Depth, rather than cost, determines when resolution can be parallelized,
+incrementalized, or avoided entirely.
+
+\medskip
+
+\paragraph{Design space of quotients.}
+A key contribution of this paper is to make explicit a small but expressive
+\emph{design space of quotients}.
+In Datalog with negation, this space includes stratified, well-founded, and stable
+semantics.
+In probabilistic databases, it includes independence assumptions and factorized
+world models.
+Each choice corresponds to a different interpretation, with different cost/depth
+profiles and different algebraic consequences.
+Classical semiring provenance emerges only after sufficient resolution has been
+performed.
+
+\medskip
+
+\paragraph{Scope and roadmap.}
+Rather than attempting to cover all sources of semantic ambiguity, this paper
+uses Datalog with negation and probabilistic databases as a focused sandbox.
+These settings are familiar to PODS readers, yet rich enough to exhibit the
+phenomena of interest.
+Our goal is not to propose a new semantics for negation or probability, but to
+clarify the algebraic consequences of existing ones.
+
+The paper proceeds as follows.
+Section~\ref{sec:background} recalls the interpretation framework and the notions
+of cost and depth.
+Section~\ref{sec:quotients} formalizes interpretation as quotient engineering.
+Section~\ref{sec:negation} analyzes stratified, well-founded, and stable negation
+through this lens.
+Section~\ref{sec:probabilistic} shows how classical semiring provenance is
+recovered after resolution in probabilistic databases.
+We conclude by discussing broader implications for provenance, concurrency, and
+distributed systems.
+
+\paragraph{Contributions.}
+\begin{itemize}
+  \item A formal account of \emph{interpretation as quotient engineering} for
+        ambiguous semantics.
+  \item Structural measures of semantic commitment: \emph{cost} (how many
+        commitments) and \emph{depth} (their dependency structure).
+  \item An explicit \emph{design space of quotients}, encompassing stratified,
+        well-founded, and stable interpretations.
+  \item Worked examples showing where and why algebraic (semiring) provenance
+        applies only \emph{after} resolution.
+\end{itemize}
+
+% ================================================================
+\section{Overview: From Ambiguity to Algebra via Quotients}
+\label{sec:overview}
+
+We begin by informally introducing the central objects of the paper and the
+conceptual move that connects them.
+The goal of this section is not technical precision, but orientation: to make
+clear what problem we are solving and why algebraic provenance naturally appears
+\emph{after} semantic resolution rather than before.
+
+Our analysis builds directly on a prior complexity framework introduced in an
+earlier paper~\cite{interpretation-complexity-arxiv}, which formalizes
+\emph{interpretation cost} and \emph{interpretation depth} as measures of the
+semantic commitments required to resolve ambiguity.
+That work develops the complexity theory in full and studies its consequences
+across several computational models.
+In this paper, we treat that framework as given and focus instead on its
+\emph{semantic payoff}: how different interpretations engineer quotients that
+enable algebraic provenance.
+
+\subsection{Ambiguous specifications}
+
+Throughout the paper, we model semantics as a (possibly multi-valued)
+specification
+\[
+  \Spec : \Hist \to 2^O ,
+\]
+mapping an input history or instance $H$ to a set of admissible outcomes.
+Ambiguity is represented directly: $\Spec(H)$ may contain many distinct outcomes,
+corresponding to different consistent interpretations of the same evidence.
+
+This formulation subsumes a wide range of familiar settings:
+Datalog programs with negation admit multiple models;
+snapshot isolation admits multiple concurrent futures;
+probabilistic databases admit multiple possible worlds.
+In all of these cases, ambiguity is not an artifact of incomplete information,
+but a fundamental property of the semantics.
+
+When $\Spec(H)$ is single-valued for all $H$, we say the specification is
+\emph{resolved}.
+Classical algebraic provenance lives almost exclusively in this regime.
+
+\subsection{Interpretations as semantic commitments}
+
+An \emph{interpretation} is a structured collection of semantic commitments that
+restrict the admissible outcomes of a specification.
+Formally, an interpretation acts by refining $\Spec$ to a new specification
+$\Spec \mid I$, obtained by eliminating outcomes that are incompatible with the
+commitments in $I$.
+
+Crucially, interpretations are not arbitrary filters.
+They are built from \emph{interpretive predicates} that may apply conditionally,
+depending on which outcomes remain admissible.
+As a result, different predicates may or may not commute:
+some commitments can be made independently, while others must be staged.
+
+This structure gives rise to two independent measures:
+\begin{itemize}
+  \item \emph{Cost}, measuring how many semantic commitments are introduced, and
+  \item \emph{Depth}, measuring the irreducible dependency structure among those
+        commitments.
+\end{itemize}
+
+Cost captures the volume of commitment; depth captures its semantic entanglement.
+Depth, rather than cost, determines whether commitments can be parallelized or
+must be introduced sequentially.
+
+\subsection{Resolution induces a quotient}
+
+Applying an interpretation $I$ induces a quotient on the outcome space.
+Outcomes that differ only in ways ruled out by $I$ are identified, while outcomes
+that violate the commitments are eliminated entirely.
+When $\Spec \mid I$ is resolved, this quotient collapses ambiguity to a single
+semantic outcome (or equivalence class).
+
+This perspective reframes semantic resolution as \emph{quotient engineering}.
+Different interpretations induce different quotients:
+some coarse, some fine-grained; some cheap, some deep.
+The space of possible interpretations thus defines a design space of quotients,
+each with distinct semantic and algebraic consequences.
+
+\subsection{Why algebra appears after resolution}
+
+Algebraic provenance relies on two properties:
+single-valued semantics and monotonic reasoning.
+Both emerge naturally after sufficient resolution has occurred.
+
+Once $\Spec \mid I$ is resolved, provenance can be computed over the induced
+quotient space.
+In this space, alternative derivations combine algebraically, explanations
+compose, and uncertainty propagates via arithmetic.
+Before resolution, however, provenance expressions mix fundamentally incompatible
+semantic possibilities.
+
+Seen this way, algebraic provenance is not a competing semantic theory, but a
+downstream beneficiary of interpretation.
+Interpretations determine \emph{when} and \emph{where} algebra applies.
+
+\subsection{A minimal running example}
+
+As a running intuition, consider a Datalog rule with negation:
+\[
+  p \leftarrow \neg q .
+\]
+Before any commitment is made about $q$, the specification admits outcomes in
+which $p$ is either true or false.
+Applying a negation-as-failure commitment eliminates outcomes where $q$ holds,
+resolving the ambiguity.
+Only after this resolution does the truth of $p$ become fixed and algebraic
+reasoning apply.
+
+Later sections develop this intuition formally and show how different choices of
+interpretation—stratified, well-founded, or stable—induce different quotients
+with different cost and depth profiles.
+
+\subsection{Looking ahead}
+
+The remainder of the paper makes this picture precise.
+We define interpretations, cost, and depth formally; characterize admissible
+quotients; and show how classical provenance is recovered in resolved spaces.
+Throughout, the guiding principle is that ambiguity is not an obstacle to
+algebra, but a signal that interpretation has not yet been accounted for.
+
+% ================================================================
+\section{Preliminaries}
+\label{sec:prelim}
+% - Histories, outcomes, specifications: Spec : Hist -> 2^O
+% - Causal extension / prefix closure as needed (keep light)
+% - Notational conventions
+
+\subsection{Histories and Specifications}
+\label{sec:hist-spec}
+
+\subsection{Resolution Properties}
+\label{sec:resolution-props}
+% - "resolved" (single-valued) as primary
+% - mention generalization to other properties if needed
+
+% ================================================================
+\section{Interpretations and Quotients}
+\label{sec:interpretations}
+% - Interpretive predicates phi : Hist x 2^O -> 2^O
+% - Interpretation syntax (conjunction/tree), application/refinement
+% - Equivalence: I \equiv_Spec J iff Spec|I = Spec|J
+% - Parsimony: cost-minimal, redundant predicates remark
+% - Depth setup: dependency/commutation, layering
+
+\subsection{Interpretive Predicates and Interpretations}
+\label{sec:predicates}
+
+\subsection{Equivalence and Parsimony}
+\label{sec:equivalence-parsimony}
+
+\subsection{Cost}
+\label{sec:cost}
+
+\subsection{Depth and Dependency}
+\label{sec:depth}
+% - Define dependency/commutation graph
+% - Define depth via canonical layering
+% - Lemma: dependency chains lower-bound depth
+
+\subsection{Resolution Cost and Resolution Depth}
+\label{sec:resolution-cost-depth}
+
+% ================================================================
+\section{Algebra After Resolution}
+\label{sec:algebra-after-resolution}
+% - What semiring provenance needs (single-valued / monotone setting, etc.)
+% - The "post-resolution quotient space": where K-relations / semiring annotations apply.
+% - Thesis statement: interpretation carves a quotient that restores algebraic structure.
+% - Optionally: short theorem/observation tying resolution -> monotonicity (if used).
+
+\subsection{Semiring Provenance: Reminder and Requirements}
+\label{sec:semiring-reqs}
+
+\subsection{Quotient Space for Provenance}
+\label{sec:quotient-space}
+% - Describe: resolved semantics + identification/equivalence of worlds/schedules/etc.
+
+% ================================================================
+\section{Quotient Engineering as a Design Space}
+\label{sec:design-space}
+% - Key move beyond the FOCS paper: we choose among quotient variants.
+% - Present the “size-3 for now” space (e.g., stratified / well-founded / stable)
+%   as choices of admissible interpretations / resolution properties.
+% - Frame as engineering tradeoffs: cost/depth vs expressiveness vs determinacy.
+
+\subsection{Three Canonical Quotients}
+\label{sec:three-quotients}
+% - (1) Restrict dependencies (stratify)
+% - (2) Weaken resolution (well-founded / partial truth)
+% - (3) Insist on totality (stable), possibly incurring unbounded depth or emptiness
+
+\subsection{How to Read Cost and Depth Here}
+\label{sec:reading-cost-depth}
+% - cost ~ number of semantic commitments (units: e.g., negated atoms / choices)
+% - depth ~ dependency height (strata / chains / cycles forcing sequencing)
+
+% ================================================================
+\section{Sandbox: Datalog with Negation as Quotient Engineering}
+\label{sec:negation}
+% You can swap this with PDBs as primary if desired; keep structure identical.
+
+\paragraph{Specification.}
+% Define Spec_neg(H): admissible models given extensional facts in H.
+
+\paragraph{Interpretive predicates.}
+% Define phi_naf^p and any other needed predicates.
+
+\paragraph{Interpretations (three variants).}
+% - Stratified: layering by strata
+% - Well-founded: partial resolution / undef; omit certain commitments
+% - Stable: total 2-valued, allow cycles; discuss when unresolved/empty arises + workaround
+
+\paragraph{Cost and depth.}
+% - cost: number of negated atoms (or relevant syntactic sites)
+% - depth: number of strata vs larger dependency chains; stable can force depth ~ cycle structure
+
+\subsection{Stratified Negation}
+\label{sec:stratified}
+
+\subsection{Well-Founded Semantics}
+\label{sec:well-founded}
+
+\subsection{Stable Model Semantics}
+\label{sec:stable}
+
+\subsection{Restoring Semiring Provenance After Resolution}
+\label{sec:restore-semiring}
+% - State precisely what structure is restored and how provenance is computed in quotient.
+
+% ================================================================
+\section{Sandbox Variant: Probabilistic Databases}
+\label{sec:pdbs}
+% Optional (either here or make this the primary sandbox and move negation to appendix).
+% - ambiguity from possible worlds + probabilities
+% - interpretations as conditioning / independence / factorization assumptions?
+% - quotient that yields tractable algebra (e.g., independent tuples)
+% - connect to semiring-like annotations (why-provenance vs probabilistic weights)
+
+% ================================================================
+\section{Cross-Domain Motivation and Examples}
+\label{sec:examples}
+% Keep short: this is motivation + “why you should care beyond Datalog”.
+
+\subsection{Transactions and Isolation}
+\label{sec:txn-iso}
+% - brief: ambiguous schedules, quotients via conflict assumptions, etc.
+
+\subsection{Distributed Coordination}
+\label{sec:coordination}
+% - brief: membership/faults, agreement as interpretation, etc.
+
+\subsection{Stochastic / Monte Carlo Settings}
+\label{sec:stochastic}
+% - brief: ambiguity from randomness, quotients via conditioning/estimation assumptions.
+
+% ================================================================
+\section{Related Work}
+\label{sec:related}
+% - Semiring provenance (Green et al., etc.), why/why-not, provenance games, etc.
+% - Datalog negation semantics: Apt/Blair/Walker; Van Gelder et al.; Gelfond/Lifschitz.
+% - PDBs: Dalvi/Suciu etc. (if included).
+% - Any “quotient” / abstraction / refinement perspectives (logic, PL).
+% - Positioning vs your FOCS paper: this is a payoff via algebraic structure + quotient design space.
+
+% ================================================================
+\section{Discussion and Future Work}
+\label{sec:discussion}
+% - Larger design space of quotients (beyond the “3”)
+% - Automated quotient selection / optimization (depth parallelism, etc.)
+% - Connections to coordination & interpretation complexity, systems synthesis
+% - Open problems: canonical quotients? minimality? completeness?
+
+% ================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+% - Restate: interpretations engineer quotients from ambiguity to algebra.
+% - cost/depth quantify commitments; negation/PDBs demonstrate the payoff.
+% - Broader promise for provenance outside classic query settings.
+
+% ================================================================
+\appendix
+
+\section{Additional Examples and Proofs}
+\label{sec:appendix}
+% - Put longer worked examples, extra theorems, extended discussions here.
+
+\subsection{(Optional) Monkey's Paw (Technico-Entertainment)}
+\label{sec:appendix-paw}
+
+\subsection{(Optional) Extended Stable/Well-Founded Details}
+\label{sec:appendix-negation}
+
+\subsection{(Optional) Extra PDB Details}
+\label{sec:appendix-pdb}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\end{document}

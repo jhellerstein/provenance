@@ -82,7 +82,7 @@ resolved semantics.
 Many modern systems, however, operate under intrinsically ambiguous semantics:
 logic programs with negation admit multiple models, transactional systems admit
 multiple consistent executions, and policy-aware or probabilistic systems admit
-multiple semantic interpretations.
+multiple admissible outcomes.
 In such settings, it is not enough to explain \emph{what} follows; we must explain
 \emph{under which semantic commitments it follows}.
 
@@ -94,9 +94,9 @@ where algebraic provenance applies.
 We identify a canonical algebraic normal form for interpretation, called a
 \emph{conditional semiring}, and introduce \emph{layer certificates} as sufficient
 statistics for interpretation provenance.
-We develop the framework using Datalog with negation as a semantic sandbox and
-transactions as a representative systems setting, clarifying when and how classical
-semiring provenance is recovered after resolution.  
+We develop the framework using transactions as a representative systems setting,
+clarifying when and how classical semiring provenance is recovered after
+resolution.
 \end{abstract}
 
 \maketitle
@@ -115,7 +115,7 @@ Once query semantics are single-valued and monotone, provenance reduces to
 arithmetic.
 
 Yet this success rests on a strong and usually implicit assumption:
-that the semantics of interest are already \emph{resolved}.
+that the underlying specification is already \emph{resolved}.
 For each input, there is a single semantic outcome (or a single equivalence class
 of outcomes) to explain.
 In many of today’s most important semantic settings, this assumption does not
@@ -124,10 +124,10 @@ hold.
 Many settings are more complex, operating under \emph{intrinsically ambiguous} semantics.
 Logic programs with negation admit multiple models.
 Transactional systems admit multiple consistent executions.
-Distributed systems admit multiple interpretations of failure, membership, or
-ordering.
-Policy-aware and probabilistic systems admit multiple semantic regimes or possible
-worlds.
+Distributed systems admit multiple admissible failure, membership, or ordering
+assumptions consistent with the same history.
+Policy-aware and probabilistic systems admit multiple admissible outcomes, often
+organized as possible worlds.
 In all of these cases, the semantic object of interest is not a single outcome,
 but a \emph{set} of admissible outcomes.
 Classical provenance explains conclusions \emph{within} a fixed semantics, but has
@@ -147,6 +147,9 @@ collapsing ambiguity into a resolved semantic space.
 Algebraic provenance applies precisely in these induced quotient spaces.
 Thus, algebra is not lost in ambiguous settings—it is \emph{recovered} through
 interpretation.
+
+We assume interpretations are given and study the algebra and provenance that
+arise within a fixed interpretation, not how interpretations are selected.
 
 \medskip
 
@@ -177,8 +180,7 @@ commitments.
 We characterize interpretations along two orthogonal dimensions:
 \emph{cost}, measuring the volume of semantic commitment, and
 \emph{depth}, measuring semantic dependency.
-Depth, rather than cost, determines when resolution can be parallelized, deferred,
-or avoided.
+Depth, rather than cost, reflects irreducible dependency among commitments.
 
 \paragraph{Conditional semirings and certificates.}
 A central technical contribution of this paper is to show that interpretations admit
@@ -195,14 +197,8 @@ required to justify conclusions above.
 This separation enables minimal, compositional provenance of interpretation.
 
 \paragraph{Representative domains.}
-We develop the framework using two representative domains.
-We use Datalog with negation as a canonical example of \emph{semantic ambiguity},
-where multiple models arise from underspecified inference.
-We use transactions as a canonical example of \emph{systems ambiguity}, where
-multiple executions or consistency interpretations are admissible.
-Our goal is not to re-litigate these domains, but to show that both exhibit the same
-foundational gap: provenance that explains not just \emph{what} follows, but
-\emph{under which semantic assumptions it follows}.
+We develop the framework using transactions as a representative systems setting.
+Examples for Datalog with negation appear in a companion paper.
 
 \paragraph{Contributions.}
 This paper makes the following contributions:
@@ -216,9 +212,8 @@ This paper makes the following contributions:
   \item We define \emph{layer certificates} as sufficient statistics for
         interpretation provenance, separating algebraic structure from information
         requirements.
-  \item We develop the framework in Datalog with negation and sketch its application
-        to transactional systems, illustrating a new provenance regime for modern
-        systems.
+  \item We develop the framework for transactional systems, illustrating provenance
+    of interpretations in a representative ambiguous setting.
 \end{itemize}
 
 % ================================================================
@@ -312,8 +307,9 @@ constrained.
 \subsection{Semantic Refinement}
 
 Ambiguity is constrained by making additional semantic commitments.
-We model such commitments abstractly as refinement operators that restrict the
-set of admissible outcomes while preserving feasibility.
+We model these commitments as \emph{interpretive predicates}, formalized as
+refinement operators that restrict admissible outcomes while preserving
+feasibility.
 
 \begin{definition}[Refinement Operator]
 A \emph{refinement operator} is a function
@@ -347,17 +343,17 @@ commitments.
 
 \subsection{Interpretations}
 
-Individual refinement operators typically express only partial semantic
+Individual interpretive predicates typically express only partial semantic
 commitments.
 We therefore model semantic resolution using finite conjunctions of refinement
-operators, interpreted as sequential conditioning.
+operators (interpretive predicates), interpreted as sequential conditioning.
 
 \begin{definition}[Interpretation]
 An \emph{interpretation} is a finite conjunction
 \[
   I = \varphi_1 \wedge \cdots \wedge \varphi_m
 \]
-of refinement operators, where $\wedge$ denotes sequential refinement.
+of interpretive predicates, where $\wedge$ denotes sequential refinement.
 \end{definition}
 
 Refinement by an interpretation is defined by sequential application:
@@ -367,7 +363,7 @@ Refinement by an interpretation is defined by sequential application:
   (\cdots((\Spec \mid \varphi_1)\mid \varphi_2)\cdots)\mid \varphi_m .
 \]
 
-Because refinement operators may be ambiguity-sensitive, the order of conjuncts
+Because interpretive predicates may be ambiguity-sensitive, the order of conjuncts
 can matter.
 This non-commutativity is the source of semantic dependency studied in later
 sections.
@@ -380,13 +376,13 @@ An interpretation $I$ \emph{resolves} $\Spec$ if $\Spec \mid I$ is resolved.
 
 \subsection{Commutation and Dependency}
 
-Each refinement operator $\varphi$ induces a transformation
+Each interpretive predicate $\varphi$ induces a transformation
 $\Spec \mapsto (\Spec \mid \varphi)$ on specifications.
 Because operators may inspect the current admissible outcome set, the order in
 which they are applied can matter.
 
 \begin{definition}[Commutation]
-Two refinement operators $\varphi$ and $\psi$ \emph{commute with respect to}
+Two interpretive predicates $\varphi$ and $\psi$ \emph{commute with respect to}
 a specification $\Spec$ if
 \[
   (\Spec \mid \varphi) \mid \psi
@@ -418,52 +414,22 @@ before full resolution, provenance expressions live in a
 \emph{conditional semiring};
 after resolution, this structure collapses to an ordinary semiring.
 
-We emphasize that this algebra is not an arbitrary design choice.
-It arises directly from the semantic structure of interpretation:
-interpretive predicates compose conjunctively,
-while internal case distinctions are expressed disjunctively.
-No additional algebraic assumptions are imposed.
+The induced algebra follows the semantic structure of interpretation:
+interpretive predicates compose conjunctively, while internal case distinctions are
+expressed disjunctively.
 
 \subsection{Interpretations Revisited}
 
-We briefly recall the core constructs from the interpretation framework
-introduced in our earlier work, which we treat here as given.
-
-A specification $\Spec : \Hist \to 2^O$ assigns to each history a set of
-admissible outcomes.
-Interpretation proceeds by refinement: progressively restricting these sets
-while preserving feasibility.
-
-An \emph{interpretive predicate} is a refinement operator
-\[
-  \varphi : \Hist \times 2^O \to 2^O
-\]
-that shrinks the admissible outcome set while never eliminating all outcomes.
-Interpretive predicates may be ambiguity-sensitive: their effect may depend on
-the entire current admissible set, not just on individual outcomes.
-
-An \emph{interpretation} is a finite conjunction
-$I = \varphi_1 \wedge \cdots \wedge \varphi_m$,
-interpreted as sequential refinement:
-\[
-  \Spec \mid I
-  \;\triangleq\;
-  (\cdots((\Spec \mid \varphi_1)\mid \varphi_2)\cdots)\mid \varphi_m .
-\]
-
-An interpretation is \emph{resolving} if $\Spec \mid I$ is single-valued for every
-history.
-Earlier sections defined \emph{interpretation cost} and \emph{interpretation depth}
-as measures of how much semantic commitment is required to achieve such
-resolution.
-
-In this paper, we are concerned not with the complexity measures themselves,
-but with the algebraic structure induced by interpretations \emph{prior} to full
-resolution.
+We rely on the definitions of interpretive predicates and interpretations from
+Section~\ref{sec:prelim}.
+Briefly: a specification maps each history to a set of admissible outcomes; an
+interpretation is a finite conjunction of interpretive predicates (refinement
+operators) that sequentially restrict these sets while preserving feasibility.
+Our focus here is the algebra induced \emph{prior} to full resolution.
 
 \subsection{Why Interpretation Is Inherently Conjunctive}
 
-A crucial semantic fact underlies everything that follows:
+A key semantic fact underlies everything that follows:
 
 \begin{quote}
 \emph{Interpretation proceeds by accumulating commitments.}
@@ -522,19 +488,18 @@ semantic dependency.
 Provenance expressions are therefore evaluated conditionally, with each layer
 conditioning on the certificates produced by earlier layers.
 
-This algebra is not imposed by fiat.
-It is the algebraic reflection of the interpretation framework’s semantics.
+This is the algebraic reflection of the interpretation framework’s semantics.
 
 
 \subsection{Collapse to Semiring Provenance After Resolution}
 
 Once an interpretation fully resolves the specification, ambiguity disappears.
-All conditioning predicates are discharged, and no further semantic commitments
+All conditioning has been accounted for, and no further semantic commitments
 remain.
 
 At this point, the conditional semiring collapses to an ordinary commutative
 semiring.
-Provenance expressions no longer depend on interpretive certificates and reduce
+Provenance expressions no longer depend on layer certificates and reduce
 to standard semiring annotations.
 
 Thus, classical algebraic provenance appears not as a primitive semantic object,
@@ -570,8 +535,8 @@ Interpretations induce an algebra with two distinct regimes:
 This perspective unifies the interpretation framework with algebraic provenance
 and clarifies why provenance succeeds only after semantic commitments have been
 made.
-Later sections instantiate this structure concretely for Datalog with negation
-and transactional semantics.
+Section~\ref{sec:interpretations} makes the induced restriction/identification
+effect explicit as a quotient construction.
 
 % ================================================================
 \section{Interpretations and Quotient Engineering}
@@ -580,17 +545,16 @@ and transactional semantics.
 
 Sections~\ref{sec:prelim} and~\ref{sec:conditional-semiring} established the
 semantic and algebraic structure induced by interpretations.
-In this section, we make explicit the \emph{semantic effect} of interpretation and
-connect it to the complexity measures introduced in our earlier work.
+In this section, we make explicit the \emph{semantic effect} of a fixed
+interpretation.
 
 At a high level, an interpretation acts in two stages.
 It first restricts the space of admissible outcomes to those compatible with its
 semantic commitments, and then collapses distinctions among the remaining
 outcomes.
 Together, these steps induce a quotient on the outcome space.
-This restriction--identification process provides the semantic bridge between
-ambiguity and algebra, and explains why algebraic provenance becomes applicable
-only after sufficient resolution.
+This restriction--identification process is the semantic bridge between ambiguity
+and algebra.
 
 \subsection{Restriction of Admissible Outcomes}
 
@@ -626,7 +590,7 @@ Fix a specification $\Spec$, an interpretation $I$, and a history $H$, and write
 \]
 for the restricted outcome set.
 We say that two outcomes $o,o' \in O_H^I$ are \emph{equivalent under $I$ at $H$},
-written $o \sim_{I,H} o'$, if no refinement operator appearing in $I$ ever
+written $o \sim_{I,H} o'$, if no interpretive predicate appearing in $I$ ever
 distinguishes between them at $H$.
 Intuitively, $I$ never depends on which of these outcomes holds.
 
@@ -644,7 +608,7 @@ Both restriction and identification are therefore intrinsic to the conditioning
 semantics of interpretation.
 
 \begin{remark}[History-indexed quotients]
-Because refinement operators may depend on the history and on intermediate
+Because interpretive predicates may depend on the history and on intermediate
 admissible sets, the equivalence relation $\sim_{I,H}$ may vary with $H$.
 Interpretation thus induces a family of quotients indexed by histories, rather
 than a single global quotient on $O$.
@@ -661,79 +625,9 @@ Resolution is therefore the limiting case of quotient construction.
 It is not a distinct semantic operation, but the endpoint of the same process of
 restriction and identification under increasingly strong commitments.
 
-\subsection{Equivalence, Cost, and Depth}
-
-Because interpretations act only through the quotients they induce, many distinct
-interpretations may be semantically equivalent.
-
-Recall that two interpretations $I$ and $J$ are equivalent for $\Spec$ if
-\[
-  \Spec \mid I \;=\; \Spec \mid J .
-\]
-Equivalent interpretations induce the same restriction and the same quotient, and
-therefore support identical downstream semantic reasoning and provenance.
-
-Within an equivalence class, interpretations may nevertheless differ in their
-structure.
-Some may assert redundant commitments; others may impose unnecessary sequencing
-dependencies.
-This motivates the complexity measures introduced in our earlier work.
-
-Interpretation \emph{cost} measures the volume of semantic commitment required to
-induce a quotient: the number of refinement operators applied.
-Interpretation \emph{depth} measures irreducible dependency structure: the minimum
-number of semantic stages required to impose those commitments.
-
-Cost-minimal and depth-minimal interpretations therefore correspond to
-\emph{parsimonious quotient constructions}.
-They induce the same quotient with fewer commitments or with fewer unavoidable
-dependency stages.
-From the quotient perspective, cost and depth are not abstract measures: they
-quantify the structural effort required to collapse semantic distinctions.
-
-\subsection{Quotient Engineering}
-
-Quotients live in the outcome space: they determine which semantic distinctions
-among admissible outcomes are preserved and which are collapsed.
-However, quotients are not selected directly.
-They are induced by upstream semantic choices—specifications, notions of
-observation, and the interpretive predicates used to resolve ambiguity.
-
-A specification $\Spec$, together with a notion of observation, determines which
-outcomes are distinguishable in principle.
-An interpretation then enforces additional commitments that restrict admissible
-outcomes and identify remaining distinctions.
-The combination of $\Spec$ and interpretation therefore induces a quotient on the
-outcome space.
-Different choices upstream may induce different quotients even over the same
-histories and outcomes.
-
-In many domains, there is no uniquely correct quotient.
-For example, well-founded and stable semantics for Datalog with negation induce
-different quotients, each defensible on semantic grounds.
-The interpretation framework does not prescribe a single choice; instead, it
-exposes the space of admissible ones by making semantic commitments explicit.
-
-Semantic choices have structural consequences.
-Each induced quotient determines the structure of the associated conditional
-semiring, whose dependency structure governs the cost and latency of provenance.
-Coarser quotients may admit simpler algebraic structure, while finer quotients may
-require deeper or more dependent interpretations.
-
-We refer to the practice of selecting interpretive predicates and interpretations
-with an eye toward the induced outcome quotient as \emph{quotient engineering}.
-Although the design actions occur in the specification and interpretation domains,
-the effects are best understood in terms of the resulting quotient.
-Quotient engineering is therefore a joint semantic and structural design problem,
-balancing fidelity of meaning against algebraic complexity.
-
-This perspective applies uniformly across domains.
-In Datalog with negation, different interpretations induce stratified,
-well-founded, or stable quotients.
-In transactional systems, they correspond to different visibility and ordering
-assumptions.
-In probabilistic settings, they correspond to different conditioning and
-independence assumptions.
+\paragraph{Scope.}
+An interpretation induces a quotient via restriction and identification.
+How interpretations are chosen or justified is out of scope here.
 
 \subsection{Summary}
 
@@ -742,14 +636,11 @@ remaining outcomes according to explicit semantic commitments.
 The resulting quotients make ambiguity and resolution first-class semantic
 objects.
 
-Cost and depth characterize the effort required to induce a quotient, while
-quotient engineering frames the semantic and structural tradeoffs involved in
-choosing among them.
 Viewed this way, interpretation is not an auxiliary mechanism but the semantic
 substrate on which provenance rests.
 
-Later sections instantiate this perspective concretely for Datalog with negation
-and transactional semantics.
+Section~\ref{sec:certificates} turns this quotient-and-layer structure into an
+information interface via layer certificates.
 
 % ================================================================
 \section{Layer Certificates and Interpretation Provenance}
@@ -765,17 +656,12 @@ In this section, we address a complementary question:
 \end{quote}
 
 Interpretations act by conditioning and quotienting outcome spaces.
-However, downstream semantic reasoning does not require access to the full history
-of semantic commitments.
-Instead, it suffices to retain summaries of prior resolution that determine which
-distinctions remain relevant.
-We formalize this idea using \emph{layer certificates}.
-
-Layer certificates are not new semantic objects.
-They are representations of \emph{sufficient information} for interpretation:
-enough to support further conditioning, but potentially much smaller than the
-interpretation itself.
-They provide a principled interface between semantic resolution and provenance.
+Downstream semantic reasoning rarely requires the full history of semantic
+commitments; it suffices to retain summaries of prior resolution that preserve
+exactly the distinctions relevant to subsequent interpretive predicates.
+We formalize these summaries as \emph{layer certificates}: sufficient information
+to continue interpretation, potentially much smaller than the interpretation
+itself.
 
 \subsection{Certificates as Sufficient Information}
 
@@ -784,7 +670,7 @@ $L_1,\ldots,L_k$ as in Section~\ref{sec:conditional-semiring}.
 Each layer imposes semantic commitments that restrict and identify outcomes,
 producing a refined specification
 \[
-  \Spec_i \;\triangleq\; \Spec \mid (\varphi_0 \wedge \cdots \wedge \varphi_i).
+  \Spec_i \;\triangleq\; \Spec \mid (\varphi_1 \wedge \cdots \wedge \varphi_i).
 \]
 
 Our goal is to characterize what information about $\Spec_i$ must be retained in
@@ -792,10 +678,10 @@ order to support subsequent interpretation.
 
 \paragraph{Certificates for individual refinements.}
 We begin by defining what it means for a value to summarize the effect of a single
-refinement operator.
+interpretive predicate.
 
-\begin{definition}[Certificate for a refinement operator]
-Let $\varphi$ be a refinement operator and let $C$ be a value.
+\begin{definition}[Certificate for an interpretive predicate]
+Let $\varphi$ be an interpretive predicate (refinement operator) and let $C$ be a value.
 We write $\llbracket C \rrbracket \subseteq O$ for the set of outcomes consistent
 with $C$ (its \emph{denotation}).
 We say that $C$ is a \emph{certificate} for $\varphi$, written $\varphi \models C$,
@@ -816,10 +702,10 @@ interpretation.
 
 \begin{definition}[Sufficient certificate for a continuation]
 Fix a specification $\Spec$ and an interpretation
-$I = \varphi_0 \wedge \cdots \wedge \varphi_k$.
+$I = \varphi_1 \wedge \cdots \wedge \varphi_k$.
 Let
 \[
-  \Spec_i \;\triangleq\; \Spec \mid (\varphi_0 \wedge \cdots \wedge \varphi_i)
+  \Spec_i \;\triangleq\; \Spec \mid (\varphi_1 \wedge \cdots \wedge \varphi_i)
   \quad\text{and}\quad
   J \;\triangleq\; \varphi_{i+1} \wedge \cdots \wedge \varphi_k .
 \]
@@ -866,46 +752,6 @@ This separation cleanly factors interpretation provenance into:
   \item the information carried between layers, as captured by certificates.
 \end{itemize}
 
-\subsection{Certificates, Cost, and Depth}
-
-Layer certificates interact with, but are distinct from, interpretation cost and
-depth.
-
-Cost and depth measure the \emph{structure of semantic commitment}:
-how many commitments are required, and how they depend on one another.
-Certificates describe the \emph{information interface} between those commitments.
-
-In particular:
-\begin{itemize}
-  \item interpretation depth determines how many layers of certificates are
-        required;
-  \item certificates determine what information must be preserved between layers.
-\end{itemize}
-
-These concerns are deliberately separated.
-A shallow interpretation may still require rich certificates, while a deep
-interpretation may admit compact certificates if each layer collapses many
-distinctions.
-
-\paragraph{Information carried by certificates.}
-Layer certificates summarize the effect of earlier semantic commitments, but they
-cannot be arbitrarily small.
-What information a certificate must retain is constrained by the expressive power
-of the remaining interpretation.
-
-In particular, if later refinement operators can test or branch on distinctions
-introduced earlier, then certificates must preserve enough information to support
-those distinctions.
-This yields unavoidable lower bounds on certificate size that are semantic rather
-than representational.
-
-We make this concrete in Section~\ref{sec:datalog}, where stratified negation
-provides a sharp illustration: each negation stratum induces an interface whose
-possible valuations must be distinguished by any certificate sufficient for
-subsequent strata.
-As a result, the information content of certificates is bounded below by the
-semantic variability exposed at stratum boundaries.
-
 \subsection{Summary}
 
 Layer certificates provide a principled interface between semantic resolution and
@@ -915,26 +761,7 @@ further conditioning, without exposing unnecessary detail.
 
 By separating interpretation structure from informational representation, the
 framework supports provenance that is both semantically grounded and flexible.
-Later sections show how concrete domains instantiate these ideas and exploit this
-separation.
-
-% ================================================================
-\section{Sandbox I: Datalog with Negation}
-\label{sec:negation}
-
-We develop the framework concretely using Datalog with negation.
-
-\subsection{Specification and Ambiguity}
-
-\subsection{Interpretive Predicates for Negation}
-
-\subsection{Stratified Semantics as Quotient Engineering}
-
-\subsection{Well-Founded Semantics}
-
-\subsection{Stable Model Semantics}
-
-\subsection{Algebraic Consequences}
+Section~\ref{sec:transactions} sketches an application in transactional systems.
 
 % ================================================================
 \section{Sandbox II: Transactions as Systems Ambiguity}
@@ -982,6 +809,9 @@ Interpretations bridge the gap between ambiguity and algebra.
 By making semantic commitments explicit and explainable, interpretation provenance
 extends algebraic provenance to settings where semantics themselves are objects of
 reasoning.
+
+How semantic regimes or interpretations are selected is out of scope here; we
+address domain-specific regime design in companion work.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{references}

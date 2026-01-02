@@ -174,19 +174,7 @@ accounting of query results than classical approaches.
 Provenance is only well-defined after semantic ambiguity has been resolved by an interpretation.
 
 \paragraph{Contributions.}
-In summary, this paper:
-\begin{itemize}
-  \item introduces \emph{interpretation provenance} as a foundation for explaining
-        results under ambiguous semantics;
-  \item shows how resolving interpretations recover classical algebraic
-        provenance as a special case;
-  \item formalizes certificates as a minimal interface for recording semantic
-        commitments;
-  \item applies the framework to transactional systems to explain
-        concurrency-dependent query results;
-  \item and identifies robustness across interpretations as a new class of
-        provenance questions.
-\end{itemize}
+This paper (i) introduces \emph{interpretation provenance} as a foundation for explaining results under ambiguous semantics; (ii) shows how resolving interpretations recover classical algebraic provenance as a special case; (iii) formalizes certificates as a minimal interface for recording semantic commitments; (iv) applies the framework to transactional systems to explain concurrency-dependent query results; and (v) identifies robustness across interpretations as a new class of provenance questions.
 
 % ================================================================
 \section{Preliminaries: Ambiguous Semantics and Refinement}
@@ -289,10 +277,7 @@ A \emph{refinement operator} is a function
   \varphi : \Hist \times 2^{O} \to 2^{O}
 \]
 such that for all histories $H$ and outcome sets $S \subseteq O$:
-\begin{itemize}
-  \item (\emph{Shrinkage}) $\varphi(H,S) \subseteq S$, and
-  \item (\emph{Feasibility}) if $S \neq \emptyset$, then $\varphi(H,S) \neq \emptyset$.
-\end{itemize}
+(\emph{Shrinkage}) $\varphi(H,S) \subseteq S$, and (\emph{Feasibility}) if $S \neq \emptyset$ then $\varphi(H,S) \neq \emptyset$.
 \end{definition}
 
 A refinement operator restricts admissible outcomes without introducing new ones
@@ -353,12 +338,7 @@ For each history $H$, refinement by $I$ produces a restricted set of admissible
 outcomes $(\Spec \mid I)(H)$.
 
 The semantic effect of interpretation has two aspects:
-\begin{itemize}
-  \item \emph{Restriction}: outcomes incompatible with the commitments in $I$ are
-        eliminated and play no further semantic role;
-  \item \emph{Identification}: among the remaining admissible outcomes, some may
-        become semantically indistinguishable.
-\end{itemize}
+\emph{restriction}, in which outcomes incompatible with the commitments in $I$ are eliminated and play no further semantic role, and \emph{identification}, in which some of the remaining admissible outcomes become semantically indistinguishable.
 
 Formally, for a history $H$ write
 \[
@@ -410,44 +390,23 @@ of interpretations and resolution from Section~\ref{sec:prelim}.
 \paragraph{Interpretation provenance values.}
 Fix a base provenance semiring $(K,\otimes,1)$ for derivations
 (e.g., polynomial provenance).
-An \emph{interpretation provenance value} is a pair
-\[
-  I \cdot k ,
-\]
-where $I$ is a \emph{resolving interpretation} (Definition~2.4) and
-$k \in K$ is ordinary semiring provenance computed over the resolved specification
-$\Spec \mid I$.
-
-The intended reading is:
-\begin{quote}
-\emph{$k$ justifies the derivation under the semantic commitments fixed by $I$.}
-\end{quote}
+An \emph{interpretation provenance value} is a pair $I\cdot k$, where $I$ is a
+\emph{resolving interpretation} (Definition~2.4) and $k \in K$ is ordinary semiring
+provenance computed over the resolved specification $\Spec \mid I$; intuitively,
+$k$ justifies the derivation under the semantic commitments fixed by $I$.
 
 \paragraph{Resolution.}
 If $I$ resolves $\Spec$, then conditioning discharges all semantic ambiguity.
-Interpretation provenance therefore collapses to classical provenance:
-\[
-  (I \cdot k)\downarrow \;=\; k .
-\]
+Interpretation provenance therefore collapses to classical provenance: $(I\cdot k)\downarrow = k$.
 
 \paragraph{Depth--0 case.}
 For depth--0 specifications, no nontrivial interpretation is required.
 Interpretation provenance coincides exactly with classical semiring-based
 provenance.
 
-\paragraph{Summary.}
-Interpretation provenance records \emph{which resolving interpretation was
-assumed}, together with the classical provenance computed under that resolution.
-All algebraic structure arises after resolution; interpretation provenance makes
-the semantic assumptions explicit.
+Interpretation provenance records \emph{which resolving interpretation was assumed}, together with the classical provenance computed under that resolution; all algebraic structure arises after resolution, and interpretation provenance makes the semantic assumptions explicit.
 
-Resolution discharges all semantic ambiguity:
-\[
-  (I \cdot k)\downarrow = k .
-\]
-
-Thus, classical provenance appears as a special case: the result of provenance
-after interpretation.
+Thus, classical provenance appears as a special case: the result of provenance after interpretation.
 
 Interpretation provenance is intentionally linear in interpretations.
 Each provenance value is indexed by a single resolving interpretation.
@@ -466,10 +425,7 @@ hence different interpretation provenance for the same query.
 We begin with a minimal example that already requires interpretation provenance.
 
 \paragraph{Data, query, and history.}
-Let $S(k,y)$ be a relation and consider the set-valued query
-\[
-  Q(y) \;:\; \exists k.\; S(k,y).
-\]
+Let $S(k,y)$ be a relation and consider the set-valued query $Q(y) : \exists k.\; S(k,y)$.
 The database initially contains $S(0,a)$ with provenance variable $x_a$.
 Five transactions execute:
 \[
@@ -503,14 +459,10 @@ leaving their relative ordering unresolved.
 
 Given that analysis, two resolving interpretations suffice:
 \[
-  I_{\mathsf{in}} \;\triangleq\;
-  \varphi_{T_4 \prec T_Q} \wedge \varphi_{T_Q \prec T_5}
-  \quad\text{(observe insert before delete)}
-\]
-\[
-  I_{\mathsf{out}} \;\triangleq\;
-  \varphi_{T_5 \prec T_Q}
-  \quad\text{(observe after delete).}
+\begin{aligned}
+  I_{\mathsf{in}} &\;\triangleq\; \varphi_{T_4 \prec T_Q} \wedge \varphi_{T_Q \prec T_5} &&\quad\text{(observe insert before delete)}\\
+  I_{\mathsf{out}} &\;\triangleq\; \varphi_{T_5 \prec T_Q} &&\quad\text{(observe after delete).}
+\end{aligned}
 \]
 
 \paragraph{Depth--0 provenance under each interpretation.}
@@ -958,16 +910,7 @@ Transactional systems invalidate this assumption.
 
 Consider a query result tuple $t$ produced by executing a workload of
 transactions.
-There are several distinct provenance questions one might ask:
-
-\begin{itemize}
-  \item (\emph{Existence}) Does $t$ appear in the query result under
-        \emph{some} admissible execution?
-  \item (\emph{Universality}) Does $t$ appear under \emph{all} admissible
-        executions?
-  \item (\emph{Dependence}) On which semantic choices---such as transaction
-        orderings or visibility decisions---does the presence of $t$ depend?
-\end{itemize}
+There are several distinct provenance questions one might ask: (\emph{Existence}) does $t$ appear under \emph{some} admissible execution; (\emph{Universality}) does $t$ appear under \emph{all} admissible executions; and (\emph{Dependence}) on which semantic choices---such as transaction orderings or visibility decisions---does the presence of $t$ depend?
 
 These questions are strictly more subtle than asking whether a final database
 state is invariant across executions.
@@ -1003,11 +946,7 @@ Under serializability, outcomes are defined via serialization.
 An \emph{outcome} is a final database state produced by some serial execution of
 the transactions.
 An outcome is admissible if there exists a total order of transactions such that
-executing them sequentially in that order:
-\begin{itemize}
-  \item produces the observed read values, and
-  \item yields the final state.
-\end{itemize}
+executing them sequentially in that order produces the observed read values and yields the final state.
 
 A single execution history may admit many such outcomes.
 Each corresponds to a different semantic explanation of the same concurrent
@@ -1076,12 +1015,7 @@ Interpretation provenance lifts this to the ambiguous history:
 \;\otimes\; \mathsf{id}(T_1).
 \]
 
-In particular, interpretation provenance can distinguish:
-\begin{itemize}
-  \item tuples that appear in all admissible serializations,
-  \item tuples that appear only under specific orderings, and
-  \item tuples whose derivations depend on irreducible semantic choices.
-\end{itemize}
+In particular, interpretation provenance can distinguish tuples that appear in all admissible serializations, tuples that appear only under specific orderings, and tuples whose derivations depend on irreducible semantic choices.
 
 This structure composes naturally with classical provenance:
 query provenance explains \emph{why} a tuple follows from a given outcome,
@@ -1183,12 +1117,7 @@ Intuitively, a robust conclusion is one whose justification does not rely on
 choices that vary across $\mathcal{I}$.
 
 This perspective separates two sources of variability:
-\begin{itemize}
-  \item \emph{Derivational variability}, arising from alternative ways to derive
-        a conclusion within a fixed interpretation; and
-  \item \emph{Semantic variability}, arising from alternative interpretations
-        themselves.
-\end{itemize}
+\emph{derivational variability}, arising from alternative ways to derive a conclusion within a fixed interpretation, and \emph{semantic variability}, arising from alternative interpretations themselves.
 
 Classical provenance addresses the former.
 Interpretation provenance makes the latter explicit.
@@ -1221,11 +1150,7 @@ Conversely, dependence on interpretation-specific certificates pinpoints the
 semantic commitments responsible for fragility.
 
 This observation suggests a practical workflow:
-\begin{itemize}
-  \item identify the class of interpretations of interest;
-  \item determine which certificates vary across that class; and
-  \item examine which conclusions depend on those certificates.
-\end{itemize}
+identify the class of interpretations of interest, determine which certificates vary across that class, and examine which conclusions depend on those certificates.
 
 We emphasize that this paper does not attempt to algorithmically enumerate
 interpretations or compute robustness properties.

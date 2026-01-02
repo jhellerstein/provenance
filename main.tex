@@ -79,24 +79,32 @@
 \begin{abstract}
 Algebraic provenance explains query results by tracing derivations under a fixed,
 resolved semantics.
-Many modern systems, however, operate under intrinsically ambiguous semantics:
-logic programs with negation admit multiple models, transactional systems admit
-multiple consistent executions, and policy-aware or probabilistic systems admit
-multiple admissible outcomes.
-In such settings, it is not enough to explain \emph{what} follows; we must explain
-\emph{under which semantic commitments it follows}.
+Many modern systems, however, operate under \emph{semantic ambiguity}:
+logic programs with negation admit multiple admissible models, transactional
+systems admit multiple consistent executions, and distributed or policy-aware
+systems admit multiple outcomes compatible with the same history.
+In such settings, it is not enough to explain \emph{what} follows; one must also
+explain \emph{under which semantic resolution it follows}.
 
-This paper introduces \emph{provenance of interpretations}: a framework for
-explaining semantic resolution itself.
-Building on a prior complexity theory of interpretation, we show how interpretations
-engineer quotients on ambiguous outcome spaces, yielding resolved semantic spaces
-where algebraic provenance applies.
-We identify a canonical algebraic normal form for interpretation, called a
-\emph{conditional semiring}, and introduce \emph{layer certificates} as sufficient
-statistics for interpretation provenance.
-We develop the framework using transactions as a representative systems setting,
-clarifying when and how classical semiring provenance is recovered after
-resolution.
+This paper introduces \emph{interpretation provenance}, a framework for making
+semantic resolution explicit and explainable.
+An \emph{interpretation} is a structured collection of semantic commitments that
+resolves ambiguity by refining admissible outcomes.
+We show that provenance becomes meaningful only \emph{after} such resolution, and
+that classical algebraic provenance arises as a special case when semantics are
+already resolved.
+
+We formalize how interpretations structure provenance prior to resolution, giving
+rise to a layered, dependency-sensitive form that collapses to ordinary semiring
+provenance once a resolving interpretation is fixed.
+We introduce \emph{layer certificates} as sufficient summaries of semantic
+commitments for downstream reasoning.
+
+We instantiate the framework in two domains with fundamentally different sources
+of ambiguity: negation in Datalog and scheduling in transactional systems.
+Across both settings, interpretation provenance clarifies which semantic
+commitments were required to justify results, and why classical provenance alone
+is insufficient in the presence of ambiguity.
 \end{abstract}
 
 \maketitle
@@ -105,115 +113,77 @@ resolution.
 \section{Introduction}
 \label{sec:intro}
 
-Algebraic provenance is one of the major success stories of database theory.
-By representing query results as elements of a commutative semiring—most famously
-as provenance polynomials—researchers have obtained a uniform account of
-\emph{why}- and \emph{how}-provenance, explanations, uncertainty propagation, and
-query optimization across a wide range of query languages
+Why did this tuple appear in my query result?
+
+Algebraic provenance has given database theory a powerful and enduring answer.
+When query semantics are single-valued and monotone, provenance provides clean,
+uniform explanations of query results, supporting why- and how-provenance,
+uncertainty propagation, and optimization through a common algebraic lens
 \cite{green2007provenance,suciu2011probabilistic}.
-Once query semantics are single-valued and monotone, provenance reduces to
-arithmetic.
+In these settings, provenance reduces to arithmetic—and that reduction has been
+remarkably successful.
 
-Yet this success rests on a strong and usually implicit assumption:
-that the underlying specification is already \emph{resolved}.
-For each input, there is a single semantic outcome (or a single equivalence class
-of outcomes) to explain.
-In many of today’s most important semantic settings, this assumption does not
-hold.
+Modern data systems build on this foundation, but they also expose a broader
+semantic landscape.
+Transactional workloads admit multiple serializable executions.
+Logic programs with negation admit multiple admissible models.
+Distributed systems admit multiple admissible orderings consistent with the same
+history.
+Here, a history determines not a single outcome, but a structured space of
+possible ones.
 
-Many settings are more complex, operating under \emph{intrinsically ambiguous} semantics.
-Logic programs with negation admit multiple models.
-Transactional systems admit multiple consistent executions.
-Distributed systems admit multiple admissible failure, membership, or ordering
-assumptions consistent with the same history.
-Policy-aware and probabilistic systems admit multiple admissible outcomes, often
-organized as possible worlds.
-In all of these cases, the semantic object of interest is not a single outcome,
-but a \emph{set} of admissible outcomes.
-Classical provenance explains conclusions \emph{within} a fixed semantics, but has
-little to say about how that semantics was chosen.
+Users still ask provenance questions—but now those questions range beyond a fixed
+semantics.
+Was this tuple returned in \emph{all} serializable executions, or only some?
+Does this result depend on snapshot isolation rather than serializability?
+Which conclusions survive a change in policy or semantics?
+Answering such questions requires explaining not only how results were derived,
+but \emph{how semantic ambiguity was resolved}.
 
-\paragraph{Thesis.}
-This paper argues that the missing foundation is not a new provenance algebra, but
-a new provenance target.
-We introduce \emph{provenance of interpretations}: a framework for explaining
-\emph{which semantic commitments were relied upon} in order to reach a conclusion.
+In prior work~\cite{hellerstein2026interpretation}, we introduced
+\emph{interpretations} as formal objects that resolve semantic ambiguity by
+introducing structured semantic commitments.
+That work develops a complexity theory of interpretation, characterizing the
+\emph{cost} and \emph{depth} of semantic resolution.
+This paper shows how interpretations give rise to a new form of provenance.
 
-We model semantic resolution as a process of \emph{interpretation}: the introduction
-of structured semantic commitments that restrict an ambiguous specification to a
-more refined one.
-Each interpretation induces a \emph{quotient} on the space of admissible outcomes,
-collapsing ambiguity into a resolved semantic space.
-Algebraic provenance applies precisely in these induced quotient spaces.
-Thus, algebra is not lost in ambiguous settings—it is \emph{recovered} through
-interpretation.
+We introduce \emph{interpretation provenance}: provenance that records the semantic
+commitments under which a result is valid, together with the ordinary derivation
+provenance that applies once those commitments are fixed.
 
-We assume interpretations are given and study the algebra and provenance that
-arise within a fixed interpretation, not how interpretations are selected.
+Seen this way, interpretation provenance enables a qualitatively richer class of
+explanations.
+It explains \emph{how ambiguity was resolved}—for example, which serializable
+executions justify a query result, rather than merely how that result follows
+within a single execution.
+It makes the effect of \emph{specification choice} explicit, revealing how
+different negation semantics or isolation levels induce different provenance
+structures over the same data.
+It also supports reasoning about \emph{semantic change}, clarifying which
+conclusions remain valid as policies evolve or mixed semantics are introduced.
 
-\medskip
-
-This work builds on a prior complexity framework for interpretation
-introduced in~\cite{hellerstein2026interpretation}.
-That work formalizes the \emph{cost} of interpretation (how many semantic commitments
-are introduced) and its \emph{depth} (the irreducible dependency structure among
-those commitments), and studies the computational consequences of deep
-interpretations.
-In contrast, the focus of this paper is semantic and algebraic:
-we show how interpretations engineer quotients that restore algebraic structure,
-and how provenance can explain this resolution process itself.
-
-\medskip
-
-\paragraph{Interpretation as quotient engineering.}
-Interpretations act by progressively restricting the space of admissible outcomes.
-Each semantic commitment rules out outcomes incompatible with it; critically,
-whether a commitment is applicable may depend on which outcomes remain.
-This dependency structure induces a quotient on the outcome space: outcomes ruled
-equivalent by the interpretation are identified, and incompatible outcomes are
-eliminated.
-When the resulting quotient is resolved, classical algebraic provenance applies.
-
-Different interpretations induce different quotients.
-Some collapse ambiguity cheaply; others require deep chains of dependent
-commitments.
-We characterize interpretations along two orthogonal dimensions:
-\emph{cost}, measuring the volume of semantic commitment, and
-\emph{depth}, measuring semantic dependency.
-Depth, rather than cost, reflects irreducible dependency among commitments.
-
-\paragraph{Conditional semirings and certificates.}
-A central technical contribution of this paper is to show that interpretations admit
-a canonical algebraic normal form, which we call a \emph{conditional semiring}.
-Intuitively, interpretation proceeds as a conjunction of conditional refinement
-steps, each of which supports algebraic reasoning within its scope.
-These layers form a stack of semirings, with full semiring provenance recovered only
-after sufficient resolution.
-
-To make interpretation provenance practical, we introduce \emph{layer certificates}:
-compact, sufficient summaries of the semantic commitments introduced at each layer.
-Certificates need not preserve all information about lower layers—only what is
-required to justify conclusions above.
-This separation enables minimal, compositional provenance of interpretation.
-
-\paragraph{Representative domains.}
-We develop the framework using transactions as a representative systems setting.
-Examples for Datalog with negation appear in a companion paper.
+We illustrate interpretation provenance in two domains with fundamentally different
+sources of semantic ambiguity.
+Logic programming with negation provides the canonical, mathematically explicit
+instance of semantic ambiguity and resolution in computer science, serving as a
+control experiment for interpretation provenance.
+We then turn to transactional systems, where ambiguity arises from concurrency and
+isolation choices, and show how interpretation provenance provides a fuller
+accounting of query results than classical approaches.
 
 \paragraph{Contributions.}
-This paper makes the following contributions:
+In summary, this paper:
 \begin{itemize}
-  \item We formalize \emph{provenance of interpretations}, explaining semantic
-        resolution itself rather than derivations under a fixed semantics.
-  \item We show how interpretations engineer quotients on ambiguous outcome spaces,
-        and how algebraic provenance applies precisely in the induced quotients.
-  \item We introduce \emph{conditional semirings} as a canonical algebraic normal
-        form for interpretation.
-  \item We define \emph{layer certificates} as sufficient statistics for
-        interpretation provenance, separating algebraic structure from information
-        requirements.
-  \item We develop the framework for transactional systems, illustrating provenance
-    of interpretations in a representative ambiguous setting.
+  \item introduces \emph{interpretation provenance} as a foundation for explaining
+        results under ambiguous semantics;
+  \item shows how resolving interpretations recover classical algebraic
+        provenance as a special case;
+  \item formalizes certificates as a minimal interface for recording semantic
+        commitments;
+  \item applies the framework to transactional systems to explain
+        concurrency-dependent query results;
+  \item and identifies robustness across interpretations as a new class of
+        provenance questions.
 \end{itemize}
 
 % ================================================================
@@ -228,10 +198,10 @@ conditioning, and dependency, while deferring complexity measures and algebraic
 structure to later sections.
 
 Our goal is to characterize what it means for a specification to admit multiple
-admissible meanings, and to identify the minimal semantic structure that such
+admissible meanings, and to identify the core semantic structure that such
 ambiguity already entails.
-We intentionally defer any discussion of how ambiguity is resolved, measured, or
-explained until subsequent sections.
+We intentionally defer any discussion of how interpretations are chosen,
+optimized, or justified until later sections.
 
 \subsection{Histories}
 
@@ -346,7 +316,7 @@ commitments.
 Individual interpretive predicates typically express only partial semantic
 commitments.
 We therefore model semantic resolution using finite conjunctions of refinement
-operators (interpretive predicates), interpreted as sequential conditioning.
+operators, interpreted as sequential conditioning.
 
 \begin{definition}[Interpretation]
 An \emph{interpretation} is a finite conjunction
@@ -374,273 +344,192 @@ $|\Spec(H)| = 1$.
 An interpretation $I$ \emph{resolves} $\Spec$ if $\Spec \mid I$ is resolved.
 \end{definition}
 
-\subsection{Commutation and Dependency}
+\subsection{Restriction and Identification}
 
-Each interpretive predicate $\varphi$ induces a transformation
-$\Spec \mapsto (\Spec \mid \varphi)$ on specifications.
-Because operators may inspect the current admissible outcome set, the order in
-which they are applied can matter.
+Fix a specification $\Spec$ and an interpretation $I$.
+For each history $H$, refinement by $I$ produces a restricted set of admissible
+outcomes $(\Spec \mid I)(H)$.
 
-\begin{definition}[Commutation]
-Two interpretive predicates $\varphi$ and $\psi$ \emph{commute with respect to}
-a specification $\Spec$ if
+The semantic effect of interpretation has two aspects:
+\begin{itemize}
+  \item \emph{Restriction}: outcomes incompatible with the commitments in $I$ are
+        eliminated and play no further semantic role;
+  \item \emph{Identification}: among the remaining admissible outcomes, some may
+        become semantically indistinguishable.
+\end{itemize}
+
+Formally, for a history $H$ write
 \[
-  (\Spec \mid \varphi) \mid \psi
-  \;=\;
-  (\Spec \mid \psi) \mid \varphi .
+  O_H^I \triangleq (\Spec \mid I)(H).
 \]
-\end{definition}
-
-When operators commute, their semantic effect is order-independent.
-When they do not commute, one operator may restrict or enable the applicability
-of the other.
-Such non-commutation exposes irreducible semantic dependency among commitments.
-
-These dependencies are purely semantic.
-They make no reference to time, execution order, or mechanism.
-Their only role is to determine which commitments can be imposed independently
-and which must be staged.
-
-These notions of refinement, conditioning, and commutation provide the raw
-semantic substrate on which we build algebraic structure in the next section.
-
-\section{Interpretations as a Conditional Semiring}
-\label{sec:conditional-semiring}
-
-This section reframes the interpretation framework of our earlier work as an
-algebraic structure suitable for provenance.
-The key observation is that interpretations induce a two-level algebra:
-before full resolution, provenance expressions live in a
-\emph{conditional semiring};
-after resolution, this structure collapses to an ordinary semiring.
-
-The induced algebra follows the semantic structure of interpretation:
-interpretive predicates compose conjunctively, while internal case distinctions are
-expressed disjunctively.
-
-\subsection{Interpretations Revisited}
-
-We rely on the definitions of interpretive predicates and interpretations from
-Section~\ref{sec:prelim}.
-Briefly: a specification maps each history to a set of admissible outcomes; an
-interpretation is a finite conjunction of interpretive predicates (refinement
-operators) that sequentially restrict these sets while preserving feasibility.
-Our focus here is the algebra induced \emph{prior} to full resolution.
-
-\subsection{Why Interpretation Is Inherently Conjunctive}
-
-A key semantic fact underlies everything that follows:
-
-\begin{quote}
-\emph{Interpretation proceeds by accumulating commitments.}
-\end{quote}
-
-Each interpretive predicate restricts the admissible outcomes.
-Applying multiple predicates corresponds to making multiple commitments, all of
-which must hold simultaneously.
-For this reason, interpretations compose by conjunction.
-There is no meaningful notion of ``choosing between'' interpretations within the
-semantics of refinement.
-
-Disjunction appears only \emph{within} interpretive predicates, where it expresses
-case distinctions:
-for example, selecting one outcome if some condition holds, and another otherwise.
-Such internal disjunction does not introduce semantic dependency between
-predicates and does not contribute to interpretation depth.
-
-This asymmetry is fundamental:
-\begin{itemize}
-  \item conjunction expresses \emph{semantic commitment} and carries dependency;
-  \item disjunction expresses \emph{cases} and is dependency-neutral.
-\end{itemize}
-
-As a result, all irreducible semantic dependency lives in the conjunctive
-structure of interpretations.
-
-\subsection{Conditional Semiring Structure}
-
-This semantic asymmetry induces a natural algebraic structure.
-
-Consider provenance expressions that track not only how outcomes are derived,
-but \emph{under which semantic commitments they are valid}.
-Such expressions combine information in two ways:
-\begin{itemize}
-  \item disjunctively, to account for alternative derivations or cases;
-  \item conjunctively, to record accumulated interpretive commitments.
-\end{itemize}
-
-However, conjunction is \emph{conditional}:
-later commitments may only be meaningful once earlier commitments have been made.
-This precisely mirrors the dependency structure captured by interpretation depth.
-
-Formally, this yields a \emph{conditional semiring}:
-\begin{itemize}
-  \item addition ($+$) is commutative and idempotent, representing disjunction of
-        alternatives;
-  \item multiplication ($\cdot$) represents conjunction of commitments, but is
-        only partially commutative: factors commute exactly when the corresponding
-        interpretive predicates commute.
-\end{itemize}
-
-Each commuting layer of an interpretation induces a semiring fragment.
-Layers compose sequentially, yielding a \emph{stack of semirings} indexed by
-semantic dependency.
-Provenance expressions are therefore evaluated conditionally, with each layer
-conditioning on the certificates produced by earlier layers.
-
-This is the algebraic reflection of the interpretation framework’s semantics.
-
-
-\subsection{Collapse to Semiring Provenance After Resolution}
-
-Once an interpretation fully resolves the specification, ambiguity disappears.
-All conditioning has been accounted for, and no further semantic commitments
-remain.
-
-At this point, the conditional semiring collapses to an ordinary commutative
-semiring.
-Provenance expressions no longer depend on layer certificates and reduce
-to standard semiring annotations.
-
-Thus, classical algebraic provenance appears not as a primitive semantic object,
-but as the \emph{endpoint} of interpretation.
-This explains both its power and its limitations:
-it applies precisely when semantic ambiguity has been eliminated.
-
-
-\paragraph{Depth-0 specifications.}
-Some specifications are intrinsically resolved: for every history, they admit a
-single admissible outcome, or can be resolved without staging any semantic
-commitments.
-For such specifications, interpretation depth is zero.
-No conditioning is required, and the conditional structure introduced above
-collapses to a single semiring.
-
-In this case, interpretation provenance coincides exactly with classical
-semiring-based provenance.
-Traditional provenance methods therefore characterize the depth-0 fragment of
-our framework: semantic settings in which ambiguity has already been eliminated,
-and no interpretive commitments are required to obtain algebraic structure.
-
-\subsection{Summary}
-
-Interpretations induce an algebra with two distinct regimes:
-\begin{itemize}
-  \item before resolution, provenance lives in a conditional semiring structured
-        by semantic dependency;
-  \item after resolution, this structure collapses to classical semiring
-        provenance.
-\end{itemize}
-
-This perspective unifies the interpretation framework with algebraic provenance
-and clarifies why provenance succeeds only after semantic commitments have been
-made.
-Section~\ref{sec:interpretations} makes the induced restriction/identification
-effect explicit as a quotient construction.
-
-% ================================================================
-\section{Interpretations and Quotient Engineering}
-\label{sec:interpretations}
-% ================================================================
-
-Sections~\ref{sec:prelim} and~\ref{sec:conditional-semiring} established the
-semantic and algebraic structure induced by interpretations.
-In this section, we make explicit the \emph{semantic effect} of a fixed
-interpretation.
-
-At a high level, an interpretation acts in two stages.
-It first restricts the space of admissible outcomes to those compatible with its
-semantic commitments, and then collapses distinctions among the remaining
-outcomes.
-Together, these steps induce a quotient on the outcome space.
-This restriction--identification process is the semantic bridge between ambiguity
-and algebra.
-
-\subsection{Restriction of Admissible Outcomes}
-
-Recall that a specification $\Spec$ assigns to each history $H$ a set
-$\Spec(H) \subseteq O$ of admissible outcomes.
-An interpretation $I$ refines $\Spec$ by sequential conditioning:
-\[
-  \Spec \mid I \;:\; H \mapsto (\Spec \mid I)(H).
-\]
-
-The primary semantic effect of refinement is restriction.
-Outcomes incompatible with the commitments expressed by $I$ are eliminated and
-play no further semantic role.
-All subsequent reasoning is carried out solely over the restricted set
-$(\Spec \mid I)(H)$.
-
-This restriction reflects the meaning of interpretation.
-Semantic commitments do not reinterpret incompatible outcomes, nor do they merge
-them with admissible ones.
-They simply rule them out.
-
-\subsection{Identification of Remaining Outcomes}
-
-Restriction alone does not exhaust the effect of interpretation.
-Even after incompatible outcomes have been eliminated, multiple admissible
-outcomes may remain.
-An interpretation may nevertheless render these outcomes semantically
-indistinguishable.
-
-Fix a specification $\Spec$, an interpretation $I$, and a history $H$, and write
-\[
-  O_H^I \;\triangleq\; (\Spec \mid I)(H)
-\]
-for the restricted outcome set.
 We say that two outcomes $o,o' \in O_H^I$ are \emph{equivalent under $I$ at $H$},
-written $o \sim_{I,H} o'$, if no interpretive predicate appearing in $I$ ever
+written $o \sim_{I,H} o'$, if no interpretive predicate appearing in $I$
 distinguishes between them at $H$.
-Intuitively, $I$ never depends on which of these outcomes holds.
 
 \begin{definition}[Interpretation-Induced Quotient]
-For each history $H$, an interpretation $I$ induces a quotient
+For each history $H$, interpretation $I$ induces a quotient
 \[
   O_H^I \big/ {\sim_{I,H}},
 \]
-obtained by identifying outcomes in $O_H^I$ that are equivalent under $I$.
+obtained by identifying admissible outcomes that are equivalent under $I$.
 \end{definition}
 
 The equivalence relation $\sim_{I,H}$ is total on the restricted domain $O_H^I$.
 Outcomes ruled out by the interpretation are simply absent from the quotient.
-Both restriction and identification are therefore intrinsic to the conditioning
-semantics of interpretation.
 
 \begin{remark}[History-indexed quotients]
 Because interpretive predicates may depend on the history and on intermediate
-admissible sets, the equivalence relation $\sim_{I,H}$ may vary with $H$.
-Interpretation thus induces a family of quotients indexed by histories, rather
-than a single global quotient on $O$.
+admissible sets, equivalence under an interpretation is defined relative to a
+history.
+Interpretations therefore induce a family of quotients indexed by histories,
+rather than a single global quotient on $O$.
 \end{remark}
 
-\subsection{Resolution as a Limiting Case}
+These notions of refinement, restriction, and identification provide the raw
+semantic substrate on which we build algebraic structure in the next section.
 
-When an interpretation $I$ resolves $\Spec$, the restricted set
-$(\Spec \mid I)(H)$ is a singleton for every history $H$.
-In this case, no nontrivial identification remains: each history admits exactly
-one equivalence class.
+%% ================================================================
+\section{Interpretations and Provenance Structure}
+\label{sec:conditional-semiring}
+%% ================================================================
 
-Resolution is therefore the limiting case of quotient construction.
-It is not a distinct semantic operation, but the endpoint of the same process of
-restriction and identification under increasingly strong commitments.
+This section connects the semantic notion of interpretation
+(Section~\ref{sec:prelim}) to provenance.
+The key observation is simple:
 
-\paragraph{Scope.}
-An interpretation induces a quotient via restriction and identification.
-How interpretations are chosen or justified is out of scope here.
+\begin{quote}
+\emph{Provenance can only be interpreted once semantic ambiguity has been
+resolved.}
+\end{quote}
+
+Interpretation provenance therefore separates two concerns:
+\begin{itemize}
+  \item \emph{semantic resolution}, captured by a resolving interpretation; and
+  \item \emph{derivation justification}, captured by ordinary provenance after
+        resolution.
+\end{itemize}
+
+We make this separation explicit below.
+
+\subsection{Interpretations and Semantic Commitment}
+
+We rely on the definitions of interpretive predicates, interpretations, and
+resolution from Section~\ref{sec:prelim}.
+Recall that an interpretation is a finite conjunction of interpretive predicates,
+and that an interpretation is \emph{resolving} if conditioning on it yields a
+single admissible outcome for every history.
+
+Interpretations compose conjunctively because semantic commitments accumulate:
+each interpretive predicate further restricts admissible outcomes.
+No algebraic structure is assumed beyond this conjunction and the semantic
+dependencies it may induce.
+
+\subsection{Interpretation Provenance}
+
+Once a specification has been resolved by an interpretation, derivations behave
+as in ordinary monotone settings.
+Interpretation provenance records this fact explicitly.
+
+\subsection{Syntax of Interpretation Provenance}
+
+We now introduce a compact notation for \emph{interpretation provenance}.
+No new semantic concepts are introduced here; we rely entirely on the definitions
+of interpretations and resolution from Section~\ref{sec:prelim}.
+
+\medskip
+
+\paragraph{Interpretation provenance values.}
+Fix a base provenance semiring $(K,\otimes,1)$ for derivations
+(e.g., polynomial provenance).
+An \emph{interpretation provenance value} is a pair
+\[
+  I \cdot k ,
+\]
+where $I$ is a \emph{resolving interpretation} (Definition~2.4) and
+$k \in K$ is ordinary semiring provenance computed over the resolved specification
+$\Spec \mid I$.
+
+The intended reading is:
+\begin{quote}
+\emph{$k$ justifies the derivation under the semantic commitments fixed by $I$.}
+\end{quote}
+
+\medskip
+
+\paragraph{Resolution.}
+If $I$ resolves $\Spec$, then conditioning discharges all semantic ambiguity.
+Interpretation provenance therefore collapses to classical provenance:
+\[
+  (I \cdot k)\downarrow \;=\; k .
+\]
+
+\medskip
+
+\paragraph{Depth--0 case.}
+For depth--0 specifications, no nontrivial interpretation is required.
+Interpretation provenance coincides exactly with classical semiring-based
+provenance.
+
+\medskip
+
+\paragraph{Summary.}
+Interpretation provenance records \emph{which resolving interpretation was
+assumed}, together with the classical provenance computed under that resolution.
+All algebraic structure arises after resolution; interpretation provenance makes
+the semantic assumptions explicit.
+
+An interpretation provenance value has the form $I \cdot k$, where:
+\begin{itemize}
+  \item $I$ is a resolving interpretation, fixing semantic commitments; and
+  \item $k$ is ordinary provenance computed over the resolved specification
+        $\Spec \mid I$.
+\end{itemize}
+
+Resolution discharges all semantic ambiguity:
+\[
+  (I \cdot k)\downarrow = k .
+\]
+
+Thus, classical provenance appears as a special case: the result of provenance
+after interpretation.
+
+Interpretation provenance is intentionally linear in interpretations.
+Each provenance value is indexed by a single resolving interpretation.
+Disjunction over interpretations is not itself a provenance value, but a
+meta-level question about robustness or change across interpretations, which we
+address later.
+This separation keeps provenance explanatory rather than speculative.
+
+\subsection{Resolved and Depth--0 Specifications}
+
+Some specifications are intrinsically resolved: they admit a single admissible
+outcome for every history, or can be resolved without staging any semantic
+commitments.
+For such specifications, interpretation provenance coincides exactly with
+classical semiring provenance.
+
+More generally, interpretation provenance makes explicit an assumption that is
+implicit in traditional provenance models:
+that a particular semantic resolution has already been fixed.
 
 \subsection{Summary}
 
-Interpretations act by first restricting outcome spaces and then identifying
-remaining outcomes according to explicit semantic commitments.
-The resulting quotients make ambiguity and resolution first-class semantic
-objects.
+Interpretations resolve semantic ambiguity.
+Provenance justifies derivations \emph{after} such resolution.
 
-Viewed this way, interpretation is not an auxiliary mechanism but the semantic
-substrate on which provenance rests.
+Interpretation provenance makes this separation explicit by pairing a resolving
+interpretation with classical provenance computed under that interpretation.
+No additional algebraic structure is required beyond what is already induced by
+interpretation and resolution.
 
-Section~\ref{sec:certificates} turns this quotient-and-layer structure into an
-information interface via layer certificates.
+No additional algebraic structure is imposed on interpretations themselves.
+All nontrivial algebraic reasoning occurs after resolution, at depth--0, where
+classical semiring provenance is recovered.
+
+The following sections instantiate this framework in two settings with very
+different sources of semantic ambiguity: negation in Datalog and scheduling in
+transactional systems.
+
 
 % ================================================================
 \section{Layer Certificates and Interpretation Provenance}
@@ -660,8 +549,7 @@ Downstream semantic reasoning rarely requires the full history of semantic
 commitments; it suffices to retain summaries of prior resolution that preserve
 exactly the distinctions relevant to subsequent interpretive predicates.
 We formalize these summaries as \emph{layer certificates}: sufficient information
-to continue interpretation, potentially much smaller than the interpretation
-itself.
+to continue interpretation.
 
 \subsection{Certificates as Sufficient Information}
 
@@ -740,17 +628,8 @@ far; it need only preserve the distinctions that matter for future semantic
 commitments.
 
 \paragraph{Interpretation provenance.}
-Certificates mediate between layers of the conditional semiring.
-Rather than conditioning later layers on the entire refined specification,
-interpretation proceeds by conditioning on certificates produced by earlier
-layers.
-
-This separation cleanly factors interpretation provenance into:
-\begin{itemize}
-  \item the algebraic structure induced by interpretation
-        (Section~\ref{sec:conditional-semiring}), and
-  \item the information carried between layers, as captured by certificates.
-\end{itemize}
+Certificates mediate between layers of the conditional semiring: later layers
+condition on certificates produced by earlier layers.
 
 \subsection{Summary}
 
@@ -758,60 +637,728 @@ Layer certificates provide a principled interface between semantic resolution an
 provenance.
 They summarize the effect of interpretation layers in a form sufficient for
 further conditioning, without exposing unnecessary detail.
-
-By separating interpretation structure from informational representation, the
-framework supports provenance that is both semantically grounded and flexible.
 Section~\ref{sec:transactions} sketches an application in transactional systems.
+
+From a systems perspective, certificates correspond to compact metadata such as
+ordering decisions, fixpoint detections, or semantic regime selections.
+Interpretation provenance characterizes which such metadata are sufficient---and
+which are unnecessary---to justify downstream conclusions.
+
+% ================================================================
+\section{Sandbox I: Datalog with Negation}
+\label{sec:negation}
+% ================================================================
+
+We instantiate interpretation provenance in a familiar and deeply studied
+setting: Datalog with negation.
+Our purpose is not to propose new semantics for negation, nor to compare their
+expressive power.
+Rather, we use classical semantics for Datalog with negation as a controlled
+environment in which to observe how different sources of semantic ambiguity give
+rise to different structures of interpretation provenance.
+
+Datalog with negation exhibits semantic ambiguity even for a fixed program and
+input instance.
+Negated predicates introduce dependencies that delay semantic commitment: the
+truth of a fact may depend on the absence of other facts whose status is not yet
+determined.
+Interpretation provenance makes these dependencies explicit, recording not only
+what conclusions are drawn, but under which semantic commitments they are valid.
+
+We examine three standard semantics for negation—stratified, well-founded, and
+stable—and show how each induces a distinct structure of interpretation
+provenance.
+These distinctions will reappear, in the next section, in the context of
+transactional systems.
+
+For example, consider the program:
+p :- not q.
+q :- not p.
+
+This program is not stratifiable.
+Under well-founded semantics, both predicates are undefined; under stable
+semantics, there are two admissible interpretations.
+Interpretation provenance explains this divergence in terms of different semantic
+commitments about justified absence.
+
+\subsection{Specification and Semantic Ambiguity}
+
+A Datalog program with negation defines a specification
+$\Spec : \Hist \to 2^{O}$ mapping histories (sets of extensional facts) to sets of
+admissible outcomes (models).
+Semantic ambiguity arises because negation introduces circular dependencies:
+whether an atom is true may depend on whether some other atom is false, and vice
+versa.
+
+This ambiguity is intrinsic.
+Even for a fixed, fully known input instance, multiple semantic outcomes may be
+admissible until additional commitments are made.
+Interpretation is therefore required to determine which semantic commitments are
+made, in what order, and with what dependencies.
+
+Interpretation provenance is concerned precisely with this process.
+It records how commitments about negation are staged, how they depend on one
+another, and what information must be retained to justify derived facts.
+
+\subsection{Interpretive Predicates for Negation}
+
+Across all semantics for Datalog with negation, interpretation proceeds by
+applying refinement operators that constrain admissible models.
+These interpretive predicates correspond to semantic commitments such as:
+\begin{itemize}
+  \item committing that an atom is true,
+  \item committing that an atom is false,
+  \item or committing that an atom remains undecided.
+\end{itemize}
+
+Such commitments are not local to individual derivations.
+They depend on the current admissible model set and may enable or disable further
+commitments.
+As a result, interpretive predicates for negation are inherently
+ambiguity-sensitive and may fail to commute.
+This non-commutativity is the source of semantic dependency and conditional
+structure in interpretation provenance.
+
+We now examine how this structure manifests under three standard semantics.
+
+\subsection{Stratified Semantics}
+
+Stratified semantics applies to programs whose dependency graph contains no cycles
+through negation.
+Fixing stratified semantics amounts to fixing a particular interpretation
+discipline, not eliminating semantic ambiguity in the specification.
+
+Even under stratification, semantic commitments must be staged.
+Negated predicates in higher strata depend on the semantic stabilization of lower
+strata.
+In incremental or distributed settings, detecting that a lower stratum has
+stabilized may itself require an interpretive predicate, since the possibility
+of late-arriving facts creates genuine ambiguity about whether a fixpoint has
+been reached.
+
+From the perspective of interpretation provenance, stratification induces a
+layered interpretation.
+Each stratum corresponds to a layer of interpretive predicates that can be
+applied only after semantic commitments for earlier strata have been established.
+Conditioned on stabilization of lower strata, provenance within a stratum
+behaves as in monotone Datalog.
+Across strata, provenance is conditional on the semantic commitments established
+earlier.
+
+Thus, stratified semantics induces a conditional semiring whose layers correspond
+directly to strata.
+Interpretation provenance records not only derivations, but the strata—and hence
+the semantic commitments—under which they are valid.
+
+\subsection{Well-Founded Semantics}
+
+Well-founded semantics (WFS) applies to all Datalog programs with negation.
+Rather than selecting among multiple total two-valued models, it resolves
+ambiguity by admitting a richer outcome space in which atoms may be
+\emph{true}, \emph{false}, or \emph{undefined}.
+Undefinedness is not a failure of semantics, but an explicit representation of
+residual ambiguity.
+
+From the perspective of interpretation provenance, WFS can be understood as
+lifting the outcome domain.
+Ambiguity over which two-valued model holds is replaced by ambiguity over which
+truth values have been semantically committed.
+This preserves feasibility while making explicit which distinctions have and
+have not yet been resolved.
+
+Resolution under WFS proceeds by progressively committing to truth or falsity for
+atoms that are justified by the current information, while leaving others
+undefined.
+Each such commitment is an interpretive predicate: it restricts admissible
+outcomes without requiring full resolution.
+These commitments are monotone but may be semantically dependent.
+In particular, justification of falsity may depend on prior commitments to truth,
+and vice versa.
+
+Interpretation depth under well-founded semantics reflects irreducible semantic
+staging.
+When there are no cycles through negation, these dependencies align with
+stratification: resolution proceeds stratum by stratum, with detection of
+stabilization required between strata.
+When cycles through negation are present, additional staging may be required,
+reflecting genuine semantic dependency rather than an artifact of evaluation
+strategy.
+
+\subsection{Stable Model Semantics}
+
+Stable model semantics differs fundamentally from stratified and well-founded
+semantics in how it resolves ambiguity.
+
+Stratified semantics and well-founded semantics each define a \emph{function}
+from programs to interpretations: once the semantic regime is fixed, every
+program has a uniquely determined interpretation (possibly in a lifted outcome
+domain).
+Stable semantics, by contrast, defines a \emph{relation}.
+A single Datalog program may admit multiple stable models, each a fully resolved
+two-valued interpretation.
+
+From the perspective of interpretation provenance, this distinction is decisive.
+In the stable setting, interpretation is not merely a process of staged semantic
+commitment.
+It additionally involves a \emph{choice among alternative resolved
+interpretations}.
+
+\paragraph{Interpretations as model selection.}
+Each stable model corresponds to a resolving interpretation: a finite collection
+of semantic commitments that jointly justify exactly one total model and exclude
+all others.
+Different stable models therefore correspond to distinct interpretations, even
+though they refine the same underlying specification.
+
+Interpretation provenance in this setting must therefore explain not only how
+facts were derived under a given interpretation, but also why a particular
+interpretation was selected from the space of admissible ones.
+This requires strictly more information than is needed under stratified or
+well-founded semantics.
+
+\paragraph{Structure of interpretation provenance.}
+Once a stable interpretation is fixed, provenance within that interpretation
+behaves as in monotone Datalog: derivations are positive and algebraic structure
+collapses to a standard semiring.
+The nontrivial structure lies above this level, in the selection among
+interpretations.
+
+Accordingly, interpretation provenance for stable semantics decomposes into two
+layers:
+\begin{itemize}
+  \item a \emph{choice layer}, recording which stable interpretation was selected;
+  \item a \emph{derivation layer}, recording how conclusions follow within that
+        interpretation.
+\end{itemize}
+
+This separation is invisible in classical provenance formalisms, which assume a
+single fixed semantics.
+It emerges naturally in interpretation provenance because interpretations are
+first-class semantic objects.
+
+\subsection{A Note on Acyclic Negation}
+
+When a program is stratifiable, stratified, well-founded, and stable semantics
+coincide in the sense that they yield equivalent resolved outcomes.
+From the perspective of interpretation provenance, this coincidence reflects the
+absence of cycles of semantic dependency through negation.
+
+In such cases, semantic commitments can be staged without global coupling, and
+interpretation depth is determined entirely by stratification.
+This recovers classical results while explaining them in terms of semantic
+dependency and staged commitment.
+
+\subsection{Takeaways for Interpretation Provenance}
+
+Datalog with negation illustrates how different forms of semantic ambiguity induce
+different structures of interpretation provenance:
+\begin{itemize}
+  \item stratified semantics yields layered, conditionally monotone provenance;
+  \item well-founded semantics yields staged commitment with partial outcomes;
+  \item stable semantics yields globally conditional provenance tied to semantic
+        choice.
+\end{itemize}
+
+In all cases, interpretation provenance makes explicit what classical semantics
+leaves implicit: which semantic commitments were relied upon, and how they depend
+on one another.
+
+In the next section, we show that transactional systems exhibit analogous forms of
+semantic ambiguity—arising from scheduling rather than negation—and that
+interpretation provenance provides the same clarifying structure there as well.
 
 % ================================================================
 \section{Sandbox II: Transactions as Systems Ambiguity}
 \label{sec:transactions}
+% ================================================================
 
-We sketch how interpretation provenance applies to transactional systems.
+We now turn to transactional systems.
+As in the previous section, our goal is not to propose new correctness criteria,
+but to understand how semantic ambiguity shapes provenance.
 
-\subsection{Ambiguity in Transactional Executions}
+Transactional systems introduce a qualitatively different source of ambiguity
+from negation.
+Here, ambiguity arises from \emph{concurrency}: transactions race to read and write
+shared state, and the execution does not uniquely determine which effects are
+observed.
+Interpretation provenance explains how query results depend not only on data, but
+on the semantic resolution of that concurrency.
 
-\subsection{Interpretations of Isolation and Consistency}
+\subsection{Provenance Questions Under Concurrency}
 
-\subsection{What Interpretation Provenance Explains}
+Classical provenance explains how an output tuple depends on base data, assuming a
+fixed semantics and a fixed execution outcome.
+Transactional systems invalidate this assumption.
 
-\subsection{Why Classical Provenance Is Insufficient}
+Consider a query result tuple $t$ produced by executing a workload of
+transactions.
+There are several distinct provenance questions one might ask:
+
+\begin{itemize}
+  \item (\emph{Existence}) Does $t$ appear in the query result under
+        \emph{some} admissible execution?
+  \item (\emph{Universality}) Does $t$ appear under \emph{all} admissible
+        executions?
+  \item (\emph{Dependence}) On which semantic choices---such as transaction
+        orderings or visibility decisions---does the presence of $t$ depend?
+\end{itemize}
+
+These questions are strictly more subtle than asking whether a final database
+state is invariant across executions.
+A database state may vary across admissible schedules even when a particular
+query answer is stable; conversely, a state may be fixed while a query result is
+not.
+
+Answering these questions requires provenance that is sensitive to
+\emph{which transactional resolutions were relied upon}, not merely which data
+items were read.
+This is precisely the role of interpretation provenance.
+
+\subsection{Ambiguity Before Order}
+
+To address this setting, we begin with a deliberately
+weak semantic model.
+A transactional workload consists of a set of transactions, each issuing reads
+and writes on shared objects and eventually committing.
+At this level, the execution does not specify an order between transactions.
+Reads may observe values written by different transactions, and multiple
+explanations of the same observed behavior may coexist.
+
+This lack of order is the source of semantic ambiguity.
+Even with complete knowledge of all operations, multiple outcomes may be
+admissible.
+Order is not a primitive feature of the execution; it is a semantic commitment
+used to justify an outcome.
+
+\subsection{Outcomes and Serializability}
+
+Under serializability, outcomes are defined via serialization.
+
+An \emph{outcome} is a final database state produced by some serial execution of
+the transactions.
+An outcome is admissible if there exists a total order of transactions such that
+executing them sequentially in that order:
+\begin{itemize}
+  \item produces the observed read values, and
+  \item yields the final state.
+\end{itemize}
+
+A single execution history may admit many such outcomes.
+Each corresponds to a different semantic explanation of the same concurrent
+behavior.
+
+At this stage, no explanation is preferred.
+Interpretation is required to select or constrain the admissible outcomes.
+
+\subsection{Interpretive Predicates as Ordering Commitments}
+
+Under serializability, semantic resolution proceeds by committing to relative
+orderings between transactions.
+Accordingly, the primitive interpretive predicates in this setting are
+\emph{ordering predicates}.
+
+For transactions $T_i$ and $T_j$, an ordering predicate $\prec(T_i, T_j)$
+asserts that $T_i$ precedes $T_j$ in the serialization order.
+Conditioning on $\prec(T_i, T_j)$ eliminates all admissible outcomes whose
+serializations violate this ordering.
+
+Interpretations are finite conjunctions of such ordering predicates.
+Each interpretation therefore corresponds to a partial order on transactions,
+refining the space of admissible serial executions.
+A fully resolving interpretation induces a total order; partial interpretations
+leave multiple serializations admissible.
+
+Ordering predicates are ambiguity-sensitive.
+Their effect depends on which serializations remain admissible, and different
+ordering commitments may enable or preclude others.
+As a result, ordering predicates need not commute, inducing semantic dependency
+and interpretation depth.
+
+\subsection{Conditional Semiring Structure}
+
+Once an interpretation is fixed---that is, once sufficient ordering commitments
+have been made---query evaluation behaves monotonically.
+Classical semiring provenance applies \emph{within} a fixed serialization.
+
+Across serializations, however, results are conditional on ordering commitments.
+Multiplication combines such conditions; addition preserves alternative justifications.
+This yields a conditional semiring whose structure reflects the staging of
+transactional commitments.
+
+\paragraph{Example: provenance of a query transaction.}
+Consider three transactions:
+$T_1$ inserts tuple $(1)$,
+$T_2$ deletes tuple $(1)$,
+and $T_Q$ executes query $Q$ that returns $(1)$ iff it is present.
+
+Under serializability, the history admits multiple serializations.
+The classical (depth-0) query provenance is:
+\[
+\mathsf{Prov}_Q =
+\begin{cases}
+\mathsf{id}(T_1) & \text{if } T_2 \prec T_1 \prec T_Q,\\
+0                & \text{if } T_1 \prec T_2 \prec T_Q.
+\end{cases}
+\]
+
+Interpretation provenance lifts this to the ambiguous history:
+\[
+\mathsf{IP}_Q(1)
+\;=\;
+\bigl(\varphi_{T_2 \prec T_1} \wedge \varphi_{T_1 \prec T_Q}\bigr)
+\;\otimes\; \mathsf{id}(T_1).
+\]
+
+In particular, interpretation provenance can distinguish:
+\begin{itemize}
+  \item tuples that appear in all admissible serializations,
+  \item tuples that appear only under specific orderings, and
+  \item tuples whose derivations depend on irreducible semantic choices.
+\end{itemize}
+
+This structure composes naturally with classical provenance:
+query provenance explains \emph{why} a tuple follows from a given outcome,
+while interpretation provenance explains \emph{under which outcomes} it holds.
+
+\subsection{Beyond Serializability}
+
+Other isolation levels expose the same phenomenon with different interpretive
+predicates.
+
+Snapshot isolation, for example, restricts admissible visibility relations while
+preserving ambiguity.
+Weaker isolation levels admit even larger families of outcomes.
+In all cases, provenance questions remain the same:
+which semantic commitments were required to justify a result?
+
+Interpretation provenance provides a uniform account across these regimes.
+
+\subsection{Summary}
+
+Transactional systems introduce semantic ambiguity through concurrency.
+Order is not primitive; it is a semantic commitment required to justify outcomes.
+
+By foregrounding provenance questions---especially tuple-level questions about
+dependence on semantic resolution---interpretation provenance extends classical
+provenance to settings where correctness admits multiple valid executions.
+
+% ================================================================
+\section{Change and Robustness Across Interpretations}
+\label{sec:robustness}
+% ================================================================
+
+Interpretation provenance equips us with a semantic vocabulary that was previously
+unavailable: it makes explicit not only derivations, but the semantic commitments
+under which those derivations are valid.
+With this vocabulary in hand, a new space of provenance questions becomes
+well-posed.
+
+Interpretation provenance also reframes why-not provenance.
+Classical why-not provenance explains absence relative to a fixed semantics.
+Under interpretation provenance, absence may instead be explained by the absence
+of any resolving interpretation that justifies the result, or by the fact that
+only interpretations ruled out by policy or specification choice would admit it.
+
+In this section, we map this question space.
+Our goal is not to propose algorithms or completeness results, but to articulate
+the kinds of semantic questions that interpretation provenance enables, and to
+clarify their logical structure.
+In particular, we focus on questions about change and robustness—how conclusions
+behave as semantic assumptions vary, and which conclusions persist across
+alternative interpretations.
+
+\subsection{Semantic Change}
+
+Many systems evolve over time.
+Policies are revised, isolation levels are adjusted, and semantic regimes are
+refined or relaxed.
+Classical provenance is tied to a fixed semantics and therefore offers limited
+support for reasoning across such changes.
+
+In the interpretation framework, a change in semantics is naturally modeled as a
+change in the resolving interpretation.
+Let $\Spec$ be a fixed ambiguous specification, and let $I$ and $I'$ be two
+resolving interpretations representing different semantic choices—for example,
+different isolation levels, policy constraints, or negation semantics.
+
+Interpretation provenance allows us to ask whether a conclusion $c$ is preserved
+under semantic change:
+\[
+  c \in (\Spec \mid I)(H)
+  \quad\text{and}\quad
+  c \in (\Spec \mid I')(H).
+\]
+When this holds, $c$ is invariant under the change from $I$ to $I'$.
+
+Because interpretation provenance records the semantic commitments under which
+$c$ was derived, it can explain \emph{why} a conclusion fails to persist.
+A conclusion may depend on commitments present in $I$ but absent from $I'$,
+or vice versa.
+This explanation is unavailable in classical provenance, which records only
+derivational structure within a single resolved semantics.
+
+\subsection{Robustness Across Interpretations}
+
+Semantic change compares two specific interpretations.
+A stronger notion is \emph{robustness}: whether a conclusion holds across an entire
+family of admissible interpretations.
+
+Let $\mathcal{I}$ be a class of resolving interpretations for $\Spec$—for example,
+all serializable schedules, all stable models, or all interpretations compatible
+with a given policy envelope.
+We say that a conclusion $c$ is \emph{robust} with respect to $\mathcal{I}$ if
+\[
+  \forall I \in \mathcal{I},\quad c \in (\Spec \mid I)(H).
+\]
+
+Interpretation provenance provides a concrete handle on this notion.
+Because provenance values are indexed by interpretations, robustness corresponds
+to the absence of dependence on particular semantic commitments.
+Intuitively, a robust conclusion is one whose justification does not rely on
+choices that vary across $\mathcal{I}$.
+
+This perspective separates two sources of variability:
+\begin{itemize}
+  \item \emph{Derivational variability}, arising from alternative ways to derive
+        a conclusion within a fixed interpretation; and
+  \item \emph{Semantic variability}, arising from alternative interpretations
+        themselves.
+\end{itemize}
+
+Classical provenance addresses the former.
+Interpretation provenance makes the latter explicit.
+
+\subsubsection{Quantitative robustness.}
+While we have treated robustness as a qualitative property—holding across all
+interpretations in a class $\mathcal{I}$—interpretation provenance also supports
+quantitative variants.
+
+If $\mathcal{I}$ is finite or otherwise measurable, one may ask what fraction of
+admissible interpretations justify a given conclusion.
+This yields a probabilistic or statistical notion of robustness, analogous in
+spirit to possible-worlds reasoning in probabilistic databases.
+
+We emphasize that interpretation provenance does not require such a measure.
+Rather, it provides the semantic structure needed to define and reason about
+quantitative robustness when a distribution over interpretations is available or
+assumed.
+
+\subsection{Certificates and Robustness}
+
+Layer certificates play a key role in reasoning about robustness.
+Because certificates summarize exactly the semantic distinctions relevant to
+subsequent interpretation, they provide a natural abstraction boundary.
+
+If a conclusion’s provenance depends only on certificates that are invariant
+across a class of interpretations, then the conclusion is robust with respect to
+that class.
+Conversely, dependence on interpretation-specific certificates pinpoints the
+semantic commitments responsible for fragility.
+
+This observation suggests a practical workflow:
+\begin{itemize}
+  \item identify the class of interpretations of interest;
+  \item determine which certificates vary across that class; and
+  \item examine which conclusions depend on those certificates.
+\end{itemize}
+
+We emphasize that this paper does not attempt to algorithmically enumerate
+interpretations or compute robustness properties.
+Rather, interpretation provenance provides the semantic structure needed to
+formulate and justify such analyses.
+
+\subsection{Discussion}
+
+Reasoning about change and robustness reframes provenance as a tool not only for
+explanation, but for semantic accountability.
+By making resolution explicit, interpretation provenance allows systems to answer
+questions about stability, sensitivity, and invariance that are increasingly
+central in practice.
+
+These questions arise across domains:
+in transactional systems, where concurrency control choices affect outcomes;
+in logic programming, where alternative semantics coexist;
+and in policy-driven systems, where rules evolve over time.
+Interpretation provenance offers a unified foundation for addressing them.
+
+We view this section as a first step.
+A full treatment of robustness—its computation, optimization, and integration
+with existing provenance techniques—is an important direction for future work.
+
+Interpretation provenance can also guard persisted results against semantic drift.
+A result materialized under one interpretation (e.g., snapshot isolation) can be
+checked for validity under another (e.g., serializability) by testing whether its
+interpretation provenance remains satisfied.
+This separates semantic soundness from recomputation.
 
 % ================================================================
 \section{Related Work}
 \label{sec:related}
+% ================================================================
 
 \subsection{Algebraic Provenance}
 
+Algebraic provenance provides a unifying framework for explaining query results
+under fixed, resolved semantics by annotating derivations with elements of a
+commutative semiring.
+The foundational work of Green et al.~\cite{green2007provenance} showed how
+why-provenance, how-provenance, and lineage could be subsumed under a single
+algebraic abstraction.
+This perspective has since been extended to probabilistic databases, incomplete
+information, aggregation, and factorized representations
+\cite{suciu2011probabilistic,dalvi2012probabilistic,olteanu2015factorized,senellart2018provenance}.
+
+Our work builds directly on this foundation, but shifts the focus from derivations
+under a fixed semantics to the semantic conditions under which such derivations
+are meaningful.
+Rather than extending the algebra itself, we study when algebraic provenance
+becomes applicable in the presence of semantic ambiguity.
+Interpretation provenance makes explicit the semantic commitments required to
+reach a resolved setting and explains how classical semiring provenance depends on
+those commitments.
+Viewed this way, classical algebraic provenance corresponds to the depth--0
+fragment of a broader semantic framework.
+
 \subsection{Negation and Non-Monotonic Semantics}
+
+Non-monotonic logic programming, and Datalog with negation in particular, provides
+the canonical mathematically explicit setting for studying semantic ambiguity and
+its resolution.
+Stratified semantics~\cite{apt1988semantics,przymusinski1988semantics},
+well-founded semantics~\cite{vanGelder1991wellFounded}, and stable model semantics
+\cite{gelfond1988stable} offer distinct, well-understood approaches to resolving
+negation, with known relationships under syntactic restrictions such as
+stratifiability.
+
+Our contribution is not to propose new semantics for negation, but to reinterpret
+these classical approaches through the lens of interpretation provenance.
+Datalog with negation serves as a control experiment: ambiguity is semantic rather
+than operational, resolution strategies are formal objects, and equivalence
+results are well established.
+This makes it an ideal setting in which to study how semantic resolution shapes
+provenance structure.
+A deeper treatment of Datalog$^{\neg}$ as a design space for semantic resolution
+appears in companion work.
+
+\subsection{Provenance, Explanations, and Counterfactuals}
+
+A large body of work studies explanations and causality for query answers,
+including why-not provenance, causal responsibility, and counterfactual
+explanations
+\cite{buneman2001why,halpern2001causes,meliou2010causality,glavic2015survey}.
+These approaches focus on explaining results relative to a fixed semantics, often
+by identifying minimal subsets of input facts or derivations.
+
+Interpretation provenance is complementary.
+Rather than explaining why a result follows from a chosen semantics, it explains
+which semantic assumptions were required for the result to hold at all.
+In this sense, interpretation provenance lifts explanation from the derivational
+level to the semantic level, making explicit which conclusions are robust across
+interpretations and which depend on particular resolution choices.
 
 \subsection{Transactional and Systems Provenance}
 
-\subsection{Abstraction, Quotients, and Semantics}
+Provenance in transactional and distributed systems has traditionally emphasized
+execution traces, dependency graphs, and audit logs
+\cite{adya1999weak,bernstein1987concurrency,cerone2015consistency}.
+Related work in workflow and system provenance records how outcomes depend on
+specific executions or schedules, often for debugging, compliance, or auditing
+purposes
+\cite{cheney2009provenance,freire2008provenance}.
 
-% ================================================================
-\section{Discussion and Future Work}
-\label{sec:discussion}
+Interpretation provenance addresses a complementary semantic question.
+Rather than explaining results relative to a single execution, it explains which
+semantic assumptions—such as isolation level, visibility rules, or ordering
+commitments—justify a result across admissible executions.
+This shifts the focus from recording histories to explaining how execution
+ambiguity is resolved, and how query answers depend on that resolution.
 
-\subsection{Interpretation Engineering as a Design Space}
+\subsection{Abstraction, Quotients, and Semantic Resolution}
 
-\subsection{Beyond Three Quotients}
+Quotienting and abstraction play a central role in semantic theory, from abstract
+interpretation~\cite{cousot1977abstract} to program equivalence and refinement.
+In database theory, quotient constructions arise implicitly in determinacy,
+view-based reasoning, and consistency models, often without being surfaced as
+objects of explanation.
 
-\subsection{Automated Certificate Selection}
+In our framework, interpretations induce quotients on outcome spaces by
+restricting and identifying admissible outcomes until ambiguity is resolved.
+Interpretation provenance explains how these quotients arise and which semantic
+distinctions they preserve.
+This perspective complements existing abstraction-based approaches by making
+semantic resolution explicit and explainable, rather than implicit in the model.
 
-\subsection{Implications for Systems and ML}
+\subsection{Interpretation Complexity}
+
+This work builds on a prior complexity theory of interpretation introduced
+in~\cite{hellerstein2026interpretation}, which characterizes the cost and depth of
+semantic resolution and identifies when interpretation requires irreducible
+staging or coordination.
+
+The present paper focuses instead on explanation.
+We assume interpretations are given and ask how provenance can explain results
+under those interpretations.
+Together, the two lines of work provide a structural and explanatory account of
+semantic resolution: complexity characterizes what resolution requires, while
+interpretation provenance explains how it was used.
 
 % ================================================================
 \section{Conclusion}
 \label{sec:conclusion}
+% ================================================================
 
-Interpretations bridge the gap between ambiguity and algebra.
-By making semantic commitments explicit and explainable, interpretation provenance
-extends algebraic provenance to settings where semantics themselves are objects of
-reasoning.
+This paper reframes provenance around a simple observation: many modern systems
+do not produce a single semantic outcome from a history, but a space of admissible
+ones.
+In such settings, explaining a result requires accounting for how ambiguity was
+resolved—not merely how derivations proceeded after the fact.
+Interpretation provenance makes those semantic commitments explicit and composable,
+recovering classical algebraic provenance once resolution is fixed, while
+retaining visibility into the assumptions that made resolution possible.
 
-How semantic regimes or interpretations are selected is out of scope here; we
-address domain-specific regime design in companion work.
+Our development shows that this perspective is not tied to a particular domain.
+In transactional systems, interpretation provenance explains how query results
+depend on ordering and isolation commitments.
+In logic programming with negation, it clarifies the structure of semantic
+dependencies that have long been studied but rarely treated as provenance objects.
+Across domains, certificates provide a minimal interface for carrying forward just
+the information required to support further reasoning.
+
+More importantly, interpretation provenance opens a broader research agenda.
+
+\paragraph{Robustness and semantic sensitivity.}
+Once results are annotated with the interpretations under which they hold, it
+becomes natural to ask which conclusions are robust across interpretations and
+which are fragile.
+This suggests new provenance questions—about semantic stability, policy change,
+and compatibility across regimes—that go beyond traditional why- and how-provenance.
+Developing principled robustness measures, including probabilistic or lattice-based
+summaries over interpretations, is a promising direction.
+
+\paragraph{Engineering interpretation provenance.}
+While interpretations are minimal by construction, certificates admit multiple
+representations.
+Designing compact, efficient certificates—tailored to particular domains,
+workloads, or performance goals—raises new engineering questions at the boundary
+of semantics and systems.
+This includes incremental maintenance, compression, and interaction with existing
+provenance stores.
+
+\paragraph{Beyond databases.}
+Semantic ambiguity and resolution are not unique to data management.
+Shared-memory consistency models, replica coordination protocols, access-control
+policies, and even machine learning pipelines exhibit similar patterns of
+underspecification followed by structured commitment.
+Interpretation provenance provides a vocabulary for transporting insights across
+these domains, suggesting a unifying foundation for provenance in ambiguous
+computational settings.
+
+The original success of algebraic provenance lay in identifying the right semantic
+object to explain.
+Interpretation provenance extends that insight: when meaning itself depends on
+resolution, provenance must explain the assumptions that made meaning possible.
+We hope this work provides both a foundation and an invitation to explore that
+space.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{references}

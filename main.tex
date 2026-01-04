@@ -660,7 +660,7 @@ basis for more parsimonious lineage when the intended query family is known.
 We illustrate this connection in Appendix~\ref{app:systems-lineage}.
 
 % ================================================================
-\section{Sandbox I: Datalog with Negation}
+\section{Sandbox I: Datalog with Negation As Semantic Ambiguity}
 \label{sec:negation}
 % ================================================================
 
@@ -689,7 +689,7 @@ transaction schedules rather than negation.
 \subsection{Specification and Semantic Ambiguity}
 
 A Datalog program with negation induces a specification
-$\Spec : \Hist \to 2^{O}$ mapping histories (EDB instances) to sets of admissible
+$\Spec : \Hist \to 2^{O}$ mapping histories (finite sets of ground EDB atoms over the fixed constant $c$ introduced below) to sets of admissible
 outcomes (models).
 Ambiguity arises because negation can create circular semantic dependencies:
 whether an atom holds may depend on whether some other atom does not hold, and
@@ -826,6 +826,7 @@ I_{\mathrm{wfs}}
 \;\wedge\;
 \varphi_{r(c)=\mathbf{u}} .
 \]
+(These $\varphi$ are meta-level semantic commitments about admissible outcomes, not object-language Datalog atoms, and they operate on the outcome space induced by the program and history.)
 Over $\Spec \mid I_{\mathrm{wfs}}$, $p(c)$ is true, while $q(c)$ and $r(c)$ are undefined.
 
 Under $I_{\mathrm{wfs}}$, interpretation provenance records:

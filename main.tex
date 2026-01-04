@@ -100,7 +100,7 @@ We show that provenance becomes meaningful only \emph{after} such resolution.
 % that classical algebraic provenance arises as a special case when semantics are
 % already resolved.
 We formalize how interpretations structure provenance prior to resolution, giving
-rise to a layered, dependency-sensitive form that collapses to ordinary semiring
+rise to a layered, dependency-sensitive form that becomes ordinary semiring
 provenance once a resolving interpretation is fixed.
 We introduce \emph{layer certificates} as sufficient summaries of semantic
 commitments for downstream reasoning.
@@ -446,13 +446,16 @@ classical provenance—into a single explanatory object.
 \paragraph{Interpretation provenance values.}
 Fix a commutative semiring $(K,\otimes,1)$ for derivational provenance
 (e.g., polynomial provenance).
-An \emph{interpretation provenance value} has the form
+For a query $Q$ and tuple $t$, write $\mathsf{prov}_{Q \mid I}(t) \in K$ for the
+ordinary (depth--0) provenance computed under the conditioned specification
+$\Spec \mid I$.
+We define \emph{interpretation provenance} as the pair
 \[
-  I \cdot k ,
+  \mathsf{IP}_Q(t) \;\triangleq\; (I,\, \mathsf{prov}_{Q \mid I}(t)).
 \]
-where $I$ is a \emph{resolving interpretation} for the specification $\Spec$
-and $k \in K$ is the ordinary semiring provenance computed over the
-resolved specification $\Spec \mid I$.
+
+When convenient, we may write $I \cdot k$ as an abbreviation for the pair $(I,k)$,
+but all semantics are expressed via conditioning on $I$.
 
 The intended reading is:
 \begin{quote}
@@ -463,9 +466,8 @@ The intended reading is:
 Once an interpretation $I$ resolves $\Spec$, all semantic ambiguity is discharged.
 Query evaluation under $\Spec \mid I$ is single-valued, and classical semiring
 provenance applies without modification.
-Interpretation provenance therefore strictly generalizes classical provenance:
-the latter is recovered simply by fixing an interpretation and retaining only
-the derivational component $k$.
+Interpretation provenance therefore records classical provenance under
+conditioning, together with the interpretation that justifies that conditioning.
 
 In particular, for \emph{depth--0} specifications—where no nontrivial semantic
 commitments are required—interpretation provenance coincides exactly with
@@ -495,7 +497,7 @@ We now return to the transactional Example~\ref{ex:example}.
 Recall that values $b, c$ are present in every serializable execution, while value $d$
 is present only under certain execution orders.
 
-We can now show a syntax of interpretation provenance for this example.
+We can now show the syntax of interpretation provenance for this example.
 In a conflict serializability context, interpretive predicates correspond to ordering
 commitments among transactions: $\varphi_{T_i \prec T_j}$ commits to
 ordering the actions of transaction $T_i$ before the conflicting actions of $T_j$.
@@ -503,12 +505,15 @@ If we observe $\{(b), (c), (d)\}$ as the query result, then an example Interpret
 \[
 I_{\mathsf{in}} \;\triangleq\; \varphi_{T_1 \prec T_2} \wedge \varphi_{T_2 \prec T_3} \wedge \varphi_{T_3 \prec T_4} \wedge \varphi_{T_4 \prec T_Q} \wedge \varphi_{T_Q \prec T_5}
 \]
-and the corresponding interpretation provenance value is
+and the corresponding conditioned (depth--0) provenance is
 \[
   \mathsf{prov}_{Q \mid I_{\mathsf{in}}}(b)=x_1+x_2,\;
   \mathsf{prov}_{Q \mid I_{\mathsf{in}}}(c)=x_3,\;
   \mathsf{prov}_{Q \mid I_{\mathsf{in}}}(d)=x_4.
 \]
+
+Interpretation provenance pairs these expressions with the interpretation,
+e.g., $\mathsf{IP}_Q(b) \triangleq (I_{\mathsf{in}},\, x_1+x_2)$.
 
 In Appendix~\ref{sec:appendix-concurrency} we work this example more fully, including 
 the case where $d$ is absent from the query result.
@@ -517,8 +522,8 @@ the case where $d$ is absent from the query result.
 
 Interpretation provenance pairs a resolving interpretation with classical
 provenance computed under that interpretation.
-After resolution (depth--0), interpretation provenance reduces to ordinary
-semiring provenance.
+Once an interpretation is fixed, provenance is classical by construction: it is
+computed over the conditioned specification $\Spec \mid I$.
 
 The following sections instantiate this framework in two settings with very
 different sources of semantic ambiguity: negation in Datalog and scheduling in
@@ -727,7 +732,7 @@ In incremental or distributed settings, this stabilization is a genuine semantic
 commitment: the possibility of late-arriving facts creates ambiguity about
 whether negation is safe to apply.
 
-Key interpretive predicates are $\varphi_{\mathrm{stab}(p)}$ (stabilization of the lower stratum defining $p$) and $\varphi_{\mathrm{neg}(q)}$ (the stratified negation commitment for $q$ given stabilization). Here the dependency is staged: $\varphi_{\mathrm{stab}(p)} \rightarrow \varphi_{\mathrm{neg}(q)}$. See Appendix~\ref{sec:appendix-datalog} for $I_{\mathrm{strat}}$ and the corresponding $\mathsf{IP}(\cdot)$ values.
+Key interpretive predicates are $\varphi_{\mathrm{stab}(p)}$ (stabilization of the lower stratum defining $p$) and $\varphi_{\mathrm{neg}(q)}$ (the stratified negation commitment for $q$ given stabilization). Here the dependency is staged: $\varphi_{\mathrm{stab}(p)} \rightarrow \varphi_{\mathrm{neg}(q)}$. See Appendix~\ref{sec:appendix-datalog} for $I_{\mathrm{strat}}$ and the corresponding conditioned provenance and interpretation provenance values.
 
 \subsection{Well-Founded Semantics}
 
@@ -738,7 +743,7 @@ ambiguity by admitting a richer outcome space in which atoms may be
 Undefinedness is not a failure of semantics; it is an explicit representation of
 residual ambiguity due to negation cycles.
 
-The staged prefix remains ($\varphi_{\mathrm{stab}(p)} \rightarrow \varphi_{\mathrm{neg}(q)}$). The cycle induces a global mutual dependence, but the resolution is deterministic (commit both to $\mathbf{u}$). Appendix~\ref{sec:appendix-datalog} gives the explicit interpretation $I_{\mathrm{wfs}}$, the dependency displays, and the resulting $\mathsf{IP}(\cdot)$ values.
+The staged prefix remains ($\varphi_{\mathrm{stab}(p)} \rightarrow \varphi_{\mathrm{neg}(q)}$). The cycle induces a global mutual dependence, but the resolution is deterministic (commit both to $\mathbf{u}$). Appendix~\ref{sec:appendix-datalog} gives the explicit interpretation $I_{\mathrm{wfs}}$, the dependency displays, and the resulting conditioned provenance and interpretation provenance values.
 
 \subsection{Stable Model Semantics}
 
@@ -808,7 +813,7 @@ Over $\Spec \mid I_{\mathrm{wfs}}$, $p$ is true, while $q$ and $r$ are undefined
 
 Interpretation provenance records:
 \[
-\mathsf{IP}(p) = I_{\mathrm{wfs}} \cdot \mathsf{prov}(a),
+\mathsf{IP}(p) \triangleq (I_{\mathrm{wfs}},\, \mathsf{prov}(a)),
 \qquad
 \mathsf{IP}(q) \text{ undefined},
 \qquad
@@ -842,9 +847,9 @@ Interpretation therefore does not merely refine a world, it describes
 \emph{which} world was chosen from a space of admissible worlds. In this example, interpretation provenance would record one of the following, depending on which stable model
 was chosen:
 \[
-\mathsf{IP}(q) = I^{(q)}_{\mathrm{stab}} \cdot 1,
+\mathsf{IP}(q) \triangleq (I^{(q)}_{\mathrm{stab}},\, 1),
 \qquad
-\mathsf{IP}(r) = I^{(r)}_{\mathrm{stab}} \cdot 1.
+\mathsf{IP}(r) \triangleq (I^{(r)}_{\mathrm{stab}},\, 1).
 \]
 
 
@@ -1020,16 +1025,19 @@ Fixing an interpretation resolves the ambiguity and yields a depth--0 setting.
 
 For tuples $b$, and $c$, the result is invariant:
 \[
-\mathsf{IP}_Q(b) = I \cdot (x_1 + x_2),
+\mathsf{prov}_{Q \mid I}(b) = x_1 + x_2,
 \qquad
-\mathsf{IP}_Q(c) = I \cdot x_3,
+\mathsf{prov}_{Q \mid I}(c) = x_3,
 \]
 for both $I_{\mathsf{in}}$ and $I_{\mathsf{out}}$.
+Accordingly, $\mathsf{IP}_Q(b) \triangleq (I,\, \mathsf{prov}_{Q \mid I}(b))$ and similarly for $c$.
 
 Tuple $d$ is semantically contingent.
 Under $I_{\mathsf{in}}$, the classical provenance question is \emph{why} $d$:
 \[
-\mathsf{IP}_Q(d) = I_{\mathsf{in}} \cdot x_4 .
+\mathsf{prov}_{Q \mid I_{\mathsf{in}}}(d) = x_4,
+\qquad
+\mathsf{IP}_Q(d) \triangleq (I_{\mathsf{in}},\, x_4).
 \]
 Under $I_{\mathsf{out}}$, $d$ is absent, and the appropriate classical question is
 \emph{why-not} $d$, explained by the ordering commitment $\prec(T_5, T_Q)$.
@@ -1081,10 +1089,11 @@ The classical (depth-0) query provenance is:
 
 Interpretation provenance lifts this to the ambiguous history:
 \[
-\mathsf{IP}_Q(1)
-\;=\;
-\bigl(\varphi_{T_2 \prec T_1} \wedge \varphi_{T_1 \prec T_Q}\bigr)
-\;\otimes\; \mathsf{id}(T_1).
+I \;\triangleq\; \varphi_{T_2 \prec T_1} \wedge \varphi_{T_1 \prec T_Q},
+\qquad
+\mathsf{prov}_{Q \mid I}(1)=\mathsf{id}(T_1),
+\qquad
+\mathsf{IP}_Q(1) \triangleq (I,\, \mathsf{id}(T_1)).
 \]
 
 In particular, interpretation provenance can distinguish tuples that appear in all admissible serializations, tuples that appear only under specific orderings, and tuples whose derivations depend on irreducible semantic choices.
@@ -1514,8 +1523,8 @@ Interpretation provenance attaches the resolving interpretation to the ordinary
 derivational explanation.
 For the observed output $\{b,c\}$, we record
 \[
-  \mathsf{IP}_Q(b)=I\cdot(x_1+x_2),\quad
-  \mathsf{IP}_Q(c)=I\cdot x_3,
+  \mathsf{IP}_Q(b)\triangleq (I,\, x_1+x_2),\quad
+  \mathsf{IP}_Q(c)\triangleq (I,\, x_3),
 \]
 where $I$ is the interpretation assumed by the system (e.g., $I_{\mathsf{out}}$).
 
@@ -1553,7 +1562,7 @@ $k_p \triangleq \mathsf{prov}(a)$.
 Interpretation provenance records that this derivation is justified under the
 stabilization-and-negation commitments:
 \[
-  \mathsf{IP}(p) \;=\; I_{\mathrm{strat}} \cdot k_p .
+  \mathsf{IP}(p) \;\triangleq\; (I_{\mathrm{strat}},\, k_p) .
 \]
 
 In contrast, $q$ is determined only after $\varphi_{\mathrm{stab}(p)}$ is in
@@ -1597,7 +1606,7 @@ $k_p \triangleq \mathsf{prov}(a)$.
 Interpretation provenance records the semantic commitments required for that
 derivation:
 \[
-  \mathsf{IP}(p) \;=\; I_{\mathrm{wfs}} \cdot k_p .
+  \mathsf{IP}(p) \;\triangleq\; (I_{\mathrm{wfs}},\, k_p) .
 \]
 
 The distinctive feature is that $I_{\mathrm{wfs}}$ resolves the negation cycle
@@ -1646,16 +1655,16 @@ each choice yields a distinct resolved interpretation.
 Within either resolved outcome, derivational provenance is ordinary:
 $p$ again has $k_p \triangleq \mathsf{prov}(a)$, so
 \[
-  \mathsf{IP}(p) \;=\; I_{\mathrm{stab}}^{(r)} \cdot k_p
+  \mathsf{IP}(p) \;\triangleq\; (I_{\mathrm{stab}}^{(r)},\, k_p)
   \quad\text{or}\quad
-  \mathsf{IP}(p) \;=\; I_{\mathrm{stab}}^{(s)} \cdot k_p ,
+  \mathsf{IP}(p) \;\triangleq\; (I_{\mathrm{stab}}^{(s)},\, k_p) ,
 \]
 depending on which stable interpretation is assumed.
 The cycle atoms exhibit genuinely interpretation-dependent conclusions; e.g.,
 \[
-  \mathsf{IP}(r) \;=\; I_{\mathrm{stab}}^{(r)} \cdot 1
+  \mathsf{IP}(r) \;\triangleq\; (I_{\mathrm{stab}}^{(r)},\, 1)
   \qquad\text{and}\qquad
-  \mathsf{IP}(s) \;=\; I_{\mathrm{stab}}^{(s)} \cdot 1 .
+  \mathsf{IP}(s) \;\triangleq\; (I_{\mathrm{stab}}^{(s)},\, 1) .
 \]
 Thus, in the stable setting, interpretation provenance must account explicitly for
 which \emph{resolved interpretation} was selected.
@@ -1762,9 +1771,9 @@ Let $k_B$ (resp.\ $k_C$) denote the derivational justification that $B$ (resp.\ 
 is the longest-duration span in the resolved execution.
 Interpretation provenance records:
 \[
-  \mathsf{IP}(\mathrm{cp}=B) \;=\; I_B \cdot k_B,
+  \mathsf{IP}(\mathrm{cp}=B) \;\triangleq\; (I_B,\, k_B),
   \qquad
-  \mathsf{IP}(\mathrm{cp}=C) \;=\; I_C \cdot k_C .
+  \mathsf{IP}(\mathrm{cp}=C) \;\triangleq\; (I_C,\, k_C) .
 \]
 
 The provenance makes explicit that the diagnostic conclusion depends on semantic

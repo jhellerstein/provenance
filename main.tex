@@ -54,6 +54,7 @@
 \newcommand{\Atoms}{\mathsf{Atoms}}
 \newcommand{\Out}{\mathcal{O}}
 \newcommand{\drule}{\mathrel{:\!-}}
+\newcommand{\Prov}{\mathsf{Prov}}
 % Certificates denote outcome constraints.
 \newcommand{\den}[1]{\llbracket #1 \rrbracket} % semantics bracket
 
@@ -366,6 +367,8 @@ An \emph{interpretation} is a finite conjunction
   I = \varphi_1 \wedge \cdots \wedge \varphi_m
 \]
 of interpretive predicates, where $\wedge$ denotes sequential refinement.
+Throughout the paper, interpretation provenance is expressed by conditioning
+semantic objects on an interpretation; no algebraic structure is imposed prior to conditioning.
 \end{definition}
 
 Refinement by an interpretation is defined by sequential application:
@@ -428,8 +431,6 @@ semantic substrate on which we build algebraic structure in the next section.
 %% ================================================================
 \section{Interpretations and Provenance Structure}
 \label{sec:conditional-semiring}
-%% ================================================================
-
 This section connects the semantic notion of interpretation
 (Section~\ref{sec:prelim}) to provenance.
 Fix a specification $\Spec$ and a resolving interpretation $I$.
@@ -442,16 +443,17 @@ We now introduce a compact notation for \emph{interpretation provenance}.
 This subsection introduces no new semantic machinery.
 It packages together notions already defined—interpretations, resolution, and
 classical provenance—into a single explanatory object.
+Throughout the paper, interpretation provenance is expressed by conditioning semantic objects on an interpretation; no algebraic structure is imposed prior to conditioning.
 
 \paragraph{Interpretation provenance values.}
 Fix a commutative semiring $(K,\otimes,1)$ for derivational provenance
 (e.g., polynomial provenance).
-For a query $Q$ and tuple $t$, write $\mathsf{prov}_{Q \mid I}(t) \in K$ for the
+For a query $Q$ and tuple $t$, write $\Prov_{Q \mid I}(t) \in K$ for the
 ordinary (depth--0) provenance computed under the conditioned specification
 $\Spec \mid I$.
 We define \emph{interpretation provenance} as the pair
 \[
-  \mathsf{IP}_Q(t) \;\triangleq\; (I,\, \mathsf{prov}_{Q \mid I}(t)).
+  \mathsf{IP}_Q(t) \;\triangleq\; (I,\, \Prov_{Q \mid I}(t)).
 \]
 
 When convenient, we may write $I \cdot k$ as an abbreviation for the pair $(I,k)$,
@@ -463,7 +465,7 @@ The intended reading is:
 \end{quote}
 
 \paragraph{Relationship to classical provenance.}
-Once an interpretation $I$ resolves $\Spec$, all semantic ambiguity is discharged.
+Once an interpretation $I$ resolves $\Spec$, semantic ambiguity is fixed for the purpose of provenance.
 Query evaluation under $\Spec \mid I$ is single-valued, and classical semiring
 provenance applies without modification.
 Interpretation provenance therefore records classical provenance under
@@ -507,9 +509,9 @@ I_{\mathsf{in}} \;\triangleq\; \varphi_{T_1 \prec T_2} \wedge \varphi_{T_2 \prec
 \]
 and the corresponding conditioned (depth--0) provenance is
 \[
-  \mathsf{prov}_{Q \mid I_{\mathsf{in}}}(b)=x_1+x_2,\;
-  \mathsf{prov}_{Q \mid I_{\mathsf{in}}}(c)=x_3,\;
-  \mathsf{prov}_{Q \mid I_{\mathsf{in}}}(d)=x_4.
+  \Prov_{Q \mid I_{\mathsf{in}}}(b)=x_1+x_2,\;
+  \Prov_{Q \mid I_{\mathsf{in}}}(c)=x_3,\;
+  \Prov_{Q \mid I_{\mathsf{in}}}(d)=x_4.
 \]
 
 Interpretation provenance pairs these expressions with the interpretation,
@@ -535,113 +537,117 @@ transactional systems.
 \label{sec:certificates}
 % ================================================================
 
-Sections~\ref{sec:prelim} and~\ref{sec:conditional-semiring} established
-the semantic and algebraic structure induced by interpretations.
-In this section, we address a complementary question:
+Interpretations resolve semantic ambiguity by conditioning a specification.
+In this section we ask a complementary question:
 
 \begin{quote}
-\emph{What information must be retained in order to support interpretation?}
+\emph{What information must be retained to support further interpretation
+\emph{and} provenance queries about the result?}
 \end{quote}
 
-Interpretations act by conditioning and quotienting outcome spaces.
-Downstream semantic reasoning rarely requires the full history of semantic
-commitments; it suffices to retain summaries of prior resolution that preserve
-exactly the distinctions relevant to subsequent interpretive predicates.
-We formalize these summaries as \emph{layer certificates}: sufficient information
-to continue interpretation.
+Interpretation proceeds incrementally, but neither subsequent interpretation nor
+provenance analysis requires access to the full refined specification.
+Instead, it suffices to retain summaries that preserve exactly the semantic
+distinctions relevant to future reasoning.
+We formalize these summaries as \emph{layer certificates}.
 
-\subsection{Certificates as Sufficient Information}
+\subsection{Certificates and Provenance Queries}
 
-Fix a specification $\Spec$ and an interpretation $I$ with a chosen layering
-$L_1,\ldots,L_k$ as in Section~\ref{sec:conditional-semiring}.
-Each layer imposes semantic commitments that restrict and identify outcomes,
-producing a refined specification
-\[
-  \Spec_i \;\triangleq\; \Spec \mid (\varphi_1 \wedge \cdots \wedge \varphi_i).
-\]
-
-Our goal is to characterize what information about $\Spec_i$ must be retained in
-order to support subsequent interpretation.
-
-\paragraph{Certificates for individual refinements.}
-We begin by defining what it means for a value to summarize the effect of a single
-interpretive predicate.
-
-\begin{definition}[Certificate for an interpretive predicate]
-Let $\varphi$ be an interpretive predicate and let $C$ be a value.
-We write $\llbracket C \rrbracket \subseteq O$ for the set of outcomes consistent
-with $C$ (its \emph{denotation}).
-We say that $C$ is a \emph{certificate} for $\varphi$, written $\varphi \models C$,
-if for all histories $H$ and all nonempty outcome sets $S \subseteq O$,
-\[
-  \varphi(H,S) \;\subseteq\; S \cap \llbracket C \rrbracket .
-\]
-\end{definition}
-
-Intuitively, $\varphi \models C$ means that conditioning on $\varphi$ never admits
-outcomes outside $\llbracket C \rrbracket$.
-The certificate $C$ may be weaker than $\varphi$ itself; it need only rule out
-outcomes that $\varphi$ would rule out.
-
-\paragraph{Sufficient certificates for continuation.}
-We now lift this notion from individual refinements to suffixes of an
-interpretation.
-
-\begin{definition}[Sufficient certificate for a continuation]
 Fix a specification $\Spec$ and an interpretation
-$I = \varphi_1 \wedge \cdots \wedge \varphi_k$.
+$I = \varphi_1 \wedge \cdots \wedge \varphi_k$ with layering
+$L_1,\ldots,L_k$.
 Let
 \[
-  \Spec_i \;\triangleq\; \Spec \mid (\varphi_1 \wedge \cdots \wedge \varphi_i)
-  \quad\text{and}\quad
+  \Spec_i \;\triangleq\; \Spec \mid (\varphi_1 \wedge \cdots \wedge \varphi_i),
+  \qquad
   J \;\triangleq\; \varphi_{i+1} \wedge \cdots \wedge \varphi_k .
 \]
-A certificate $C_i$ is \emph{sufficient for the continuation $J$} if, for all
-histories $H$,
+
+\paragraph{Certificates.}
+An interpretive predicate restricts admissible outcomes.
+A \emph{certificate} summarizes this restriction.
+
+\begin{definition}[Certificate]
+Let $\varphi$ be an interpretive predicate.
+A value $C$ with denotation $\llbracket C \rrbracket \subseteq O$ is a
+\emph{certificate} for $\varphi$, written $\varphi \models C$, if for all histories
+$H$ and nonempty $S \subseteq O$,
 \[
-  (\Spec_i \mid J)(H)
-  \;=\;
-  \bigl( (\Spec \mid \chi_{C_i}) \mid J \bigr)(H),
+  \varphi(H,S) \subseteq S \cap \llbracket C \rrbracket .
 \]
-where $\chi_{C_i}(H,S) \triangleq S \cap \llbracket C_i \rrbracket$.
 \end{definition}
 
-That is, replacing the refined specification $\Spec_i$ by conditioning on the
-certificate $C_i$ has no effect on the outcome of any subsequent interpretation.
-All semantic distinctions relevant to $J$ are preserved by $C_i$.
+Certificates may be weaker than the predicates they summarize: they need only
+exclude outcomes that would be excluded by interpretation, not encode the full
+resolution process.
 
-\paragraph{Layer certificates.}
-A \emph{layer certificate} is simply a certificate that is sufficient for all
-subsequent layers of an interpretation.
+\paragraph{Provenance queries.}
+Interpretation provenance is queried.
 
-\begin{definition}[Layer Certificate]
-Given a layering $L_1,\ldots,L_k$, a \emph{layer certificate} for layer $i$ is a
-certificate $C_i$ that is sufficient for the continuation
-$\varphi_{i+1} \wedge \cdots \wedge \varphi_k$.
+\begin{definition}[Provenance Query]
+A \emph{provenance query} is a function
+\[
+  q : (\Spec \mid I) \to A ,
+\]
+where $A$ is an answer domain (e.g., Boolean, explanations, or dependency sets).
 \end{definition}
 
-Intuitively, a layer certificate is a sufficient statistic for interpretation
-beyond layer $i$.
-It need not encode the full refined specification or the full interpretation so
-far; it need only preserve the distinctions that matter for future semantic
-commitments.
+Examples include robustness queries (“does $t$ hold under all interpretations in a
+class?”), semantic-change queries (“does $t$ persist when replacing $I$ by $I'$?”),
+and conditional why/why-not queries.
 
-\paragraph{Interpretation provenance.}
-Certificates mediate between layers of the interpretation structure: later layers
-condition on certificates produced by earlier layers.
+\paragraph{Sufficiency for continuation and queries.}
+Certificates must preserve both future interpretation and the answers to intended
+provenance queries.
+
+\begin{definition}[Sufficient Certificate]
+A certificate $C_i$ is \emph{sufficient for $(J,\mathcal{Q})$} if for all histories
+$H$:
+\begin{enumerate}
+  \item \emph{Continuation:}
+  \[
+    (\Spec_i \mid J)(H)
+    =
+    \bigl((\Spec \mid \chi_{C_i}) \mid J\bigr)(H);
+  \]
+  \item \emph{Query preservation:} for all $q \in \mathcal{Q}$,
+  \[
+    q\bigl((\Spec_i \mid J)(H)\bigr)
+    =
+    q\bigl(((\Spec \mid \chi_{C_i}) \mid J)(H)\bigr).
+  \]
+\end{enumerate}
+\end{definition}
+
+A \emph{layer certificate} is a certificate sufficient for all subsequent layers
+and the intended family of provenance queries.
+
+\subsection{Query Sensitivity of Certificates}
+
+Supporting richer provenance queries strictly increases certificate requirements.
+
+\begin{theorem}[Query Monotonicity]
+If $\mathcal{Q}_1 \subseteq \mathcal{Q}_2$, then every certificate sufficient for
+$(J,\mathcal{Q}_2)$ is sufficient for $(J,\mathcal{Q}_1)$.
+\end{theorem}
+
+\noindent
+Thus, extending the space of provenance questions can only require retaining
+additional semantic information, never less.
+
+Concrete illustrations of this phenomenon appear in the appendices.
+Appendix~\ref{sec:appendix-datalog} shows how semantic-change queries for negation
+semantics enlarge certificates beyond those needed for derivational provenance.
+Appendix~\ref{sec:appendix-concurrency} shows the analogous effect for robustness
+queries under transactional ambiguity.
 
 \subsection{Summary}
 
 Layer certificates provide a principled interface between semantic resolution and
-provenance.
-They summarize the effect of interpretation layers in a form sufficient for
-further conditioning, without exposing unnecessary detail.
-Section~\ref{sec:transactions} sketches an application in transactional systems.
-
-From a systems perspective, certificates correspond to compact metadata such as
-ordering decisions, fixpoint detections, or semantic regime selections.
-Interpretation provenance characterizes which such metadata are sufficient---and
-which are unnecessary---to justify downstream conclusions.
+provenance analysis.
+By parameterizing certificates by provenance query families, interpretation
+provenance makes explicit which semantic distinctions must be retained—and why—
+when supporting explanation, robustness, or semantic change.
 
 % ================================================================
 \section{Sandbox I: Datalog with Negation}
@@ -813,7 +819,7 @@ Over $\Spec \mid I_{\mathrm{wfs}}$, $p$ is true, while $q$ and $r$ are undefined
 
 Interpretation provenance records:
 \[
-\mathsf{IP}(p) \triangleq (I_{\mathrm{wfs}},\, \mathsf{prov}(a)),
+	ext{Under } I_{\mathrm{wfs}},\ \mathsf{IP}(p) \triangleq (I_{\mathrm{wfs}},\, \Prov(a)),
 \qquad
 \mathsf{IP}(q) \text{ undefined},
 \qquad
@@ -1025,17 +1031,17 @@ Fixing an interpretation resolves the ambiguity and yields a depth--0 setting.
 
 For tuples $b$, and $c$, the result is invariant:
 \[
-\mathsf{prov}_{Q \mid I}(b) = x_1 + x_2,
+\Prov_{Q \mid I}(b) = x_1 + x_2,
 \qquad
-\mathsf{prov}_{Q \mid I}(c) = x_3,
+\Prov_{Q \mid I}(c) = x_3,
 \]
 for both $I_{\mathsf{in}}$ and $I_{\mathsf{out}}$.
-Accordingly, $\mathsf{IP}_Q(b) \triangleq (I,\, \mathsf{prov}_{Q \mid I}(b))$ and similarly for $c$.
+Accordingly, $\mathsf{IP}_Q(b) \triangleq (I,\, \Prov_{Q \mid I}(b))$ and similarly for $c$.
 
 Tuple $d$ is semantically contingent.
 Under $I_{\mathsf{in}}$, the classical provenance question is \emph{why} $d$:
 \[
-\mathsf{prov}_{Q \mid I_{\mathsf{in}}}(d) = x_4,
+\Prov_{Q \mid I_{\mathsf{in}}}(d) = x_4,
 \qquad
 \mathsf{IP}_Q(d) \triangleq (I_{\mathsf{in}},\, x_4).
 \]
@@ -1078,9 +1084,9 @@ $T_2$ deletes tuple $(1)$,
 and $T_Q$ executes query $Q$ that returns $(1)$ iff it is present.
 
 Under serializability, the history admits multiple serializations.
-The classical (depth-0) query provenance is:
+Under a fixed serialization (equivalently, under a fixed resolving interpretation), the classical (depth-0) query provenance is:
 \[
-\mathsf{Prov}_Q =
+\Prov_Q =
 \begin{cases}
 \mathsf{id}(T_1) & \text{if } T_2 \prec T_1 \prec T_Q,\\
 0                & \text{if } T_1 \prec T_2 \prec T_Q.
@@ -1091,7 +1097,7 @@ Interpretation provenance lifts this to the ambiguous history:
 \[
 I \;\triangleq\; \varphi_{T_2 \prec T_1} \wedge \varphi_{T_1 \prec T_Q},
 \qquad
-\mathsf{prov}_{Q \mid I}(1)=\mathsf{id}(T_1),
+\Prov_{Q \mid I}(1)=\mathsf{id}(T_1),
 \qquad
 \mathsf{IP}_Q(1) \triangleq (I,\, \mathsf{id}(T_1)).
 \]
@@ -1504,9 +1510,9 @@ Given that analysis, two resolving interpretations suffice:
 \paragraph{Depth--0 provenance under each interpretation.}
 Conditioned on $I_{\mathsf{in}}$, the resolved snapshot contains $b,c,d$:
 \[
-  \mathsf{prov}_{Q \mid I_{\mathsf{in}}}(b)=x_1+x_2,\;
-  \mathsf{prov}_{Q \mid I_{\mathsf{in}}}(c)=x_3,\;
-  \mathsf{prov}_{Q \mid I_{\mathsf{in}}}(d)=x_4.
+  \Prov_{Q \mid I_{\mathsf{in}}}(b)=x_1+x_2,\;
+  \Prov_{Q \mid I_{\mathsf{in}}}(c)=x_3,\;
+  \Prov_{Q \mid I_{\mathsf{in}}}(d)=x_4.
 \]
 Conditioned on $I_{\mathsf{out}}$, the snapshot contains $b,c$ but not $d$.
 
@@ -1558,7 +1564,7 @@ has been resolved.
 
 Over the resolved specification $\Spec \mid I_{\mathrm{strat}}$, $p$ is derived
 from $a$ and has ordinary derivation provenance
-$k_p \triangleq \mathsf{prov}(a)$.
+$k_p \triangleq \Prov(a)$.
 Interpretation provenance records that this derivation is justified under the
 stabilization-and-negation commitments:
 \[
@@ -1602,7 +1608,7 @@ atoms to $\mathbf{u}$.
 
 Over $\Spec \mid I_{\mathrm{wfs}}$, derivational provenance is depth--0; in
 particular $p$ again has
-$k_p \triangleq \mathsf{prov}(a)$.
+$k_p \triangleq \Prov(a)$.
 Interpretation provenance records the semantic commitments required for that
 derivation:
 \[
@@ -1653,7 +1659,7 @@ Unlike WFS, stable semantics does not prescribe a unique resolution of the cycle
 each choice yields a distinct resolved interpretation.
 
 Within either resolved outcome, derivational provenance is ordinary:
-$p$ again has $k_p \triangleq \mathsf{prov}(a)$, so
+$p$ again has $k_p \triangleq \Prov(a)$, so
 \[
   \mathsf{IP}(p) \;\triangleq\; (I_{\mathrm{stab}}^{(r)},\, k_p)
   \quad\text{or}\quad

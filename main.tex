@@ -1074,6 +1074,7 @@ In all cases, provenance questions remain the same:
 which semantic commitments were required to justify a result?
 
 Interpretation provenance provides a uniform account across these regimes.
+We return to mixed-regime systems (e.g., SER + SI) in Section~\ref{sec:robustness}, where we treat inter-specification interaction as an explicit policy layer.
 
 \subsection{Summary}
 
@@ -1153,6 +1154,16 @@ support for reasoning across such changes.
 In the interpretation framework, semantic change is an inter-specification question:
 it compares conclusions obtained under different specifications $\Spec$ and $\Spec'$.
 We model the semantic regimes under which each specification is interpreted via conditioning.
+
+\subsubsection{Mixed-spec execution as policy}
+Mixed regimes (e.g., some transactions under SI and others under SER) are not a
+semantic primitive; they require an explicit policy for how results justified under
+one specification are treated under another.
+Meaningful options include: (i) \emph{Reject}, (ii) \emph{Mask-as-missing}, (iii) \emph{Annotate}
+(carry interpretation provenance/certificate metadata), or (iv) \emph{Accept}.
+We do not advocate a particular policy.
+Interpretation provenance supports all four by making explicit the interpretive predicates/commitments
+that justify each result, making the policy choice explicit and checkable.
 
 The corresponding preservation check is given schematically in the provenance-checks paragraph above.
 
@@ -1604,7 +1615,7 @@ derivation:
 
 The distinctive feature is that $I_{\mathrm{wfs}}$ resolves the negation cycle
 without making a two-valued choice: it commits explicitly to assigning $r(c)$ and $s(c)$
-the value \mathbf{u}.
+the value $\mathbf{u}$.
 
 \subsubsection{Stable semantics: explicit interpretation provenance}
 

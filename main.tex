@@ -880,12 +880,6 @@ Their provenance depends on commitments that are:
 (ii) mutually exclusive under stable semantics.
 
 Interpretation provenance makes this dependence explicit.
-
-\subsubsection{Certificates for Robustness Queries}
-
-In this example, a certificate sufficient for classical why/why-not provenance of $d$ \emph{under a fixed serialization} can be as small as the relevant ordering commitments (i.e., the resolving interpretation assumed by the system, such as $I_{\mathsf{in}}$ or $I_{\mathsf{out}}$). Conditioned on that fixed interpretation, $d$ is either present (with why-provenance witness $x_4$) or absent (with a why-not explanation tied to the same fixed commitments).
-
-By contrast, the robustness query “Does $d$ appear under all serializable executions?” cannot be answered from a certificate that records only one chosen order. To support robustness, the certificate must preserve the fact that the history does \emph{not} impose a total order between the insert $T_4$ and delete $T_5$ relative to $T_Q$, so that both $I_{\mathsf{in}}$ and $I_{\mathsf{out}}$ remain feasible prior to resolution. This is directly analogous to the negation-cycle case in Appendix~\ref{sec:appendix-datalog} and illustrates the same query-family effect discussed in Section~\ref{sec:certificates}.
 The absence of $q$ under well-founded semantics is not a failure of derivation,
 but the consequence of a different interpretation regime.
 Likewise, the presence of $q$ under one stable model is incompatible with its
@@ -1555,6 +1549,12 @@ Under $I_{\mathsf{in}}$, $d$ admits a why-provenance explanation; under
 $I_{\mathsf{out}}$, it admits a why-not explanation.
 Interpretation provenance makes this dependence explicit.
 
+\subsubsection{Certificates for Robustness Queries}
+
+In this example, a certificate sufficient for classical why/why-not provenance of $d$ \emph{under a fixed serialization} can be as small as the relevant ordering commitments (i.e., the resolving interpretation assumed by the system, such as $I_{\mathsf{in}}$ or $I_{\mathsf{out}}$). Conditioned on that fixed interpretation, $d$ is either present (with why-provenance witness $x_4$) or absent (with a why-not explanation tied to the same fixed commitments).
+
+By contrast, the robustness query “Does $d$ appear under all serializable executions?” requires the \emph{strictly stronger} certificate needed for robustness: it must preserve the fact that the history does \emph{not} impose a total order between the insert $T_4$ and delete $T_5$ relative to $T_Q$, so that both $I_{\mathsf{in}}$ and $I_{\mathsf{out}}$ remain admissible under the specification prior to resolution. This is directly analogous to the negation-cycle case in Appendix~\ref{sec:appendix-datalog} and illustrates the same query-family effect discussed in Section~\ref{sec:certificates}. This illustrates the query-parametric notion of certificate sufficiency formalized in Section~\ref{sec:certificates}.
+
 \subsection{Datalog\texorpdfstring{$^{\neg}$}{ with negation} worked interpretation provenance}
 \label{sec:appendix-datalog}
 
@@ -1698,9 +1698,9 @@ This appendix has emphasized certificates sufficient to support derivational pro
   q \;\drule\; \neg r.\qquad
   r \;\drule\; \neg q.
 \]
-Under a fixed resolving interpretation (e.g., committing $p=\mathbf{t}$ in the surrounding example), a minimal certificate sufficient for the derivational provenance of $p$ need only preserve the commitments that make $p$ well-defined (and hence justify $k_p=\Prov(a)$). However, answering a semantic-change query such as “Would $q$ become true under stable-model semantics?” requires a strictly larger certificate: it must preserve the \emph{unresolved negation structure} of the cycle (the mutual negative dependency between $q$ and $r$), not merely the resolved truth assignments under one semantics.
+Under a fixed resolving interpretation (e.g., committing $p=\mathbf{t}$ in the surrounding example), a minimal certificate sufficient for the derivational provenance of $p$ need only preserve the commitments that make $p$ well-defined (and hence justify $k_p=\Prov(a)$). However, answering a semantic-change query such as “Would $q$ become true under stable-model semantics?” requires a \emph{strictly stronger} certificate: it must preserve the \emph{unresolved negation structure} of the cycle (the mutual negative dependency between $q$ and $r$), not merely the resolved truth assignments under one semantics.
 
-This is an instance of Theorem~6.1 (Query Monotonicity): supporting a richer query (semantic change across semantics/interpretations) can only increase the information a certificate must retain.
+This is an instance of Theorem~6.1 (Query Monotonicity): supporting a richer query (semantic change across semantics/interpretations) can only increase the information a certificate must retain. This illustrates the query-parametric notion of certificate sufficiency formalized in Section~\ref{sec:certificates}.
 
 % ================================================================
 \section{Appendix: Interpretation Provenance for Systems Lineage}

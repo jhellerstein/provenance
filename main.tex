@@ -491,7 +491,7 @@ Each interpretation provenance value is indexed by a \emph{single} resolving
 interpretation.
 We do not form disjunctions over interpretations inside provenance values.
 Questions about variation across interpretations—such as robustness,
-invariance, or sensitivity to semantic change—are treated explicitly and
+invariance, or sensitivity to cross-spec semantic change—are treated explicitly and
 separately in Section~\ref{sec:robustness}.
 
 This design choice is intentional.
@@ -604,8 +604,8 @@ where $A$ is an answer domain (e.g., Boolean, explanations, or dependency sets).
 \end{definition}
 
 Examples include robustness queries (“does $t$ hold under all interpretations in a
-class?”), semantic-change queries (“does $t$ persist when replacing $I$ by $I'$?”),
-and conditional why/why-not queries.
+class?”), cross-spec semantic-change queries (Section~\ref{sec:robustness}), and
+conditional why/why-not queries.
 
 \paragraph{Sufficiency for continuation and queries.}
 Certificates must preserve both future interpretation and the answers to intended
@@ -647,8 +647,9 @@ Thus, extending the space of provenance questions can only require retaining
 additional semantic information, never less.
 
 Concrete illustrations of this phenomenon appear in the appendices.
-Appendix~\ref{sec:appendix-datalog} shows how semantic-change queries for negation
-semantics enlarge certificates beyond those needed for derivational provenance.
+Appendix~\ref{sec:appendix-datalog} shows how cross-spec semantic-change queries
+(Section~\ref{sec:robustness}) for negation semantics enlarge certificates beyond
+those needed for derivational provenance.
 Appendix~\ref{sec:appendix-concurrency} shows the analogous effect for robustness
 queries under transactional ambiguity.
 
@@ -659,7 +660,7 @@ provenance.
 By parameterizing certificates by families of provenance queries,
 interpretation provenance makes explicit which semantic distinctions must be
 retained—and which can be discarded—when supporting explanation, robustness, or
-semantic change.
+cross-spec semantic change (Section~\ref{sec:robustness}).
 
 This perspective also clarifies a familiar pattern in systems lineage and
 observability.
@@ -911,112 +912,12 @@ of semantic ambiguity.
 
 Appendix~\ref{sec:appendix-datalog} gives the explicit interpretations, dependency graphs, and provenance values.
 
-\subsection{Semantic Change Example: Negation Semantics}
+\paragraph{Semantic change (forward reference).}
+Semantic change is a cross-spec question; see Section~\ref{sec:robustness}.
+A worked semantic-change analysis appears in Appendix~\ref{sec:appendix-datalog}.
 
-We illustrate semantic change with a concrete Datalog program whose conclusions
-depend on how negation is resolved.
-
-\paragraph{Program and instance.}
-Consider the program $P$, consisting of a stratified fragment defining $p(c)$, 
-and a negation cycle between $q(c)$ and $r(c)$:
-\[
-\begin{array}{l}
-p(c) \;\drule\; a(c).\\
-q(c) \;\drule\; \neg r(c).\\
-r(c) \;\drule\; \neg q(c).
-\end{array}
-\]
-with extensional instance $H = \{a(c)\}$.
-
-
-\paragraph{Well-founded semantics.}
-Under well-founded semantics, the negation cycle is unresolved.
-The unique resolving interpretation commits:
-\[
-I_{\mathrm{wfs}}
-\;\triangleq\;
-\varphi_{p(c)=\mathbf{t}}
-\;\wedge\;
-\varphi_{q(c)=\mathbf{u}}
-\;\wedge\;
-\varphi_{r(c)=\mathbf{u}} .
-\]
-(These $\varphi$ are meta-level semantic commitments about admissible outcomes, not object-language Datalog atoms, and they operate on the outcome space induced by the program and history.)
-Over $\Spec \mid I_{\mathrm{wfs}}$, $p(c)$ is true, while $q(c)$ and $r(c)$ are undefined.
-
-Under $I_{\mathrm{wfs}}$, interpretation provenance records:
-\[
-\mathsf{IP}(p(c)) \triangleq (I_{\mathrm{wfs}},\, \Prov(a(c))),
-\qquad
-\mathsf{IP}(q(c)) \text{ undefined},
-\qquad
-\mathsf{IP}(r(c)) \text{ undefined}.
-\]
-
-\paragraph{Stable model semantics.}
-Under stable model semantics, the same program admits two resolving interpretations:
-\[
-I^{(q)}_{\mathrm{stab}}
-\;\triangleq\;
-\varphi_{p(c)=\mathbf{t}}
-\wedge \varphi_{q(c)=\mathbf{t}}
-\wedge \varphi_{r(c)=\mathbf{f}},
-\qquad
-I^{(r)}_{\mathrm{stab}}
-\;\triangleq\;
-\varphi_{p(c)=\mathbf{t}}
-\wedge \varphi_{r(c)=\mathbf{t}}
-\wedge \varphi_{q(c)=\mathbf{f}} .
-\]
-
-In classical data provenance, the semantic outcome is fixed in advance, and
-provenance refines explanations \emph{within} a single world.
-Interpretation operates at a different level.
-These resolving interpretations correspond to distinct admissible semantic
-outcomes (or \emph{possible worlds}) of the same specification.
-They are mutually incompatible: no single outcome can satisfy both
-$I^{(q)}_{\mathrm{stab}}$ and $I^{(r)}_{\mathrm{stab}}$.
-Interpretation therefore does not merely refine a world, it describes
-\emph{which} world was chosen from a space of admissible worlds. In this example, interpretation provenance would record one of the following, depending on which stable model
-was chosen:
-\[
-\mathsf{IP}(q(c)) \triangleq (I^{(q)}_{\mathrm{stab}},\, 1),
-\qquad
-\mathsf{IP}(r(c)) \triangleq (I^{(r)}_{\mathrm{stab}},\, 1).
-\]
-
-
-
-\paragraph{Robustness and contingency.}
-Fact $p(c)$ is \emph{robust}: it holds in every admissible semantic world under both
-well-founded and stable semantics.
-By contrast, $q(c)$ and $r(c)$ are \emph{semantically contingent}: each holds in some
-admissible worlds but not others.
-Their provenance depends on commitments that are:
-(i) unavailable under well-founded semantics, and
-(ii) mutually exclusive under stable semantics.
-
-Interpretation provenance makes this dependence explicit.
-The absence of $q(c)$ under well-founded semantics is not a failure of derivation,
-but the consequence of a different interpretation regime.
-Likewise, the presence of $q(c)$ under one stable model is incompatible with its
-presence under the other.
-
-\paragraph{Reassessment under semantic change.}
-Interpretation provenance also supports reassessing conclusions drawn under one
-semantic regime when another is adopted.
-For example, a result derived under stable model semantics may be reconsidered
-under well-founded semantics by checking whether its interpretation provenance
-remains satisfied.
-In this example, conclusions about $q(c)$ or $r(c)$ derived under a stable interpretation
-have no counterpart under $I_{\mathrm{wfs}}$, while $p(c)$ remains valid.
-Section~\ref{sec:robustness} develops this notion of semantic change more systematically.
-
-\vspace{1em}
-In the next section, we will see closely analogous provenance shapes in
-transactional systems: staging commitments (serializability orderings), lifted
-outcome domains (snapshot-style visibility constraints), and multi-valued resolved
-interpretations (multiple admissible serializations) over the same history.
+The next sandbox mirrors these interpretation shapes, but with ambiguity arising
+from concurrency rather than negation.
 
 % ================================================================
 \section{Sandbox II: Transactions as Systems Ambiguity}
@@ -1112,85 +1013,11 @@ ordering commitments may enable or preclude others.
 As a result, ordering predicates need not commute, inducing semantic dependency
 and interpretation depth.
 
-\subsection{Semantic Change Example: Serializability}
+\subsection{Semantic change (forward reference)}
 \label{sec:txn-semantic-change}
 
-We now revisit Example~\ref{ex:example} to illustrate how interpretation
-provenance supports reasoning about \emph{semantic change} in transactional
-systems.
-
-\paragraph{Possible outcomes and incompatibility.}
-Under serializability, the history in Example~\ref{ex:example} admits multiple
-admissible outcomes.
-In particular, tuple $d$ may or may not appear in the result of $Q$, depending on
-how the insert and delete transactions are ordered relative to the query.
-
-These outcomes are mutually incompatible.
-No single serial execution can both include and exclude $d$ from the result.
-Thus, as in the case of negation semantics, the specification admits multiple
-distinct admissible semantic outcomes (possible worlds).
-
-\paragraph{Resolving interpretations.}
-As discussed in the example, we focus on interpretations in which the query
-transaction $T_Q$ is the final transaction in the serialization, so that it
-observes a complete database state.
-
-Two resolving interpretations suffice:
-\[
-I_{\mathsf{in}}
-\;\triangleq\;
-\prec(T_4, T_Q) \;\wedge\; \prec(T_Q, T_5),
-\qquad
-I_{\mathsf{out}}
-\;\triangleq\;
-\prec(T_5, T_Q).
-\]
-Under $I_{\mathsf{in}}$, the insert of $d$ is visible to $T_Q$ and the delete is
-not; under $I_{\mathsf{out}}$, the delete precedes the query and $d$ is absent.
-
-These interpretations correspond to distinct admissible serializations of the
-same concurrent history and are mutually incompatible. As in the case of negation semantics (Section~\ref{sec:negation}), interpretation
-here does not refine explanations within a fixed outcome, but determines which
-admissible outcome is being explained.
-
-\paragraph{Interpretation provenance under serializability.}
-Fixing an interpretation resolves the ambiguity and yields a depth--0 setting.
-
-For tuples $b$, and $c$, the result is invariant:
-\[
-\Prov_{Q \mid I}(b) = x_1 + x_2,
-\qquad
-\Prov_{Q \mid I}(c) = x_3,
-\]
-for both $I_{\mathsf{in}}$ and $I_{\mathsf{out}}$.
-Accordingly, $\mathsf{IP}_Q(b) \triangleq (I,\, \Prov_{Q \mid I}(b))$ and similarly for $c$.
-
-Tuple $d$ is semantically contingent.
-Under $I_{\mathsf{in}}$, the classical provenance question is \emph{why} $d$:
-\[
-\Prov_{Q \mid I_{\mathsf{in}}}(d) = x_4,
-\qquad
-\mathsf{IP}_Q(d) \triangleq (I_{\mathsf{in}},\, x_4).
-\]
-Under $I_{\mathsf{out}}$, $d$ is absent, and the appropriate classical question is
-\emph{why-not} $d$, explained by the ordering commitment $\prec(T_5, T_Q)$.
-There is no single classical provenance question for $d$ prior to fixing an
-interpretation.
-
-\paragraph{Semantic change.}
-Interpretation provenance also supports reassessing conclusions under a change in
-semantic assumptions.
-For example, a result materialized under interpretation $I_{\mathsf{in}}$ can be
-checked for validity under $I_{\mathsf{out}}$ by testing whether its interpretation
-provenance remains satisfied.
-In this example, conclusions about $b$ and $c$ persist, while conclusions
-about $d$ do not.
-
-This reassessment does not require recomputation of derivations.
-It depends only on whether the semantic commitments recorded in the interpretation
-provenance are compatible with the new interpretation.
-Section~\ref{sec:robustness} generalizes this notion of semantic change and
-robustness across families of interpretations.
+Semantic change in transactional settings is a cross-spec question; see
+Section~\ref{sec:robustness} and Appendix~\ref{sec:appendix-concurrency}.
 
 \subsection{Interpretation Structure}
 
@@ -1288,11 +1115,12 @@ refined or relaxed.
 Classical provenance is tied to a fixed semantics and therefore offers limited
 support for reasoning across such changes.
 
-In the interpretation framework, a change in semantics is naturally modeled as a
-change in the resolving interpretation.
-Let $\Spec$ be a fixed ambiguous specification, and let $I$ and $I'$ be two
-resolving interpretations representing different semantic choices—for example,
-different isolation levels, policy constraints, or negation semantics.
+In the interpretation framework (Section~\ref{sec:robustness}), semantic change is explicitly cross-spec: it
+compares conclusions obtained under different semantic regimes.
+We model such regimes via conditioning on (potentially different) resolving
+interpretations.
+Let $\Spec$ be an ambiguous specification, and let $I$ and $I'$ be two resolving
+interpretations representing different semantic choices.
 
 Interpretation provenance allows us to ask whether a conclusion $c$ is preserved
 under semantic change:
@@ -1312,7 +1140,7 @@ derivational structure within a single resolved semantics.
 
 \subsection{Robustness Across Interpretations}
 
-Semantic change compares two specific interpretations.
+Cross-spec semantic change compares two specific resolving interpretations.
 A stronger notion is \emph{robustness}: whether a conclusion holds across an entire
 family of admissible interpretations.
 
@@ -1808,9 +1636,66 @@ The cycle atoms exhibit genuinely interpretation-dependent conclusions; e.g.,
 Thus, in the stable setting, interpretation provenance must account explicitly for
 which \emph{resolved interpretation} was selected.
 
+\subsubsection{Semantic change example: negation semantics}
+
+This example is a concrete instance of cross-spec semantic change in the sense of
+Section~\ref{sec:robustness}: holding the program and extensional history fixed,
+different negation semantics induce different resolving interpretations, and thus
+different conditioned outcomes.
+
+\paragraph{Program and instance.}
+Consider the program $P$, consisting of a stratified fragment defining $p(c)$,
+and a negation cycle between $q(c)$ and $r(c)$:
+\[
+\begin{array}{l}
+p(c) \;\drule\; a(c).\\
+q(c) \;\drule\; \neg r(c).\\
+r(c) \;\drule\; \neg q(c).
+\end{array}
+\]
+with extensional instance $H = \{a(c)\}$.
+
+\paragraph{Well-founded semantics.}
+Under well-founded semantics, the negation cycle is unresolved.
+The unique resolving interpretation commits:
+\[
+I_{\mathrm{wfs}}
+\;\triangleq\;
+\varphi_{p(c)=\mathbf{t}}
+\;\wedge\;
+\varphi_{q(c)=\mathbf{u}}
+\;\wedge\;
+\varphi_{r(c)=\mathbf{u}} .
+\]
+(These $\varphi$ are interpretive predicates at the meta-level: they constrain the
+admissible outcomes induced by the program and history, rather than denoting
+object-language Datalog atoms.)
+Over $\Spec \mid I_{\mathrm{wfs}}$, $p(c)$ is true, while $q(c)$ and $r(c)$ are undefined.
+
+\paragraph{Stable model semantics.}
+Under stable model semantics, the same program admits two resolving interpretations:
+\[
+I^{(q)}_{\mathrm{stab}}
+\;\triangleq\;
+\varphi_{p(c)=\mathbf{t}}
+\wedge \varphi_{q(c)=\mathbf{t}}
+\wedge \varphi_{r(c)=\mathbf{f}},
+\qquad
+I^{(r)}_{\mathrm{stab}}
+\;\triangleq\;
+\varphi_{p(c)=\mathbf{t}}
+\wedge \varphi_{r(c)=\mathbf{t}}
+\wedge \varphi_{q(c)=\mathbf{f}} .
+\]
+
+These resolving interpretations are mutually incompatible conditionings of the
+same underlying program and history.
+In particular, $p(c)$ persists under both conditionings, while $q(c)$ and $r(c)$
+depend on which resolving interpretation is assumed.
+
 \subsubsection{Certificates and Semantic-Change Queries}
 
-This appendix has emphasized certificates sufficient to support derivational provenance once an interpretation is fixed. To see how provenance query families enlarge certificate requirements (Section~\ref{sec:certificates}), consider the negation-cycle program used in the semantic-change discussion:
+This appendix has emphasized certificates sufficient to support derivational provenance once an interpretation is fixed. To see how provenance query families enlarge certificate requirements (Section~\ref{sec:certificates}), consider the negation-cycle program used in the semantic-change examples:
 \[
   q(c) \;\drule\; \neg r(c).\qquad
   r(c) \;\drule\; \neg q(c).

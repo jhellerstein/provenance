@@ -1089,6 +1089,18 @@ provenance to settings where correctness admits multiple valid executions.
 \label{sec:robustness}
 % ================================================================
 
+Throughout the paper we consider two distinct kinds of semantic questions.
+\emph{Intra-spec} questions range over resolving interpretations of a fixed specification,
+asking which conclusions are stable, contingent, or explainable under different resolutions of ambiguity.
+\emph{Cross-spec} questions compare conclusions across different specifications,
+asking whether results persist under semantic change.
+Intra-spec questions ask “what holds under different resolutions of the same semantics,”
+whereas cross-spec questions ask “what survives when the semantics themselves change.”
+Although both are analyzed using interpretation provenance, they quantify over different spaces and should
+not be conflated.
+
+We write robustness queries as quantification over resolving interpretations $I$ of a fixed $\Spec$, and semantic-change queries as comparisons across distinct specifications $\Spec$ and $\Spec'$.
+
 Interpretation provenance equips us with a semantic vocabulary that was previously
 unavailable: it makes explicit not only derivations, but the semantic commitments
 under which those derivations are valid.
@@ -1637,6 +1649,8 @@ Thus, in the stable setting, interpretation provenance must account explicitly f
 which \emph{resolved interpretation} was selected.
 
 \subsubsection{Semantic change example: negation semantics}
+
+This example compares outcomes across specifications, not across interpretations of a single fixed specification.
 
 This example is a concrete instance of cross-spec semantic change in the sense of
 Section~\ref{sec:robustness}: holding the program and extensional history fixed,

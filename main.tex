@@ -367,8 +367,6 @@ An \emph{interpretation} is a finite conjunction
   I = \varphi_1 \wedge \cdots \wedge \varphi_m
 \]
 of interpretive predicates, where $\wedge$ denotes sequential refinement.
-Throughout the paper, interpretation provenance is expressed by conditioning
-semantic objects on an interpretation; no algebraic structure is imposed prior to conditioning.
 \end{definition}
 
 Refinement by an interpretation is defined by sequential application:
@@ -644,10 +642,22 @@ queries under transactional ambiguity.
 \subsection{Summary}
 
 Layer certificates provide a principled interface between semantic resolution and
-provenance analysis.
-By parameterizing certificates by provenance query families, interpretation
-provenance makes explicit which semantic distinctions must be retained—and why—
-when supporting explanation, robustness, or semantic change.
+provenance.
+By parameterizing certificates by families of provenance queries,
+interpretation provenance makes explicit which semantic distinctions must be
+retained—and which can be discarded—when supporting explanation, robustness, or
+semantic change.
+
+This perspective also clarifies a familiar pattern in systems lineage and
+observability.
+Tracing systems such as Dapper typically retain worst-case information in order to
+support arbitrary downstream diagnostic queries, effectively treating all
+semantic distinctions as potentially relevant~\cite{sigelman2010dapper}.
+In our framework, this corresponds to choosing certificate families large enough
+to preserve all future provenance queries.
+Interpretation provenance exposes this tradeoff explicitly and provides a semantic
+basis for more parsimonious lineage when the intended query family is known.
+We illustrate this connection in Appendix~\ref{app:systems-lineage}.
 
 % ================================================================
 \section{Sandbox I: Datalog with Negation}
@@ -870,6 +880,12 @@ Their provenance depends on commitments that are:
 (ii) mutually exclusive under stable semantics.
 
 Interpretation provenance makes this dependence explicit.
+
+\subsubsection{Certificates for Robustness Queries}
+
+In this example, a certificate sufficient for classical why/why-not provenance of $d$ \emph{under a fixed serialization} can be as small as the relevant ordering commitments (i.e., the resolving interpretation assumed by the system, such as $I_{\mathsf{in}}$ or $I_{\mathsf{out}}$). Conditioned on that fixed interpretation, $d$ is either present (with why-provenance witness $x_4$) or absent (with a why-not explanation tied to the same fixed commitments).
+
+By contrast, the robustness query “Does $d$ appear under all serializable executions?” cannot be answered from a certificate that records only one chosen order. To support robustness, the certificate must preserve the fact that the history does \emph{not} impose a total order between the insert $T_4$ and delete $T_5$ relative to $T_Q$, so that both $I_{\mathsf{in}}$ and $I_{\mathsf{out}}$ remain feasible prior to resolution. This is directly analogous to the negation-cycle case in Appendix~\ref{sec:appendix-datalog} and illustrates the same query-family effect discussed in Section~\ref{sec:certificates}.
 The absence of $q$ under well-founded semantics is not a failure of derivation,
 but the consequence of a different interpretation regime.
 Likewise, the presence of $q$ under one stable model is incompatible with its
@@ -1674,6 +1690,17 @@ The cycle atoms exhibit genuinely interpretation-dependent conclusions; e.g.,
 \]
 Thus, in the stable setting, interpretation provenance must account explicitly for
 which \emph{resolved interpretation} was selected.
+
+\subsubsection{Certificates and Semantic-Change Queries}
+
+This appendix has emphasized certificates sufficient to support derivational provenance once an interpretation is fixed. To see how provenance query families enlarge certificate requirements (Section~\ref{sec:certificates}), consider the negation-cycle program used in the semantic-change discussion:
+\[
+  q \;\drule\; \neg r.\qquad
+  r \;\drule\; \neg q.
+\]
+Under a fixed resolving interpretation (e.g., committing $p=\mathbf{t}$ in the surrounding example), a minimal certificate sufficient for the derivational provenance of $p$ need only preserve the commitments that make $p$ well-defined (and hence justify $k_p=\Prov(a)$). However, answering a semantic-change query such as “Would $q$ become true under stable-model semantics?” requires a strictly larger certificate: it must preserve the \emph{unresolved negation structure} of the cycle (the mutual negative dependency between $q$ and $r$), not merely the resolved truth assignments under one semantics.
+
+This is an instance of Theorem~6.1 (Query Monotonicity): supporting a richer query (semantic change across semantics/interpretations) can only increase the information a certificate must retain.
 
 % ================================================================
 \section{Appendix: Interpretation Provenance for Systems Lineage}

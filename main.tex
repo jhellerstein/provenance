@@ -696,16 +696,17 @@ whether an atom holds may depend on whether some other atom does not hold, and
 vice versa.
 
 \paragraph{Running example.}
-Consider the following program $P$ over EDB facts in a history $H$:
+Consider the following program $P$ over EDB facts in a history $H$.
+For notational economy we use a fixed constant $c$ and take all predicates unary, so the EDB fact is $a(c)$ and the derived atoms are $p(c),q(c),r(c),s(c)$.
 \begin{align*}
-  p &\leftarrow a.\\
-  q &\leftarrow \neg p.\\[1mm]
-  r &\leftarrow \neg s.\\
-  s &\leftarrow \neg r.
+  p(c) &\leftarrow a(c).\\
+  q(c) &\leftarrow \neg p(c).\\[1mm]
+  r(c) &\leftarrow \neg s(c).\\
+  s(c) &\leftarrow \neg r(c).
 \end{align*}
-Assume $H$ contains the single extensional fact $a$.
+Assume $H$ contains the single extensional fact $a(c)$.
 The pair $(P,H)$ contains both a stratified fragment
-($q$ depends negatively on $p$, and $p$ depends positively on $a$)
+($q(c)$ depends negatively on $p(c)$, and $p(c)$ depends positively on $a(c)$)
 and a cycle through negation ($r \leftrightarrow \neg s$).
 We use this single instance to exhibit, side-by-side, three distinct structures
 of interpretation provenance.
@@ -739,11 +740,11 @@ through negation.
 It restricts attention to a class of specifications for which negation can be
 interpreted by a stratum order.
 
-For the stratified fragment of our example, $p$ lies in a lower stratum (derived
-from EDB), and $q$ lies in a higher stratum (depending on $\neg p$).
+For the stratified fragment of our example, $p(c)$ lies in a lower stratum (derived
+from EDB), and $q(c)$ lies in a higher stratum (depending on $\neg p(c)$).
 The key semantic issue is not computing a fixpoint per se, but committing that
 the lower stratum has \emph{stabilized}—i.e., that no additional lower-stratum
-consequences remain that could change the truth of $p$.
+consequences remain that could change the truth of $p(c)$.
 In incremental or distributed settings, this stabilization is a genuine semantic
 commitment: the possibility of late-arriving facts creates ambiguity about
 whether negation is safe to apply.
@@ -773,7 +774,7 @@ The staged prefix remains ($\varphi_{\mathrm{stab}(p)} \rightarrow \varphi_{\mat
 When a program is stratifiable, stratified, well-founded, and stable semantics
 coincide in the sense that they yield the same resolved two-valued outcome.
 In our running example, restricting attention to the stratified fragment
-$\{p \leftarrow a.\;,\; q \leftarrow \neg p.\}$ eliminates the negation cycle and
+$\{p(c) \leftarrow a(c).\;\,\; q(c) \leftarrow \neg p(c).\}$ eliminates the negation cycle and
 recovers this coincidence.
 
 From the perspective of interpretation provenance, this reflects the absence of
@@ -801,16 +802,16 @@ We illustrate semantic change with a concrete Datalog program whose conclusions
 depend on how negation is resolved.
 
 \paragraph{Program and instance.}
-Consider the program $P$, consisting of a stratified fragment defining $p$, 
-and a negation cycle between $q$ and $r$:
+Consider the program $P$, consisting of a stratified fragment defining $p(c)$, 
+and a negation cycle between $q(c)$ and $r(c)$:
 \[
 \begin{array}{l}
-p \;\drule\; a.\\
-q \;\drule\; \neg r.\\
-r \;\drule\; \neg q.
+p(c) \;\drule\; a(c).\\
+q(c) \;\drule\; \neg r(c).\\
+r(c) \;\drule\; \neg q(c).
 \end{array}
 \]
-with extensional instance $H = \{a\}$.
+with extensional instance $H = \{a(c)\}$.
 
 
 \paragraph{Well-founded semantics.}
@@ -819,21 +820,21 @@ The unique resolving interpretation commits:
 \[
 I_{\mathrm{wfs}}
 \;\triangleq\;
-\varphi_{p=\mathbf{t}}
+\varphi_{p(c)=\mathbf{t}}
 \;\wedge\;
-\varphi_{q=\mathbf{u}}
+\varphi_{q(c)=\mathbf{u}}
 \;\wedge\;
-\varphi_{r=\mathbf{u}} .
+\varphi_{r(c)=\mathbf{u}} .
 \]
-Over $\Spec \mid I_{\mathrm{wfs}}$, $p$ is true, while $q$ and $r$ are undefined.
+Over $\Spec \mid I_{\mathrm{wfs}}$, $p(c)$ is true, while $q(c)$ and $r(c)$ are undefined.
 
 Under $I_{\mathrm{wfs}}$, interpretation provenance records:
 \[
-\mathsf{IP}(p) \triangleq (I_{\mathrm{wfs}},\, \Prov(a)),
+\mathsf{IP}(p(c)) \triangleq (I_{\mathrm{wfs}},\, \Prov(a(c))),
 \qquad
-\mathsf{IP}(q) \text{ undefined},
+\mathsf{IP}(q(c)) \text{ undefined},
 \qquad
-\mathsf{IP}(r) \text{ undefined}.
+\mathsf{IP}(r(c)) \text{ undefined}.
 \]
 
 \paragraph{Stable model semantics.}
@@ -841,15 +842,15 @@ Under stable model semantics, the same program admits two resolving interpretati
 \[
 I^{(q)}_{\mathrm{stab}}
 \;\triangleq\;
-\varphi_{p=\mathbf{t}}
-\wedge \varphi_{q=\mathbf{t}}
-\wedge \varphi_{r=\mathbf{f}},
+\varphi_{p(c)=\mathbf{t}}
+\wedge \varphi_{q(c)=\mathbf{t}}
+\wedge \varphi_{r(c)=\mathbf{f}},
 \qquad
 I^{(r)}_{\mathrm{stab}}
 \;\triangleq\;
-\varphi_{p=\mathbf{t}}
-\wedge \varphi_{r=\mathbf{t}}
-\wedge \varphi_{q=\mathbf{f}} .
+\varphi_{p(c)=\mathbf{t}}
+\wedge \varphi_{r(c)=\mathbf{t}}
+\wedge \varphi_{q(c)=\mathbf{f}} .
 \]
 
 In classical data provenance, the semantic outcome is fixed in advance, and
@@ -863,26 +864,26 @@ Interpretation therefore does not merely refine a world, it describes
 \emph{which} world was chosen from a space of admissible worlds. In this example, interpretation provenance would record one of the following, depending on which stable model
 was chosen:
 \[
-\mathsf{IP}(q) \triangleq (I^{(q)}_{\mathrm{stab}},\, 1),
+\mathsf{IP}(q(c)) \triangleq (I^{(q)}_{\mathrm{stab}},\, 1),
 \qquad
-\mathsf{IP}(r) \triangleq (I^{(r)}_{\mathrm{stab}},\, 1).
+\mathsf{IP}(r(c)) \triangleq (I^{(r)}_{\mathrm{stab}},\, 1).
 \]
 
 
 
 \paragraph{Robustness and contingency.}
-Fact $p$ is \emph{robust}: it holds in every admissible semantic world under both
+Fact $p(c)$ is \emph{robust}: it holds in every admissible semantic world under both
 well-founded and stable semantics.
-By contrast, $q$ and $r$ are \emph{semantically contingent}: each holds in some
+By contrast, $q(c)$ and $r(c)$ are \emph{semantically contingent}: each holds in some
 admissible worlds but not others.
 Their provenance depends on commitments that are:
 (i) unavailable under well-founded semantics, and
 (ii) mutually exclusive under stable semantics.
 
 Interpretation provenance makes this dependence explicit.
-The absence of $q$ under well-founded semantics is not a failure of derivation,
+The absence of $q(c)$ under well-founded semantics is not a failure of derivation,
 but the consequence of a different interpretation regime.
-Likewise, the presence of $q$ under one stable model is incompatible with its
+Likewise, the presence of $q(c)$ under one stable model is incompatible with its
 presence under the other.
 
 \paragraph{Reassessment under semantic change.}
@@ -891,8 +892,8 @@ semantic regime when another is adopted.
 For example, a result derived under stable model semantics may be reconsidered
 under well-founded semantics by checking whether its interpretation provenance
 remains satisfied.
-In this example, conclusions about $q$ or $r$ derived under a stable interpretation
-have no counterpart under $I_{\mathrm{wfs}}$, while $p$ remains valid.
+In this example, conclusions about $q(c)$ or $r(c)$ derived under a stable interpretation
+have no counterpart under $I_{\mathrm{wfs}}$, while $p(c)$ remains valid.
 Section~\ref{sec:robustness} develops this notion of semantic change more systematically.
 
 \vspace{1em}
@@ -1578,17 +1579,17 @@ The interpretive predicate dependency is strict:
 The negation commitment cannot be applied until stabilization of the lower stratum
 has been resolved.
 
-Over the resolved specification $\Spec \mid I_{\mathrm{strat}}$, $p$ is derived
-from $a$ and has ordinary derivation provenance
-$k_p \triangleq \Prov(a)$.
+Over the resolved specification $\Spec \mid I_{\mathrm{strat}}$, $p(c)$ is derived
+from $a(c)$ and has ordinary derivation provenance
+$k_p \triangleq \Prov(a(c))$.
 Interpretation provenance records that this derivation is justified under the
 stabilization-and-negation commitments:
 \[
-  \mathsf{IP}(p) \;\triangleq\; (I_{\mathrm{strat}},\, k_p) .
+  \mathsf{IP}(p(c)) \;\triangleq\; (I_{\mathrm{strat}},\, k_p) .
 \]
 
-In contrast, $q$ is determined only after $\varphi_{\mathrm{stab}(p)}$ is in
-force; under our $H$ with $a$, $q$ does not hold under stratified semantics.
+In contrast, $q(c)$ is determined only after $\varphi_{\mathrm{stab}(p)}$ is in
+force; under our $H$ with $a(c)$, $q(c)$ does not hold under stratified semantics.
 
 \subsubsection{Well-founded semantics: explicit interpretation provenance}
 
@@ -1598,7 +1599,7 @@ before:
   \varphi_{\mathrm{stab}(p)} \;\rightarrow\; \varphi_{\mathrm{neg}(q)}.
 \]
 Beyond this prefix, the remaining atoms participate in a negation cycle.
-Neither $r$ nor $s$ is justified without circular reasoning, so WFS commits both
+Neither $r(c)$ nor $s(c)$ is justified without circular reasoning, so WFS commits both
 to \emph{undefined}.
 
 \paragraph{Interpretation provenance (example).}
@@ -1607,8 +1608,8 @@ true/false/undefined.
 A resolving interpretation for $(P,H)$ under WFS can be written schematically as
 \[
   I_{\mathrm{wfs}} \;\triangleq\;
-  \varphi_{p=\mathbf{t}} \wedge \varphi_{q=\mathbf{f}}
-  \wedge \varphi_{r=\mathbf{u}} \wedge \varphi_{s=\mathbf{u}} .
+  \varphi_{p(c)=\mathbf{t}} \wedge \varphi_{q(c)=\mathbf{f}}
+  \wedge \varphi_{r(c)=\mathbf{u}} \wedge \varphi_{s(c)=\mathbf{u}} .
 \]
 
 The interpretive predicate dependency graph therefore consists of a stratified
@@ -1616,7 +1617,7 @@ prefix followed by a cycle:
 \[
   \varphi_{\mathrm{stab}(p)} \;\rightarrow\; \varphi_{\mathrm{neg}(q)}
   \qquad\text{and}\qquad
-  \varphi_{r=\mathbf{u}} \;\leftrightarrow\; \varphi_{s=\mathbf{u}} .
+  \varphi_{r(c)=\mathbf{u}} \;\leftrightarrow\; \varphi_{s(c)=\mathbf{u}} .
 \]
 The cycle admits no precedence ordering.
 Well-founded semantics resolves it deterministically by committing \emph{both}
@@ -1624,15 +1625,15 @@ atoms to $\mathbf{u}$.
 
 Over $\Spec \mid I_{\mathrm{wfs}}$, derivational provenance is depth--0; in
 particular $p$ again has
-$k_p \triangleq \Prov(a)$.
+$k_p \triangleq \Prov(a(c))$.
 Interpretation provenance records the semantic commitments required for that
 derivation:
 \[
-  \mathsf{IP}(p) \;\triangleq\; (I_{\mathrm{wfs}},\, k_p) .
+  \mathsf{IP}(p(c)) \;\triangleq\; (I_{\mathrm{wfs}},\, k_p) .
 \]
 
 The distinctive feature is that $I_{\mathrm{wfs}}$ resolves the negation cycle
-without making a two-valued choice: it commits explicitly to leaving $r$ and $s$
+without making a two-valued choice: it commits explicitly to leaving $r(c)$ and $s(c)$
 undefined.
 
 \subsubsection{Stable semantics: explicit interpretation provenance}
@@ -1643,9 +1644,9 @@ As before, the stratified fragment induces the same prefix dependencies:
 \]
 Beyond this prefix, the negation cycle admits multiple two-valued resolutions.
 
-For our example with $a$, the stratified fragment forces $p$ true and $q$ false,
-while the cycle admits two stable outcomes: one with $r$ true and $s$ false, and
-one with $s$ true and $r$ false.
+For our example with $a(c)$, the stratified fragment forces $p(c)$ true and $q(c)$ false,
+while the cycle admits two stable outcomes: one with $r(c)$ true and $s(c)$ false, and
+one with $s(c)$ true and $r(c)$ false.
 
 \paragraph{Interpretation provenance (example).}
 Accordingly, stable semantics yields multiple resolving interpretations for the
@@ -1653,40 +1654,40 @@ same $(P,H)$.
 Write
 \[
   I_{\mathrm{stab}}^{(r)} \triangleq
-  \varphi_{p=\mathbf{t}} \wedge \varphi_{q=\mathbf{f}}
-  \wedge \varphi_{r=\mathbf{t}} \wedge \varphi_{s=\mathbf{f}}
+  \varphi_{p(c)=\mathbf{t}} \wedge \varphi_{q(c)=\mathbf{f}}
+  \wedge \varphi_{r(c)=\mathbf{t}} \wedge \varphi_{s(c)=\mathbf{f}}
 \]
 and
 \[
   I_{\mathrm{stab}}^{(s)} \triangleq
-  \varphi_{p=\mathbf{t}} \wedge \varphi_{q=\mathbf{f}}
-  \wedge \varphi_{s=\mathbf{t}} \wedge \varphi_{r=\mathbf{f}} .
+  \varphi_{p(c)=\mathbf{t}} \wedge \varphi_{q(c)=\mathbf{f}}
+  \wedge \varphi_{s(c)=\mathbf{t}} \wedge \varphi_{r(c)=\mathbf{f}} .
 \]
 
 The dependency structure is therefore:
 \[
   \varphi_{\mathrm{stab}(p)} \;\rightarrow\; \varphi_{\mathrm{neg}(q)},
   \qquad
-  \varphi_{r=\mathbf{t}} \;\leftrightarrow\; \varphi_{s=\mathbf{f}},
+  \varphi_{r(c)=\mathbf{t}} \;\leftrightarrow\; \varphi_{s(c)=\mathbf{f}},
   \qquad
-  \varphi_{s=\mathbf{t}} \;\leftrightarrow\; \varphi_{r=\mathbf{f}} .
+  \varphi_{s(c)=\mathbf{t}} \;\leftrightarrow\; \varphi_{r(c)=\mathbf{f}} .
 \]
 Unlike WFS, stable semantics does not prescribe a unique resolution of the cycle;
 each choice yields a distinct resolved interpretation.
 
 Within either resolved outcome, derivational provenance is ordinary:
-$p$ again has $k_p \triangleq \Prov(a)$, so
+$p(c)$ again has $k_p \triangleq \Prov(a(c))$, so
 \[
-  \mathsf{IP}(p) \;\triangleq\; (I_{\mathrm{stab}}^{(r)},\, k_p)
+  \mathsf{IP}(p(c)) \;\triangleq\; (I_{\mathrm{stab}}^{(r)},\, k_p)
   \quad\text{or}\quad
-  \mathsf{IP}(p) \;\triangleq\; (I_{\mathrm{stab}}^{(s)},\, k_p) ,
+  \mathsf{IP}(p(c)) \;\triangleq\; (I_{\mathrm{stab}}^{(s)},\, k_p) ,
 \]
 depending on which stable interpretation is assumed.
 The cycle atoms exhibit genuinely interpretation-dependent conclusions; e.g.,
 \[
-  \mathsf{IP}(r) \;\triangleq\; (I_{\mathrm{stab}}^{(r)},\, 1)
+  \mathsf{IP}(r(c)) \;\triangleq\; (I_{\mathrm{stab}}^{(r)},\, 1)
   \qquad\text{and}\qquad
-  \mathsf{IP}(s) \;\triangleq\; (I_{\mathrm{stab}}^{(s)},\, 1) .
+  \mathsf{IP}(s(c)) \;\triangleq\; (I_{\mathrm{stab}}^{(s)},\, 1) .
 \]
 Thus, in the stable setting, interpretation provenance must account explicitly for
 which \emph{resolved interpretation} was selected.
@@ -1695,10 +1696,10 @@ which \emph{resolved interpretation} was selected.
 
 This appendix has emphasized certificates sufficient to support derivational provenance once an interpretation is fixed. To see how provenance query families enlarge certificate requirements (Section~\ref{sec:certificates}), consider the negation-cycle program used in the semantic-change discussion:
 \[
-  q \;\drule\; \neg r.\qquad
-  r \;\drule\; \neg q.
+  q(c) \;\drule\; \neg r(c).\qquad
+  r(c) \;\drule\; \neg q(c).
 \]
-Under a fixed resolving interpretation (e.g., committing $p=\mathbf{t}$ in the surrounding example), a minimal certificate sufficient for the derivational provenance of $p$ need only preserve the commitments that make $p$ well-defined (and hence justify $k_p=\Prov(a)$). However, answering a semantic-change query such as “Would $q$ become true under stable-model semantics?” requires a \emph{strictly stronger} certificate: it must preserve the \emph{unresolved negation structure} of the cycle (the mutual negative dependency between $q$ and $r$), not merely the resolved truth assignments under one semantics.
+Under a fixed resolving interpretation (e.g., committing $p(c)=\mathbf{t}$ in the surrounding example), a minimal certificate sufficient for the derivational provenance of $p(c)$ need only preserve the commitments that make $p(c)$ well-defined (and hence justify $k_p=\Prov(a(c))$). However, answering a semantic-change query such as “Would $q(c)$ become true under stable-model semantics?” requires a \emph{strictly stronger} certificate: it must preserve the \emph{unresolved negation structure} of the cycle (the mutual negative dependency between $q(c)$ and $r(c)$), not merely the resolved truth assignments under one semantics.
 
 This is an instance of Theorem~6.1 (Query Monotonicity): supporting a richer query (semantic change across semantics/interpretations) can only increase the information a certificate must retain. This illustrates the query-parametric notion of certificate sufficiency formalized in Section~\ref{sec:certificates}.
 

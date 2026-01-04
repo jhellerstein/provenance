@@ -491,7 +491,7 @@ Each interpretation provenance value is indexed by a \emph{single} resolving
 interpretation.
 We do not form disjunctions over interpretations inside provenance values.
 Questions about variation across interpretations—such as robustness,
-invariance, or sensitivity to cross-spec semantic change—are treated explicitly and
+invariance, or sensitivity to inter-specification semantic change—are treated explicitly and
 separately in Section~\ref{sec:robustness}.
 
 This design choice is intentional.
@@ -604,7 +604,7 @@ where $A$ is an answer domain (e.g., Boolean, explanations, or dependency sets).
 \end{definition}
 
 Examples include robustness queries (“does $t$ hold under all interpretations in a
-class?”), cross-spec semantic-change queries (Section~\ref{sec:robustness}), and
+class?”), inter-specification semantic-change queries (Section~\ref{sec:robustness}), and
 conditional why/why-not queries.
 
 \paragraph{Sufficiency for continuation and queries.}
@@ -647,7 +647,7 @@ Thus, extending the space of provenance questions can only require retaining
 additional semantic information, never less.
 
 Concrete illustrations of this phenomenon appear in the appendices.
-Appendix~\ref{sec:appendix-datalog} shows how cross-spec semantic-change queries
+Appendix~\ref{sec:appendix-datalog} shows how inter-specification semantic-change queries
 (Section~\ref{sec:robustness}) for negation semantics enlarge certificates beyond
 those needed for derivational provenance.
 Appendix~\ref{sec:appendix-concurrency} shows the analogous effect for robustness
@@ -660,7 +660,7 @@ provenance.
 By parameterizing certificates by families of provenance queries,
 interpretation provenance makes explicit which semantic distinctions must be
 retained—and which can be discarded—when supporting explanation, robustness, or
-cross-spec semantic change (Section~\ref{sec:robustness}).
+inter-specification semantic change (Section~\ref{sec:robustness}).
 
 This perspective also clarifies a familiar pattern in systems lineage and
 observability.
@@ -913,7 +913,7 @@ of semantic ambiguity.
 Appendix~\ref{sec:appendix-datalog} gives the explicit interpretations, dependency graphs, and provenance values.
 
 \paragraph{Semantic change (forward reference).}
-Semantic change is a cross-spec question; see Section~\ref{sec:robustness}.
+Semantic change is an inter-specification question; see Section~\ref{sec:robustness}.
 A worked semantic-change analysis appears in Appendix~\ref{sec:appendix-datalog}.
 
 The next sandbox mirrors these interpretation shapes, but with ambiguity arising
@@ -1016,7 +1016,7 @@ and interpretation depth.
 \subsection{Semantic change (forward reference)}
 \label{sec:txn-semantic-change}
 
-Semantic change in transactional settings is a cross-spec question; see
+Semantic change in transactional settings is an inter-specification question; see
 Section~\ref{sec:robustness} and Appendix~\ref{sec:appendix-concurrency}.
 
 \subsection{Interpretation Structure}
@@ -1089,35 +1089,58 @@ provenance to settings where correctness admits multiple valid executions.
 \label{sec:robustness}
 % ================================================================
 
-Throughout the paper we consider two distinct kinds of semantic questions.
-\emph{Intra-spec} questions range over resolving interpretations of a fixed specification,
-asking which conclusions are stable, contingent, or explainable under different resolutions of ambiguity.
-\emph{Cross-spec} questions compare conclusions across different specifications,
-asking whether results persist under semantic change.
-Intra-spec questions ask “what holds under different resolutions of the same semantics,”
-whereas cross-spec questions ask “what survives when the semantics themselves change.”
-Although both are analyzed using interpretation provenance, they quantify over different spaces and should
-not be conflated.
-
-We write robustness queries as quantification over resolving interpretations $I$ of a fixed $\Spec$, and semantic-change queries as comparisons across distinct specifications $\Spec$ and $\Spec'$.
-
 Interpretation provenance equips us with a semantic vocabulary that was previously
 unavailable: it makes explicit not only derivations, but the semantic commitments
 under which those derivations are valid.
 With this vocabulary in hand, a new space of provenance questions becomes
 well-posed.
 
-Interpretation provenance also reframes why-not provenance.
-Classical why-not provenance explains absence relative to a fixed semantics.
-Under interpretation provenance, absence may instead be explained by the absence
-of any resolving interpretation that justifies the result, or by the fact that
-only interpretations ruled out by policy or specification choice would admit it.
+\paragraph{Two classes of questions.}
+We distinguish \emph{intra-specification} questions, which vary resolving interpretations $I$ for a fixed $\Spec$,
+from \emph{inter-specification} questions, which compare results across distinct specifications $\Spec$ and $\Spec'$.
+Both are analyzed using interpretation provenance, but they quantify over different dimensions: interpretation choice versus specification change.
+Intuitively, intra-specification questions ask what holds under different resolutions of the same semantics, whereas inter-specification questions ask what survives when the semantics themselves change.
+We use the terms intra-specification and inter-specification throughout this section.
 
-In this section, we map this question space.
-This section maps the provenance question space enabled by interpretation provenance; it does not propose algorithms or completeness results.
-In particular, we focus on questions about change and robustness—how conclusions
-behave as semantic assumptions vary, and which conclusions persist across
-alternative interpretations.
+\paragraph{Provenance checks.}
+Interpretation provenance supports concise schematic constraints for both
+question families.
+
+\emph{Intra-specification (robustness).}
+Fix a specification $\Spec$ and a class $\mathcal{I}$ of resolving interpretations
+of $\Spec$.
+A tuple $t$ is \emph{robust} with respect to $\mathcal{I}$ iff
+\[
+  \forall I \in \mathcal{I}.\; t \in (\Spec \mid I)(H).
+\]
+That is, $t$ is justified under every admissible resolution of the same
+semantic specification.
+
+\emph{Inter-specification (semantic change).}
+Given specifications $\Spec$ and $\Spec'$, a tuple $t$ is \emph{preserved} across
+semantic change iff
+\[
+  \forall I \in \mathcal{I},\; \forall I' \in \mathcal{I}'.\;
+  \bigl(t \in (\Spec \mid I)(H)\bigr) \;\Rightarrow\;
+  \bigl(t \in (\Spec' \mid I')(H)\bigr),
+\]
+where $\mathcal{I}$ and $\mathcal{I}'$ range over the resolving interpretations
+appropriate to $\Spec$ and $\Spec'$, respectively.
+This check compares conclusions across specifications, rather than across
+resolutions of a single specification.
+
+Appendices~\ref{sec:appendix-datalog} and~\ref{sec:appendix-concurrency} instantiate
+both forms of provenance checks on our running examples.
+
+\smallskip
+Interpretation provenance also reframes \emph{why-not} provenance.
+Classical why-not explanations account for absence relative to a fixed semantics.
+Under interpretation provenance, absence may instead be explained by the absence
+of any resolving interpretation that admits the result, or by the fact that only
+interpretations excluded by policy or specification choice would justify it.
+
+We map the provenance question space enabled by interpretation provenance; we do not propose algorithms or completeness results.
+In particular, we focus on intra-specification robustness and inter-specification semantic change.
 
 \subsection{Semantic Change}
 
@@ -1127,21 +1150,11 @@ refined or relaxed.
 Classical provenance is tied to a fixed semantics and therefore offers limited
 support for reasoning across such changes.
 
-In the interpretation framework (Section~\ref{sec:robustness}), semantic change is explicitly cross-spec: it
-compares conclusions obtained under different semantic regimes.
-We model such regimes via conditioning on (potentially different) resolving
-interpretations.
-Let $\Spec$ be an ambiguous specification, and let $I$ and $I'$ be two resolving
-interpretations representing different semantic choices.
+In the interpretation framework, semantic change is an inter-specification question:
+it compares conclusions obtained under different specifications $\Spec$ and $\Spec'$.
+We model the semantic regimes under which each specification is interpreted via conditioning.
 
-Interpretation provenance allows us to ask whether a conclusion $c$ is preserved
-under semantic change:
-\[
-  c \in (\Spec \mid I)(H)
-  \quad\text{and}\quad
-  c \in (\Spec \mid I')(H).
-\]
-When this holds, $c$ is invariant under the change from $I$ to $I'$.
+The corresponding preservation check is given schematically in the provenance-checks paragraph above.
 
 Because interpretation provenance records the semantic commitments under which
 $c$ was derived, it can explain \emph{why} a conclusion fails to persist.
@@ -1152,17 +1165,13 @@ derivational structure within a single resolved semantics.
 
 \subsection{Robustness Across Interpretations}
 
-Cross-spec semantic change compares two specific resolving interpretations.
-A stronger notion is \emph{robustness}: whether a conclusion holds across an entire
-family of admissible interpretations.
+Robustness is an intra-specification question: whether a conclusion holds across an entire
+family of admissible interpretations of a fixed $\Spec$.
 
 Let $\mathcal{I}$ be a class of resolving interpretations for $\Spec$—for example,
 all serializable schedules, all stable models, or all interpretations compatible
 with a given policy envelope.
-We say that a conclusion $c$ is \emph{robust} with respect to $\mathcal{I}$ if
-\[
-  \forall I \in \mathcal{I},\quad c \in (\Spec \mid I)(H).
-\]
+The corresponding quantification over $I \in \mathcal{I}$ is given schematically in the provenance-checks paragraph above.
 
 Interpretation provenance provides a concrete handle on this notion.
 Because provenance values are indexed by interpretations, robustness corresponds
@@ -1510,7 +1519,12 @@ Interpretation provenance makes this dependence explicit.
 
 In this example, a certificate sufficient for classical why/why-not provenance of $d$ \emph{under a fixed serialization} can be as small as the relevant ordering commitments (i.e., the resolving interpretation assumed by the system, such as $I_{\mathsf{in}}$ or $I_{\mathsf{out}}$). Conditioned on that fixed interpretation, $d$ is either present (with why-provenance witness $x_4$) or absent (with a why-not explanation tied to the same fixed commitments).
 
-By contrast, the robustness query “Does $d$ appear under all serializable executions?” requires the \emph{strictly stronger} certificate needed for robustness: it must preserve the fact that the history does \emph{not} impose a total order between the insert $T_4$ and delete $T_5$ relative to $T_Q$, so that both $I_{\mathsf{in}}$ and $I_{\mathsf{out}}$ remain admissible under the specification prior to resolution. This is directly analogous to the negation-cycle case in Appendix~\ref{sec:appendix-datalog} and illustrates the same query-family effect discussed in Section~\ref{sec:certificates}. This illustrates the query-parametric notion of certificate sufficiency formalized in Section~\ref{sec:certificates}.
+By contrast, the robustness query “Does $d$ appear under all serializable executions?” requires the
+\emph{strictly stronger} certificate needed for robustness: it must preserve the fact that the history does
+\emph{not} impose a total order between the insert $T_4$ and delete $T_5$ relative to $T_Q$, so that both
+$I_{\mathsf{in}}$ and $I_{\mathsf{out}}$ remain admissible under the specification prior to resolution. This
+is directly analogous to the negation-cycle case in Appendix~\ref{sec:appendix-datalog} and illustrates the same
+query-family effect discussed in Section~\ref{sec:certificates}.
 
 \subsection{Datalog\texorpdfstring{$^{\neg}$}{ with negation} worked interpretation provenance}
 \label{sec:appendix-datalog}
@@ -1589,8 +1603,8 @@ derivation:
 \]
 
 The distinctive feature is that $I_{\mathrm{wfs}}$ resolves the negation cycle
-without making a two-valued choice: it commits explicitly to leaving $r(c)$ and $s(c)$
-undefined.
+without making a two-valued choice: it commits explicitly to assigning $r(c)$ and $s(c)$
+the value \mathbf{u}.
 
 \subsubsection{Stable semantics: explicit interpretation provenance}
 
@@ -1652,7 +1666,7 @@ which \emph{resolved interpretation} was selected.
 
 This example compares outcomes across specifications, not across interpretations of a single fixed specification.
 
-This example is a concrete instance of cross-spec semantic change in the sense of
+This example is a concrete instance of inter-specification semantic change in the sense of
 Section~\ref{sec:robustness}: holding the program and extensional history fixed,
 different negation semantics induce different resolving interpretations, and thus
 different conditioned outcomes.

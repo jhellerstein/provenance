@@ -931,7 +931,7 @@ but to understand how semantic ambiguity shapes provenance.
 Transactional systems introduce a qualitatively different source of ambiguity
 from negation.
 Here, ambiguity arises from \emph{concurrency}: transactions race to read and write
-shared state, and the execution does not uniquely determine which effects are
+shared state, and the execution may not uniquely determine which effects are
 observed.
 Interpretation provenance explains how query results depend not only on data, but
 on the semantic resolution of that concurrency.
@@ -944,7 +944,11 @@ Transactional systems invalidate this assumption.
 
 Consider a query result tuple $t$ produced by executing a workload of
 transactions.
-There are several distinct provenance questions one might ask: (\emph{Existence}) does $t$ appear under \emph{some} admissible execution; (\emph{Universality}) does $t$ appear under \emph{all} admissible executions; and (\emph{Dependence}) on which semantic choices---such as transaction orderings or visibility decisions---does the presence of $t$ depend?
+There are several distinct provenance questions one might ask: (\emph{Existence})
+does $t$ appear under \emph{some} admissible execution; (\emph{Universality}) does
+$t$ appear under \emph{all}
+admissible executions; and (\emph{Dependence}) on which semantic choices---e.g.,
+transaction orderings or visibility decisions---does the presence of $t$ depend?
 
 These questions are strictly more subtle than asking whether a final database
 state is invariant across executions.
@@ -980,12 +984,12 @@ Under serializability, outcomes are defined via serialization.
 An \emph{outcome} is a final database state produced by some serial execution of
 the transactions.
 An outcome is admissible if there exists a total order of transactions such that
-executing them sequentially in that order produces the observed read values and yields the final state.
+sequential execution in that order yields the same final state and is
+consistent with the history’s ordering constraints.
 
 A single execution history may admit many such outcomes.
 Each corresponds to a different semantic explanation of the same concurrent
 behavior.
-
 At this stage, no explanation is preferred.
 Interpretation is required to select or constrain the admissible outcomes.
 
@@ -1021,46 +1025,45 @@ Section~\ref{sec:robustness} and Appendix~\ref{sec:appendix-concurrency}.
 
 \subsection{Interpretation Structure}
 
-Once an interpretation is fixed---that is, once sufficient ordering commitments
-have been made---query evaluation behaves monotonically.
-Classical semiring provenance applies \emph{within} a fixed serialization.
+Once sufficient ordering commitments have been made, query evaluation is
+monotone and classical semiring provenance applies.
+Interpretation provenance captures the semantic structure that exists
+\emph{before} such commitments are fixed.
 
-Across serializations, however, results are conditional on ordering commitments.
-A tuple's derivation may rely on particular ordering commitments, and the same
-tuple may be justified under multiple admissible serializations.
-This yields an interpretation whose structure reflects the staging of
-transactional commitments.
+We reuse the running example from Section~\ref{sec:intro} and
+Appendix~\ref{sec:appendix-concurrency}, focusing on the contingent tuple $d$
+inserted by $T_4$ and deleted by $T_5$.
 
-\paragraph{Example: provenance of a query transaction.}
-Consider three transactions:
-$T_1$ inserts tuple $(1)$,
-$T_2$ deletes tuple $(1)$,
-and $T_Q$ executes query $Q$ that returns $(1)$ iff it is present.
-
-Under serializability, the history admits multiple serializations.
-Under a fixed serialization (equivalently, under a fixed resolving interpretation), the classical (depth-0) query provenance is:
+Under the resolving interpretation
 \[
-\Prov_Q =
-\begin{cases}
-\mathsf{id}(T_1) & \text{if } T_2 \prec T_1 \prec T_Q,\\
-0                & \text{if } T_1 \prec T_2 \prec T_Q.
-\end{cases}
+  I_{\mathsf{in}} \;\triangleq\;
+  \varphi_{T_4 \prec T_Q} \wedge \varphi_{T_Q \prec T_5},
+\]
+the insert precedes the query and the delete follows it.
+Conditioning on $I_{\mathsf{in}}$ yields a resolved snapshot in which $d$ is
+present, and classical provenance applies:
+\[
+  \Prov_{Q \mid I_{\mathsf{in}}}(d)=x_4.
 \]
 
-Interpretation provenance lifts this to the ambiguous history:
+Under the alternative interpretation
 \[
-I \;\triangleq\; \varphi_{T_2 \prec T_1} \wedge \varphi_{T_1 \prec T_Q},
-\qquad
-\Prov_{Q \mid I}(1)=\mathsf{id}(T_1),
-\qquad
-\mathsf{IP}_Q(1) \triangleq (I,\, \mathsf{id}(T_1)).
+  I_{\mathsf{out}} \;\triangleq\; \varphi_{T_5 \prec T_Q},
+\]
+the delete precedes the query, so $d$ is absent and the appropriate classical
+question is \emph{why-not}.
+
+Prior to fixing an interpretation, there is no single classical provenance
+question for $d$.
+Interpretation provenance makes this dependence explicit by recording the
+semantic commitments under which derivations hold:
+\[
+  \mathsf{IP}_Q(d) \;\triangleq\; (I_{\mathsf{in}},\, x_4).
 \]
 
-In particular, interpretation provenance can distinguish tuples that appear in all admissible serializations, tuples that appear only under specific orderings, and tuples whose derivations depend on irreducible semantic choices.
-
-This structure composes naturally with classical provenance:
-query provenance explains \emph{why} a tuple follows from a given outcome,
-while interpretation provenance explains \emph{under which outcomes} it holds.
+Thus, classical provenance explains \emph{why} a tuple follows from a resolved
+outcome, while interpretation provenance explains \emph{under which semantic
+resolutions} that explanation applies.
 
 \subsection{Beyond Serializability}
 

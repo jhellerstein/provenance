@@ -37,7 +37,7 @@
 % ---------- Notation ----------
 \newcommand{\Hist}{\mathcal{H}}
 \newcommand{\Proc}{\mathcal{P}}
-\newcommand{\Obs}{\mathsf{Obs}}
+%\newcommand{\Obs}{\mathsf{Obs}} % reserved for resolved-observation function names, not the outcome set
 \newcommand{\Spec}{\mathsf{Spec}}
 \newcommand{\Term}{\mathsf{Term}}
 \newcommand{\Ord}{\preceq}
@@ -55,7 +55,7 @@
 \newcommand{\ICost}{\mathsf{ICost}}
 \newcommand{\IDepth}{\mathsf{IDepth}}
 \newcommand{\Atoms}{\mathsf{Atoms}}
-% \newcommand{\Out}{\mathcal{O}} % TODO: legacy macro; prefer \Obs for observable outcomes.
+% \newcommand{\Out}{\mathcal{O}} % legacy; use $O$ for the set of outcomes/observations
 \newcommand{\drule}{\mathrel{:\!-}}
 \newcommand{\Prov}{\mathsf{Prov}}
 % Certificates denote outcome constraints.
@@ -333,9 +333,9 @@ without revising previously observed relationships.
 We interpret $\sqsubseteq$ as information growth, not as time or execution.
 
 \subsection{Observations and Specifications}
-
+Fix a set $O$ of fully specified semantic objects, called \emph{outcomes}.
 \begin{definition}[Observation]
-An \emph{observation} is an element of a set $\Obs$ of fully specified semantic objects.
+An \emph{observation} is an element of a set $O$ of fully specified semantic objects.
 \end{definition}
 
 Observations represent what an observer may conclude once all semantic commitments have
@@ -346,7 +346,7 @@ a logic program, the visible state of an automaton, or a completed task result.
 \begin{definition}[Specification]
 A \emph{specification} is a function
 \[
-  \Spec : \Hist \to 2^{\Obs},
+  \Spec : \Hist \to 2^{O},
 \]
 mapping each history $H \in \Hist$ to a (possibly empty) set of admissible observations.
 \end{definition}
@@ -362,8 +362,8 @@ executions all admit multiple admissible observations for the same history,
 corresponding to different semantic resolutions of underspecified behavior.
 In such settings, semantic questions cannot be posed until ambiguity is constrained
 by interpretation.\footnote{%
-This notion of ambiguity—multiplicity in $\Spec(H) \subseteq \Obs$—is distinct from
-uncertainty represented \emph{within} the observation domain $\Obs$ itself (e.g.,
+This notion of ambiguity—multiplicity in $\Spec(H) \subseteq O$—is distinct from
+uncertainty represented \emph{within} the observation domain $O$ itself (e.g.,
 probabilistic or multi-valued observations).
 Interpretation provenance addresses ambiguity at the level of admissible
 observations.
@@ -381,9 +381,9 @@ preserving feasibility.
 \begin{definition}[Interpretive Predicate (as Outcome Filter)]
 An \emph{interpretive predicate} is a function
 \[
-  \varphi : \Hist \times 2^{\Obs} \to 2^{\Obs}
+  \varphi : \Hist \times 2^{O} \to 2^{O}
 \]
-such that for all histories $H$ and observation sets $S \subseteq \Obs$:
+such that for all histories $H$ and observation sets $S \subseteq O$:
 (\emph{Shrinkage}) $\varphi(H,S) \subseteq S$, and
 (\emph{Feasibility}) if $S \neq \emptyset$ then $\varphi(H,S) \neq \emptyset$.
 \end{definition}
@@ -446,7 +446,7 @@ An interpretation $I$ \emph{resolves} $\Spec$ (i.e., $I$ is \emph{resolving for}
 Resolution is defined pointwise in the history.
 A resolved specification need not produce a single global observation; rather,
 for each history $H$, it determines a unique admissible observation.
-Resolution therefore corresponds to determinism of $\Spec : \Hist \to \Obs$.
+Resolution therefore corresponds to determinism of $\Spec : \Hist \to O$.
 
 \paragraph{Dependency graphs on interpretive predicates.}
 A useful way to make this structure explicit is via a \emph{dependency graph}
@@ -469,20 +469,20 @@ The semantic effect of interpretation has two aspects:
 
 Formally, for a history $H$ write
 \[
-  \Obs_H^I \triangleq (\Spec \mid I)(H).
+  O_H^I \triangleq (\Spec \mid I)(H).
 \]
-We say that two outcomes $o,o' \in \Obs_H^I$ are \emph{equivalent under $I$ at $H$},
+We say that two outcomes $o,o' \in O_H^I$ are \emph{equivalent under $I$ at $H$},
 written $o \sim_{I,H} o'$, if no interpretive predicate in $I$ distinguishes between them at $H$.
 
 \begin{definition}[Interpretation-Induced Quotient]
 For each history $H$, interpretation $I$ induces a quotient
 \[
-  \Obs_H^I \big/ {\sim_{I,H}},
+  O_H^I \big/ {\sim_{I,H}},
 \]
 obtained by identifying admissible outcomes that are equivalent under $I$.
 \end{definition}
 
-The equivalence relation $\sim_{I,H}$ is total on the restricted domain $\Obs_H^I$.
+The equivalence relation $\sim_{I,H}$ is total on the restricted domain $O_H^I$.
 Outcomes ruled out by the interpretation are simply absent from the quotient.
 
 \begin{remark}[History-indexed quotients]
@@ -490,7 +490,7 @@ Because interpretive predicates may depend on the history and on intermediate
 admissible sets, equivalence under an interpretation is defined relative to a
 history.
 Interpretations therefore induce a family of quotients indexed by histories,
-rather than a single global quotient on $\Obs$.
+rather than a single global quotient on $O$.
 \end{remark}
 
 These notions of refinement, restriction, and identification provide the raw
@@ -1184,7 +1184,7 @@ semantic commitments under which those derivations are valid.
 This section formalizes two such families of questions and grounds them in the
 examples developed earlier.
 
-Here, \emph{observations} refer to observable query answers or derived facts (elements of $\Obs$), which correspond to (possibly partial) properties of admissible semantic objects as defined in Section~\ref{sec:prelim}.
+Here, \emph{observations} refer to observable query answers or derived facts—i.e., elements of the outcome set $O$—as defined in Section~\ref{sec:prelim}.
 
 \subsection{Intra- vs.\ Inter-Specification Questions}
 

@@ -37,7 +37,7 @@
 % ---------- Notation ----------
 \newcommand{\Hist}{\mathcal{H}}
 \newcommand{\Proc}{\mathcal{P}}
-%\newcommand{\Obs}{\mathsf{Obs}} % reserved for resolved-observation function names, not the outcome set
+% \newcommand{\Obs}{\mathsf{Obs}} % reserved for resolved-observation function names, not the outcome set
 \newcommand{\Spec}{\mathsf{Spec}}
 \newcommand{\Term}{\mathsf{Term}}
 \newcommand{\Ord}{\preceq}
@@ -93,7 +93,7 @@ logic programs with negation admit multiple accepted models, transactional
 systems admit multiple consistent executions, and distributed or policy-aware
 systems admit multiple outcomes compatible with the same history.
 In such settings, it is not enough to explain \emph{what follows;} one must also
-explain \emph{under which semantic resolution it follows}.
+explain \emph{under which semantic resolution of ambiguity} it follows.
 
 This paper introduces \emph{interpretation provenance}, a framework for making
 semantic resolution explicit and explainable.
@@ -209,9 +209,8 @@ Under serializability, the observed history admits multiple executions.
 Tuples $\{(b), (c)\}$ appear in $Q$ for every serializable execution.
 Tuple $(d)$ is contingent: it appears in some executions and not others, depending
 on whether the delete is ordered before or after the query. Before resolving this
-ambiguity, there is no single classical provenance question for $d$. Indeed,
-the family of provenance itself depends on how the ambiguity is resolved: in 
-one order the question is \emph{why} $d$ appears, while in another it is \emph{why-not} $d$.
+ambiguity, even the \emph{family} of provenance expressions for $(d)$ is ambiguous:
+in one order the question is \emph{why} $d$ appears, while in another it is \emph{why-not} $d$.
 Interpretation provenance makes this dependence explicit.
 It records the semantic commitments under which the query result is interpreted,
 together with the ordinary derivational explanation that applies once those
@@ -227,10 +226,11 @@ explains conclusions in the presence of ambiguous semantics by recording the
 commitments under which those conclusions become determinate.
 We (i) formalize interpretations and certificates as the semantic structure
 needed to recover classical algebraic provenance once ambiguity is resolved;
-(ii) show, via Datalog with negation, how different semantics regimes induce
+(ii) show, via Datalog with negation, how different semantic regimes induce
 distinct interpretation and provenance structures, (iii) show, via transactional
 systems, how concurrency and isolation choices give rise to interpretation-dependent
-query results; and (iv) identify robustness and preservation across semantic change
+query results; and (iv) identify \emph{robustness} across interpretations and
+\emph{preservation} across changes in specifications
 as new classes of provenance questions enabled by this framework.
 
 
@@ -265,22 +265,20 @@ as new classes of provenance questions enabled by this framework.
 \label{sec:prelim}
 % ================================================================
 
-Classical data provenance assumes a fixed, resolved semantics: for each input
-instance, a specification determines a single outcome, and provenance explains
-how that outcome was derived.
-In many systems of interest, however, a single input does not determine a unique
-meaning.
-Concurrency, negation, and underspecification may admit multiple admissible
-outcomes, depending on how semantic choices are resolved.
+Classical data provenance assumes a fixed, resolved semantics: for each input instance,
+a specification (query) determines a single outcome, and provenance explains how that outcome was
+derived.
+In many systems, however, concurrency, negation, or underspecification admit
+multiple admissible outcomes for the same input.
 
 This section introduces a minimal semantic framework for reasoning about such
 ambiguity.
-We model specifications that admit multiple admissible outcomes, and the
-semantic commitments—called \emph{interpretations}—that refine ambiguity until
-meaning becomes determinate.
-The presentation is deliberately lightweight: we focus only on the structure
-needed to define and explain interpretation provenance, deferring complexity,
-algebraic structure, and optimization questions to later sections.
+We model specifications with multiple admissible outcomes and the semantic
+commitments—called \emph{interpretations}—that restrict ambiguity until meaning
+is determinate.
+Our focus is purely structural: we introduce only the semantic objects needed to
+define interpretation provenance and to reason about robustness and change across
+interpretations, without assuming any particular execution model.
 
 \subsection{Histories}
 
@@ -311,8 +309,10 @@ where $E$ is a set of events and $\rightarrow \subseteq E \times E$ is a strict
 
 The order $\rightarrow$ records only irreducible constraints—facts that must be
 respected by any admissible semantic interpretation.
-No total order, timeline, or execution schedule is assumed.
-Histories therefore represent semantic information, not executions.
+Histories abstract semantic information from execution detail: they may coincide
+with executions or traces, but they do not require a total order or a fixed
+schedule, and apply equally to purely semantic settings such as Datalog with
+negation.
 
 We write $\Hist$ for the class of histories under consideration.
 This choice is parametric and deliberately abstract: histories may represent
@@ -328,9 +328,9 @@ $H_1 \sqsubseteq H_2$ if:
 \end{enumerate}
 \end{definition}
 
-Intuitively, histories grow by accumulating events and precedence constraints,
+Intuitively, histories are extended by accumulating events and precedence constraints,
 without revising previously observed relationships.
-We interpret $\sqsubseteq$ as information growth, not as time or execution.
+We interpret $\sqsubseteq$ as information growth, not as time or execution \emph{per se}.
 
 \subsection{Observations and Specifications}
 Fix a set $O$ of fully specified semantic objects, called \emph{outcomes}.
@@ -352,8 +352,8 @@ mapping each history $H \in \Hist$ to a (possibly empty) set of admissible obser
 \end{definition}
 
 The set $\Spec(H)$ captures all observations consistent with the evidence in $H$.
-When $|\Spec(H)| > 1$, the specification admits multiple mutually incompatible
-meanings.
+When $|\Spec(H)| > 1$, the specification admits multiple admissible meanings for $H$,
+reflecting unresolved semantic ambiguity.
 When $|\Spec(H)| = 1$, the meaning of $H$ is fully determined.
 
 Ambiguity in this sense is common and intentional.
@@ -362,11 +362,11 @@ executions all admit multiple admissible observations for the same history,
 corresponding to different semantic resolutions of underspecified behavior.
 In such settings, semantic questions cannot be posed until ambiguity is constrained
 by interpretation.\footnote{%
-This notion of ambiguity—multiplicity in $\Spec(H) \subseteq O$—is distinct from
-uncertainty represented \emph{within} the observation domain $O$ itself (e.g.,
-probabilistic or multi-valued observations).
-Interpretation provenance addresses ambiguity at the level of admissible
-observations.
+The ambiguity we study lives in the \emph{powerset domain} $2^{O}$: multiplicity
+of admissible outcomes $\Spec(H) \subseteq O$.
+This is distinct from uncertainty or nondeterminism \emph{within} the outcome
+domain $O$ itself (e.g., distributions, multi-valued attributes, or
+partial observations).
 We discuss this distinction in more detail in Section~\ref{sec:negation} and
 Appendix~\ref{sec:appendix-datalog}.}
 
@@ -383,21 +383,18 @@ An \emph{interpretive predicate} is a function
 \[
   \varphi : \Hist \times 2^{O} \to 2^{O}
 \]
-such that for all histories $H$ and observation sets $S \subseteq O$:
-(\emph{Shrinkage}) $\varphi(H,S) \subseteq S$, and
-(\emph{Feasibility}) if $S \neq \emptyset$ then $\varphi(H,S) \neq \emptyset$.
+such that for all histories $H$ and observation sets $S \subseteq O$, \hspace{0.8mm} $\varphi(H,S)
+\subseteq S$ (\emph{Shrinkage}), and if $S \neq \emptyset$ then $\varphi(H,S) \neq \emptyset$
+ (\emph{Feasibility}).
 \end{definition}
-
-Interpretive predicates correspond to the refinement operators studied in our
-earlier work~\cite{hellerstein2026interpretation}.
-They restrict admissible observations without introducing new ones or rendering
+Interpretive predicates restrict admissible observations without introducing new ones or rendering
 the specification infeasible.
 
-Crucially, an interpretive predicate may depend on the \emph{entire current set}
-of admissible observations.
-That is, $\varphi(H,S)$ need not be definable as a pointwise test on individual
-observations, but may instead enforce semantic commitments whose effect depends
-on which alternatives remain admissible.
+Crucially, an interpretive predicate may depend on the admissible outcome set
+\emph{as a whole}.
+That is, $\varphi(H,S)$ need not be definable as a pointwise test applied
+independently to each $o \in S$, but may instead enforce semantic commitments
+whose effect depends on which alternatives are jointly admissible.
 We refer to such predicates as \emph{ambiguity-sensitive}.
 
 \begin{definition}[Refinement by Conditioning]
@@ -408,22 +405,26 @@ Given a specification $\Spec$ and an interpretive predicate $\varphi$, the
 \]
 \end{definition}
 
-Sequential refinement therefore corresponds to conditioning on multiple semantic
-commitments, whose interaction need not commute.
+Multiple interpretive predicates may be applied by iterating this refinement
+operation.
+Because predicates may be ambiguity-sensitive, the order in which refinements
+are applied can matter.
 
 \subsection{Interpretations}
 
 Individual interpretive predicates typically express only partial semantic
 commitments.
-We therefore model semantic resolution using finite conjunctions of refinement
-predicates, interpreted as sequential conditioning.
+We therefore model semantic resolution using finite compositions of refinement
+predicates, interpreted as \emph{sequential conditioning}.
 
 \begin{definition}[Interpretation]
-An \emph{interpretation} is a finite conjunction
+An \emph{interpretation} is a finite expression
 \[
   I = \varphi_1 \wedge \cdots \wedge \varphi_m
 \]
-of interpretive predicates, where $\wedge$ denotes sequential refinement.
+of interpretive predicates, where $\wedge$ denotes \emph{ordered (sequential)
+refinement} rather than logical conjunction.
+In particular, $\wedge$ is not assumed to be commutative or idempotent.
 \end{definition}
 
 Refinement by an interpretation is defined by sequential application:
@@ -435,18 +436,8 @@ Refinement by an interpretation is defined by sequential application:
 
 Because interpretive predicates may be ambiguity-sensitive, the order of conjuncts
 can matter.
-This non-commutativity induces semantic dependency, studied in later sections.
+This non-commutativity induces semantic dependency.
 
-\begin{definition}[Resolved specification and resolving interpretation]
-A specification $\Spec$ is \emph{resolved} if for every history $H$, $|\Spec(H)| = 1$.
-An interpretation $I$ \emph{resolves} $\Spec$ (i.e., $I$ is \emph{resolving for} $\Spec$) if $\Spec \mid I$ is resolved.
-\end{definition}
-
-\paragraph{Clarification.}
-Resolution is defined pointwise in the history.
-A resolved specification need not produce a single global observation; rather,
-for each history $H$, it determines a unique admissible observation.
-Resolution therefore corresponds to determinism of $\Spec : \Hist \to O$.
 
 \paragraph{Dependency graphs on interpretive predicates.}
 A useful way to make this structure explicit is via a \emph{dependency graph}
@@ -456,6 +447,15 @@ $\varphi$ has been resolved.
 Such dependencies determine when a specification becomes resolved and when
 depth--0 derivational provenance applies.
 
+\begin{definition}[Resolved specification and resolving interpretation]
+A specification $\Spec$ is \emph{resolved} if for every history $H$, $|\Spec(H)| = 1$.
+An interpretation $I$ \emph{resolves} $\Spec$ (i.e., $I$ is \emph{resolving for} $\Spec$) if $\Spec \mid I$ is resolved.
+\end{definition}
+
+\paragraph{Clarification.}
+Resolution is a property of the set-valued specification $\Spec:\Hist\to 2^O$:
+it is \emph{single-valued pointwise in the history}, i.e., for every history $H$,
+the set $\Spec(H)$ is a singleton.
 Resolution marks the point at which semantic ambiguity has been fully discharged.
 
 \subsection{Restriction and Identification}
@@ -483,7 +483,7 @@ obtained by identifying admissible outcomes that are equivalent under $I$.
 \end{definition}
 
 The equivalence relation $\sim_{I,H}$ is total on the restricted domain $O_H^I$.
-Outcomes ruled out by the interpretation are simply absent from the quotient.
+Outcomes ruled out by the interpretation are not in $O_H^I$, and hence simply absent from the quotient.
 
 \begin{remark}[History-indexed quotients]
 Because interpretive predicates may depend on the history and on intermediate
@@ -511,7 +511,10 @@ We now introduce a compact notation for \emph{interpretation provenance}.
 This subsection introduces no new semantic machinery.
 It packages together notions already defined—interpretations, resolution, and
 classical provenance—into a single explanatory object.
-Throughout the paper, interpretation provenance is expressed by conditioning semantic objects on an interpretation; no algebraic structure is imposed prior to conditioning.
+Throughout the paper, interpretation provenance is expressed by conditioning
+semantic objects on an interpretation.
+At this stage, we assume no algebraic structure on interpretations or outcomes
+beyond what has already been defined.
 
 \paragraph{Interpretation provenance values.}
 Fix a commutative semiring $(K,\otimes,1)$ for derivational provenance
@@ -524,13 +527,11 @@ We define \emph{interpretation provenance} as the pair
   \mathsf{IP}_Q(t) \;\triangleq\; (I,\, \Prov_{Q \mid I}(t)).
 \]
 
-When convenient, we may write $I \cdot k$ as an abbreviation for the pair $(I,k)$,
-but all semantics are expressed via conditioning on $I$.
+% When convenient, we may write $I \cdot k$ as an abbreviation for the pair $(I,k)$,
+% but all semantics are expressed via conditioning on $I$.
 
 The intended reading is:
-\begin{quote}
 \emph{$k$ explains the derivation, assuming the semantic commitments fixed by $I$.}
-\end{quote}
 
 \paragraph{Relationship to classical provenance.}
 Once an interpretation $I$ resolves $\Spec$, semantic ambiguity is fixed for the purpose of provenance.
@@ -543,18 +544,19 @@ In particular, for \emph{depth--0} specifications—where no nontrivial semantic
 commitments are required—interpretation provenance coincides exactly with
 classical semiring-based provenance.
 
-\paragraph{Why interpretation provenance is linear.}
-Each interpretation provenance value is indexed by a \emph{single} resolving
+\paragraph{Why interpretation provenance is interpretation-relative.}
+Interpretation provenance is defined relative to a \emph{single, fixed}
 interpretation.
-We do not form disjunctions over interpretations inside provenance values.
-Questions about variation across interpretations—such as robustness,
-invariance, or sensitivity to inter-specification semantic change—are treated explicitly and
-separately in Section~\ref{sec:robustness}.
+A provenance value records how a semantic outcome is derived \emph{given} a
+particular set of semantic commitments; it does not combine or quantify over
+multiple interpretations.
 
-This design choice is intentional.
-Interpretation provenance is explanatory rather than speculative: it records
-which semantic assumptions were actually relied upon, together with the
-derivational explanation that follows once those assumptions are fixed.
+Accordingly, we do not form disjunctions or aggregations over interpretations
+within a single provenance object.
+Questions about how outcomes or explanations vary across different
+interpretations—such as robustness, invariance, or sensitivity to semantic
+change—are treated explicitly and separately in
+Section~\ref{sec:robustness}.
 
 We illustrate this syntax next in a transactional setting, where
 different ordering commitments induce different interpretations and,
@@ -591,13 +593,10 @@ the case where $d$ is absent from the query result.
 \subsection{Interpretation Parsimony and Discriminating Power}
 \label{sec:parsimony}
 
-Interpretations resolve semantic ambiguity by restricting and identifying
-admissible outcomes.
-For a history $H$ and interpretation $I$, resolution induces a quotient
-\[
-  O_H^I \big/ {\sim_{I,H}},
-\]
-which captures exactly which admissible outcomes are semantically distinguished.
+Recall that for a history $H$ and interpretation $I$, refinement induces a
+quotient $O_H^I \big/ {\sim_{I,H}}$,
+which records which admissible outcomes remain semantically distinguished after
+conditioning (Section~\ref{sec:prelim}).
 
 \paragraph{Discriminating power.}
 Fix a specification $\Spec$.
@@ -621,19 +620,30 @@ some admissible interpretation.
 
 \paragraph{Parsimony and robustness.}
 Parsimony is a property of the \emph{predicate basis}, not of individual queries.
+The predicate basis determines which semantic distinctions are expressible, and
+therefore which admissible outcomes can be distinguished or collapsed.
 In practice, systems often adopt non-parsimonious bases—for reasons of efficiency,
-policy, or usability—thereby collapsing distinctions among admissible outcomes.
+policy, or usability—thereby intentionally abstracting away fine-grained
+differences among admissible outcomes.
 
-As a result, some observations become invariant across all resolving
-interpretations precisely because the available predicates never discriminate
-between the outcomes on which those observations would differ.
-This phenomenon motivates the robustness questions studied in
-Section~\ref{sec:robustness}: robustness diagnoses observations that persist
-\emph{because} the chosen interpretive vocabulary declines to make finer semantic
-distinctions.
+In the transactional setting, for example, predicates that commit only to an
+equivalent serial schedule are deliberately coarse.
+They collapse many concrete execution orders into a single semantic class, leaving
+some tuples—such as $a$ and $b$ in Section~\ref{sec:intro}—present under every
+interpretation consistent with that abstraction.
+Interpretation provenance makes this explicit by showing which observations are
+invariant across all interpretations induced by the chosen predicate basis, and
+which would require sharper ordering predicates to distinguish.
+
+This invariance is not accidental.
+Observations are robust precisely when the available interpretive vocabulary
+never discriminates between the outcomes on which they would differ.
+This perspective motivates the robustness questions studied in
+Section~\ref{sec:robustness}, where robustness is understood as persistence
+\emph{relative to a fixed predicate basis}, rather than as an absolute semantic
+property.
 
 \subsection{Summary}
-
 Interpretation provenance pairs a resolving interpretation with classical
 provenance computed under that interpretation.
 Once an interpretation is fixed, provenance is classical by construction: it is
@@ -1365,6 +1375,26 @@ Recent systems work on mixed isolation regimes, such as Milano et al.’s MixT
 \cite{milano2020mixt}, addresses related concerns operationally; our contribution
 is a semantic and explanatory account that makes such mixtures explicit and
 checkable.
+
+\paragraph{Homeostasis.}
+Gehrke, Korn, and Srivastava’s work on \emph{homeostasis}~\cite{gehrke2002homeostasis}
+studies queries whose results remain invariant under admissible input changes,
+enabling incremental maintenance without recomputation.
+In our frame, homeostatic queries inhabit the \emph{depth 0} fragment:
+the specification is already resolved; additional semantic commitments are
+neither required nor permitted.
+
+Our framework is complementary.
+Rather than enforcing invariance, we model and explain what happens when
+invariance does \emph{not} hold—when specifications intentionally admit multiple
+admissible outcomes, and semantic commitments must be staged to make meaning
+determinate.
+Interpretation depth characterizes the structure and necessity of those stages,
+while robustness questions diagnose which conclusions persist despite the
+absence of finer semantic commitments.
+Viewed this way, homeostasis isolates a class of specifications whose semantics
+are already resolved, so incremental change does not require introducing new
+semantic commitments.
 
 \subsection{Interpretation Complexity}
 

@@ -1,8 +1,14 @@
-@article{green2007provenance,
-  title={Provenance semirings},
-  author={Green, Todd J and Karvounarakis, Giorgos and Tannen, Val},
-  journal={PODS},
-  year={2007}
+@inproceedings{green2007provenance,
+  author    = {Todd J. Green and Giorgos Karvounarakis and Val Tannen},
+  title     = {Provenance Semirings},
+  booktitle = {Proceedings of the Twenty-Sixth {ACM} {SIGMOD}-{SIGACT}-{SIGART} Symposium on Principles of Database Systems (PODS)},
+  year      = {2007},
+  pages     = {31--40},
+  address   = {Beijing, China},
+  publisher = {Association for Computing Machinery},
+  doi       = {10.1145/1265530.1265535},
+  url       = {https://doi.org/10.1145/1265530.1265535},
+  isbn      = {9781595936851}
 }
 
 @book{suciu2011probabilistic,
@@ -15,8 +21,13 @@
 @article{dalvi2012probabilistic,
   title={The dichotomy of probabilistic inference for unions of conjunctive queries},
   author={Dalvi, Nilesh and Suciu, Dan},
-  journal={JACM},
-  year={2012}
+  journal={J. {ACM}},
+  volume={59},
+  number={6},
+  pages={30:1--30:87},
+  year={2012},
+  doi={10.1145/2395116.2395119},
+  url={https://doi.org/10.1145/2395116.2395119}
 }
 
 @article{olteanu2015factorized,
@@ -31,6 +42,18 @@
   author={Senellart, Pierre},
   year={2018},
   publisher={Cambridge University Press}
+}
+
+@article{lamport,
+  author  = {Lamport, Leslie},
+  title   = {Time, Clocks, and the Ordering of Events in a Distributed System},
+  journal = {Communications of the {ACM}},
+  year    = {1978},
+  volume  = {21},
+  number  = {7},
+  pages   = {558--565},
+  doi     = {10.1145/359545.359563},
+  url     = {https://doi.org/10.1145/359545.359563}
 }
 
 @article{apt1988semantics,
@@ -61,11 +84,19 @@
   year={1988}
 }
 
-@article{buneman2001why,
-  title={Why and where: A characterization of data provenance},
-  author={Buneman, Peter and Khanna, Sanjeev and Tan, Wang-Chiew},
-  journal={ICDT},
-  year={2001}
+@inproceedings{buneman2001why,
+  author    = {Peter Buneman and Sanjeev Khanna and Wang{-}Chiew Tan},
+  title     = {Why and Where: {A} Characterization of Data Provenance},
+  booktitle = {Database Theory - {ICDT} 2001, 8th International Conference, London, UK, January 4-6, 2001, Proceedings},
+  editor    = {Jan Van den Bussche and Victor Vianu},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {1973},
+  pages     = {316--330},
+  address   = {London, UK},
+  publisher = {Springer},
+  year      = {2001},
+  doi       = {10.1007/3-540-44503-X_20},
+  url       = {https://doi.org/10.1007/3-540-44503-X_20}
 }
 
 @book{halpern2001causes,
@@ -77,9 +108,13 @@
 
 @article{meliou2010causality,
   title={Causality in databases},
-  author={Meliou, Alexandra and Gatterbauer, Wolfgang and Moore, Katherine and Suciu, Dan},
-  journal={VLDB},
-  year={2010}
+  author={Meliou, Alexandra and Gatterbauer, Wolfgang and Halpern, Joseph Y. and Koch, Christoph and Moore, Katherine F. and Suciu, Dan},
+  journal={IEEE Data Engineering Bulletin},
+  volume={33},
+  number={3},
+  pages={59--67},
+  year={2010},
+  url={http://sites.computer.org/debull/A10sept/suciu.pdf}
 }
 
 @article{glavic2015survey,
@@ -172,6 +207,7 @@
   year      = {2005},
   address   = {San Francisco, CA},
   publisher = {USENIX Association},
+  pages     = {99--116},
 }
 
 @inproceedings{bates2015trustworthy,
@@ -182,3 +218,42 @@
   address   = {Washington, D.C.},
   publisher = {USENIX Association},
 }
+
+@inproceedings{10.1145/3192366.3192375,
+author = {Milano, Mae and Myers, Andrew C.},
+title = {MixT: a language for mixing consistency in geodistributed transactions},
+year = {2018},
+isbn = {9781450356985},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3192366.3192375},
+doi = {10.1145/3192366.3192375},
+abstract = {Programming concurrent, distributed systems is hard—especially when these systems mutate shared, persistent state replicated at geographic scale. To enable high availability and scalability, a new class of weakly consistent data stores has become popular. However, some data needs strong consistency. To manipulate both weakly and strongly consistent data in a single transaction, we introduce a new abstraction: mixed-consistency transactions, embodied in a new embedded language, MixT. Programmers explicitly associate consistency models with remote storage sites; each atomic, isolated transaction can access a mixture of data with different consistency models. Compile-time information-flow checking, applied to consistency models, ensures that these models are mixed safely and enables the compiler to automatically partition transactions. New run-time mechanisms ensure that consistency models can also be mixed safely, even when the data used by a transaction resides on separate, mutually unaware stores. Performance measurements show that despite their stronger guarantees, mixed-consistency transactions retain much of the speed of weak consistency, significantly outperforming traditional serializable transactions.},
+booktitle = {Proceedings of the 39th ACM SIGPLAN Conference on Programming Language Design and Implementation},
+pages = {226–241},
+numpages = {16},
+keywords = {Consistency, Information Flow, Transactions},
+location = {Philadelphia, PA, USA},
+series = {PLDI 2018}
+}
+
+@article{milano2020mixt,
+author = {Milano, Mae and Myers, Andrew C.},
+title = {MixT: a language for mixing consistency in geodistributed transactions},
+year = {2018},
+issue_date = {April 2018},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {53},
+number = {4},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/3296979.3192375},
+doi = {10.1145/3296979.3192375},
+abstract = {Programming concurrent, distributed systems is hard—especially when these systems mutate shared, persistent state replicated at geographic scale. To enable high availability and scalability, a new class of weakly consistent data stores has become popular. However, some data needs strong consistency. To manipulate both weakly and strongly consistent data in a single transaction, we introduce a new abstraction: mixed-consistency transactions, embodied in a new embedded language, MixT. Programmers explicitly associate consistency models with remote storage sites; each atomic, isolated transaction can access a mixture of data with different consistency models. Compile-time information-flow checking, applied to consistency models, ensures that these models are mixed safely and enables the compiler to automatically partition transactions. New run-time mechanisms ensure that consistency models can also be mixed safely, even when the data used by a transaction resides on separate, mutually unaware stores. Performance measurements show that despite their stronger guarantees, mixed-consistency transactions retain much of the speed of weak consistency, significantly outperforming traditional serializable transactions.},
+journal = {SIGPLAN Not.},
+month = jun,
+pages = {226–241},
+numpages = {16},
+keywords = {Consistency, Information Flow, Transactions}
+}
+

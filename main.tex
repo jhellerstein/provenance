@@ -59,6 +59,7 @@
 \newcommand{\drule}{\mathrel{:\!-}}
 \newcommand{\Prov}{\mathsf{Prov}}
 \newcommand{\snap}{\mathsf{snap}}
+\newcommand{\seal}{\mathsf{seal}}
 \newcommand{\FCW}{\mathsf{FCW}}
 \newcommand{\writes}{\mathsf{writes}}
 % ---------- Comments, etc. ----------
@@ -738,41 +739,6 @@ corresponding to certificates that preserve all future queries.
 Interpretation provenance exposes this choice explicitly and enables more
 parsimonious lineage when the intended query family is known
 (Appendix~\ref{app:systems-lineage}).
-% ================================================================
-\section{Sandbox I: Datalog with Negation As Semantic Ambiguity}
-\label{sec:negation}
-% ================================================================
-
-We instantiate interpretation provenance in a familiar and deeply studied
-setting: Datalog with negation.
-Our purpose is not to propose new semantics for negation, nor to compare their
-expressive power.
-Rather, we use classical semantics for Datalog with negation as a controlled
-environment in which to observe how semantic ambiguity in a \emph{fixed}
-specification gives rise to different structures of interpretation provenance.
-
-Datalog with negation exhibits ambiguity even for a fixed program and a fixed
-input instance.
-Negated predicates introduce dependencies that delay semantic commitment: whether
-an atom is justified can depend on the absence of other atoms whose status is not
-yet determined.
-Interpretation provenance makes these dependencies explicit, recording not only
-what conclusions are drawn, but the semantic commitments under which they are
-valid.
-
-We examine three standard semantics for negation—stratified, well-founded, and
-stable—and write down the corresponding interpretation provenance in each case.
-Figure~\ref{fig:interp-tables}(A) summarizes the interpretations for these regimes,
-making explicit which interpretive predicates are sufficient to resolve the
-specification under each semantics.
-When a semantics admits multiple incompatible resolutions, we enumerate them;
-when it admits a unique resolution, we record that interpretation alone.
-Appendix~\ref{sec:appendix-datalog} contains full details, including the
-derivation of conditioned provenance values. We proceed with an
-intuitive  overview here.
-
-
-\subsection{Specification and Semantic Ambiguity}
 
 
 \begin{figure*}[t]
@@ -781,24 +747,28 @@ intuitive  overview here.
   \setlength{\tabcolsep}{6pt}
   \renewcommand{\arraystretch}{1.15}
 
-  \begin{tabular}{@{}p{0.20\linewidth} p{0.72\linewidth}@{}}
-    \toprule
-    \multicolumn{2}{c}{\textbf{(A) Datalog negation semantics}}                 \\
-    \midrule
-    \textbf{Case} & \textbf{Resolving interpretation(s)}                        \\
-    \midrule
-    Stratified    &
-    $\varphi_{\mathrm{stab}(p)}$                                                \\
-    %
-    Well-founded  &
-    $\varphi_{\mathrm{stab}(p)} \wedge \varphi_{p(c)=\mathbf{t}} \wedge \varphi_{q(c)=\mathbf{f}}
-    \wedge \varphi_{r(c)=\mathbf{u}} \wedge \varphi_{s(c)=\mathbf{u}}$          \\
-    %
-    Stable        &
-    $(\varphi_{\mathrm{stab}(p)} \wedge I_{\mathrm{stab}}^{(r)}) \;\text{or}\;
-    (\varphi_{\mathrm{stab}(p)} \wedge I_{\mathrm{stab}}^{(s)})$ (incompatible) \\
-    \bottomrule
-  \end{tabular}
+\begin{tabular}{@{}p{0.12\linewidth} p{0.65\linewidth} p{0.12\linewidth}@{}}
+  \toprule
+  \multicolumn{3}{c}{\textbf{(A) Datalog negation semantics}} \\
+  \midrule
+  \textbf{Case} & \textbf{Resolving interpretation(s)} & \textbf{Depth} \\
+  \midrule 
+  Stratified &
+  $\varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)$
+  & $k$ \\
+
+Well-founded &
+  $\varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)
+   \wedge \varphi_{\seal}(U_1)\wedge \varphi_{\seal}(U_2)\wedge\cdots$
+  & unbounded \\
+
+Stable &
+  $(\varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)\wedge I^{(r)})
+  \;\text{or}\;
+  (\varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)\wedge I^{(s)})$
+  & $k{+}1$ \\
+  \bottomrule
+\end{tabular}
 
   \vspace{1em}
 
@@ -830,32 +800,43 @@ intuitive  overview here.
     \bottomrule
   \end{tabular}
 
-  \caption{
-    Interpretation summaries for our two sandboxes.
-    (\textbf{A}) For Datalog with negation, different semantics induce different
-    structures of semantic resolution: stratified and well-founded semantics admit
-    a single resolving interpretation, while stable semantics admits multiple
-    incompatible resolving interpretations.
-    (\textbf{B}) For serializable transactions, many serial interpretations may
-    justify the same outcome; we therefore display a single resolving interpretation
-    as a semantic witness, since the existence (rather than enumeration) of such
-    interpretations is what matters.
-    % add to caption (one sentence):
-    The SI row abbreviates snapshot choices ($\snap(\cdot)$) and the first-committer-wins
-    rule ($\FCW$).
-    Full details appear in
-    Appendices~\ref{sec:appendix-datalog} and~\ref{sec:appendix-concurrency}.
-  }
+\caption{
+  Interpretation summaries for our two sandboxes.
+  Depth counts non-commuting stages of semantic commitment; branching among
+  incompatible interpretations does not increase depth.
+  (\textbf{A}) For Datalog with negation, different semantics induce different
+  structures of semantic resolution: stratified and well-founded semantics admit
+  a single resolving interpretation, while stable semantics admits multiple
+  incompatible ones.
+  (\textbf{B}) For serializable transactions, many serial interpretations may
+  justify the same outcome; we therefore display a single resolving interpretation
+  as a semantic witness, since only existence (not enumeration) matters.
+  The SI row abbreviates snapshot choices ($\snap(\cdot)$) and the
+  first-committer-wins rule ($\FCW$).
+  Full details appear in
+  Appendices~\ref{sec:appendix-datalog} and~\ref{sec:appendix-concurrency}.
+}
   \label{fig:interp-tables}
 \end{figure*}
 
+% ================================================================
+\section{Sandbox I: Datalog with Negation as Semantic Ambiguity}
+\label{sec:negation}
+% ================================================================
 
-A Datalog program with negation induces a specification
-$\Spec : \Hist \to 2^{O}$ mapping histories (finite sets of ground EDB atoms over the fixed constant $c$ introduced below) to sets of admissible
-outcomes (models).
-Ambiguity arises because negation can create circular semantic dependencies:
-whether an atom holds may depend on whether some other atom does not hold, and
-vice versa.
+We use Datalog with negation as a controlled setting in which to study
+\emph{semantic ambiguity} within a fixed specification.
+Our goal is not to propose new semantics, but to expose how classical negation
+semantics differ in the \emph{structure} of the semantic commitments they require,
+and how those commitments are reflected in interpretation provenance.
+
+Even for a fixed program and extensional input, negation can delay semantic
+commitment.
+Whether an atom holds may depend on the absence of other atoms whose status is
+itself unresolved.
+Interpretation provenance makes this explicit by separating ordinary derivational
+consequences—true in all admissible outcomes—from \emph{interpretive predicates}
+that rule out some outcomes and thereby resolve ambiguity.
 
 \begin{example}[Datalog with negation]
   \label{ex:datalog-negation}
@@ -873,133 +854,86 @@ vice versa.
   of interpretation provenance.
 \end{example}
 
-\paragraph{Interpretive predicates for negation.}
-Across all negation semantics we consider, interpretation proceeds by applying
-interpretive predicates that constrain admissible models.
-In this sandbox, it is helpful to think of interpretive predicates as semantic
-commitments about the status of atoms---e.g., committing that an atom is true,
-false, or (when the outcome domain is lifted) undefined. Only commitments that
-rule out admissible outcomes count as interpretive predicates;
-consequences that hold in all remaining outcomes are treated derivationally.
-
-These commitments are not local to individual derivations.
-They depend on which outcomes remain admissible and may enable or disable further
-commitments.
-As a result, cycles of interpretive predicates with negation are ambiguity-sensitive and may
-fail to commute.
-
-\subsection{Stratified Semantics}
-
-Stratified semantics applies to programs whose dependency graph contains no cycles
-through negation.
-It restricts attention to specifications for which negation can be interpreted by
-a stratum order, allowing semantic commitments to be staged.
-
-In our running example, we temporarily set aside predicates $r(c)$ and $s(c)$,
-which form a negation cycle, and focus on the stratified fragment defining $p(c)$
-and $q(c)$.
-Predicate $p(c)$ lies in a lower stratum derived from the EDB,
-while $q(c)$ lies in a higher stratum, depending negatively on $p(c)$.
-
-The central semantic issue is not the computation of a fixpoint for $p(c)$ per se, but the
-commitment that the lower stratum has \emph{stabilized}—no further
-lower-stratum consequences will appear that could change the fixpoint.
-In incremental or distributed settings, this stabilization is a genuine semantic
-choice: the possibility of late-arriving facts creates ambiguity about whether
-negation is safe to apply; resolving that ambiguity requires committing to a
-closed world for the lower stratum.
-
-Accordingly, resolution proceeds by a single interpretive predicate,
-$\varphi_{\mathrm{stab}(p)}$, committing that the lower stratum defining $p(c)$ has
-stabilized. Once this commitment is made, negation is well-defined and subsequent
-derivations proceed without further semantic resolution,as summarized in the first row of
-Figure~\ref{fig:interp-tables}(A).
-The fully resolved specification supports ordinary derivational provenance for
-$q(c)$ under this interpretation.
-The explicit interpretation $I_{\mathrm{strat}}$, along with its dependency
-structure and conditioned provenance values, is worked out in
+We examine three standard semantics for negation—stratified, well-founded, and
+stable—and record the corresponding resolving interpretations.
+Figure~\ref{fig:interp-tables}(\textbf{A}) summarizes these interpretations and
+their \emph{interpretation depth}, defined as the length of a non-commuting chain
+of semantic commitments.
+When a semantics admits multiple incompatible resolutions, we list them;
+when it admits a unique resolution, we record that interpretation alone.
+Here $S_i$ denotes the set of atoms whose truth is sealed at stratum~$i$, and
+$U_i$ denotes the unfounded set eliminated at alternation~$i$ in the
+well-founded construction.
+Full derivations and conditioned provenance appear in
 Appendix~\ref{sec:appendix-datalog}.
 
-\subsection{Well-Founded Semantics}
+\subsection{Negation Semantics as Interpretation Shapes}
 
-Well-founded semantics (WFS) applies to all Datalog programs with negation,
-including those with cycles.
-Rather than selecting among multiple total two-valued models, WFS resolves
-ambiguity by enlarging the outcome domain: atoms may be \emph{true}, \emph{false},
-or \emph{undefined}.
-Undefinedness is not a failure of semantics; it is an explicit representation of
-residual ambiguity \emph{within the outcome domain}.
-Rather than resolving multiplicity among admissible outcomes, well-founded
-semantics internalizes ambiguity by lifting the domain of outcomes itself.
-This highlights a modeling distinction that our framework makes explicit.
-Ambiguity in $\Spec(H) \subseteq O$ corresponds to multiple incompatible semantic
-outcomes and is resolved by interpretation.
-By contrast, lifting the outcome domain (as in well-founded semantics) moves
-uncertainty \emph{into} $O$ itself, yielding outcomes that are intentionally
-multi-valued and meaningful to the application rather than requiring further
-interpretation.
+We illustrate these interpretation structures using the single running program of
+Example~\ref{ex:datalog-negation}, which contains both a stratified fragment
+($p,q$) and a cycle through negation ($r \leftrightarrow \neg s$).
+Depth counts only non-commuting stages of semantic commitment; branching among
+incompatible interpretations does not increase depth.
 
-For our example, the stratified prefix remains unchanged: resolution commits only
-to stabilization of the lower stratum via $\varphi_{\mathrm{stab}(p)}$.
-Negation over $p(c)$ is then forced, while the remaining cycle between $r(c)$ and
-$s(c)$ is handled by lifting the outcome domain.
+\paragraph{Stratified semantics.}
+In stratified programs, negation flows strictly from higher to lower strata.
+Resolving ambiguity therefore requires committing that each stratum has
+\emph{stabilized}: no additional facts for predicates in that stratum will appear.
+In the example, the lower stratum defining $p(c)$ must be sealed before $q(c)$ can
+be interpreted negatively.
 
-The resulting interpretation produces a unique element of $2^O$: there is a single
-admissible outcome.
-Resolution is achieved not by choosing among alternatives, but by lifting the
-outcome domain to include an explicit undefined value.
-This structure is reflected in the second row of
-Figure~\ref{fig:interp-tables}(A).
-Appendix~\ref{sec:appendix-datalog} presents the explicit resolving interpretation
-$I_{\mathrm{wfs}}$, its dependency structure, and the resulting conditioned and
-interpretation provenance values.
+These sealing predicates do not commute: stabilization of stratum~$i$ is a
+prerequisite for interpreting negation in stratum~$i{+}1$.
+Accordingly, a program with $k$ strata has interpretation depth exactly~$k$.
+Figure~\ref{fig:interp-tables}(\textbf{A}, Stratified) schematically represents
+this chain; the explicit predicates appear in
+Appendix~\ref{sec:appendix-datalog}.
 
-\subsection{Stable Model Semantics}
+\paragraph{Well-founded semantics.}
+Well-founded semantics applies to programs with negation cycles, such as the
+$r/s$ fragment of the example.
+Rather than choosing among total models, it alternates between positive
+derivation and elimination of unfounded sets, producing a three-valued outcome
+in which atoms may be true, false, or undefined.
 
-Stable model semantics resolves negation cycles in a fundamentally different way.
-Rather than admitting partial outcomes, it insists on total two-valued models and
-therefore requires an explicit semantic choice when cycles arise.
+Interpretively, this corresponds to an \emph{alternating sequence} of non-commuting
+sealing commitments: successive stages classify additional atoms as determined or
+undefined, with later commitments depending on earlier ones.
+The number of alternations is not bounded in general, so well-founded semantics
+does not admit a fixed finite interpretation depth.
+Figure~\ref{fig:interp-tables}(\textbf{A}, WFS) records the limit interpretation
+for the example instance.
 
-In our example, resolution again begins by committing to stabilization of the lower stratum via
-$\varphi_{\mathrm{stab}(p)}$.
-Beyond this commitment, the cycle between $r(c)$ and $s(c)$ now admits multiple incompatible
-resolutions.
-Each stable model corresponds to a distinct resolving interpretation, committing
-one atom to true and the other to false.
-No single interpretation refines the others; the admissible outcomes are separated
-into mutually exclusive semantic worlds.
+\paragraph{Stable model semantics.}
+Stable semantics insists on total two-valued models.
+Stable-model truth assignments rely on stratification to give negation a
+closed-world meaning and therefore do not commute with stratification
+commitments.
+After sealing the stratified prefix of the program, a global hypothesis can be
+made about the truth of atoms in the negation cycle (e.g., $r$ or $s$ in the
+example) and checked for self-consistency.
 
-This multiplicity of resolving interpretations is summarized in the third row of
-Figure~\ref{fig:interp-tables}(A).
-Interpretation provenance must therefore record \emph{which} stable interpretation
-was assumed before derivational provenance can be applied.
-Appendix~\ref{sec:appendix-datalog} gives the explicit interpretations, dependency
-graphs, and provenance values for each stable model.
+Each stable model corresponds to a distinct resolving interpretation, and these
+interpretations are mutually incompatible.
+Within any one stable interpretation, however, the commitments are logically
+simultaneous and commute.
+Thus stable semantics has interpretation depth~$k{+}1$: $k$ stages for the
+stratified prefix, followed by a single global stable-model commitment, despite
+potentially exponential branching across alternatives
+(Figure~\ref{fig:interp-tables}(\textbf{A}, Stable)).
 
-\subsection{Takeaways for Interpretation Provenance}
-
-This sandbox highlights three distinct provenance shapes induced by three
-classical negation semantics.
-Stratification yields a layered structure in which negation-dependent derivations
-are conditional on stabilization commitments for earlier strata.
-Well-founded semantics resolves ambiguity by lifting the outcome domain and
-recording explicit commitments to partiality (undefinedness) in the presence of
-negation cycles.
-Stable semantics yields multiple resolving interpretations for the same program
-and instance, so interpretation provenance must record which resolved
-interpretation was assumed even before derivational provenance is consulted.
-When negation is acyclic, all three semantics coincide and interpretation
-provenance collapses to ordinary derivational provenance, reflecting the absence
-of semantic ambiguity.
-
-Appendix~\ref{sec:appendix-datalog} gives the explicit interpretations, dependency graphs, and provenance values.
-
-\paragraph{Semantic change (forward reference).}
-Semantic change is an inter-specification question; see Section~\ref{sec:robustness}.
-A worked semantic-change analysis appears in Appendix~\ref{sec:appendix-datalog}.
-
-The next sandbox mirrors these interpretation shapes, but with ambiguity arising
-from concurrency rather than negation.
+\paragraph{Takeaway.}
+The three semantics differ not only in which outcomes they admit, but in the
+\emph{structure} of semantic resolution.
+Stratified semantics requires a linear chain of stabilization commitments;
+well-founded semantics requires an alternating, potentially unbounded sequence;
+stable semantics branches among shallow but incompatible interpretations after
+stratification.
+When negation is acyclic, all three semantics coincide extensionally, but
+interpretation provenance still records the sealing commitments required to
+justify negation.
+Full derivations and dependency graphs appear in
+Appendix~\ref{sec:appendix-datalog}.
 
 % ================================================================
 \section{Sandbox II: Transactions as Systems Ambiguity}
@@ -1420,198 +1354,215 @@ Interpretation provenance extends that insight: when meaning itself depends on
 resolution, provenance must explain the assumptions that made meaning possible.
 
 \appendix
-\section{Appendix: Worked Examples}
-\label{sec:appendix-examples}
+% \section{Appendix: Worked Examples}
+% \label{sec:appendix-examples}
 
-\subsection{Datalog\texorpdfstring{$^{\neg}$}{ with negation} worked interpretation provenance}
+\section{Datalog$^{\neg}$ Worked Interpretation Provenance}
 \label{sec:appendix-datalog}
 
-\subsubsection{Stratified semantics: explicit interpretation provenance}
+This appendix instantiates interpretation provenance for the Datalog-with-negation
+sandbox used throughout Section~\ref{sec:negation}.
+We work through the same running example under stratified, well-founded, and stable
+semantics, making explicit the interpretive predicates, their dependency structure,
+and the resulting provenance annotations.
+The purpose is to justify the interpretation shapes and depths summarized in
+Figure~\ref{fig:interp-tables}(\textbf{A}).
 
-\paragraph{Interpretation provenance (example).}
-Write $\varphi_{\mathrm{stab}(p)}$ for the interpretive predicate that commits
-that the lower stratum defining $p$ has stabilized for the current history.
-In the stratified fragment, this commitment suffices to eliminate all semantic
-ambiguity: once the lower stratum is fixed, the truth of $\neg p(c)$ is determined
-derivationally.
+Throughout, we use \emph{sealing predicates}
+$\varphi_{\seal}(X)$, which commit that the set of atoms $X$ is complete:
+no additional atoms in $X$ will be derived in any admissible outcome.
+Such predicates rule out outcomes and therefore constitute genuine interpretive
+commitments.
 
-Accordingly, a resolving interpretation for the stratified fragment is simply
+\subsection{Stratified Semantics}
+
+\paragraph{Interpretive structure.}
+In stratified semantics, predicates are partitioned into strata
+$S_1,\dots,S_k$ such that negation flows strictly from higher to lower strata.
+Resolving ambiguity requires committing that each stratum has stabilized before
+negation may be applied in the next stratum.
+
+For the running example (Example~\ref{ex:datalog-negation}), the stratified fragment
+consists of the predicates defining $p(c)$ and $q(c)$.
+Resolution therefore requires sealing the lower stratum containing $p(c)$.
+
+\paragraph{Resolving interpretation.}
+A resolving interpretation for the stratified fragment is
 \[
-  I_{\mathrm{strat}} \;\triangleq\; \varphi_{\mathrm{stab}(p)} .
+  I_{\mathrm{strat}}
+  \;\triangleq\;
+  \varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k),
 \]
+where each $S_i$ is the set of atoms whose truth is fixed at stratum~$i$.
+These sealing predicates do \emph{not} commute: sealing $S_i$ is a prerequisite
+for interpreting negation in $S_{i+1}$.
+Accordingly, the interpretation depth is exactly $k$, as recorded in
+Figure~\ref{fig:interp-tables}(\textbf{A}, Stratified).
 
-There is no further interpretive dependency: negation in the higher stratum does
-not rule out admissible outcomes beyond those already excluded by stabilization.
-
-Over the resolved specification $\Spec \mid I_{\mathrm{strat}}$, $p(c)$ is derived
-from $a(c)$ with ordinary derivational provenance
-$k_p \triangleq \Prov(a(c))$.
-Interpretation provenance records that this derivation is justified under the
-stabilization commitment:
+\paragraph{Provenance.}
+Once $I_{\mathrm{strat}}$ is fixed, the specification is fully resolved.
+Derivational provenance applies without further semantic refinement.
+For example,
 \[
-  \mathsf{IP}(p(c)) \;\triangleq\; (I_{\mathrm{strat}},\, k_p) .
+  \mathsf{IP}(p(c)) \;\triangleq\; (I_{\mathrm{strat}},\, \Prov(a(c))).
 \]
+Absences such as $\neg q(c)$ are derivational consequences of the sealed lower stratum
+and require no additional interpretive predicates.
 
-Under the given history $H$ with $a(c)$, $q(c)$ does not hold under stratified
-semantics; this absence is derivational and requires no additional semantic
-commitment.
+\subsection{Well-Founded Semantics}
 
-\subsubsection{Well-founded semantics: explicit interpretation provenance}
+\paragraph{Interpretive structure.}
+Well-founded semantics (WFS) applies to programs with negation cycles.
+It resolves ambiguity by alternating between positive derivation and the elimination
+of \emph{unfounded sets}, yielding a three-valued outcome domain
+$\{\mathbf{t},\mathbf{f},\mathbf{u}\}$.
 
-Well-founded semantics applies to programs with negation cycles by resolving
-ambiguity through a lifted outcome domain.
-Rather than choosing among multiple two-valued outcomes, it commits certain atoms
-to the value $\mathbf{u}$ (undefined).
+Crucially, WFS still relies on the same stratified-prefix commitments as stratified
+semantics: the lower strata must be sealed before negation is interpreted.
+Beyond this prefix, resolution proceeds through an \emph{alternating sequence} of
+additional sealing commitments that classify atoms as determined or undefined.
 
-\paragraph{Interpretation provenance (example).}
-Let $\mathbf{t},\mathbf{f},\mathbf{u}$ denote the well-founded truth values
-true/false/undefined.
-A resolving interpretation for $(P,H)$ under WFS can be written as
-\[
-  I_{\mathrm{wfs}} \;\triangleq\;
-  \varphi_{p(c)=\mathbf{t}} \wedge
-  \varphi_{q(c)=\mathbf{f}} \wedge
-  \varphi_{r(c)=\mathbf{u}} \wedge
-  \varphi_{s(c)=\mathbf{u}} .
-\]
-
-These interpretive predicates are outcome-level commitments that collapse the
-space of admissible models to a single partial interpretation.
-There is no remaining semantic ambiguity among outcomes, and hence no
-nontrivial dependency structure among these predicates.
-
-Over $\Spec \mid I_{\mathrm{wfs}}$, derivational provenance is depth--0; in
-particular,
-\[
-  \mathsf{IP}(p(c)) \;\triangleq\; (I_{\mathrm{wfs}},\, \Prov(a(c))) .
-\]
-
-The key distinction from the stratified case is that resolution is achieved not by
-staging commitments, but by lifting the outcome domain to explicitly represent
-residual ambiguity.
-
-\subsubsection{Stable semantics: explicit interpretation provenance}
-
-Stable model semantics resolves negation cycles by selecting total two-valued
-models.
-In the presence of a negation cycle, this yields multiple incompatible resolving
-interpretations.
-
-\paragraph{Interpretation provenance (example).}
-For our example with $a(c)$, the lower stratum again forces $p(c)$ to be true.
-The negation cycle between $r(c)$ and $s(c)$ admits two stable resolutions:
-\[
-  I_{\mathrm{stab}}^{(r)} \;\triangleq\;
-  \varphi_{p(c)=\mathbf{t}} \wedge
-  \varphi_{q(c)=\mathbf{f}} \wedge
-  \varphi_{r(c)=\mathbf{t}} \wedge
-  \varphi_{s(c)=\mathbf{f}},
-\]
-\[
-  I_{\mathrm{stab}}^{(s)} \;\triangleq\;
-  \varphi_{p(c)=\mathbf{t}} \wedge
-  \varphi_{q(c)=\mathbf{f}} \wedge
-  \varphi_{s(c)=\mathbf{t}} \wedge
-  \varphi_{r(c)=\mathbf{f}} .
-\]
-
-These interpretations are mutually incompatible conditionings of the same
-program and history.
-Unlike well-founded semantics, stable semantics does not prescribe a unique
-resolution of the cycle.
-
-Within either resolved outcome, derivational provenance is ordinary:
-\[
-  \mathsf{IP}(p(c)) \;\triangleq\; (I_{\mathrm{stab}}^{(r)},\, \Prov(a(c)))
-  \quad\text{or}\quad
-  (I_{\mathrm{stab}}^{(s)},\, \Prov(a(c))) .
-\]
-
-The cycle atoms exhibit genuinely interpretation-dependent conclusions; e.g.,
-\[
-  \mathsf{IP}(r(c)) \;\triangleq\; (I_{\mathrm{stab}}^{(r)},\, 1),
-  \qquad
-  \mathsf{IP}(s(c)) \;\triangleq\; (I_{\mathrm{stab}}^{(s)},\, 1) .
-\]
-
-Thus, in the stable setting, interpretation provenance must explicitly record
-which resolved interpretation was assumed before derivational provenance applies.
-
-\subsubsection{Semantic change example: negation semantics}
-
-This example illustrates inter-specification semantic change.
-Holding the program and extensional history fixed, different negation semantics
-induce different spaces of resolving interpretations and hence different
-conditioned outcomes.
-
-\paragraph{Program and instance.}
-Consider the program
-\[
-  \begin{array}{l}
-    p(c) \;\drule\; a(c).      \\
-    q(c) \;\drule\; \neg r(c). \\
-    r(c) \;\drule\; \neg q(c),
-  \end{array}
-\]
-with extensional instance $H = \{a(c)\}$.
-
-\paragraph{Well-founded semantics.}
-Under WFS, the unique resolving interpretation is
+\paragraph{Resolving interpretation.}
+A resolving interpretation under WFS can be written schematically as
 \[
   I_{\mathrm{wfs}}
   \;\triangleq\;
-  \varphi_{p(c)=\mathbf{t}} \wedge
-  \varphi_{q(c)=\mathbf{u}} \wedge
-  \varphi_{r(c)=\mathbf{u}} .
+  \varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)
+  \wedge
+  \varphi_{\seal}(U_1)\wedge\varphi_{\seal}(U_2)\wedge\cdots,
 \]
-Here $p(c)$ is true, while $q(c)$ and $r(c)$ are undefined.
+where each $U_i$ is an unfounded set eliminated at alternation~$i$.
+These commitments are non-commuting and may require an unbounded number of
+alternations.
+Hence WFS has no fixed finite interpretation depth in general, as indicated in
+Figure~\ref{fig:interp-tables}(\textbf{A}, Well-founded).
 
-\paragraph{Stable model semantics.}
-Under stable semantics, the same program admits two resolving interpretations:
+For the running example, the limit of this process yields the unique partial
+interpretation
 \[
-  I^{(q)}_{\mathrm{stab}}
-  \;\triangleq\;
-  \varphi_{p(c)=\mathbf{t}} \wedge
-  \varphi_{q(c)=\mathbf{t}} \wedge
-  \varphi_{r(c)=\mathbf{f}},
-  \qquad
-  I^{(r)}_{\mathrm{stab}}
-  \;\triangleq\;
-  \varphi_{p(c)=\mathbf{t}} \wedge
-  \varphi_{r(c)=\mathbf{t}} \wedge
-  \varphi_{q(c)=\mathbf{f}} .
+  p(c)=\mathbf{t},\quad q(c)=\mathbf{f},\quad r(c)=\mathbf{u},\quad s(c)=\mathbf{u}.
 \]
 
-The conclusion $p(c)$ is preserved across semantics, while $q(c)$ and $r(c)$ are
-not.
-Interpretation provenance makes this preservation (and non-preservation)
-explicit.
+\paragraph{Provenance.}
+Because WFS yields a single resolved outcome (in the lifted domain), there is no
+branching among interpretations.
+Once $I_{\mathrm{wfs}}$ is fixed, provenance is again depth~0:
+\[
+  \mathsf{IP}(p(c)) \;\triangleq\; (I_{\mathrm{wfs}},\, \Prov(a(c))).
+\]
+The difference from stratified semantics lies not in multiplicity of outcomes, but
+in the unbounded, alternating structure of the interpretation itself.
 
-\subsubsection{Certificates and Semantic-Change Queries}
+\subsection{Stable Model Semantics}
+
+\paragraph{Interpretive structure.}
+Stable semantics insists on total two-valued models.
+Like WFS, it requires sealing the stratified prefix before negation is interpreted.
+Unlike WFS, it does not lift the outcome domain; instead it resolves cycles by
+branching among incompatible global hypotheses.
+
+\paragraph{Resolving interpretations.}
+For the running example, resolution begins with the same stratified-prefix sealing
+$\varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)$.
+After this prefix, the negation cycle admits two incompatible resolutions:
+\[
+  I^{(r)}
+  \;\triangleq\;
+  \varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)\wedge
+  (r(c)=\mathbf{t},\,s(c)=\mathbf{f}),
+\]
+\[
+  I^{(s)}
+  \;\triangleq\;
+  \varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)\wedge
+  (s(c)=\mathbf{t},\,r(c)=\mathbf{f}).
+\]
+
+Within either interpretation, the remaining commitments are logically simultaneous
+and commute.
+Thus the interpretation depth is $k{+}1$: the $k$ stratification stages plus one
+additional, non-commuting branching stage.
+This is reflected in Figure~\ref{fig:interp-tables}(\textbf{A}, Stable).
+
+\paragraph{Provenance.}
+Interpretation provenance must record which stable interpretation is assumed:
+\[
+  \mathsf{IP}(r(c)) \;\triangleq\; (I^{(r)},\,1),
+  \qquad
+  \mathsf{IP}(s(c)) \;\triangleq\; (I^{(s)},\,1).
+\]
+Only after this choice does ordinary derivational provenance apply.
+
+\subsubsection{Semantic Change Across Negation Semantics}
+
+Holding the program and extensional history fixed, different negation semantics
+induce different spaces of resolving interpretations.
+
+For example, consider the program
+\[
+  p(c)\leftarrow a(c),\qquad
+  q(c)\leftarrow \neg r(c),\qquad
+  r(c)\leftarrow \neg q(c),
+\]
+with $H=\{a(c)\}$.
+Under WFS, there is a unique resolving interpretation with
+$q(c)=r(c)=\mathbf{u}$.
+Under stable semantics, there are two incompatible interpretations, one with
+$q(c)=\mathbf{t}$ and one with $r(c)=\mathbf{t}$.
+
+The conclusion $p(c)$ is preserved across semantics, while $q(c)$ and $r(c)$ are not.
+Interpretation provenance makes this preservation (and non-preservation) explicit
+and checkable.
+
+\subsection{Certificates and Semantic-Change Queries}
+
+Fix a specification $\Spec$ and a resolving interpretation $I$.
+A \emph{provenance query} is a function
+\[
+  q : (\Spec \mid I) \to A,
+\]
+where $A$ is an answer domain (e.g., Boolean, explanations, dependency sets),
+including classical why/why-not provenance and the semantic-change queries of
+Section~\ref{sec:robustness}.
+Such queries depend only on the restrictions that interpretation imposes on
+admissible outcomes, not on the full resolution process.
+
+Interpretive predicates restrict admissible outcomes; a \emph{certificate}
+summarizes these restrictions.
+Formally, a certificate is a sound over-approximation: it may admit outcomes that
+a full interpretation would exclude, but must exclude none that interpretation
+admits.
+This lossiness is acceptable precisely because provenance queries are evaluated
+only up to the distinctions they are designed to observe.
+
+In the negation sandbox, a natural certificate for the stratified prefix is given
+by a \emph{sealed set} of atoms.
+Equivalently, this can be represented by a \emph{history antichain}: a frontier in
+the partial order of derivations that fixes which facts are considered complete.
+In a totally ordered execution, a single timestamp freezes the past; in a
+partially ordered history, an antichain plays the same role, sealing exactly the
+downward closure of a sub-history without imposing an artificial total order.
 
 Under a fixed resolving interpretation, a minimal certificate sufficient for
-derivational provenance of $p(c)$ need only preserve the commitments that make
-$p(c)$ well-defined.
-However, answering a semantic-change query such as
-``Would $q(c)$ become true under stable-model semantics?''
+derivational provenance of $p(c)$ need only preserve the sealing commitments for
+the stratified prefix.
+By contrast, answering a semantic-change query such as
+``Would $q(c)$ become true under stable semantics?''
 requires a strictly stronger certificate: it must preserve the unresolved
-negation structure of the cycle, not merely a particular resolution of it.
+negation structure itself, not merely one resolution.
 
 This illustrates the query-parametric nature of certificate sufficiency
-(Section~\ref{sec:certificates}): supporting richer provenance questions can only
-increase the information that must be retained.
+(Section~\ref{sec:certificates}): supporting richer provenance questions strictly
+increases the semantic information that must be retained.
 
 
-\subsection{Full Transactional Provenance Examples}
+% ===============================================================
+\section{Transactional Worked Interpretation Provenance}
 \label{sec:appendix-concurrency}
+% ===============================================================
 
-This appendix works through the transactional sandbox examples in full detail.
-We begin with serializability, which uses ordering predicates as its interpretive
-basis, and then extend the same history to snapshot isolation, which requires a
-richer interpretation structure.
-
-% ================================================================
-\subsubsection{Serializability}
+% ===============================================================
+\subsection{Serializability}
 % ================================================================
 
 \paragraph{Data, query, and history.}
@@ -1702,8 +1653,8 @@ If $T_{-2}$ follows $T_Q$, the provenance remains $x_1+x_2$.
 Thus, different resolving interpretations can induce different depth--0
 derivational explanations for the same observation.
 
-% ================================================================
-\subsubsection{Snapshot Isolation}
+% ===============================================================
+\subsection{Snapshot Isolation}
 \label{sec:appendix-SI}
 % ================================================================
 
@@ -1791,9 +1742,9 @@ The interpretation depth of SI is therefore $O(|H|)$ in the worst case.
 Once an SI interpretation is fixed, provenance again reduces to depth--0
 derivational provenance.
 
-% ================================================================
-\subsubsection{Certificates for Robustness Queries}
-% ================================================================
+% ===============================================================
+\subsection{Certificates for Robustness Queries}
+% ===============================================================
 
 For serializability, a certificate sufficient for classical why/why-not provenance
 under a fixed execution can be as small as the resolving serialization itself.

@@ -664,140 +664,80 @@ transactional systems.
 \label{sec:certificates}
 % ================================================================
 
-Interpretations resolve semantic ambiguity by imposing semantic commitments that
-are not independent: some commitments can only be made once others are fixed.
-This structure is captured by the dependency graph over interpretive predicates
-introduced earlier.
-
-Let $G = (\Phi, \rightarrow)$ be the dependency graph for a specification $\Spec$,
-where $\varphi \rightarrow \psi$ indicates that committing to $\psi$ requires
-$\varphi$ to have already been resolved.
-A \emph{layer} is an antichain in $G$ whose elements depend only on predicates in
-earlier layers.
-Intuitively, a layer $L_i$ groups semantic commitments that are mutually independent,
-given the commitments made in lower layers $L_1, \ldots, L_{i-1}$.
-
-Interpretation can therefore be understood as refinement along successive layers
-of this dependency structure.
-However, neither subsequent semantic refinement nor provenance queries require
-access to the full refined specification.
-Instead, it suffices to retain summaries that preserve only the semantic
-distinctions exposed at each layer boundary.
-We call these summaries \emph{layer certificates}.
-
-\subsection{Certificates and Provenance Queries}
-
 Fix a specification $\Spec$ and an interpretation
-$I = \varphi_1 \wedge \cdots \wedge \varphi_k$ with layering
-$L_1,\ldots,L_k$.
-Let
-\[
-  \Spec_i \;\triangleq\; \Spec \mid (\varphi_1 \wedge \cdots \wedge \varphi_i),
-  \qquad
-  J \;\triangleq\; \varphi_{i+1} \wedge \cdots \wedge \varphi_k .
-\]
+$I=\varphi_1\wedge\cdots\wedge\varphi_k$ with layering $L_1,\ldots,L_k$.
 
-\paragraph{Certificates.}
-An interpretive predicate restricts admissible outcomes.
-A \emph{certificate} summarizes this restriction.
+A \emph{provenance query} is a function $q:(\Spec\mid I)\to A$,
+where $A$ is an answer domain (e.g., Boolean, explanations, dependency sets),
+including classical why/why-not provenance and the robustness queries of
+Section~\ref{sec:robustness}.
+Such queries depend only on the restrictions that interpretation places on the
+space of admissible outcomes.
+A \emph{certificate} summarizes these restrictions.
 
 \begin{definition}[Certificate]
   Let $\varphi$ be an interpretive predicate.
-  A certificate for $\varphi$ is a predicate $C : O \to \{\mathsf{true},\mathsf{false}\}$
-  such that for all histories $H$ and all nonempty $S \subseteq O$,
+  A certificate for $\varphi$, written $\varphi\models C$, is a predicate
+  $C:O\to\{\mathsf{true},\mathsf{false}\}$ such that for all histories $H$ and
+  nonempty $S\subseteq O$,
   \[
-    \varphi(H,S) \subseteq \{\, o \in S \mid C(o) \,\}.
+    \varphi(H,S)\subseteq\{\,o\in S\mid C(o)\,\}.
   \]
-  We write $\varphi \models C$.
 \end{definition}
 
-Certificates are lossy summaries that may admit false positives: they exclude only
-those outcomes that interpretation must exclude, without encoding the full
-resolution process.
+Certificates are sound over-approximations: they may admit false positives, but
+never exclude outcomes admitted by interpretation.
+Whether such lossiness is acceptable depends on the provenance queries being asked.
+To formalize this dependence, write
+\[
+  \Spec_i \triangleq \Spec \mid (\varphi_1\wedge\cdots\wedge\varphi_i),
+  \qquad
+  J \triangleq \varphi_{i+1}\wedge\cdots\wedge\varphi_k .
+\]
 
-\paragraph{Provenance queries.}
-Interpretation provenance is queried.
-
-\begin{definition}[Provenance Query]
-  A \emph{provenance query} is a function
+\begin{definition}[Sufficient Cert.]
+  A certificate $C_i$ is \emph{sufficient for $(J,\mathcal{Q})$} if for all histories $H$,
   \[
-    q : (\Spec \mid I) \to A ,
+    (\Spec_i\mid J)(H)=((\Spec\mid\chi_{C_i})\mid J)(H),
   \]
-  where $A$ is an answer domain (e.g., Boolean, explanations, or dependency sets).
+  and for all $q\in\mathcal{Q}$,
+  \[
+    q((\Spec_i\mid J)(H)) = q(((\Spec\mid\chi_{C_i})\mid J)(H)).
+  \]
 \end{definition}
 
-Examples include interpretation-conditioned classical data provenance queries (why, why-not, etc.),
-and the robustness and preservation queries we introduce in Section~\ref{sec:robustness}.
+\noindent
+Thus, certificates may be lossy, but only insofar as they preserve both further
+semantic resolution and the answers to the intended provenance queries.
 
-\paragraph{Sufficiency for continuation and queries.}
-Certificates must preserve both future interpretation and the answers to intended
-provenance queries.
-
-\begin{definition}[Sufficient Certificate]
-  A certificate $C_i$ is \emph{sufficient for $(J,\mathcal{Q})$} if for all histories
-  $H$:
-  \begin{enumerate}
-    \item \emph{Continuation:}
-          \[
-            (\Spec_i \mid J)(H)
-            =
-            \bigl((\Spec \mid \chi_{C_i}) \mid J\bigr)(H);
-          \]
-    \item \emph{Query preservation:} for all $q \in \mathcal{Q}$,
-          \[
-            q\bigl((\Spec_i \mid J)(H)\bigr)
-            =
-            q\bigl(((\Spec \mid \chi_{C_i}) \mid J)(H)\bigr).
-          \]
-  \end{enumerate}
+\begin{definition}[Layer Cert.]
+  A \emph{layer certificate} is a certificate $C_i$ for layer $L_i$ that is sufficient
+  for $(J,\mathcal{Q})$.
 \end{definition}
-
-\begin{definition}[Layer Certificate]
-  A \emph{layer certificate} is a certificate $C_i$ for layer $L_i$ that is
-  sufficient for $(J,\mathcal{Q})$, where $J$ is the remaining interpretation
-  after layer $L_i$ and $\mathcal{Q}$ is the intended family of provenance queries.
-\end{definition}
-
-% \subsection{Query Sensitivity of Certificates}
-
-Supporting richer provenance queries strictly increases certificate requirements.
 
 \begin{theorem}[Query Monotonicity]
-  If $\mathcal{Q}_1 \subseteq \mathcal{Q}_2$, then every certificate sufficient for
+  If $\mathcal{Q}_1\subseteq\mathcal{Q}_2$, then every certificate sufficient for
   $(J,\mathcal{Q}_2)$ is sufficient for $(J,\mathcal{Q}_1)$.
 \end{theorem}
 
 \noindent
-Thus, extending the space of provenance questions can only require retaining
+Thus, expanding the space of provenance questions can only require retaining
 additional semantic information, never less.
+Appendix~\ref{sec:appendix-datalog} illustrates this effect for semantic-change
+queries under negation; Appendix~\ref{sec:appendix-concurrency} does so for
+robustness queries under transactional ambiguity.
 
-Concrete illustrations of this phenomenon appear in the appendices.
-Appendix~\ref{sec:appendix-datalog} shows how inter-specification semantic-change queries
-(Section~\ref{sec:robustness}) for negation semantics enlarge certificates beyond
-those needed for derivational provenance.
-Appendix~\ref{sec:appendix-concurrency} shows the analogous effect for robustness
-queries under transactional ambiguity.
 
-\subsection{Summary}
-
+\paragraph{Summary}
 Layer certificates provide a principled interface between semantic resolution and
-provenance.
-By parameterizing certificates by families of provenance queries,
-interpretation provenance makes explicit which semantic distinctions must be
-retained—and which can be discarded—when supporting explanation, robustness, or
-inter-specification semantic change (Section~\ref{sec:robustness}).
-
-This perspective also clarifies a familiar pattern in systems lineage and
-observability.
-Tracing systems such as Dapper typically retain worst-case information---full histories---in order to
-support arbitrary downstream diagnostic queries, effectively treating all
-semantic distinctions as potentially relevant~\cite{sigelman2010dapper}.
-In our framework, this corresponds to choosing certificate families large enough
-to preserve all future provenance queries.
-Interpretation provenance exposes this tradeoff explicitly and provides a semantic
-basis for more parsimonious lineage when the intended query family is known.
-We illustrate this connection in Appendix~\ref{app:systems-lineage}.
-
+provenance, making explicit which semantic distinctions must be retained for a
+given family of provenance queries.
+This reframes a familiar tradeoff in systems lineage: tracing systems such as
+Dapper retain full histories to support arbitrary diagnostics~\cite{sigelman2010dapper},
+corresponding to certificates that preserve all future queries.
+Interpretation provenance exposes this choice explicitly and enables more
+parsimonious lineage when the intended query family is known
+(Appendix~\ref{app:systems-lineage}).
 % ================================================================
 \section{Sandbox I: Datalog with Negation As Semantic Ambiguity}
 \label{sec:negation}
@@ -1097,7 +1037,6 @@ state is invariant across executions.
 A database state may vary across admissible schedules even when a particular
 query answer is stable; conversely, a state may be fixed while a query result is
 not.
-
 Answering these questions requires provenance that is sensitive to
 \emph{which transactional resolutions were relied upon}, not merely which data
 items were read.
@@ -1219,12 +1158,11 @@ These predicates do not collapse to a total order and must range over all concur
 transactions in the history.
 
 Consequently, while serializability has interpretation depth~1 (all ordering
-predicates commute), snapshot isolation has interpretation depth
-$O(|H|)$ in the worst case, since each transaction may require an independent
+predicates commute), snapshot isolation has worst-case interpretation depth
+$O(|H|)$, since each transaction may require an independent
 snapshot commitment.
 Once an SI interpretation is fixed, however, the specification again becomes
 single-valued and provenance reduces to ordinary depth--0 derivational provenance.
-
 The transactional provenance questions are unchanged: which semantic commitments
 were required to justify an observation?
 What changes is the structure and size of the interpretation space.
@@ -1244,29 +1182,23 @@ Interpretation provenance records not only how observations are derived, but the
 semantic commitments under which those derivations are valid.
 This section formalizes two such families of questions and grounds them in the
 examples developed earlier.
-
 Here, \emph{observations} refer to observable query answers or derived facts—i.e., elements of the outcome set $O$—as defined in Section~\ref{sec:prelim}.
 
-\subsection{Intra- vs.\ Inter-Specification Questions}
+% \subsection{Intra- vs.\ Inter-Specification Questions}
 
 We distinguish two classes of provenance questions.
-
 \emph{Intra-specification} questions fix a specification $\Spec$ and range over its
-resolving interpretations.
-They ask which observations hold under different admissible resolutions
-of the \emph{same} specification.
-
+resolving interpretations, asking which observations hold under different
+admissible resolutions of the \emph{same} specification.
 \emph{Inter-specification} questions compare observations across distinct
-specifications $\Spec$ and $\Spec'$.
-They ask which observations persist when the specifications themselves change---for
-example, when a transactional system moves from serializability to snapshot
-isolation, or when a logic program is interpreted under a different negation
-semantics.
+specifications $\Spec$ and $\Spec'$, asking which observations persist when the
+specification itself changes—for example, when a transactional system moves from
+serializability to snapshot isolation, or when a logic program adopts a different
+negation semantics.
+Both question families are expressed using interpretation provenance; they simply
+quantify over different spaces.
 
-Both question families are expressed using interpretation provenance, they
-just quantify over different spaces.
-
-\subsection{Robustness Within a Fixed Specification}
+\subsection{Intra-Specification Queries: Robustness}
 
 Robustness is an intra-specification property.
 Fix a specification $\Spec$ and a class $\mathcal{I}$ of resolving interpretations.
@@ -1296,15 +1228,17 @@ This exposes that $b$ and $c$ are robust under serializability, while $d$ is not
 The lack of parsimony in the predicate basis here is both meaningful (it exposes artifacts of serializability)
 and practical (it avoids an explosion of ordering predicates).
 
-\subsection{Semantic Change Across Specifications}
+\subsection{Inter-Specification Queries: Preservation under Semantic Change}
 \label{sec:semantic-change}
 
 Semantic change is an inter-specification question: it compares which observations
 are admitted under different specifications for the same history.
 
 \paragraph{Preservation.}
-Given specifications $\Spec$ and $\Spec'$, an outcome $o$ is \emph{preserved}
-from $\Spec$ to $\Spec'$ iff
+Given specifications $\Spec$ and $\Spec'$, outcome $o$, and
+sets $\mathcal{I}$ and $\mathcal{I}'$ of all resolving interpretations
+for $\Spec$ and $\Spec'$ respectively,
+$o$ is \emph{preserved} from $\Spec$ to $\Spec'$ iff
 \[
   \forall I \in \mathcal{I},\;
   \bigl(o \in (\Spec \mid I)(H)\bigr)
@@ -1312,8 +1246,6 @@ from $\Spec$ to $\Spec'$ iff
   \exists I' \in \mathcal{I}'.\;
   \bigl(o \in (\Spec' \mid I')(H)\bigr),
 \]
-where $\mathcal{I}$ and $\mathcal{I}'$ range over resolving interpretations
-admissible under $\Spec$ and $\Spec'$ respectively.
 
 \paragraph{Serializable outcomes under snapshot isolation.}
 Snapshot isolation admits a larger space of interpretations than serializability.
@@ -1321,14 +1253,13 @@ Preservation therefore reduces to the following question:
 \emph{given an SI interpretation, does there exist a serializable interpretation
   that admits the same outcome?}
 
-Interpretation provenance provides a concrete handle on this question.
-An SI interpretation explicitly records snapshot choices and commit-admissibility
-constraints.
-From these predicates, one can check whether the implied visibility and conflict
-relations admit a topological sort that constitutes a serial execution.
-If so, the outcome is preserved under strengthening from SI to serializability;
-if not, the outcome is inherently non-serializable. Appendix~\ref{sec:appendix-concurrency}
-works through a detailed example.
+Interpretation provenance provides concrete syntax for this question.
+An SI interpretation records snapshot choices and commit-admissibility constraints.
+From these predicates, one can check whether the induced visibility and conflict
+relations admit a topological sort constituting a serial execution.
+If so, the outcome is preserved when strengthening from SI to serializability;
+otherwise it is inherently non-serializable.
+Appendix~\ref{sec:appendix-concurrency} works through a detailed example.
 
 This reframes preservation as a \emph{semantic validation problem} over
 interpretations rather than as a comparison of executions.
@@ -1359,8 +1290,7 @@ predicates.
 \label{sec:related}
 % ================================================================
 
-\subsection{Data Provenance and Explanations}
-
+\noindent\textbf{Data provenance and explanations.}
 Algebraic provenance provides a uniform framework for explaining query
 conclusions under fixed, resolved semantics by annotating derivations with
 elements of a commutative semiring
@@ -1373,13 +1303,17 @@ explanations
 From the perspective of this paper, these approaches operate at
 interpretation depth~0: semantic ambiguity has already been resolved, and
 provenance explains derivations relative to a fixed semantics.
-Interpretation provenance is complementary.
-It explains which semantic commitments are required for observations to hold
-at all, and how classical provenance depends on those commitments once
+This includes work on incremental view maintenance and \emph{homeostasis},
+which identifies queries whose answers are invariant under admissible input
+changes and therefore require no additional semantic commitments to maintain
+\cite{gehrke2002homeostasis}.
+Interpretation provenance is complementary: rather than assuming resolved
+semantics, it explains which semantic commitments are required for observations
+to hold at all, and how classical provenance depends on those commitments once
 resolution has occurred.
 
-\subsection{Negation and Non-Monotonic Semantics}
-
+\medskip
+\noindent\textbf{Negation and non-monotonic semantics.}
 Classical semantics for Datalog with negation provide well-understood mechanisms
 for resolving semantic ambiguity, with established relationships under syntactic
 restrictions.
@@ -1389,9 +1323,9 @@ setting in which resolution strategies are explicit and formal, making it
 possible to study how different semantic commitments induce distinct
 interpretation structures and provenance behavior.
 
-\subsection{Transactional and Systems Provenance}
-
-A first line of work studies provenance in transactional, workflow, and database
+\medskip
+\noindent\textbf{Transactional and systems provenance.}
+Provenance has been studied in transactional, workflow, and database
 settings under an assumed execution or isolation level
 \cite{bernstein1987concurrency,adya1999weak,cerone2015consistency,cheney2009provenance,freire2008provenance}.
 In these settings, semantic resolution is implicit: provenance explains results
@@ -1404,43 +1338,21 @@ observed behavior
 \cite{seltzer2005provenance,bates2015trustworthy,sigelman2010dapper}.
 These approaches take a maximalist view of provenance, capturing entire execution
 histories to account for ambiguity in scheduling and message interleaving.
-
 Interpretation provenance provides a semantic foundation for structuring such
-systems provenance.
-Rather than committing to a single reconstructed execution, it makes explicit
-the semantic commitments required for a diagnostic conclusion to hold across
-admissible executions, supporting principled notions of parsimony and robustness.
+systems provenance: rather than committing to a single reconstructed execution,
+it makes explicit the semantic commitments required for a diagnostic conclusion
+to hold across admissible executions, supporting principled notions of parsimony
+and robustness.
 Recent systems work on mixed isolation regimes, such as Milano et al.’s MixT
 \cite{milano2020mixt}, addresses related concerns operationally; our contribution
 is a semantic and explanatory account that makes such mixtures explicit and
 checkable.
 
-\paragraph{Homeostasis.}
-Gehrke, Korn, and Srivastava’s work on \emph{homeostasis}~\cite{gehrke2002homeostasis}
-studies queries whose results remain invariant under admissible input changes,
-enabling incremental maintenance without recomputation.
-In our frame, homeostatic queries inhabit the \emph{depth 0} fragment:
-the specification is already resolved; additional semantic commitments are
-neither required nor permitted.
-
-Our framework is complementary.
-Rather than enforcing invariance, we model and explain what happens when
-invariance does \emph{not} hold—when specifications intentionally admit multiple
-admissible outcomes, and semantic commitments must be staged to make meaning
-determinate.
-Interpretation depth characterizes the structure and necessity of those stages,
-while robustness questions diagnose which conclusions persist despite the
-absence of finer semantic commitments.
-Viewed this way, homeostasis isolates a class of specifications whose semantics
-are already resolved, so incremental change does not require introducing new
-semantic commitments.
-
-\subsection{Interpretation Complexity}
-
+\medskip
+\noindent\textbf{Interpretation complexity.}
 This work builds on a prior complexity theory of interpretation
 introduced in~\cite{hellerstein2026interpretation}, which characterizes the cost,
 depth, and coordination requirements of semantic resolution.
-
 The present paper focuses instead on explanation.
 Interpretations are assumed given, and interpretation provenance explains how
 observations depend on them.

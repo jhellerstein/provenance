@@ -91,10 +91,4 @@
 
   // Forward and reverse search (SyncTeX)
   "latex-workshop.synctex.synctexjs.enabled": true,
-
-  // Formatting
-  // This removes the VS Code alert asking you to set a formatter.
-  // Uses latexindent (ships with TeX Live / MacTeX).
-  "latex-workshop.formatting.latex": "latexindent",
-  "latex-workshop.formatting.latexindent.args": ["-m"]
 }

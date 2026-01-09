@@ -772,33 +772,38 @@ Stable &
 
   \vspace{1em}
 
-  \begin{tabular}{@{}p{0.23\linewidth} p{0.69\linewidth}@{}}
-    \toprule
-    \multicolumn{2}{c}{\textbf{(B) Transactions: serializability and snapshot isolation}} \\
-    \midrule
-    \textbf{Case}                & \textbf{One resolving interpretation}                  \\
-    \midrule
-    SER robust $b$               &
-    $\varphi_{T_1 \prec T_Q} \wedge \varphi_{T_Q \prec T_2} \wedge \varphi_{T_2 \prec T_3}
-    \wedge \varphi_{T_3 \prec T_4} \wedge \varphi_{T_4 \prec T_5}$                        \\
-    %
-    SER contingent $d$ (why)     &
-    $\varphi_{T_1 \prec T_2} \wedge \varphi_{T_2 \prec T_3} \wedge \varphi_{T_3 \prec T_4}
-    \wedge \varphi_{T_4 \prec T_Q} \wedge \varphi_{T_Q \prec T_5}$                        \\
-    %
-    SER contingent $d$ (why-not) &
-    $\varphi_{T_1 \prec T_2} \wedge \varphi_{T_2 \prec T_3} \wedge \varphi_{T_3 \prec T_4}
-    \wedge \varphi_{T_4 \prec T_5} \wedge \varphi_{T_5 \prec T_Q}$                        \\
-    SI (write-skew $e/f$)        &
-    $\Bigl(\!\bigwedge_{i\in\{1,2,3,4,6,7\}}\varphi_{\snap(T_i)=\emptyset}\Bigr)
-      \wedge
-      \varphi_{T_4 \in \snap(T_5)}
-      \wedge
-      \Bigl(\!\bigwedge_{j=1}^7 \varphi_{T_j \in \snap(T_Q)}\Bigr)
-      \wedge
-    \varphi_{\FCW}(\{T_1,\dots,T_7\})$                                                    \\
-    \bottomrule
-  \end{tabular}
+\begin{tabular}{@{}p{0.23\linewidth} p{0.54\linewidth} p{0.12\linewidth}@{}}
+  \toprule
+  \multicolumn{3}{c}{\textbf{(B) Transactions: serializability and snapshot isolation}} \\
+  \midrule
+  \textbf{Case} & \textbf{One resolving interpretation} & \textbf{Depth} \\
+  \midrule
+  SER robust $b$               &
+  $\varphi_{T_1 \prec T_Q} \wedge \varphi_{T_Q \prec T_2} \wedge \varphi_{T_2 \prec T_3}
+   \wedge \varphi_{T_3 \prec T_4} \wedge \varphi_{T_4 \prec T_5}$                        &
+  $1$ \\
+  %
+  SER contingent $d$ (why)     &
+  $\varphi_{T_1 \prec T_2} \wedge \varphi_{T_2 \prec T_3} \wedge \varphi_{T_3 \prec T_4}
+   \wedge \varphi_{T_4 \prec T_Q} \wedge \varphi_{T_Q \prec T_5}$                        &
+  $1$ \\
+  %
+  SER contingent $d$ (why-not) &
+  $\varphi_{T_1 \prec T_2} \wedge \varphi_{T_2 \prec T_3} \wedge \varphi_{T_3 \prec T_4}
+   \wedge \varphi_{T_4 \prec T_5} \wedge \varphi_{T_5 \prec T_Q}$                        &
+  $1$ \\
+  %
+  SI (write-skew $e/f$)        &
+  $\Bigl(\!\bigwedge_{i\in\{1,2,3,4,6,7\}}\varphi_{\snap(T_i)=\emptyset}\Bigr)
+    \wedge
+    \varphi_{T_4 \in \snap(T_5)} 
+    \wedge
+    \Bigl(\!\bigwedge_{j=1}^7 \varphi_{T_j \in \snap(T_Q)}\Bigr) \linebreak
+    \wedge
+    \varphi_{\FCW}(\{T_1,\dots,T_7\})$                                                    &
+  $O(|H|)$ \\
+  \bottomrule
+\end{tabular}
 
 \caption{
   Interpretation summaries for our two sandboxes.
@@ -941,171 +946,132 @@ Appendix~\ref{sec:appendix-datalog}.
 % ================================================================
 
 We now turn to transactional systems.
-As in the previous section, our goal is not to propose new correctness criteria,
-but to understand how semantic ambiguity shapes provenance.
+As in Sandbox~I, our goal is not to propose new correctness criteria, but to use a
+well-studied setting to expose how \emph{semantic ambiguity} arises within a fixed
+specification, and how different resolution regimes induce different
+\emph{interpretation structures}.
 
-Transactional systems introduce a qualitatively different source of ambiguity
-from negation.
-Here, ambiguity arises from \emph{concurrency}: transactions race to read and write
-shared state, and the execution may not uniquely determine which effects are
-observed.
+In transactional systems, ambiguity arises not from negation but from
+\emph{concurrency}.
+Transactions race to read and write shared state, and the execution history does
+not uniquely determine which effects are observed.
 Interpretation provenance explains how query results depend not only on data, but
-on the semantic resolution of that concurrency.
+on the semantic commitments used to resolve that concurrency.
 
-\subsection{Provenance Questions Under Concurrency}
+\subsection{Concurrency as Semantic Ambiguity}
 
-Classical provenance explains how an output tuple depends on base data, assuming a
-fixed semantics and a fixed execution outcome.
-Transactional systems invalidate this assumption.
-
-Consider a query result tuple $t$ produced by executing a workload of
-transactions.
-There are several distinct provenance questions one might ask: (\emph{Existence})
-does $t$ appear under \emph{some} admissible execution; (\emph{Universality}) does
-$t$ appear under \emph{all}
-admissible executions; and (\emph{Dependence}) on which semantic choices---e.g.,
-transaction orderings or visibility decisions---does the presence of $t$ depend?
-
-These questions are strictly more subtle than asking whether a final database
-state is invariant across executions.
-A database state may vary across admissible schedules even when a particular
-query answer is stable; conversely, a state may be fixed while a query result is
-not.
-Answering these questions requires provenance that is sensitive to
-\emph{which transactional resolutions were relied upon}, not merely which data
-items were read.
-This is precisely the role of interpretation provenance.
-
-\subsection{Ambiguity Before Order}
-
-To address this setting, we begin with a deliberately
-weak semantic model.
-A transactional workload consists of a set of transactions, each issuing reads
-and writes on shared objects and eventually committing.
-At this level, the execution does not specify an order between transactions.
-Reads may observe values written by different transactions, and multiple
-explanations of the same observed behavior may coexist.
-
-This lack of order is the source of semantic ambiguity.
+A transactional workload consists of a finite set of transactions issuing reads
+and writes and eventually committing.
+The history records these operations and commit events, but—crucially—does not
+determine a unique order or visibility relation among transactions.
 Even with complete knowledge of all operations, multiple outcomes may be
 admissible.
-Order is not a primitive feature of the execution; it is a semantic commitment
-used to justify an outcome.
 
-Classical provenance assumes a fixed execution outcome.
-Transactional systems invalidate this assumption: the same history may admit
-multiple outcomes, and tuple-level provenance questions must therefore range over
-semantic resolutions of concurrency.
+Order, therefore, is not a primitive feature of the execution.
+It is a \emph{semantic commitment} used to justify an outcome.
+This mirrors the role of stabilization commitments in Sandbox~I: before committing
+to an order or visibility decision, certain conclusions are simply not determined.
 
-\subsection{Outcomes under Serializability}
+Classical data provenance assumes a fixed execution outcome.
+Transactional systems invalidate this assumption.
+A single history may admit multiple outcomes, and tuple-level provenance questions
+must therefore range over alternative semantic resolutions of concurrency.
 
-Under serializability, outcomes are defined via serialization.
-
-An \emph{outcome} is a final database state produced by some interleaved execution of
-the transactions.
-An outcome is admissible if there exists a total order of transactions such that
-sequential execution in that order yields the same outcome and respects the
-history’s ordering constraints.
-
-A single history may admit many such outcomes.
-Each corresponds to a distinct semantic explanation of the same concurrent
-behavior.
-Interpretation constrains this space by committing to ordering decisions.
-
-\subsection{Interpretive Predicates as Ordering Commitments}
-
-Accordingly, the natural primitive interpretive predicates in this setting are
-\emph{ordering predicates}.
-For transactions $T_i$ and $T_j$, the predicate
-$\varphi_{T_i \prec T_j}$ commits that $T_i$ precedes $T_j$ in the serialization.
-Conditioning on an ordering predicate eliminates all admissible outcomes whose
-serializations violate it.
-An interpretation is a finite conjunction of such predicates, inducing a partial
-order on transactions.
-A fully resolving interpretation induces a total (serial) order.
-
-Ordering predicates such as
-$\varphi_{T_1 \prec T_2}$ and $\varphi_{T_2 \prec T_3}$ are independent and
-commutative, so the interpretation depth of serializability is~1.
-
-As shorthand, we write $\varphi_{T_1 \prec \cdots \prec T_k \prec \mathcal{U}}$ to specify
-that $T_1 \prec \cdots \prec T_k$ and that every $U\in\mathcal{U}$ follows $T_k$, i.e.
-$\bigwedge_{i=1}^{k-1}\varphi_{T_i\prec T_{i+1}} \wedge
-  \bigwedge_{U\in\mathcal{U}}\varphi_{T_k\prec U}$.
-
-In what follows, we fix one resolving interpretation that admits the observation
-of interest.
-Many distinct interpretations may yield the same observation—possibly with
-different classical derivational provenance (Appendix~\ref{sec:appendix-concurrency})—but enumerating them is not
-informative for our purposes.
-We therefore present a single resolving interpretation as a representative
-worked example.
-
-\subsection{Interpretation Structure (Example~\ref{ex:example})}
+\subsection{Running Example}
 
 We reuse the running example from the introduction and
-Appendix~\ref{sec:appendix-concurrency}, focusing on the contingent tuple $d$
-inserted by $T_4$ and deleted by $T_5$.
+Appendix~\ref{sec:appendix-concurrency}, focusing on the tuple $d$ inserted by
+$T_4$ and deleted by $T_5$.
+The history does not determine whether $d$ is visible to the query transaction
+$T_Q$.
+That depends on how concurrency is resolved.
 
+As in Sandbox~I, this single example suffices to exhibit multiple interpretation
+shapes under different semantics.
+
+\subsection{Serializability as Interpretation Shape}
+
+Under serializability, admissible outcomes are those explainable by some total
+order of transactions consistent with the history.
+Each outcome corresponds to at least one such serialization.
+
+\paragraph{Interpretive predicates.}
+The primitive interpretive predicates in this setting are \emph{ordering
+predicates}.
+For transactions $T_i$ and $T_j$, the predicate $\varphi_{T_i \prec T_j}$ commits
+that $T_i$ precedes $T_j$ in the serialization.
+An interpretation is a finite conjunction of such predicates, inducing a partial
+order; a fully resolving interpretation induces a total order.
+
+Crucially, ordering predicates commute.
+Committing to $T_1 \prec T_2$ and to $T_2 \prec T_3$ can be done in either order and
+has the same effect.
+As a result, serializability has interpretation depth~1: all semantic commitments
+belong to a single commutative stage.
+
+\paragraph{Example.}
 Under the interpretation
-$\;I_{\mathsf{in}} \triangleq
-  \varphi_{T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_Q \prec T_5}$,
+\[
+  I_{\mathsf{in}} \triangleq
+  \varphi_{T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_Q \prec T_5},
+\]
 the insert precedes the query and the delete follows it.
-Conditioning on $I_{\mathsf{in}}$ yields a resolved outcome in which $d$ is
-present, and classical provenance applies:
-$\Prov_{Q \mid I_{\mathsf{in}}}(d)=x_4$.
+Conditioning on $I_{\mathsf{in}}$ yields a resolved outcome in which $d$ is present,
+with classical provenance $\Prov_{Q \mid I_{\mathsf{in}}}(d)=x_4$.
 
 Under the alternative interpretation
-$\;I_{\mathsf{out}} \triangleq
-  \varphi_{T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_5 \prec T_Q}$,
-the delete precedes the query, so $d$ is absent and the appropriate classical
-question is \emph{why-not}.
+\[
+  I_{\mathsf{out}} \triangleq
+  \varphi_{T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_5 \prec T_Q},
+\]
+the delete precedes the query and $d$ is absent.
+Prior to fixing an interpretation, there is no single classical provenance question
+for $d$.
+Interpretation provenance records the semantic commitments under which each
+explanation applies.
 
-Prior to fixing an interpretation, there is no single classical provenance
-question for $d$.
-Interpretation provenance makes this dependence explicit by recording the semantic
-commitments under which derivations hold; for example,
-$\mathsf{IP}_Q(d) \triangleq (I_{\mathsf{in}},\, x_4)$.
+Figure~\ref{fig:interp-tables}(\textbf{B}, SER) summarizes representative resolving
+interpretations.
 
-Thus, classical provenance explains \emph{why} a tuple follows from a resolved
-outcome, while interpretation provenance explains \emph{under which semantic
-  resolutions} that explanation applies.
+\subsection{Snapshot Isolation as Interpretation Shape}
 
-\subsection{Snapshot Isolation}
+Snapshot isolation (SI) resolves concurrency using a different basis of semantic
+commitments.
+Rather than committing to a total order, SI assigns each transaction a snapshot of
+the database state it reads from and enforces a global
+first-committer-wins constraint on writes.
 
-Serializability resolves concurrency by committing to a total order on transactions.
-Snapshot isolation (SI) resolves concurrency differently, using a distinct basis of
-interpretive predicates and a different interpretation structure.
+\paragraph{Interpretive predicates.}
+An SI interpretation consists of:
+(i) snapshot predicates specifying, for each transaction, which committed effects
+it observes; and
+(ii) a global write-conflict admissibility predicate.
+These commitments do not collapse to a total order and must be made separately for
+potentially many concurrent transactions.
 
-Under SI, each transaction reads from a snapshot of the database corresponding to
-some committed prefix of the history, while writes are validated at commit time
-according to a first-committer-wins rule.
-As a result, outcomes are justified not by a single serialization order, but by a
-collection of snapshot and commit-admissibility commitments.
+Unlike serializability, these predicates do not commute in general: snapshot
+choices for one transaction constrain admissible choices for others.
+Accordingly, snapshot isolation has worst-case interpretation depth $O(|H|)$,
+reflecting a sequence of non-commuting snapshot commitments.
 
-Figure~\ref{fig:interp-tables}(B) includes an SI row illustrating this structure.
-Unlike serializability, whose resolving interpretations are conjunctions of
-pairwise ordering predicates, an SI interpretation records, for each transaction,
-the snapshot it reads from together with a global write-conflict admissibility
-constraint.
-These predicates do not collapse to a total order and must range over all concurrent
-transactions in the history.
+Figure~\ref{fig:interp-tables}(\textbf{B}, SI) records one such resolving
+interpretation for the running example.
+Once an SI interpretation is fixed, the specification again becomes single-valued,
+and provenance reduces to ordinary depth--0 derivational provenance.
+What differs from serializability is the \emph{structure and depth} of the semantic
+resolution required to reach that point.
 
-Consequently, while serializability has interpretation depth~1 (all ordering
-predicates commute), snapshot isolation has worst-case interpretation depth
-$O(|H|)$, since each transaction may require an independent
-snapshot commitment.
-Once an SI interpretation is fixed, however, the specification again becomes
-single-valued and provenance reduces to ordinary depth--0 derivational provenance.
-The transactional provenance questions are unchanged: which semantic commitments
-were required to justify an observation?
-What changes is the structure and size of the interpretation space.
-
-\paragraph{Summary.}
-Transactional ambiguity arises because order is not given but must be assumed.
-Interpretation provenance isolates the semantic commitments that justify query
-results, extending classical provenance to settings where correctness admits
-multiple valid executions.
+\paragraph{Takeaway.}
+Both serializability and snapshot isolation admit multiple admissible outcomes for
+the same transactional history.
+What distinguishes them is not the presence of ambiguity, but the
+\emph{structure of semantic resolution}.
+Serializability resolves ambiguity via a single commutative layer of ordering
+commitments.
+Snapshot isolation requires a richer, deeper structure of non-commuting snapshot
+and conflict commitments.
+Interpretation provenance makes these differences explicit, while classical
+provenance applies only after resolution is complete.
 
 % ================================================================
 \section{Change and Robustness Across Interpretations}
@@ -1561,14 +1527,44 @@ increases the semantic information that must be retained.
 \label{sec:appendix-concurrency}
 % ===============================================================
 
+This appendix instantiates interpretation provenance for the transactional sandbox
+used in Section~\ref{sec:transactions}.
+As in the Datalog appendix, we make explicit the interpretive predicates,
+their dependency structure, and the resulting provenance annotations.
+The goal is to justify the interpretation shapes and depths summarized in
+Figure~\ref{fig:interp-tables}(\textbf{B}).
+
+Throughout, interpretive predicates rule out admissible executions and therefore
+constitute genuine semantic commitments.
+Once a resolving interpretation is fixed, the specification becomes single-valued
+and provenance reduces to ordinary derivational provenance.
+
 % ===============================================================
 \subsection{Serializability}
-% ================================================================
+% ===============================================================
+
+\paragraph{Interpretive structure.}
+Under serializability, semantic ambiguity arises because a concurrent history does
+not determine a unique transaction order.
+Outcomes are justified by committing to a \emph{serialization} consistent with the
+history’s conflicts.
+
+The primitive interpretive predicates are \emph{ordering predicates}
+$\varphi_{T_i \prec T_j}$, asserting that transaction $T_i$ precedes $T_j$ in the
+serialization.
+Conditioning on such a predicate eliminates all admissible outcomes whose
+serializations violate it.
+
+Crucially, ordering predicates commute: no ordering commitment enables or disables
+another.
+Semantic resolution therefore consists of a \emph{single stage} of commitment,
+regardless of how many orderings are asserted.
+Hence serializability has interpretation depth~1.
 
 \paragraph{Data, query, and history.}
 Let $S(k,y)$ be a relation and consider the query
 $Q(y) \drule S(k,y)$.
-The database initially is empty.
+The database is initially empty.
 Five transactions execute:
 \[
   \begin{array}{ll}
@@ -1579,91 +1575,75 @@ Five transactions execute:
     T_5: \textsf{delete } S(4,d).               &
   \end{array}
 \]
-A query transaction $T_Q$ evaluates $Q$ under a serializable execution model,
-where the visibility of updates is determined by the chosen serialization order.
+A query transaction $T_Q$ evaluates $Q$.
 
-\paragraph{Semantic ambiguity under serializability.}
-The history alone does not determine whether $d$ is visible to $T_Q$.
-That depends on how $T_Q$ is ordered relative to $T_4$ and $T_5$.
-We write $\varphi_{T_i \prec T_j}$ for the interpretive predicate committing that
-the execution corresponds to a serial schedule in which $T_i$ precedes $T_j$.
+The history alone does not determine whether $d$ is visible to $T_Q$; this depends
+on the relative ordering of $T_4$, $T_5$, and $T_Q$.
 
-We treat $Q$ as reading the entire relation $S$, so any transaction that inserts
-into $S$ conflicts with $T_Q$.
-% For expository purposes, we restrict attention to serial executions in which
-% $T_Q$ is last in the serialization; this loses no generality for the example and
-% allows the query result to witness the final database state.
-Transactions $T_4$ and $T_5$ conflict with each other and with $T_Q$, leaving their
-relative ordering unresolved.
-
-The history therefore admits multiple resolving interpretations (serial schedules)
-consistent with serializability.
-For exposition, we fix two concrete resolving interpretations that differ only in
-the relative ordering of $T_4$, $T_5$, and $T_Q$:
+\paragraph{Resolving interpretations.}
+Two valid resolving interpretations under serializability are:
 \[
   I_{\mathsf{in}} \triangleq
-  T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_Q \prec T_5
-\]
-and
-\[
+  T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_Q \prec T_5,
+  \qquad
   I_{\mathsf{out}} \triangleq
-  T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_5 \prec T_Q .
+  T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_5 \prec T_Q.
 \]
+Both are conjunctions of ordering predicates and therefore arise in a single
+semantic stage.
 
-Both are valid resolving interpretations under serializability.
-
-\paragraph{Interpretation depth and post-resolution provenance.}
-All ordering predicates commute with each other, so the interpretation depth is~1.
-Said differently, under serializability, semantic ambiguity is resolved by a
-\emph{single stage} of semantic commitment: fixing a serialization order.
-
-
-Once a resolving interpretation is fixed, the specification becomes single-valued
-and provenance reduces to ordinary depth--0 derivational provenance.
+\paragraph{Provenance.}
+Once a resolving interpretation is fixed, provenance is purely derivational.
 Conditioned on $I_{\mathsf{in}}$, the resolved snapshot contains $b,c,d$:
 \[
   \Prov_{Q \mid I_{\mathsf{in}}}(b)=x_1+x_2,\quad
   \Prov_{Q \mid I_{\mathsf{in}}}(c)=x_3,\quad
   \Prov_{Q \mid I_{\mathsf{in}}}(d)=x_4.
 \]
-Conditioned on $I_{\mathsf{out}}$, the resolved snapshot contains $b,c$ but not $d$,
-and classical why-not provenance applies to $d$.
+Conditioned on $I_{\mathsf{out}}$, tuple $d$ is absent and classical why-not
+provenance applies.
 
-Thus, interpretation provenance accounts for the depth--1 semantic choice required
-to justify a snapshot, after which all explanation proceeds at depth~0.
-
-\paragraph{Interpretation provenance.}
-Interpretation provenance attaches the resolving interpretation to the ordinary
-derivational explanation.
-For the observed output $\{b,c\}$ we record:
+Interpretation provenance records the semantic assumption under which the
+derivation holds; e.g.,
 \[
-  \mathsf{IP}_Q(b)\triangleq (I,\, x_1+x_2),\quad
-  \mathsf{IP}_Q(c)\triangleq (I,\, x_3),
+  \mathsf{IP}_Q(d) \triangleq (I_{\mathsf{in}},\, x_4).
 \]
-where $I$ is the interpretation assumed by the system (e.g., $I_{\mathsf{out}}$).
 
 \paragraph{Same observation, different derivational provenance.}
 Even when multiple serializations yield the same observation, they need not agree
-on classical provenance.
-Extend the example with
-$T_{-2}:\ \textsf{delete } S(2,b)$.
-If $T_{-2}$ precedes $T_Q$ but follows $T_2$, tuple $b$ is still observed, but
-$\Prov(b)=x_1$ rather than $x_1+x_2$.
-If $T_{-2}$ follows $T_Q$, the provenance remains $x_1+x_2$.
-Thus, different resolving interpretations can induce different depth--0
-derivational explanations for the same observation.
+on derivational provenance.
+Adding
+$T_{-2}:\ \textsf{delete } S(2,b)$
+yields executions in which $b$ is observed with provenance $x_1$ or $x_1+x_2$,
+depending on the serialization.
+Thus interpretation provenance distinguishes semantic explanations even when the
+observable outcome is unchanged.
 
 % ===============================================================
 \subsection{Snapshot Isolation}
 \label{sec:appendix-SI}
-% ================================================================
+% ===============================================================
 
-We now extend the same transactional setting to snapshot isolation (SI), which
-uses a different basis of interpretive predicates.
+\paragraph{Interpretive structure.}
+Snapshot isolation (SI) resolves concurrency using a different basis of semantic
+commitments.
+Rather than committing to a total order, an SI interpretation assigns each
+transaction a \emph{snapshot} of committed transactions whose effects it reads,
+together with a global write-conflict admissibility constraint.
+
+Interpretively, this yields two kinds of predicates:
+(i) snapshot predicates $\snap(T)=U$, committing that $T$ reads from the effects of
+exactly the transactions in $U$, and
+(ii) a global \emph{first-committer-wins} predicate $\varphi_{\FCW}$ that restricts
+which snapshot assignments are admissible.
+
+Unlike ordering predicates, snapshot commitments do not commute in general.
+Each transaction may require an independent snapshot decision, yielding a staged
+interpretation structure whose depth grows with the history.
 
 \paragraph{Extended history.}
-In addition to the five transactions from the beginning of this section, assume
-the database initially contains $S(5,e)$ and $S(6,f)$, and the following transactions execute concurrently:
+In addition to $T_1$–$T_5$, assume the database initially contains $S(5,e)$ and
+$S(6,f)$, and the following transactions execute concurrently:
 \[
   \begin{array}{ll}
     T_6: \textsf{read } S(5,e);\ \textsf{delete } S(6,f) \qquad &
@@ -1672,92 +1652,65 @@ the database initially contains $S(5,e)$ and $S(6,f)$, and the following transac
 \]
 A query transaction $T_Q$ again evaluates $Q$.
 
-\paragraph{Interpretive predicates for snapshot isolation.}
-An interpretation $I$ for snapshot isolation (SI) assigns semantic commitments of
-two kinds.
-
-First, for each transaction $T \in \mathcal{T}$, $I$ assigns a \emph{snapshot}
-$\snap_I(T)=U$, where $U \subseteq \mathcal{T}$ is a finite set of transactions.
-This asserts that $T$ reads from the database state obtained by applying exactly
-the commits of the transactions in $U$.
-Snapshot assignments must respect commit order: if $T' \in \snap_I(T)$, then the
-commit of $T'$ precedes the reads of $T$.
-
-Second, SI imposes a global \emph{first-committer-wins} constraint, formalized by
-the predicate $\varphi_{\FCW}$, which restricts which snapshot assignments are
-admissible.
-
-\begin{definition}[First-Committer-Wins predicate]
-  An interpretation $I$ satisfies $\varphi_{\FCW}$ iff for all distinct transactions
-  $T_i,T_j \in \mathcal{T}$,
-  \[
-    \bigl(
-    T_i \notin \snap_I(T_j) \;\wedge\;
-    T_j \notin \snap_I(T_i)
-    \bigr)
-    \;\Rightarrow\;
-    \writes(T_i) \cap \writes(T_j) = \emptyset.
-  \]
-\end{definition}
-
-That is, no two transactions that are concurrent under the interpretation—neither
-sees the other’s effects—may write the same key.
-
-\paragraph{A concrete SI interpretation.}
-One admissible SI interpretation occurs when $T_1, T_2, T_3, T_4$ and $T_6$ read the initial state
-of the database ($S(5,e); S(6,f)$), $T_5$ reads the state after $T_4$ commits, and $T_Q$ reads
-the final state after all other transactions commit.
+\paragraph{Resolving interpretation.}
+One admissible SI interpretation is:
 \[
   \begin{aligned}
     I_{\mathrm{SI}} \triangleq {} &
-    \snap_{I_{\mathrm{SI}}}(T_1)=\snap_{I_{\mathrm{SI}}}(T_2)=\snap_{I_{\mathrm{SI}}}(T_3)=\snap_{I_{\mathrm{SI}}}(T_4)=\snap_{I_{\mathrm{SI}}}(T_6)=\snap_{I_{\mathrm{SI}}}(T_7)=\emptyset \\
-                                  & \wedge\; \snap_{I_{\mathrm{SI}}}(T_5)=\{T_4\}                                                                                                           \\
-                                  & \wedge\; \snap_{I_{\mathrm{SI}}}(T_Q)=\{T_1,\dots,T_7\}                                                                                                 \\
+    \snap(T_1)=\snap(T_2)=\snap(T_3)=\snap(T_4)=\snap(T_6)=\snap(T_7)=\emptyset \\
+                                  & \wedge\; \snap(T_5)=\{T_4\} \\
+                                  & \wedge\; \snap(T_Q)=\{T_1,\dots,T_7\} \\
                                   & \wedge\; \varphi_{\FCW}.
   \end{aligned}
 \]
 
-\paragraph{Outcome and provenance under SI.}
+\paragraph{Outcome and provenance.}
 Under $I_{\mathrm{SI}}$, the final state contains $b$ and $c$, but not $d,e,f$.
-The query result is $\{b,c\}$ with provenance:
+The query result is $\{b,c\}$ with derivational provenance:
 \[
   \Prov_{Q \mid I_{\mathrm{SI}}}(b)=x_1+x_2,\qquad
   \Prov_{Q \mid I_{\mathrm{SI}}}(c)=x_3.
 \]
 
-\paragraph{Detecting serializability.}
+\paragraph{Semantic change and serializability.}
 Although $I_{\mathrm{SI}}$ is admissible under snapshot isolation, it does not admit
-any serial execution. $T_6$ and $T_7$ exhibit the classical \emph{write-skew} anomaly
-admitted under snapshot isolation \cite{adya1999weak}: a non-serializable
-dependency cycle that cannot be linearized into a total-order interpretation.
-This obstruction is explicit in the snapshot predicates.
-Restricting attention to SI interpretations whose snapshot and conflict predicates
-admit a topological sort yields exactly the serializable outcomes.
+any serial execution.
+The concurrent writes of $T_6$ and $T_7$ produce the classical write-skew anomaly:
+a dependency cycle that cannot be linearized into a total order.
+
+Interpretation provenance makes this explicit.
+Restricting attention to SI interpretations whose snapshot predicates admit a
+topological sort recovers exactly the serializable outcomes.
 
 \paragraph{Interpretation depth.}
-Unlike serializability, which requires a single stage of ordering commitments,
-snapshot isolation may require independent snapshot commitments for each
-concurrent transaction.
-The interpretation depth of SI is therefore $O(|H|)$ in the worst case.
+Unlike serializability, which resolves ambiguity in a single commuting stage,
+snapshot isolation may require an independent snapshot commitment for each
+transaction.
+Thus SI has worst-case interpretation depth $O(|H|)$, as recorded in
+Figure~\ref{fig:interp-tables}(\textbf{B}).
 Once an SI interpretation is fixed, provenance again reduces to depth--0
 derivational provenance.
 
 % ===============================================================
-\subsection{Certificates for Robustness Queries}
+\subsection{Certificates and Semantic-Change Queries}
 % ===============================================================
 
-For serializability, a certificate sufficient for classical why/why-not provenance
-under a fixed execution can be as small as the resolving serialization itself.
-By contrast, robustness queries such as
-“Does $d$ appear under all serializable executions?” require a strictly stronger
-certificate: one that preserves the absence of an ordering commitment between
-$T_4$ and $T_5$ relative to $T_Q$, so that both $I_{\mathsf{in}}$ and
-$I_{\mathsf{out}}$ remain admissible.
+As in the negation sandbox, provenance queries depend only on the restrictions that
+an interpretation imposes on admissible outcomes.
+A \emph{certificate} summarizes these restrictions and may safely over-approximate
+the interpretation.
 
-Under snapshot isolation, certificates are necessarily larger: they must record
-all snapshot and conflict predicates relevant to the outcome.
-Interpretation provenance provides a uniform mechanism for representing and
-checking such certificates across isolation levels.
+Under serializability, a certificate need only record a set of ordering predicates
+sufficient to justify the observation.
+Under snapshot isolation, however, answering semantic-change queries—such as
+whether an SI outcome admits a serial explanation—requires preserving the snapshot
+structure itself, not merely a particular resolved state.
+
+As in Section~\ref{sec:appendix-datalog}, certificates are therefore
+query-parametric.
+Richer provenance questions require retaining strictly more semantic information,
+reflecting the deeper and less-commutative structure of the underlying
+interpretation.
 
 % ================================================================
 \section{Appendix: Interpretation Provenance for Systems Lineage}
@@ -1766,9 +1719,9 @@ checking such certificates across isolation levels.
 
 This appendix illustrates interpretation provenance in a systems setting that
 lies outside traditional database semantics.
-The example is adapted directly from the Dapper distributed tracing model
-introduced by Sigelman et al.~\cite{sigelman2010dapper}, abstracting its trace
-semantics rather than its implementation details.
+The example is adapted from the distributed tracing model introduced by
+Sigelman et al.~\cite{sigelman2010dapper}, abstracting its trace semantics rather
+than its implementation details.
 
 The example serves two purposes.
 First, it shows that interpretation provenance extends the database tradition of
@@ -1777,6 +1730,12 @@ formal treatment.
 Second, it demonstrates how the parsimony of interpretations---as minimal semantic
 commitments---can refine systems lineage explanations by making explicit which
 assumptions are required to justify diagnostic conclusions.
+
+Unlike the previous appendices, this setting does not admit a fixed canonical
+interpretation depth.
+Semantic commitments may be staged or bundled depending on the diagnostic query,
+but interpretation provenance still cleanly separates observable evidence from
+the assumptions required to explain it.
 
 \subsection{Trace Specification and Semantic Ambiguity}
 
@@ -1803,7 +1762,8 @@ Because clocks are unsynchronized, these constraints determine only \emph{bounds
 on server-side timestamps.
 As a result, multiple executions---with different relative orderings and overlaps
 of spans---are admissible under the same observed history.
-Critical-path analysis is therefore semantically ambiguous prior to interpretation.
+Diagnostic conclusions such as critical-path analysis are therefore semantically
+ambiguous prior to interpretation.
 
 \subsection{Diagnostic Query: Critical Path}
 
@@ -1817,6 +1777,7 @@ determines the end-to-end latency of the root span.
 Under a fixed execution, this query is deterministic.
 Under the specification $\Spec$, however, different admissible executions may
 yield different critical paths.
+Without additional semantic commitments, the query is ill-posed.
 
 \subsection{Interpretive Predicates}
 
@@ -1825,15 +1786,15 @@ fix a particular execution.
 Relevant interpretive predicates include:
 \begin{itemize}
   \item $\varphi_{\mathrm{align}(h_i,h_j)}$, committing to a concrete clock
-        alignment between hosts $h_i$ and $h_j$ within the admissible bounds;
+        alignment between hosts $h_i$ and $h_j$ within admissible bounds;
   \item $\varphi_{\mathrm{order}(X,Y)}$, committing that span $X$ precedes span
         $Y$ when their relative order is otherwise unconstrained;
   \item $\varphi_{\mathrm{cp}=X}$, committing that $X$ is the critical-path
-        witness once ordering and alignment are fixed.
+        witness \emph{given the preceding alignment and ordering commitments}.
 \end{itemize}
 
-These predicates are ambiguity-sensitive and may be semantically dependent.
-For example, committing to $\varphi_{\mathrm{cp}=X}$ presupposes commitments that
+These predicates are ambiguity-sensitive and semantically dependent.
+For example, committing to a critical-path witness presupposes commitments that
 fix the relative placement of competing spans.
 
 \subsection{Resolving Interpretations}
@@ -1869,7 +1830,7 @@ Interpretation provenance records:
 The provenance makes explicit that the diagnostic conclusion depends on semantic
 commitments about clock alignment and span ordering.
 Without fixing an interpretation, the question ``which span is on the critical
-path?'' is ill-posed.
+path?'' has no determinate answer.
 
 \subsection{Certificates and Parsimony}
 
@@ -1882,14 +1843,21 @@ A sufficient certificate consists of:
         $I_C$.
 \end{itemize}
 
+As in the previous appendices, the certificate acts as a \emph{semantic frontier}:
+it freezes exactly those commitments needed to justify the diagnostic observation,
+without reconstructing a total execution.
+In a totally ordered execution, a timestamp suffices to delimit the past; in a
+partially ordered trace, an antichain of events plays the same role, sealing the
+relevant downward closure without imposing an artificial linearization.
+
 Interpretation provenance therefore supports a compressed form of systems lineage:
-only the semantic commitments required for the diagnostic observation need be
+only the semantic commitments required for the diagnostic conclusion need be
 retained.
 This refines existing tracing practice by separating observable evidence from the
 interpretive assumptions used to explain it.
 
 \paragraph{Summary.}
-This example demonstrates that interpretation provenance applies naturally to
+This appendix demonstrates that interpretation provenance applies naturally to
 systems diagnostics.
 It extends provenance beyond data derivations to explanations of execution-level
 properties, while retaining a minimal, explicit account of the semantic

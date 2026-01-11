@@ -62,6 +62,7 @@
 \newcommand{\seal}{\mathsf{seal}}
 \newcommand{\FCW}{\mathsf{FCW}}
 \newcommand{\writes}{\mathsf{writes}}
+\newcommand{\seq}{\mathbin{\triangleright}}
 % ---------- Comments, etc. ----------
 \newenvironment{commentary}{%
   \begin{quote}\itshape\small\color{gray}
@@ -439,17 +440,43 @@ Because interpretive predicates may be ambiguity-sensitive, the order of conjunc
 can matter.
 This non-commutativity induces semantic dependency.
 
-A useful way to make this structure explicit is via a \emph{dependency graph}
-over interpretive predicates.
-\begin{definition}[Interpretation dependency graph]
-  An interpretation $I = \varphi_1 \wedge \cdots \wedge \varphi_m$ has a directed
-  acyclic \emph{interpretation dependency graph} $G=(\Phi, \rightarrow)$ where $\Phi = \{\varphi_1,\ldots,\varphi_m\}$
-  and $\varphi_i \rightarrow \varphi_j$ iff $i < j$ and $\varphi_j$ is
-  ambiguity-sensitive with respect to $\varphi_i$; that is, $\varphi_i$ must be resolved
-  before $\varphi_j$.
+\paragraph{Layer-sequencing notation.}
+The operator $\wedge$ denotes predicate-level \emph{sequential refinement} and is
+therefore generally non-commutative.
+When reasoning about \emph{depth}, however, we will often group predicates into
+\emph{layers} whose predicates commute (i.e., can be applied in any order without
+changing the result).
+To make this structure explicit, we use $\seq$ as syntactic sugar for a sequence
+of commuting batches.
+
+\begin{definition}[Sequencing of layers (notation)]
+  \label{def:layer-seq}
+  Let $L_1,\ldots,L_k$ be multisets of interpretive predicates.
+  We write $L_1 \seq L_2 \seq \cdots \seq L_k$
+  for the interpretation obtained by applying the predicates of $L_1$ (in any
+  order), then those of $L_2$, and so on:
+  \[
+    \Spec \mid (L_1 \seq \cdots \seq L_k)
+    \;\triangleq\;
+    (\cdots((\Spec \mid L_1)\mid L_2)\cdots)\mid L_k,
+  \]
+  where $\Spec \mid L$ abbreviates refinement by all predicates in $L$ in any
+  order.
+  This notation is used only to expose layering; it imposes no additional algebraic
+  structure beyond commutativity within each layer.
 \end{definition}
-Such dependencies determine when a specification becomes resolved and when
-depth--0 derivational provenance applies.
+
+% A useful way to make this structure explicit is via a \emph{dependency graph}
+% over interpretive predicates.
+% \begin{definition}[Interpretation dependency graph]
+%   An interpretation $I = \varphi_1 \wedge \cdots \wedge \varphi_m$ has a directed
+%   acyclic \emph{interpretation dependency graph} $G=(\Phi, \rightarrow)$ where $\Phi = \{\varphi_1,\ldots,\varphi_m\}$
+%   and $\varphi_i \rightarrow \varphi_j$ iff $i < j$ and $\varphi_j$ is
+%   ambiguity-sensitive with respect to $\varphi_i$; that is, $\varphi_i$ must be resolved
+%   before $\varphi_j$.
+% \end{definition}
+% Such dependencies determine when a specification becomes resolved and when
+% depth--0 derivational provenance applies.
 
 \begin{definition}[Resolved specification and resolving interpretation]
   A specification $\Spec$ is \emph{resolved} if for every history $H$, $|\Spec(H)| = 1$.
@@ -473,9 +500,7 @@ The semantic effect of interpretation has two aspects:
 \emph{restriction}, in which outcomes incompatible with the commitments in $I$ are eliminated and play no further semantic role, and \emph{identification}, in which some of the remaining admissible outcomes become semantically indistinguishable.
 
 Formally, for a history $H$ write
-\[
-  O_H^I \triangleq (\Spec \mid I)(H).
-\]
+$O_H^I \triangleq (\Spec \mid I)(H)$.
 We say that two outcomes $o,o' \in O_H^I$ are \emph{equivalent under $I$ at $H$},
 written $o \sim_{I,H} o'$, if no interpretive predicate in $I$ distinguishes between them at $H$.
 
@@ -567,6 +592,58 @@ We illustrate this syntax next in a transactional setting, where
 different ordering commitments induce different interpretations and,
 consequently, different provenance for the same query.
 
+\subsection{Algebraic Structure of Interpretations}
+\label{sec:algebra}
+
+Interpretations refine a specification through a sequence of semantic
+commitments.
+This process exhibits a layered algebraic structure, which we summarize here to
+clarify the relationship between interpretation provenance and classical algebraic
+provenance.
+
+\paragraph{Sequential conditioning across layers.}
+Between layers, interpretive predicates compose by sequential conditioning.
+This composition is generally dependent and non-commutative: applying one
+predicate may enable or disable another.
+Accordingly, the sequencing operator $\seq$ carries no algebraic meaning beyond
+ordered refinement.
+
+\paragraph{Commutative structure within a layer.}
+Within a single layer, interpretive predicates commute.
+Order of application does not affect the resulting restriction of admissible
+outcomes.
+As a result, predicates within a layer form a \emph{conditional commutative
+  monoid}, where conjunction corresponds to joint semantic commitment and the
+identity element is the trivial predicate.
+
+The carrier of this monoid is conditional on prior layers: which predicates are
+available, and which outcomes they act upon, depends on the interpretation prefix.
+
+\paragraph{Special case: semiring structure.}
+In special cases—most notably when interpretive predicates are pointwise and
+independent across outcomes—this monoid extends to a commutative semiring.
+Although this structure is familiar from algebraic provenance, we do not exploit
+it here, as our focus is on semantic resolution rather than algebraic
+optimization.
+
+\paragraph{Why semiring provenance applies at layer~0.}
+Once a resolving interpretation $I$ is fixed, all semantic ambiguity has been
+eliminated.
+The conditioned specification $\Spec \mid I$ is single-valued and monotone: no
+further interpretive predicates can rule out admissible outcomes.
+All remaining variation is purely derivational.
+In this setting, explanations combine algebraically exactly as in classical
+semiring provenance.
+While $\Spec \mid I$ need not syntactically be a Datalog program, it is
+algebraically equivalent, for provenance purposes, to monotone query evaluation
+over a fixed instance.
+This is precisely the semantic regime studied in prior work on semiring
+provenance.
+
+Accordingly, interpretation provenance pairs a resolving interpretation with
+ordinary algebraic provenance computed under the resolved specification.
+Formal details appear in Appendix~\ref{app:algebra}.
+
 \subsection{Example Revisited: Resolving Transactional Ambiguity}
 \label{sec:concurrency}
 
@@ -580,9 +657,22 @@ commitments among transactions: $\varphi_{T_i \prec T_j}$ commits to
 ordering the actions of transaction $T_i$ before the conflicting actions of $T_j$.
 If we observe $\{(b), (c), (d)\}$ as the query result, then an example Interpretation is
 \[
-  I_{\mathsf{in}} \;\triangleq\; \varphi_{T_1 \prec T_2} \wedge \varphi_{T_2 \prec T_3} \wedge \varphi_{T_3 \prec T_4} \wedge \varphi_{T_4 \prec T_Q} \wedge \varphi_{T_Q \prec T_5}
+  I_{\mathsf{in}} \;\triangleq\;
+  \bigl(
+  \varphi_{T_1 \prec T_2}
+  \wedge
+  \varphi_{T_2 \prec T_3}
+  \wedge
+  \varphi_{T_3 \prec T_4}
+  \wedge
+  \varphi_{T_4 \prec T_Q}
+  \wedge
+  \varphi_{T_Q \prec T_5}
+  \bigr)
 \]
-and the corresponding conditioned (depth--0) provenance is
+All predicates in $I_{\mathsf{in}}$ commute; thus $I_{\mathsf{in}}$ forms a single
+interpretation layer (depth~1).
+The corresponding conditioned (depth--0) provenance is
 \[
   \Prov_{Q \mid I_{\mathsf{in}}}(b)=x_1+x_2,\;
   \Prov_{Q \mid I_{\mathsf{in}}}(c)=x_3,\;
@@ -747,80 +837,78 @@ parsimonious lineage when the intended query family is known
   \setlength{\tabcolsep}{6pt}
   \renewcommand{\arraystretch}{1.15}
 
-\begin{tabular}{@{}p{0.12\linewidth} p{0.65\linewidth} p{0.12\linewidth}@{}}
-  \toprule
-  \multicolumn{3}{c}{\textbf{(A) Datalog negation semantics}} \\
-  \midrule
-  \textbf{Case} & \textbf{Resolving interpretation(s)} & \textbf{Depth} \\
-  \midrule 
-  Stratified &
-  $\varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)$
-  & $k$ \\
+  \begin{tabular}{@{}p{0.12\linewidth} p{0.65\linewidth} p{0.12\linewidth}@{}}
+    \toprule
+    \multicolumn{3}{c}{\textbf{(A) Datalog negation semantics}}           \\
+    \midrule
+    \textbf{Case} & \textbf{Resolving interpretation(s)} & \textbf{Depth} \\
+    \midrule
+    Stratified    &
+    $\varphi_{\seal}(S_1) \seq \varphi_{\seal}(S_2) \seq \cdots \seq \varphi_{\seal}(S_k)$
+                  & $k$                                                   \\
 
-Well-founded &
-  $\varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)
-   \wedge \varphi_{\seal}(U_1)\wedge \varphi_{\seal}(U_2)\wedge\cdots$
-  & unbounded \\
+    Well-founded  &
+    $\varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k)
+      \seq \varphi_{\seal}(U_1) \seq \varphi_{\seal}(U_2) \seq \cdots$
+                  & unbounded                                             \\
 
-Stable &
-  $(\varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)\wedge I^{(r)})
-  \;\text{or}\;
-  (\varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)\wedge I^{(s)})$
-  & $k{+}1$ \\
-  \bottomrule
-\end{tabular}
+    Stable        &
+    $(\varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k) \seq I^{(r)})
+      \;\text{or}\;
+      (\varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k) \seq I^{(s)})$
+                  & $k{+}1$                                               \\
+    \bottomrule
+  \end{tabular}
 
   \vspace{1em}
 
-\begin{tabular}{@{}p{0.23\linewidth} p{0.54\linewidth} p{0.12\linewidth}@{}}
-  \toprule
-  \multicolumn{3}{c}{\textbf{(B) Transactions: serializability and snapshot isolation}} \\
-  \midrule
-  \textbf{Case} & \textbf{One resolving interpretation} & \textbf{Depth} \\
-  \midrule
-  SER robust $b$               &
-  $\varphi_{T_1 \prec T_Q} \wedge \varphi_{T_Q \prec T_2} \wedge \varphi_{T_2 \prec T_3}
-   \wedge \varphi_{T_3 \prec T_4} \wedge \varphi_{T_4 \prec T_5}$                        &
-  $1$ \\
-  %
-  SER contingent $d$ (why)     &
-  $\varphi_{T_1 \prec T_2} \wedge \varphi_{T_2 \prec T_3} \wedge \varphi_{T_3 \prec T_4}
-   \wedge \varphi_{T_4 \prec T_Q} \wedge \varphi_{T_Q \prec T_5}$                        &
-  $1$ \\
-  %
-  SER contingent $d$ (why-not) &
-  $\varphi_{T_1 \prec T_2} \wedge \varphi_{T_2 \prec T_3} \wedge \varphi_{T_3 \prec T_4}
-   \wedge \varphi_{T_4 \prec T_5} \wedge \varphi_{T_5 \prec T_Q}$                        &
-  $1$ \\
-  %
-  SI (write-skew $e/f$)        &
-  $\Bigl(\!\bigwedge_{i\in\{1,2,3,4,6,7\}}\varphi_{\snap(T_i)=\emptyset}\Bigr)
-    \wedge
-    \varphi_{T_4 \in \snap(T_5)} 
-    \wedge
-    \Bigl(\!\bigwedge_{j=1}^7 \varphi_{T_j \in \snap(T_Q)}\Bigr) \linebreak
-    \wedge
-    \varphi_{\FCW}(\{T_1,\dots,T_7\})$                                                    &
-  $O(|H|)$ \\
-  \bottomrule
-\end{tabular}
+  \begin{tabular}{@{}p{0.23\linewidth} p{0.54\linewidth} p{0.12\linewidth}@{}}
+    \toprule
+    \multicolumn{3}{c}{\textbf{(B) Transactions: serializability and snapshot isolation}} \\
+    \midrule
+    \textbf{Case}                & \textbf{One resolving interpretation} & \textbf{Depth} \\
+    \midrule
+    SER robust $b$               &
+    $\{\varphi_{T_1 \prec T_Q},\varphi_{T_Q \prec T_2},\varphi_{T_2 \prec T_3},
+      \varphi_{T_3 \prec T_4},\varphi_{T_4 \prec T_5}\}$
+                                 & $1$                                                    \\
+    %
+    SER contingent $d$ (why)     &
+    $\{\varphi_{T_1 \prec T_2},\varphi_{T_2 \prec T_3},\varphi_{T_3 \prec T_4},
+      \varphi_{T_4 \prec T_Q},\varphi_{T_Q \prec T_5}\}$
+                                 & $1$                                                    \\
+    %
+    SER contingent $d$ (why-not) &
+    $\{\varphi_{T_1 \prec T_2},\varphi_{T_2 \prec T_3},\varphi_{T_3 \prec T_4},
+      \varphi_{T_4 \prec T_5},\varphi_{T_5 \prec T_Q}\}$
+                                 & $1$                                                    \\
+    %
+    SI (write-skew $e/f$)        &
+    $\varphi_{\snap(T_1)=\emptyset} \seq \cdots \seq
+      \varphi_{\snap(T_7)=\emptyset}
+      \seq \varphi_{T_4 \in \snap(T_5)}
+      \seq \varphi_{\snap(T_Q)=\{T_1,\dots,T_7\}}
+      \seq \varphi_{\FCW}(\{T_1,\dots,T_7\})$
+                                 & $O(|H|)$                                               \\
+    \bottomrule
+  \end{tabular}
 
-\caption{
-  Interpretation summaries for our two sandboxes.
-  Depth counts non-commuting stages of semantic commitment; branching among
-  incompatible interpretations does not increase depth.
-  (\textbf{A}) For Datalog with negation, different semantics induce different
-  structures of semantic resolution: stratified and well-founded semantics admit
-  a single resolving interpretation, while stable semantics admits multiple
-  incompatible ones.
-  (\textbf{B}) For serializable transactions, many serial interpretations may
-  justify the same outcome; we therefore display a single resolving interpretation
-  as a semantic witness, since only existence (not enumeration) matters.
-  The SI row abbreviates snapshot choices ($\snap(\cdot)$) and the
-  first-committer-wins rule ($\FCW$).
-  Full details appear in
-  Appendices~\ref{sec:appendix-datalog} and~\ref{sec:appendix-concurrency}.
-}
+  \caption{
+    Interpretation summaries for examples.
+    Depth counts non-commuting stages of semantic commitment; branching among
+    incompatible interpretations does not increase depth.
+    (\textbf{A}) For Datalog with negation, different semantics induce different
+    resolution structures: stratified and well-founded semantics admit a single
+    resolving interpretation, while stable semantics admits multiple incompatible
+    ones.
+    (\textbf{B}) For serializable transactions, many serial interpretations may
+    justify the same outcome; we therefore display one resolving interpretation
+    as a witness, since only existence (not enumeration) matters.
+    The SI row abbreviates snapshot choices ($\snap(\cdot)$) and the
+    first-committer-wins rule ($\FCW$).
+    Details appear in
+    Appendices~\ref{sec:appendix-datalog} and~\ref{sec:appendix-concurrency}.
+  }
   \label{fig:interp-tables}
 \end{figure*}
 
@@ -889,7 +977,12 @@ be interpreted negatively.
 
 These sealing predicates do not commute: stabilization of stratum~$i$ is a
 prerequisite for interpreting negation in stratum~$i{+}1$.
-Accordingly, a program with $k$ strata has interpretation depth exactly~$k$.
+Accordingly, a program with $k$ strata has interpretation depth exactly~$k$,
+corresponding to the layered interpretation
+\[
+  \varphi_{\seal}(S_1) \seq \varphi_{\seal}(S_2) \seq \cdots \seq \varphi_{\seal}(S_k)
+\]
+% [added \seq]
 Figure~\ref{fig:interp-tables}(\textbf{A}, Stratified) schematically represents
 this chain; the explicit predicates appear in
 Appendix~\ref{sec:appendix-datalog}.
@@ -902,8 +995,12 @@ derivation and elimination of unfounded sets, producing a three-valued outcome
 in which atoms may be true, false, or undefined.
 
 Interpretively, this corresponds to an \emph{alternating sequence} of non-commuting
-sealing commitments: successive stages classify additional atoms as determined or
-undefined, with later commitments depending on earlier ones.
+sealing commitments layered after the stratified prefix:
+\[
+  \varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k)
+  \seq \varphi_{\seal}(U_1) \seq \varphi_{\seal}(U_2) \seq \cdots
+\]
+% [added \seq]
 The number of alternations is not bounded in general, so well-founded semantics
 does not admit a fixed finite interpretation depth.
 Figure~\ref{fig:interp-tables}(\textbf{A}, WFS) records the limit interpretation
@@ -922,9 +1019,16 @@ Each stable model corresponds to a distinct resolving interpretation, and these
 interpretations are mutually incompatible.
 Within any one stable interpretation, however, the commitments are logically
 simultaneous and commute.
-Thus stable semantics has interpretation depth~$k{+}1$: $k$ stages for the
-stratified prefix, followed by a single global stable-model commitment, despite
-potentially exponential branching across alternatives
+Thus stable semantics has interpretation depth~$k{+}1$, corresponding to
+\[
+  \bigl(\varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k)\bigr)
+  \seq I^{(r)}
+  \quad\text{or}\quad
+  \bigl(\varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k)\bigr)
+  \seq I^{(s)}
+\]
+% [added \seq]
+despite potentially exponential branching across alternatives
 (Figure~\ref{fig:interp-tables}(\textbf{A}, Stable)).
 
 \paragraph{Takeaway.}
@@ -937,7 +1041,7 @@ stratification.
 When negation is acyclic, all three semantics coincide extensionally, but
 interpretation provenance still records the sealing commitments required to
 justify negation.
-Full derivations and dependency graphs appear in
+Full derivations appear in
 Appendix~\ref{sec:appendix-datalog}.
 
 % ================================================================
@@ -997,7 +1101,7 @@ Each outcome corresponds to at least one such serialization.
 
 \paragraph{Interpretive predicates.}
 The primitive interpretive predicates in this setting are \emph{ordering
-predicates}.
+  predicates}.
 For transactions $T_i$ and $T_j$, the predicate $\varphi_{T_i \prec T_j}$ commits
 that $T_i$ precedes $T_j$ in the serialization.
 An interpretation is a finite conjunction of such predicates, inducing a partial
@@ -1007,23 +1111,26 @@ Crucially, ordering predicates commute.
 Committing to $T_1 \prec T_2$ and to $T_2 \prec T_3$ can be done in either order and
 has the same effect.
 As a result, serializability has interpretation depth~1: all semantic commitments
-belong to a single commutative stage.
+belong to a single commutative stage, which we can write schematically as
+\[
+  \varphi_{T_1 \prec T_2}, \ldots, \varphi_{T_i \prec T_j}
+\]
+or, exposing the single layer,
+$\{\varphi_{T_i \prec T_j}\}_{i,j}$,
+% [added \seq]
+with no further sequencing required.
 
 \paragraph{Example.}
 Under the interpretation
-\[
-  I_{\mathsf{in}} \triangleq
-  \varphi_{T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_Q \prec T_5},
-\]
+$I_{\mathsf{in}} \triangleq
+  \varphi_{T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_Q \prec T_5}$,
 the insert precedes the query and the delete follows it.
 Conditioning on $I_{\mathsf{in}}$ yields a resolved outcome in which $d$ is present,
 with classical provenance $\Prov_{Q \mid I_{\mathsf{in}}}(d)=x_4$.
 
 Under the alternative interpretation
-\[
-  I_{\mathsf{out}} \triangleq
-  \varphi_{T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_5 \prec T_Q},
-\]
+$I_{\mathsf{out}} \triangleq
+  \varphi_{T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_5 \prec T_Q}$,
 the delete precedes the query and $d$ is absent.
 Prior to fixing an interpretation, there is no single classical provenance question
 for $d$.
@@ -1052,7 +1159,13 @@ potentially many concurrent transactions.
 Unlike serializability, these predicates do not commute in general: snapshot
 choices for one transaction constrain admissible choices for others.
 Accordingly, snapshot isolation has worst-case interpretation depth $O(|H|)$,
-reflecting a sequence of non-commuting snapshot commitments.
+reflecting a sequence of non-commuting snapshot commitments, which can be written
+schematically as
+\[
+  \varphi_{\snap(T_{i_1})} \seq \varphi_{\snap(T_{i_2})} \seq \cdots \seq \varphi_{\FCW}
+\]
+% [added \seq]
+where later snapshot choices depend on earlier ones.
 
 Figure~\ref{fig:interp-tables}(\textbf{B}, SI) records one such resolving
 interpretation for the running example.
@@ -1320,6 +1433,136 @@ Interpretation provenance extends that insight: when meaning itself depends on
 resolution, provenance must explain the assumptions that made meaning possible.
 
 \appendix
+% ================================================================
+\section{Appendix: Algebraic Structure After Semantic Resolution}
+\label{app:algebra}
+% ================================================================
+
+This appendix clarifies the algebraic structure induced by interpretations and
+explains why classical algebraic provenance applies once semantic ambiguity has
+been resolved.
+The goal is not to develop a new provenance algebra, but to situate interpretation
+provenance precisely relative to existing algebraic frameworks.
+
+\subsection{Sequential Conditioning Versus Algebraic Combination}
+
+Interpretations refine a specification by applying interpretive predicates via
+\emph{sequential conditioning}.
+Given a specification $\Spec$ and predicates $\varphi_1,\varphi_2$, refinement
+\[
+  (\Spec \mid \varphi_1)\mid \varphi_2
+\]
+need not equal
+\[
+  (\Spec \mid \varphi_2)\mid \varphi_1,
+\]
+because predicates may be ambiguity-sensitive.
+Accordingly, predicate composition across layers is generally non-commutative and
+does not admit a semiring structure.
+
+This distinction is essential.
+Sequential conditioning eliminates admissible outcomes; it is a semantic operation,
+not an algebraic one.
+Interpretive predicates therefore do \emph{not} combine explanations, but restrict
+the space in which explanations are defined.
+
+\subsection{Commutative Structure Within a Layer}
+
+Within a single interpretation layer, predicates commute by construction.
+Fix a specification prefix $\Spec^{\ell}$ obtained after resolving all prior layers.
+Let $L$ be a set of interpretive predicates applicable at that layer.
+
+For $\varphi,\psi \in L$,
+\[
+  (\Spec^{\ell} \mid \varphi)\mid \psi
+  \;=\;
+  (\Spec^{\ell} \mid \psi)\mid \varphi .
+\]
+Thus predicates in $L$ form a \emph{commutative monoid} under conjunction, with the
+identity given by the trivial predicate that performs no restriction.
+
+This monoid is \emph{conditional}: the available predicates and their effect depend
+on the interpretation prefix.
+No global algebra over predicates is assumed or required.
+
+\subsection{Special Case: Semiring Structure}
+
+In special cases, the commutative monoid within a layer extends to a semiring.
+This occurs when:
+(i) predicates are pointwise over admissible outcomes; and
+(ii) conjunction distributes over disjunction of outcomes.
+
+These conditions coincide with those assumed in classical algebraic provenance.
+Although many of our examples satisfy them, we do not exploit this structure in the
+main text.
+Our focus is on semantic resolution, not on algebraic optimization or factorization.
+
+\subsection{Resolved Specifications and Monotone Evaluation}
+
+The key transition occurs once a resolving interpretation $I$ has been fixed.
+
+\begin{definition}[Resolved specification]
+  A specification $\Spec \mid I$ is \emph{resolved} if for every history $H$,
+  $(\Spec \mid I)(H)$ is a singleton.
+\end{definition}
+
+Resolution has two crucial consequences:
+
+\paragraph{Single-valuedness.}
+There are no remaining admissible alternatives.
+Interpretive predicates no longer apply, and semantic conditioning ceases.
+
+\paragraph{Monotonicity.}
+All remaining variation is derivational.
+Facts accumulate, explanations only grow, and no semantic commitments rule out
+previously admissible outcomes.
+
+Together, these properties place $\Spec \mid I$ in the standard setting of
+monotone query evaluation.
+
+\subsection{Why Semiring Provenance Applies at Layer~0}
+
+Classical semiring provenance applies precisely to monotone evaluation over a fixed
+instance.
+Once interpretation is complete, this is exactly the situation we obtain.
+
+\begin{proposition}[Resolved specifications admit semiring provenance]
+  \label{prop:semiring}
+  If $\Spec \mid I$ is resolved and monotone, then derivational provenance over
+  $\Spec \mid I$ is captured by a commutative semiring.
+\end{proposition}
+
+\paragraph{Justification.}
+Because $\Spec \mid I$ is single-valued, there is no further semantic elimination of
+outcomes.
+Because it is monotone, derivations combine locally:
+alternative derivations combine by addition, and joint use of facts combines by
+multiplication.
+This is precisely the algebraic regime studied in classical provenance work.
+
+Importantly, $\Spec \mid I$ need not syntactically be a Datalog program.
+However, it is algebraically equivalent, for provenance purposes, to monotone query
+evaluation over a fixed instance.
+This equivalence suffices to justify the use of semiring provenance and aligns our
+framework with existing algebraic results.
+
+\subsection{Relationship to Datalog and Prior Work}
+
+Many of our examples are naturally expressed in Datalog, and classical provenance
+results apply directly in those cases.
+However, our claim is algebraic rather than syntactic:
+interpretation provenance recovers the algebraic conditions required for semiring
+provenance by explicitly discharging semantic ambiguity.
+
+Seen this way, interpretation theory serves as a semantic prelude to algebraic
+provenance.
+It explains \emph{when} and \emph{why} classical provenance applies, rather than
+assuming a fixed monotone semantics from the outset.
+
+This perspective complements existing work on semiring provenance and factorized
+representations by separating semantic resolution from algebraic explanation.
+
+
 % \section{Appendix: Worked Examples}
 % \label{sec:appendix-examples}
 
@@ -1357,8 +1600,13 @@ A resolving interpretation for the stratified fragment is
 \[
   I_{\mathrm{strat}}
   \;\triangleq\;
-  \varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k),
+  \varphi_{\seal}(S_1)
+  \seq
+  \varphi_{\seal}(S_2)
+  \seq \cdots \seq
+  \varphi_{\seal}(S_k),
 \]
+% [added \seq]
 where each $S_i$ is the set of atoms whose truth is fixed at stratum~$i$.
 These sealing predicates do \emph{not} commute: sealing $S_i$ is a prerequisite
 for interpreting negation in $S_{i+1}$.
@@ -1393,10 +1641,16 @@ A resolving interpretation under WFS can be written schematically as
 \[
   I_{\mathrm{wfs}}
   \;\triangleq\;
-  \varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)
-  \wedge
-  \varphi_{\seal}(U_1)\wedge\varphi_{\seal}(U_2)\wedge\cdots,
+  \varphi_{\seal}(S_1)
+  \seq \cdots \seq
+  \varphi_{\seal}(S_k)
+  \seq
+  \varphi_{\seal}(U_1)
+  \seq
+  \varphi_{\seal}(U_2)
+  \seq \cdots,
 \]
+% [added \seq]
 where each $U_i$ is an unfounded set eliminated at alternation~$i$.
 These commitments are non-commuting and may require an unbounded number of
 alternations.
@@ -1429,20 +1683,36 @@ branching among incompatible global hypotheses.
 
 \paragraph{Resolving interpretations.}
 For the running example, resolution begins with the same stratified-prefix sealing
-$\varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)$.
+\[
+  \varphi_{\seal}(S_1)
+  \seq \cdots \seq
+  \varphi_{\seal}(S_k),
+\]
+% [added \seq]
 After this prefix, the negation cycle admits two incompatible resolutions:
 \[
   I^{(r)}
   \;\triangleq\;
-  \varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)\wedge
+  \bigl(
+  \varphi_{\seal}(S_1)
+  \seq \cdots \seq
+  \varphi_{\seal}(S_k)
+  \bigr)
+  \seq
   (r(c)=\mathbf{t},\,s(c)=\mathbf{f}),
 \]
 \[
   I^{(s)}
   \;\triangleq\;
-  \varphi_{\seal}(S_1)\wedge\cdots\wedge\varphi_{\seal}(S_k)\wedge
+  \bigl(
+  \varphi_{\seal}(S_1)
+  \seq \cdots \seq
+  \varphi_{\seal}(S_k)
+  \bigr)
+  \seq
   (s(c)=\mathbf{t},\,r(c)=\mathbf{f}).
 \]
+% [added \seq]
 
 Within either interpretation, the remaining commitments are logically simultaneous
 and commute.
@@ -1520,7 +1790,6 @@ negation structure itself, not merely one resolution.
 This illustrates the query-parametric nature of certificate sufficiency
 (Section~\ref{sec:certificates}): supporting richer provenance questions strictly
 increases the semantic information that must be retained.
-
 
 % ===============================================================
 \section{Transactional Worked Interpretation Provenance}
@@ -1658,11 +1927,12 @@ One admissible SI interpretation is:
   \begin{aligned}
     I_{\mathrm{SI}} \triangleq {} &
     \snap(T_1)=\snap(T_2)=\snap(T_3)=\snap(T_4)=\snap(T_6)=\snap(T_7)=\emptyset \\
-                                  & \wedge\; \snap(T_5)=\{T_4\} \\
-                                  & \wedge\; \snap(T_Q)=\{T_1,\dots,T_7\} \\
-                                  & \wedge\; \varphi_{\FCW}.
+                                  & \seq\; \snap(T_5)=\{T_4\}                   \\
+                                  & \seq\; \snap(T_Q)=\{T_1,\dots,T_7\}         \\
+                                  & \seq\; \varphi_{\FCW}.
   \end{aligned}
 \]
+% [added \seq]
 
 \paragraph{Outcome and provenance.}
 Under $I_{\mathrm{SI}}$, the final state contains $b$ and $c$, but not $d,e,f$.

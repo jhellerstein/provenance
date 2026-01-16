@@ -1362,6 +1362,29 @@ is a semantic and explanatory account that makes such mixtures explicit and
 checkable.
 
 \medskip
+\noindent\textbf{Causal analysis of logs and executions.}
+Recent work on causal analysis of system logs studies how diagnostic conclusions
+depend on modeling choices made when constructing causal explanations from
+execution traces, including discretization, causal graph construction, and
+sensitivity to unobserved variables
+\cite{markakis2024sawmill,chen2025causalens,markakis2024press,zeng2024validity,lai2025seercuts}.
+These systems typically take logs as causal histories and focus on summarizing,
+querying, or stress-testing inferred causal structure.
+
+From the perspective of this paper, such modeling choices can be understood as
+semantic commitments that restrict the space of admissible explanations.
+Interpretation provenance does not perform causal inference; rather, it provides
+a framework for making these commitments explicit and for reasoning about how
+conclusions depend on them.
+In particular, the robustness and preservation questions studied in
+Section~\ref{sec:robustness} suggest a natural connection: diagnostic conclusions
+may be robust across a class of causal interpretations, or may depend critically
+on specific causal assumptions.
+Clarifying this connection—by treating causal graph construction and
+summarization as forms of semantic resolution over ambiguous histories—is a
+promising direction for future work.
+
+\medskip
 \noindent\textbf{Interpretation complexity.}
 This work builds on a prior complexity theory of interpretation
 introduced in~\cite{hellerstein2026interpretation}, which characterizes the cost,

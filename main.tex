@@ -1,4 +1,4 @@
-\documentclass[acmsmall,nonacm]{acmart}
+\documentclass[acmsmall,anonymous]{acmart}
 
 \usepackage{microtype}
 \usepackage{enumitem}
@@ -7,12 +7,15 @@
 \usepackage{booktabs}
 
 
-% ---------- Simple block bracketing ----------
-\newenvironment{bracketlines}{%
-  \par\medskip\hrule\medskip\noindent
-}{%
-  \par\medskip\hrule\medskip
-}
+% ---------- Notation ----------
+\newcommand{\Hist}{\mathcal{H}}
+\newcommand{\Spec}{\mathsf{Spec}}
+\newcommand{\drule}{\mathrel{:\!-}}
+\newcommand{\Prov}{\mathsf{Prov}}
+\newcommand{\snap}{\mathsf{snap}}
+\newcommand{\seal}{\mathsf{seal}}
+\newcommand{\FCW}{\mathsf{FCW}}
+\newcommand{\seq}{\mathbin{\triangleright}}
 
 % ---------- Theorem environments ----------
 \newtheorem{definition}{Definition}
@@ -34,47 +37,6 @@
 \numberwithin{observation}{section}
 \numberwithin{assumption}{section}
 
-% ---------- Notation ----------
-% TODO: Add theorem showing that determination resolution
-% induces history-monotonicity (moved from complexity paper §C for PODS submission).
-% This is the foundational result motivating why classical provenance (which assumes
-% monotonicity) becomes applicable after determination resolution.
-\newcommand{\Hist}{\mathcal{H}}
-\newcommand{\Proc}{\mathcal{P}}
-% \newcommand{\Obs}{\mathsf{Obs}} % reserved for resolved-observation function names, not the outcome set
-\newcommand{\Spec}{\mathsf{Spec}}
-\newcommand{\Term}{\mathsf{Term}}
-\newcommand{\Ord}{\preceq}
-\newcommand{\cost}{\mathsf{cost}}
-\newcommand{\Cost}{\mathsf{Cost}}
-\newcommand{\depth}{\mathsf{depth}}
-\newcommand{\sqsubseteqh}{\sqsubseteq_h}
-\newcommand{\Aop}{\mathsf{A}}
-\newcommand{\Depth}{\mathsf{Depth}}
-\newcommand{\Resolve}{\mathsf{Resolve}}
-\newcommand{\view}{\mathsf{view}}
-\newcommand{\Ag}{\mathcal{A}g}
-\newcommand{\CoordCost}{\mathsf{CoordCost}}
-\newcommand{\CoordDepth}{\mathsf{CoordDepth}}
-\newcommand{\ICost}{\mathsf{ICost}}
-\newcommand{\IDepth}{\mathsf{IDepth}}
-\newcommand{\Atoms}{\mathsf{Atoms}}
-% \newcommand{\Out}{\mathcal{O}} % legacy; use $O$ for the set of outcomes/observations
-\newcommand{\drule}{\mathrel{:\!-}}
-\newcommand{\Prov}{\mathsf{Prov}}
-\newcommand{\snap}{\mathsf{snap}}
-\newcommand{\seal}{\mathsf{seal}}
-\newcommand{\FCW}{\mathsf{FCW}}
-\newcommand{\writes}{\mathsf{writes}}
-\newcommand{\seq}{\mathbin{\triangleright}}
-% ---------- Comments, etc. ----------
-\newenvironment{commentary}{%
-  \begin{quote}\itshape\small\color{gray}
-}{%
-  \end{quote}
-}
-
-
 \title{Provenance of Determinations: From Ambiguity to Algebra}
 \author{Joseph M. Hellerstein}
 \affiliation{%
@@ -85,7 +47,7 @@
 
 \acmConference[Conference]{Full Conference Name}{Month Year}{Location}
 \acmBooktitle{Proceedings of the Conference}
-\acmYear{2024}
+\acmYear{2026}
 \acmISBN{123-4-56789-012-3}
 
 
@@ -242,32 +204,6 @@ query results; and (iv) identify \emph{robustness} across determinations and
 as new classes of provenance questions enabled by this framework.
 
 
-% \begin{enumerate}
-% \item It identifies \emph{semantic ambiguity}—the presence of multiple admissible
-% outcomes for a single history—as a first-class concern for provenance, and argues
-% that classical algebraic provenance implicitly assumes this ambiguity has already
-% been resolved.
-
-% \item It introduces \emph{determination provenance} as a semantic layer that
-% records the commitments under which conclusions become well defined, and shows how
-% classical algebraic provenance arises as a special case once a determination is
-% fixed.
-
-% \item It formalizes \emph{layer certificates} as a minimal interface for carrying
-% semantic commitments forward, enabling provenance reasoning that is sensitive to
-% which distinctions a system chooses to make and which it intentionally collapses.
-
-% \item It demonstrates, through two sandboxes, how determination provenance exposes
-% previously implicit structure: in Datalog with negation, by making semantic
-% dependency and resolution explicit; and in transactional systems, by explaining
-% how query conclusions depend on ordering and isolation commitments.
-
-% \item It identifies \emph{robustness} and \emph{semantic change} as new, well-posed
-% classes of provenance questions—respectively, invariance across determinations of
-% a fixed specification and preservation across different specifications—and shows
-% how determination provenance supports both.
-% \end{enumerate}
-
 % ================================================================
 \section{Preliminaries: Ambiguous Semantics and Refinement}
 \label{sec:prelim}
@@ -383,8 +319,7 @@ by determination.\footnote{%
 \subsection{Semantic Refinement}
 
 Ambiguity is constrained by making additional semantic commitments.
-We model these commitments as \emph{commitment predicates}, understood as
-semantic conditions that \emph{filter} the set of admissible observations while
+We model these commitments as semantic conditions that \emph{filter} the set of admissible observations while
 preserving feasibility.
 
 \begin{definition}[Commitment (as Outcome Filter)]
@@ -398,6 +333,12 @@ preserving feasibility.
 \end{definition}
 Commitments restrict admissible observations without introducing new ones or rendering
 the specification infeasible.
+Note that the Feasibility condition is specific to the provenance setting:
+the companion complexity theory~\cite{hellerstein2026interpretation} requires only
+Shrinkage, because infeasible commitments can arise naturally in adversarial or
+exploratory resolution strategies.
+Here, we require Feasibility because provenance is meaningful only when the
+conditioned specification remains non-empty.
 
 Crucially, a commitment may depend on the admissible outcome set
 \emph{as a whole}.
@@ -472,18 +413,6 @@ of commuting batches.
   structure beyond commutativity within each layer.
 \end{definition}
 
-% A useful way to make this structure explicit is via a \emph{dependency graph}
-% over commitments.
-% \begin{definition}[Determination dependency graph]
-%   A determination $I = \varphi_1 \wedge \cdots \wedge \varphi_m$ has a directed
-%   acyclic \emph{determination dependency graph} $G=(\Phi, \rightarrow)$ where $\Phi = \{\varphi_1,\ldots,\varphi_m\}$
-%   and $\varphi_i \rightarrow \varphi_j$ iff $i < j$ and $\varphi_j$ is
-%   ambiguity-sensitive with respect to $\varphi_i$; that is, $\varphi_i$ must be resolved
-%   before $\varphi_j$.
-% \end{definition}
-% Such dependencies determine when a specification becomes resolved and when
-% depth--0 derivational provenance applies.
-
 \begin{definition}[Resolved specification and resolving determination]
   A specification $\Spec$ is \emph{resolved} if for every history $H$, $|\Spec(H)| = 1$.
   A determination $I$ \emph{resolves} $\Spec$ (i.e., $I$ is \emph{resolving for} $\Spec$) if $\Spec \mid I$ is resolved.
@@ -501,36 +430,108 @@ Resolution marks the point at which semantic ambiguity has been fully discharged
 Fix a specification $\Spec$ and a determination $I$.
 For each history $H$, refinement by $I$ produces a restricted set of admissible
 outcomes $(\Spec \mid I)(H)$.
-
 The semantic effect of a determination has two aspects:
-\emph{restriction}, in which outcomes incompatible with the commitments in $I$ are eliminated and play no further semantic role, and \emph{identification}, in which some of the remaining admissible outcomes become semantically indistinguishable.
+\emph{restriction}, in which outcomes incompatible with the commitments in $I$
+are eliminated, and \emph{identification}, in which remaining outcomes that no
+commitment in $I$ distinguishes become semantically equivalent.
 
-Formally, for a history $H$ write
-$O_H^I \triangleq (\Spec \mid I)(H)$.
-We say that two outcomes $o,o' \in O_H^I$ are \emph{equivalent under $I$ at $H$},
-written $o \sim_{I,H} o'$, if no commitment in $I$ distinguishes between them at $H$.
+Formally, write $O_H^I \triangleq (\Spec \mid I)(H)$ and define
+$o \sim_{I,H} o'$ iff no commitment in $I$ distinguishes $o$ from $o'$ at $H$.
+This equivalence induces a quotient $O_H^I / {\sim_{I,H}}$ for each history,
+recording which admissible outcomes remain semantically distinguished after
+conditioning.
+Because commitments may depend on the history, this quotient is
+history-indexed rather than global.
+The quotient structure underlies the parsimony analysis in
+Section~\ref{sec:parsimony}.
 
-\begin{definition}[Determination-Induced Quotient]
-  For each history $H$, determination $I$ induces a quotient
-  \[
-    O_H^I \big/ {\sim_{I,H}},
-  \]
-  obtained by identifying admissible outcomes that are equivalent under $I$.
+\subsection{Resolution Induces Monotonicity}
+\label{sec:mono-theorem}
+
+The central claim of this paper is that classical provenance applies once a
+determination has resolved a specification.
+Classical provenance requires monotone evaluation: facts accumulate and
+explanations only grow.
+We now show that monotonicity is not an independent assumption but a
+\emph{consequence} of resolution, under a mild condition on the commitment basis.
+
+\begin{definition}[History-monotone specification]
+  \label{def:set-mono}
+  A specification $\Spec : \Hist \to 2^O$ is \emph{history-monotone} if
+  $H_1 \sqsubseteq H_2 \;\Longrightarrow\; \Spec(H_2) \subseteq \Spec(H_1)$.
 \end{definition}
 
-The equivalence relation $\sim_{I,H}$ is total on the restricted domain $O_H^I$.
-Outcomes ruled out by the determination are not in $O_H^I$, and hence simply absent from the quotient.
+Extending a history may rule out outcomes but should never make new ones
+admissible.
 
-\begin{remark}[History-indexed quotients]
-  Because commitments may depend on the history and on intermediate
-  admissible sets, equivalence under a determination is defined relative to a
-  history.
-  Determinations therefore induce a family of quotients indexed by histories,
-  rather than a single global quotient on $O$.
+\begin{definition}[Persistent commitment basis]
+  \label{def:persistent}
+  A commitment basis $\Phi$ is \emph{persistent} if for every
+  $\varphi \in \Phi$, all histories $H_1 \sqsubseteq H_2$,
+  all $S, S' \subseteq O$, and all outcomes $o \in O$,
+  \[
+    o \notin \varphi(H_1, S)
+    \quad\Longrightarrow\quad
+    o \notin \varphi(H_2, S').
+  \]
+  That is, once a commitment excludes an outcome at a history,
+  it continues to exclude that outcome at all extensions and under
+  any admissible set.
+\end{definition}
+
+Persistence is a natural condition: it says that commitments are irrevocable.
+The atomic basis (single-outcome exclusions) is trivially persistent.
+The sealing basis used for Datalog with negation and the ordering basis used for
+serializability are both persistent, as are snapshot predicates under SI.
+
+\begin{assumption}[Prefix-closure of histories]
+  \label{ass:prefix-closed}
+  If $H \in \Hist$ and $H' \sqsubseteq H$, then $H' \in \Hist$.
+\end{assumption}
+
+\begin{theorem}[Resolved specifications are history-monotone]
+  \label{thm:resolution-implies-monotone}
+  Assume prefix-closure (Assumption~\ref{ass:prefix-closed}).
+  Let $\Phi$ be a persistent commitment basis and let $I$ be a determination
+  over $\Phi$ that resolves $\Spec$.
+  Then the induced singleton-valued specification
+  $\widehat{\Spec}_I(H) \triangleq (\Spec \mid I)(H)$
+  is history-monotone.
+\end{theorem}
+
+\begin{proof}
+  Fix $H_1 \sqsubseteq H_2$.
+  Since $\Spec \mid I$ is resolved,
+  $(\Spec \mid I)(H_1) = \{o_1\}$ and
+  $(\Spec \mid I)(H_2) = \{o_2\}$ for some $o_1, o_2 \in O$.
+  We show $o_1 = o_2$.
+
+  Write $I = \varphi_1 \wedge \cdots \wedge \varphi_m$.
+  Since $I$ refines $\Spec(H_1)$ to $\{o_1\}$, every outcome
+  $o \neq o_1$ is excluded by some $\varphi_j$ when applied at $H_1$:
+  there exists $j$ and an admissible set $S$ such that
+  $o \notin \varphi_j(H_1, S)$.
+  By persistence (Definition~\ref{def:persistent}), $o \notin \varphi_j(H_2, S')$
+  for \emph{every} $S' \subseteq O$—in particular, for the admissible set that
+  arises when $\varphi_j$ is applied at $H_2$ during the sequential refinement.
+  Hence $o \notin (\Spec \mid I)(H_2)$.
+  Since this holds for every $o \neq o_1$, the only outcome that can survive
+  at $H_2$ is $o_1$, so $o_2 = o_1$.
+\end{proof}
+
+\begin{remark}
+  The theorem does not claim that $\Spec$ itself is monotone, nor that all
+  determinations coincide.
+  It shows only that resolution forces monotonicity: once a determination fixes
+  a single outcome at each history, the induced semantics must respect causal
+  extension.
+  Persistence should be verified for each application-specific basis; the
+  examples in this paper all satisfy it.
 \end{remark}
 
-These notions of refinement, restriction, and identification provide the raw
-semantic substrate on which we build algebraic structure in the next section.
+These notions of refinement, restriction, identification, and the monotonicity
+of resolved specifications provide the semantic substrate on which we build
+provenance structure in the next section.
 
 %% ================================================================
 \section{Determinations and Provenance Structure}
@@ -635,7 +636,9 @@ optimization.
 \paragraph{Why semiring provenance applies at layer~0.}
 Once a resolving determination $I$ is fixed, all semantic ambiguity has been
 eliminated.
-The conditioned specification $\Spec \mid I$ is single-valued and monotone: no
+The conditioned specification $\Spec \mid I$ is single-valued and, under a
+persistent basis, history-monotone
+(Theorem~\ref{thm:resolution-implies-monotone}): no
 further commitments can rule out admissible outcomes.
 All remaining variation is purely derivational.
 In this setting, explanations combine algebraically exactly as in classical
@@ -676,7 +679,9 @@ If we observe $\{(b), (c), (d)\}$ as the query result, then an example determina
   \varphi_{T_Q \prec T_5}
   \bigr)
 \]
-All predicates in $I_{\mathsf{in}}$ commute; thus $I_{\mathsf{in}}$ forms a single
+All predicates in $I_{\mathsf{in}}$ commute (each filters admissible serializations
+by an independent pairwise constraint, so application order is irrelevant);
+thus $I_{\mathsf{in}}$ forms a single
 determination layer (depth~1).
 The corresponding conditioned (depth--0) provenance is
 \[
@@ -729,7 +734,7 @@ differences among admissible outcomes.
 
 In the transactional setting, for example, predicates that commit only to an
 equivalent serial schedule are deliberately coarse.
-Some tuples—such as $a$ and $b$ in Example~\ref{ex:example}—are present under every
+Some tuples—such as $b$ and $c$ in Example~\ref{ex:example}—are present under every
 determination consistent with that abstraction.
 Determination provenance makes this explicit by showing which observations are
 invariant across all determinations induced by the chosen commitment basis; these
@@ -746,11 +751,8 @@ Section~\ref{sec:robustness}, where this invariance (which we call \emph{robustn
 property.
 
 \subsection{Summary}
-Determination provenance pairs a resolving determination with classical
-provenance computed under that determination.
-Once a determination is fixed, provenance is classical by construction: it is
+Once a determination is fixed, provenance is classical: it is
 computed over the conditioned specification $\Spec \mid I$.
-
 The following sections instantiate this framework in two settings with very
 different sources of semantic ambiguity: negation in Datalog and scheduling in
 transactional systems.
@@ -793,6 +795,8 @@ To formalize this dependence, write
 \]
 
 \begin{definition}[Sufficient Cert.]
+  Let $\chi_{C_i}$ denote the commitment induced by certificate $C_i$, defined by
+  $\chi_{C_i}(H,S) \triangleq \{\,o \in S \mid C_i(o)\,\}$.
   A certificate $C_i$ is \emph{sufficient for $(J,\mathcal{Q})$} if for all histories $H$,
   \[
     (\Spec_i\mid J)(H)=((\Spec\mid\chi_{C_i})\mid J)(H),
@@ -816,6 +820,17 @@ semantic resolution and the answers to the intended provenance queries.
   If $\mathcal{Q}_1\subseteq\mathcal{Q}_2$, then every certificate sufficient for
   $(J,\mathcal{Q}_2)$ is sufficient for $(J,\mathcal{Q}_1)$.
 \end{theorem}
+\begin{proof}[Proof sketch]
+  Sufficiency requires that $C_i$ preserve both further semantic resolution and
+  the answers to all queries in the target family.
+  If $C_i$ is sufficient for $(J,\mathcal{Q}_2)$, then for every $q \in \mathcal{Q}_2$
+  and every history $H$,
+  $q((\Spec_i \mid J)(H)) = q(((\Spec \mid \chi_{C_i}) \mid J)(H))$.
+  Since $\mathcal{Q}_1 \subseteq \mathcal{Q}_2$, this equality holds \emph{a fortiori}
+  for every $q \in \mathcal{Q}_1$.
+  The resolution-preservation condition is independent of $\mathcal{Q}$ and
+  therefore inherited directly.
+\end{proof}
 
 \noindent
 Thus, expanding the space of provenance questions can only require retaining
@@ -825,10 +840,16 @@ queries under negation; Appendix~\ref{sec:appendix-concurrency} does so for
 robustness queries under transactional ambiguity.
 
 
-\paragraph{Summary}
+\paragraph{Summary.}
 Layer certificates provide a principled interface between semantic resolution and
 provenance, making explicit which semantic distinctions must be retained for a
 given family of provenance queries.
+Concretely: in the Datalog sandbox, a sealed set of atoms suffices for
+derivational provenance but not for semantic-change queries
+(Appendix~\ref{sec:appendix-datalog}); in the transactional sandbox, ordering
+certificates suffice under serializability but snapshot structure must be
+preserved for SI-to-SER preservation queries
+(Appendix~\ref{sec:appendix-concurrency}).
 This reframes a familiar tradeoff in systems lineage: tracing systems such as
 Dapper retain full histories to support arbitrary diagnostics~\cite{sigelman2010dapper},
 corresponding to certificates that preserve all future queries.
@@ -915,7 +936,7 @@ parsimonious lineage when the intended query family is known
     Details appear in
     Appendices~\ref{sec:appendix-datalog} and~\ref{sec:appendix-concurrency}.
   }
-  \label{fig:interp-tables}
+  \label{fig:det-tables}
 \end{figure*}
 
 % ================================================================
@@ -955,7 +976,7 @@ that rule out some outcomes and thereby resolve ambiguity.
 
 We examine three standard semantics for negation—stratified, well-founded, and
 stable—and record the corresponding resolving determinations.
-Figure~\ref{fig:interp-tables}(\textbf{A}) summarizes these determinations and
+Figure~\ref{fig:det-tables}(\textbf{A}) summarizes these determinations and
 their \emph{determination depth}, defined as the length of a non-commuting chain
 of semantic commitments.
 When a semantics admits multiple incompatible resolutions, we list them;
@@ -989,9 +1010,24 @@ corresponding to the layered determination
   \varphi_{\seal}(S_1) \seq \varphi_{\seal}(S_2) \seq \cdots \seq \varphi_{\seal}(S_k)
 \]
 % [added \seq]
-Figure~\ref{fig:interp-tables}(\textbf{A}, Stratified) schematically represents
+Figure~\ref{fig:det-tables}(\textbf{A}, Stratified) schematically represents
 this chain; the explicit predicates appear in
 Appendix~\ref{sec:appendix-datalog}.
+
+\begin{proposition}[Stratified determination depth]
+  \label{prop:stratified-depth}
+  A stratified Datalog program with $k$ strata has determination depth
+  exactly~$k$ under the sealing commitment basis.
+\end{proposition}
+\begin{proof}[Proof sketch]
+  Each stratum $S_i$ requires a sealing commitment $\varphi_{\seal}(S_i)$ that
+  commits to the completeness of atoms in $S_i$.
+  Sealing $S_i$ is a prerequisite for evaluating negation in $S_{i+1}$, so
+  $\varphi_{\seal}(S_i)$ and $\varphi_{\seal}(S_{i+1})$ do not commute.
+  Hence $k$ layers are necessary.
+  Within each stratum, all sealing commitments commute (they act on disjoint
+  predicate sets), so $k$ layers are also sufficient.
+\end{proof}
 
 \paragraph{Well-founded semantics.}
 Well-founded semantics applies to programs with negation cycles, such as the
@@ -1009,7 +1045,7 @@ sealing commitments layered after the stratified prefix:
 % [added \seq]
 The number of alternations is not bounded in general, so well-founded semantics
 does not admit a fixed finite determination depth.
-Figure~\ref{fig:interp-tables}(\textbf{A}, WFS) records the limit determination
+Figure~\ref{fig:det-tables}(\textbf{A}, WFS) records the limit determination
 for the example instance.
 
 \paragraph{Stable model semantics.}
@@ -1035,7 +1071,7 @@ Thus stable semantics has determination depth~$k{+}1$, corresponding to
 \]
 % [added \seq]
 despite potentially exponential branching across alternatives
-(Figure~\ref{fig:interp-tables}(\textbf{A}, Stable)).
+(Figure~\ref{fig:det-tables}(\textbf{A}, Stable)).
 
 \paragraph{Takeaway.}
 The three semantics differ not only in which outcomes they admit, but in the
@@ -1077,15 +1113,12 @@ determine a unique order or visibility relation among transactions.
 Even with complete knowledge of all operations, multiple outcomes may be
 admissible.
 
-Order, therefore, is not a primitive feature of the execution.
-It is a \emph{semantic commitment} used to justify an outcome.
+The key observation is that transaction order is not a primitive feature of the
+execution; it is a \emph{semantic commitment} used to justify an outcome.
 This mirrors the role of stabilization commitments in Sandbox~I: before committing
 to an order or visibility decision, certain conclusions are simply not determined.
-
-Classical data provenance assumes a fixed execution outcome.
-Transactional systems invalidate this assumption.
-A single history may admit multiple outcomes, and tuple-level provenance questions
-must therefore range over alternative semantic resolutions of concurrency.
+Classical data provenance implicitly assumes such commitments have already been
+made; determination provenance makes them explicit.
 
 \subsection{Running Example}
 
@@ -1143,8 +1176,18 @@ for $d$.
 Determination provenance records the semantic commitments under which each
 explanation applies.
 
-Figure~\ref{fig:interp-tables}(\textbf{B}, SER) summarizes representative resolving
+Figure~\ref{fig:det-tables}(\textbf{B}, SER) summarizes representative resolving
 determinations.
+
+\paragraph{Same observation, different derivational provenance.}
+Even when multiple serializations yield the same observable outcome, they need not
+agree on derivational provenance.
+For instance, adding a transaction
+$T_{-2}:\ \textsf{delete } S(2,b)$
+yields serializations in which $b$ is observed with provenance $x_1$ or $x_1+x_2$,
+depending on whether $T_{-2}$ precedes or follows $T_Q$.
+Determination provenance distinguishes these semantic explanations even when the
+query result is identical.
 
 \subsection{Snapshot Isolation as Determination Shape}
 
@@ -1162,18 +1205,21 @@ it observes; and
 These commitments do not collapse to a total order and must be made separately for
 potentially many concurrent transactions.
 
-Unlike serializability, these predicates do not commute in general: snapshot
-choices for one transaction constrain admissible choices for others.
-Accordingly, snapshot isolation has worst-case determination depth $O(|H|)$,
-reflecting a sequence of non-commuting snapshot commitments, which can be written
-schematically as
+Unlike serializability, these predicates do not commute in general: the snapshot
+visible to one transaction may depend on which earlier transactions have already
+been assigned snapshots, because the first-committer-wins rule can render a
+snapshot choice infeasible once a conflicting assignment is fixed.
+In the worst case, each of the $n$ transactions in the history requires an
+independent, non-commuting snapshot commitment, yielding determination
+depth $O(|H|)$.
+Schematically:
 \[
   \varphi_{\snap(T_{i_1})} \seq \varphi_{\snap(T_{i_2})} \seq \cdots \seq \varphi_{\FCW}
 \]
 % [added \seq]
 where later snapshot choices depend on earlier ones.
 
-Figure~\ref{fig:interp-tables}(\textbf{B}, SI) records one such resolving
+Figure~\ref{fig:det-tables}(\textbf{B}, SI) records one such resolving
 determination for the running example.
 Once an SI determination is fixed, the specification again becomes single-valued,
 and provenance reduces to ordinary depth--0 derivational provenance.
@@ -1232,6 +1278,18 @@ $\mathcal{I}$.
 In the lens of Section~\ref{sec:parsimony}, robustness is evidence of a lack of
 parsimony in the commitment basis.
 
+\begin{observation}[Robustness as non-discrimination]
+  \label{obs:robustness-parsimony}
+  An observation $o$ is robust with respect to $\mathcal{I}$ if and only if
+  no commitment in the basis discriminates between admissible outcomes that
+  agree on $o$.
+  Formally, $o$ is robust iff for every $I, I' \in \mathcal{I}$,
+  the resolved outcomes $(\Spec \mid I)(H)$ and $(\Spec \mid I')(H)$ agree on
+  whether $o$ holds.
+  Robustness therefore characterizes exactly the observations that lie in the
+  intersection of all resolved outcomes induced by $\mathcal{I}$.
+\end{observation}
+
 \paragraph{Example: robustness under serializability.}
 In the transactional example of
 Appendix~\ref{sec:appendix-concurrency}, the history admits multiple serial orders.
@@ -1263,7 +1321,7 @@ $o$ is \emph{preserved} from $\Spec$ to $\Spec'$ iff
   \bigl(o \in (\Spec \mid I)(H)\bigr)
   \;\Rightarrow\;
   \exists I' \in \mathcal{I}'.\;
-  \bigl(o \in (\Spec' \mid I')(H)\bigr),
+  \bigl(o \in (\Spec' \mid I')(H)\bigr).
 \]
 
 \paragraph{Serializable outcomes under snapshot isolation.}
@@ -1286,16 +1344,6 @@ Mixed-consistency execution policies—e.g., allowing SI but ignoring
 any non-serializable outcome rows—can therefore be expressed and enforced directly in
 terms of determination provenance, without re-executing the workload.
 
-\subsection{Quantitative Variants}
-
-The definitions above are qualitative.
-When the space of determinations is finite or otherwise measurable, one can ask
-quantitative questions—for example, what fraction of admissible determinations
-justify a conclusion, or how often a conclusion is preserved across semantic
-changes.
-Determination provenance provides the semantic structure needed to formulate such
-questions, though it does not require a measure over determinations.
-
 \paragraph{Summary.}
 Robustness identifies conclusions invariant under the semantic distinctions a
 system chooses to make.
@@ -1303,6 +1351,9 @@ Semantic change compares conclusions across different semantic regimes.
 Determination provenance provides a common framework for expressing both, while
 making explicit the limits of discrimination imposed by the chosen
 commitments.
+When the space of determinations is finite or otherwise measurable, these
+qualitative questions admit quantitative variants—for example, what fraction of
+admissible determinations justify a conclusion.
 
 % ================================================================
 \section{Related Work}
@@ -1326,10 +1377,12 @@ This includes work on incremental view maintenance and \emph{homeostasis},
 which identifies queries whose answers are invariant under admissible input
 changes and therefore require no additional semantic commitments to maintain
 \cite{gehrke2002homeostasis}.
-Determination provenance is complementary: rather than assuming resolved
-semantics, it explains which semantic commitments are required for observations
-to hold at all, and how classical provenance depends on those commitments once
-resolution has occurred.
+In our framework, homeostasis corresponds precisely to robustness at
+determination depth~0: the query answer is invariant across all admissible
+outcomes of the specification, so no commitment is needed to justify it.
+Determination provenance generalizes this by explaining which commitments are
+required when invariance fails, and how classical provenance depends on those
+commitments once resolution has occurred.
 
 \medskip
 \noindent\textbf{Negation and non-monotonic semantics.}
@@ -1557,23 +1610,29 @@ Once determination is complete, this is exactly the situation we obtain.
 
 \begin{proposition}[Resolved specifications admit semiring provenance]
   \label{prop:semiring}
-  If $\Spec \mid I$ is resolved and monotone, then derivational provenance over
+  If $\Spec \mid I$ is resolved and the commitment basis is persistent
+  (Definition~\ref{def:persistent}), then derivational provenance over
   $\Spec \mid I$ is captured by a commutative semiring.
 \end{proposition}
-
-\paragraph{Justification.}
-Because $\Spec \mid I$ is single-valued, there is no further semantic elimination of
-outcomes.
-Because it is monotone, derivations combine locally:
-alternative derivations combine by addition, and joint use of facts combines by
-multiplication.
-This is precisely the algebraic regime studied in classical provenance work.
-
-Importantly, $\Spec \mid I$ need not syntactically be a Datalog program.
-However, it is algebraically equivalent, for provenance purposes, to monotone query
-evaluation over a fixed instance.
-This equivalence suffices to justify the use of semiring provenance and aligns our
-framework with existing algebraic results.
+\begin{proof}[Proof sketch]
+  By Theorem~\ref{thm:resolution-implies-monotone}, $\Spec \mid I$ is
+  history-monotone.
+  Because it is also single-valued (resolved), $(\Spec \mid I)(H)$ is a singleton
+  for every history $H$; no further commitments can eliminate outcomes, so semantic
+  conditioning has ceased.
+  Because it is monotone, the unique outcome grows monotonically with
+  the history: $H_1 \sqsubseteq H_2$ implies that every fact derivable at $H_1$
+  remains derivable at $H_2$.
+  Under these two conditions, derivations compose exactly as in monotone query
+  evaluation over a fixed instance: alternative derivations of the same fact
+  combine by semiring addition, and joint use of multiple facts combines by
+  semiring multiplication.
+  This is precisely the algebraic regime established
+  by Green et al.~\cite{green2007provenance} for positive relational queries.
+  Although $\Spec \mid I$ need not syntactically be a Datalog program, it is
+  algebraically equivalent, for provenance purposes, to monotone evaluation over
+  a fixed instance, which suffices.
+\end{proof}
 
 \subsection{Relationship to Datalog and Prior Work}
 
@@ -1604,7 +1663,7 @@ We work through the same running example under stratified, well-founded, and sta
 semantics, making explicit the commitments, their dependency structure,
 and the resulting provenance annotations.
 The purpose is to justify the determination shapes and depths summarized in
-Figure~\ref{fig:interp-tables}(\textbf{A}).
+Figure~\ref{fig:det-tables}(\textbf{A}).
 
 Throughout, we use \emph{sealing predicates}
 $\varphi_{\seal}(X)$, which commit that the set of atoms $X$ is complete:
@@ -1640,7 +1699,7 @@ where each $S_i$ is the set of atoms whose truth is fixed at stratum~$i$.
 These sealing predicates do \emph{not} commute: sealing $S_i$ is a prerequisite
 for applying negation commitments in $S_{i+1}$.
 Accordingly, the determination depth is exactly $k$, as recorded in
-Figure~\ref{fig:interp-tables}(\textbf{A}, Stratified).
+Figure~\ref{fig:det-tables}(\textbf{A}, Stratified).
 
 \paragraph{Provenance.}
 Once $I_{\mathrm{strat}}$ is fixed, the specification is fully resolved.
@@ -1684,7 +1743,7 @@ where each $U_i$ is an unfounded set eliminated at alternation~$i$.
 These commitments are non-commuting and may require an unbounded number of
 alternations.
 Hence WFS has no fixed finite determination depth in general, as indicated in
-Figure~\ref{fig:interp-tables}(\textbf{A}, Well-founded).
+Figure~\ref{fig:det-tables}(\textbf{A}, Well-founded).
 
 For the running example, the limit of this process yields the unique partial
 outcome
@@ -1747,7 +1806,7 @@ Within either determination, the remaining commitments are logically simultaneou
 and commute.
 Thus the determination depth is $k{+}1$: the $k$ stratification stages plus one
 additional, non-commuting branching stage.
-This is reflected in Figure~\ref{fig:interp-tables}(\textbf{A}, Stable).
+This is reflected in Figure~\ref{fig:det-tables}(\textbf{A}, Stable).
 
 \paragraph{Provenance.}
 Determination provenance must record which stable determination is assumed:
@@ -1830,7 +1889,7 @@ used in Section~\ref{sec:transactions}.
 As in the Datalog appendix, we make explicit the commitments,
 their dependency structure, and the resulting provenance annotations.
 The goal is to justify the determination shapes and depths summarized in
-Figure~\ref{fig:interp-tables}(\textbf{B}).
+Figure~\ref{fig:det-tables}(\textbf{B}).
 
 Throughout, commitments rule out admissible executions and therefore
 constitute genuine semantic commitments.
@@ -1986,7 +2045,7 @@ Unlike serializability, which resolves ambiguity in a single commuting stage,
 snapshot isolation may require an independent snapshot commitment for each
 transaction.
 Thus SI has worst-case determination depth $O(|H|)$, as recorded in
-Figure~\ref{fig:interp-tables}(\textbf{B}).
+Figure~\ref{fig:det-tables}(\textbf{B}).
 Once an SI determination is fixed, provenance again reduces to depth--0
 derivational provenance.
 
@@ -2035,6 +2094,16 @@ determination depth.
 Semantic commitments may be staged or bundled depending on the diagnostic query,
 but determination provenance still cleanly separates observable evidence from
 the assumptions required to explain it.
+
+\paragraph{Scope.}
+The treatment below is deliberately illustrative rather than fully formal.
+The Datalog and transactional sandboxes admit precise commitment bases because
+their semantics are mathematically specified; distributed tracing, by contrast,
+involves physical clocks and operational assumptions that resist clean
+axiomatization.
+We therefore describe commitments semi-formally, showing how the determination
+provenance framework applies in principle while deferring a complete
+formalization to future work on specific tracing systems.
 
 \subsection{Trace Specification and Semantic Ambiguity}
 
@@ -2152,7 +2221,7 @@ relevant downward closure without imposing an artificial linearization.
 Determination provenance therefore supports a compressed form of systems lineage:
 only the semantic commitments required for the diagnostic conclusion need be
 retained.
-This refines existing tracing practice by separating observable evidence from the
+This refines existing tracing practice by separating observable evidence from
 the semantic assumptions used to explain it.
 
 \paragraph{Summary.}
@@ -2169,22 +2238,39 @@ expressed at determination depth~0.
 
 Given a specification $\Spec$ and history $H$, a conclusion may be absent in
 several semantically distinct ways:
-(i) it fails under a particular resolved determination;
-(ii) it fails under all resolving determinations of the fixed specification
-$\Spec$; or
-(iii) it holds under some determinations of a \emph{different} specification
-$\Spec'$—for example, under a different negation semantics or isolation level—but
-under none of the determinations admitted by $\Spec$ itself.
+\begin{enumerate}
+  \item It fails under a particular resolved determination but holds under others.
+    In the transactional example, tuple $d$ is absent under
+    $I_{\mathsf{out}}$ (where $T_5 \prec T_Q$) but present under
+    $I_{\mathsf{in}}$ (where $T_Q \prec T_5$).
+    Classical why-not provenance under $I_{\mathsf{out}}$ explains the
+    derivational failure; determination provenance additionally records that
+    the absence is contingent on the ordering commitment.
+
+  \item It fails under \emph{all} resolving determinations of the fixed
+    specification $\Spec$.
+    In the same example, a tuple $(e)$ that was never inserted fails under
+    every serialization.
+    This is a robust absence: no ordering commitment can make it appear.
+    Determination provenance certifies this by showing that the observation
+    lies outside $(\Spec \mid I)(H)$ for every resolving $I$.
+
+  \item It holds under some determinations of a \emph{different} specification
+    $\Spec'$ but under none of the determinations admitted by $\Spec$ itself.
+    For instance, a write-skew outcome visible under snapshot isolation may be
+    absent under every serializable determination.
+    This is an inter-specification absence, handled via the preservation
+    analysis of Section~\ref{sec:robustness} rather than by determination
+    provenance alone.
+\end{enumerate}
+
+\noindent
 Classical why-not provenance collapses these cases, because it conditions on a
 single resolved semantics and a fixed specification.
-
-Determination provenance makes the first two cases explicit.
-By recording the semantic commitments under which observations hold, it explains
-absence in terms of the non-existence (or variability) of supporting
-determinations of $\Spec$, rather than in terms of blocked derivations.
-The third case is an inter-specification question and is handled via semantic
-change and preservation analysis (Section~\ref{sec:robustness}), rather than by
-determination provenance alone.
+Determination provenance makes the first two cases explicit by recording the
+semantic commitments under which observations hold, explaining absence in terms
+of the non-existence (or variability) of supporting determinations rather than
+in terms of blocked derivations.
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{references}
 

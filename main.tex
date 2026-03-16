@@ -35,6 +35,10 @@
 \numberwithin{assumption}{section}
 
 % ---------- Notation ----------
+% TODO: Add theorem showing that determination resolution
+% induces history-monotonicity (moved from complexity paper §C for PODS submission).
+% This is the foundational result motivating why classical provenance (which assumes
+% monotonicity) becomes applicable after determination resolution.
 \newcommand{\Hist}{\mathcal{H}}
 \newcommand{\Proc}{\mathcal{P}}
 % \newcommand{\Obs}{\mathsf{Obs}} % reserved for resolved-observation function names, not the outcome set
@@ -71,7 +75,7 @@
 }
 
 
-\title{Provenance of Interpretations: From Ambiguity to Algebra}
+\title{Provenance of Determinations: From Ambiguity to Algebra}
 \author{Joseph M. Hellerstein}
 \affiliation{%
   \institution{University of California, Berkeley and Amazon Web Services}
@@ -97,26 +101,26 @@
   In such settings, it is not enough to explain \emph{what follows;} one must also
   explain \emph{under which semantic resolution of ambiguity} it follows.
 
-  This paper introduces \emph{interpretation provenance}, a framework for making
+  This paper introduces \emph{determination provenance}, a framework for making
   semantic resolution explicit and explainable.
-  An \emph{interpretation} is a structured collection of semantic commitments that
+  A \emph{determination} is a structured collection of commitments that
   resolves ambiguity by refining admissible outcomes.
   We show that provenance becomes meaningful only \emph{after} such resolution.
   % , and
   % that classical algebraic provenance arises as a special case when semantics are
   % already resolved.
-  We formalize how interpretations structure provenance prior to resolution, giving
+  We formalize how determinations structure provenance prior to resolution, giving
   rise to a layered, dependency-sensitive form that becomes ordinary semiring
-  provenance once a resolving interpretation is fixed.
-  We introduce \emph{layer certificates} as sufficient summaries of semantic
+  provenance once a resolving determination is fixed.
+  We introduce \emph{layer certificates} as sufficient summaries of
   commitments for downstream reasoning.
 
   The work extends the reach of formal data provenance to a range of
   settings where ambiguity is intrinsic.
   To illustrate, we instantiate the framework in two domains with fundamentally different sources
   of ambiguity: negation in Datalog and scheduling in transactional systems.
-  Across both settings, interpretation provenance clarifies which semantic
-  commitments were required to justify observations, and why interpretations
+  Across both settings, determination provenance clarifies which
+  commitments were required to justify observations, and why determinations
   are required to complement classical provenance in the presence of ambiguity.
 \end{abstract}
 
@@ -162,28 +166,28 @@ Answering such questions requires explaining not only how conclusions were deriv
 but \emph{how semantic ambiguity was resolved}.
 
 Prior work developed
-\emph{interpretations} as formal objects that resolve semantic ambiguity by
-introducing structured semantic commitments~\cite{hellerstein2026interpretation}.
-That work develops a complexity theory of interpretation, characterizing the
+\emph{determinations} as formal objects that resolve semantic ambiguity by
+introducing structured commitments~\cite{hellerstein2026interpretation}.
+That work develops a complexity theory of determination, characterizing the
 \emph{cost} and \emph{depth} of semantic resolution.
-Interpretations explain both semantic ambiguity arising within formal languages
+Determinations explain both semantic ambiguity arising within formal languages
 (as in logic programming with negation) and ambiguity arising from execution
 environments (as in transactional and distributed systems).
 
-This paper shows how interpretations give rise to a new form of provenance.
-We introduce \emph{interpretation provenance}, which records the semantic
+This paper shows how determinations give rise to a new form of provenance.
+We introduce \emph{determination provenance}, which records the
 commitments under which observations become well defined.
-Once semantic ambiguity has been resolved by an interpretation, classical data
+Once semantic ambiguity has been resolved by a determination, classical data
 provenance applies directly, providing the derivational structure of results
-within that interpretation.
+within that determination.
 
-We illustrate interpretation provenance in two domains with fundamentally different
+We illustrate determination provenance in two domains with fundamentally different
 sources of semantic ambiguity.
 Logic programming with negation provides the canonical, mathematically explicit
 instance of semantic ambiguity and resolution in computer science, serving as a
-control experiment for interpretation provenance.
+control experiment for determination provenance.
 We then turn to transactional systems, where ambiguity arises from concurrency and
-isolation choices, and show how interpretation provenance provides a fuller
+isolation choices, and show how determination provenance provides a fuller
 accounting of query results than classical approaches. In the appendix we also examine
 examples from distributed systems observability, a widely-used setting for system
 lineage~\cite{sigelman2010dapper}.
@@ -216,24 +220,24 @@ illustrate the ideas:
   Before resolving this ambiguity, even the \emph{family} of provenance expressions
   for $(d)$ is ambiguous: in one resolution the relevant question is \emph{why} $d$
   appears, while in another it is \emph{why-not} $d$.
-  Interpretation provenance makes this dependence explicit by recording the semantic
-  commitments under which the query result is interpreted, together with the ordinary
+  Determination provenance makes this dependence explicit by recording the
+  commitments under which the query result is determined, together with the ordinary
   derivational explanation that applies once those commitments are fixed.
   Section~\ref{sec:transactions} formalizes this example by writing down the
-  corresponding resolving interpretations and provenance expressions, and the example
+  corresponding resolving determinations and provenance expressions, and the example
   is worked in full in Appendix~\ref{sec:appendix-concurrency}.
 \end{example}
 
 \paragraph{Contributions.}
-This paper introduces \emph{interpretation provenance}: a semantic layer that
+This paper introduces \emph{determination provenance}: a semantic layer that
 explains conclusions in the presence of ambiguous semantics by recording the
 commitments under which those conclusions become determinate.
-We (i) formalize interpretations and certificates as the semantic structure
+We (i) formalize determinations and certificates as the semantic structure
 needed to recover classical algebraic provenance once ambiguity is resolved;
 (ii) show, via Datalog with negation, how different semantic regimes induce
-distinct interpretation and provenance structures, (iii) show, via transactional
-systems, how concurrency and isolation choices give rise to interpretation-dependent
-query results; and (iv) identify \emph{robustness} across interpretations and
+distinct determination and provenance structures, (iii) show, via transactional
+systems, how concurrency and isolation choices give rise to determination-dependent
+query results; and (iv) identify \emph{robustness} across determinations and
 \emph{preservation} across changes in specifications
 as new classes of provenance questions enabled by this framework.
 
@@ -244,24 +248,24 @@ as new classes of provenance questions enabled by this framework.
 % that classical algebraic provenance implicitly assumes this ambiguity has already
 % been resolved.
 
-% \item It introduces \emph{interpretation provenance} as a semantic layer that
+% \item It introduces \emph{determination provenance} as a semantic layer that
 % records the commitments under which conclusions become well defined, and shows how
-% classical algebraic provenance arises as a special case once interpretation is
+% classical algebraic provenance arises as a special case once a determination is
 % fixed.
 
 % \item It formalizes \emph{layer certificates} as a minimal interface for carrying
 % semantic commitments forward, enabling provenance reasoning that is sensitive to
 % which distinctions a system chooses to make and which it intentionally collapses.
 
-% \item It demonstrates, through two sandboxes, how interpretation provenance exposes
+% \item It demonstrates, through two sandboxes, how determination provenance exposes
 % previously implicit structure: in Datalog with negation, by making semantic
 % dependency and resolution explicit; and in transactional systems, by explaining
 % how query conclusions depend on ordering and isolation commitments.
 
 % \item It identifies \emph{robustness} and \emph{semantic change} as new, well-posed
-% classes of provenance questions—respectively, invariance across interpretations of
+% classes of provenance questions—respectively, invariance across determinations of
 % a fixed specification and preservation across different specifications—and shows
-% how interpretation provenance supports both.
+% how determination provenance supports both.
 % \end{enumerate}
 
 % ================================================================
@@ -277,12 +281,12 @@ multiple admissible outcomes for the same input.
 
 This section introduces a minimal semantic framework for reasoning about such
 ambiguity.
-We model specifications with multiple admissible outcomes and the semantic
-commitments—called \emph{interpretations}—that restrict ambiguity until meaning
+We model specifications with multiple admissible outcomes and the
+commitments—called \emph{determinations}—that restrict ambiguity until meaning
 is determinate.
 Our focus is purely structural: we introduce only the semantic objects needed to
-define interpretation provenance and to reason about robustness and change across
-interpretations, without assuming any particular execution model.
+define determination provenance and to reason about robustness and change across
+determinations, without assuming any particular execution model.
 
 \subsection{Histories}
 
@@ -312,7 +316,7 @@ sets and coincide with classical database instances.
 \end{definition}
 
 The order $\rightarrow$ records only irreducible constraints—facts that must be
-respected by any admissible semantic interpretation.
+respected by any admissible semantic determination.
 Histories abstract semantic information from execution detail: they may coincide
 with executions or traces, but they do not require a total order or a fixed
 schedule, and apply equally to purely semantic settings such as Datalog with
@@ -321,19 +325,21 @@ negation.
 We write $\Hist$ for the class of histories under consideration.
 This choice is parametric and deliberately abstract: histories may represent
 database updates, transaction invocations, message deliveries, or any other
-events that constrain semantic interpretation.
+events that constrain semantic determination.
 
 \begin{definition}[History Extension]
   For histories $H_1=(E_1,\rightarrow_1)$ and $H_2=(E_2,\rightarrow_2)$, we write
   $H_1 \sqsubseteq H_2$ if:
   \begin{enumerate}
     \item $E_1 \subseteq E_2$, and
-    \item $\rightarrow_1 = \rightarrow_2 \cap (E_1 \times E_1)$.
+    \item $\rightarrow_1 = \rightarrow_2 \cap (E_1 \times E_1)$, and
+    \item no event in $E_1$ has a causal predecessor in $E_2 \setminus E_1$.
   \end{enumerate}
 \end{definition}
 
-Intuitively, histories are extended by accumulating events and precedence constraints,
-without revising previously observed relationships.
+Intuitively, a history extension may add new events and causal edges involving
+those new events, but it may not revise the causal past of any event that has
+already occurred.
 We interpret $\sqsubseteq$ as information growth, not as time or execution \emph{per se}.
 
 \subsection{Observations and Specifications}
@@ -365,7 +371,7 @@ Specifications for Datalog with negation, transactional systems, and distributed
 executions all admit multiple admissible observations for the same history,
 corresponding to different semantic resolutions of underspecified behavior.
 In such settings, semantic questions cannot be posed until ambiguity is constrained
-by interpretation.\footnote{%
+by determination.\footnote{%
   The ambiguity we study lives in the \emph{powerset domain} $2^{O}$: multiplicity
   of admissible outcomes $\Spec(H) \subseteq O$.
   This is distinct from uncertainty or nondeterminism \emph{within} the outcome
@@ -377,12 +383,12 @@ by interpretation.\footnote{%
 \subsection{Semantic Refinement}
 
 Ambiguity is constrained by making additional semantic commitments.
-We model these commitments as \emph{interpretive predicates}, understood as
+We model these commitments as \emph{commitment predicates}, understood as
 semantic conditions that \emph{filter} the set of admissible observations while
 preserving feasibility.
 
-\begin{definition}[Interpretive Predicate (as Outcome Filter)]
-  An \emph{interpretive predicate} is a function
+\begin{definition}[Commitment (as Outcome Filter)]
+  A \emph{commitment} is a function
   \[
     \varphi : \Hist \times 2^{O} \to 2^{O}
   \]
@@ -390,87 +396,87 @@ preserving feasibility.
     \subseteq S$ (\emph{Shrinkage}), and if $S \neq \emptyset$ then $\varphi(H,S) \neq \emptyset$
   (\emph{Feasibility}).
 \end{definition}
-Interpretive predicates restrict admissible observations without introducing new ones or rendering
+Commitments restrict admissible observations without introducing new ones or rendering
 the specification infeasible.
 
-Crucially, an interpretive predicate may depend on the admissible outcome set
+Crucially, a commitment may depend on the admissible outcome set
 \emph{as a whole}.
 That is, $\varphi(H,S)$ need not be definable as a pointwise test applied
 independently to each $o \in S$, but may instead enforce semantic commitments
 whose effect depends on which alternatives are jointly admissible.
-We refer to such predicates as \emph{ambiguity-sensitive}.
+We refer to such commitments as \emph{ambiguity-sensitive}.
 
 \begin{definition}[Refinement by Conditioning]
-  Given a specification $\Spec$ and an interpretive predicate $\varphi$, the
+  Given a specification $\Spec$ and a commitment $\varphi$, the
   \emph{refinement} of $\Spec$ by $\varphi$ is the specification
   \[
     (\Spec \mid \varphi)(H) \triangleq \varphi(H,\Spec(H)).
   \]
 \end{definition}
 
-Multiple interpretive predicates may be applied by iterating this refinement
+Multiple commitments may be applied by iterating this refinement
 operation.
-Because predicates may be ambiguity-sensitive, these refinements \emph{need not commute}.
+Because commitments may be ambiguity-sensitive, these refinements \emph{need not commute}.
 
-\subsection{Interpretations}
+\subsection{Determinations}
 
-Individual interpretive predicates typically express only partial semantic
+Individual commitments typically express only partial semantic
 commitments.
-We therefore model semantic resolution using finite compositions of refinement
-predicates, interpreted as \emph{sequential conditioning}.
+We therefore model semantic resolution using finite compositions of
+commitments, applied as \emph{sequential conditioning}.
 
-\begin{definition}[Interpretation]
-  An \emph{interpretation} is a finite expression
+\begin{definition}[Determination]
+  A \emph{determination} is a finite expression
   \[
     I = \varphi_1 \wedge \cdots \wedge \varphi_m
   \]
-  of interpretive predicates, where $\wedge$ denotes \emph{ordered (sequential)
+  of commitments, where $\wedge$ denotes \emph{ordered (sequential)
     refinement} rather than logical conjunction.
   In particular, $\wedge$ is not assumed to be commutative or idempotent.
 \end{definition}
 
-Refinement by an interpretation is defined by sequential application:
+Refinement by a determination is defined by sequential application:
 \[
   \Spec \mid I
   \;\triangleq\;
   (\cdots((\Spec \mid \varphi_1)\mid \varphi_2)\cdots)\mid \varphi_m .
 \]
 
-Because interpretive predicates may be ambiguity-sensitive, the order of conjuncts
+Because commitments may be ambiguity-sensitive, the order of conjuncts
 can matter.
 This non-commutativity induces semantic dependency.
 
 \paragraph{Layer-sequencing notation.}
-The operator $\wedge$ denotes predicate-level \emph{sequential refinement} and is
+The operator $\wedge$ denotes \emph{sequential refinement} and is
 therefore generally non-commutative.
-When reasoning about \emph{depth}, however, we will often group predicates into
-\emph{layers} whose predicates commute (i.e., can be applied in any order without
+When reasoning about \emph{depth}, however, we will often group commitments into
+\emph{layers} whose commitments commute (i.e., can be applied in any order without
 changing the result).
 To make this structure explicit, we use $\seq$ as syntactic sugar for a sequence
 of commuting batches.
 
 \begin{definition}[Sequencing of layers (notation)]
   \label{def:layer-seq}
-  Let $L_1,\ldots,L_k$ be multisets of interpretive predicates.
+  Let $L_1,\ldots,L_k$ be multisets of commitments.
   We write $L_1 \seq L_2 \seq \cdots \seq L_k$
-  for the interpretation obtained by applying the predicates of $L_1$ (in any
+  for the determination obtained by applying the commitments of $L_1$ (in any
   order), then those of $L_2$, and so on:
   \[
     \Spec \mid (L_1 \seq \cdots \seq L_k)
     \;\triangleq\;
     (\cdots((\Spec \mid L_1)\mid L_2)\cdots)\mid L_k,
   \]
-  where $\Spec \mid L$ abbreviates refinement by all predicates in $L$ in any
+  where $\Spec \mid L$ abbreviates refinement by all commitments in $L$ in any
   order.
   This notation is used only to expose layering; it imposes no additional algebraic
   structure beyond commutativity within each layer.
 \end{definition}
 
 % A useful way to make this structure explicit is via a \emph{dependency graph}
-% over interpretive predicates.
-% \begin{definition}[Interpretation dependency graph]
-%   An interpretation $I = \varphi_1 \wedge \cdots \wedge \varphi_m$ has a directed
-%   acyclic \emph{interpretation dependency graph} $G=(\Phi, \rightarrow)$ where $\Phi = \{\varphi_1,\ldots,\varphi_m\}$
+% over commitments.
+% \begin{definition}[Determination dependency graph]
+%   A determination $I = \varphi_1 \wedge \cdots \wedge \varphi_m$ has a directed
+%   acyclic \emph{determination dependency graph} $G=(\Phi, \rightarrow)$ where $\Phi = \{\varphi_1,\ldots,\varphi_m\}$
 %   and $\varphi_i \rightarrow \varphi_j$ iff $i < j$ and $\varphi_j$ is
 %   ambiguity-sensitive with respect to $\varphi_i$; that is, $\varphi_i$ must be resolved
 %   before $\varphi_j$.
@@ -478,9 +484,9 @@ of commuting batches.
 % Such dependencies determine when a specification becomes resolved and when
 % depth--0 derivational provenance applies.
 
-\begin{definition}[Resolved specification and resolving interpretation]
+\begin{definition}[Resolved specification and resolving determination]
   A specification $\Spec$ is \emph{resolved} if for every history $H$, $|\Spec(H)| = 1$.
-  An interpretation $I$ \emph{resolves} $\Spec$ (i.e., $I$ is \emph{resolving for} $\Spec$) if $\Spec \mid I$ is resolved.
+  A determination $I$ \emph{resolves} $\Spec$ (i.e., $I$ is \emph{resolving for} $\Spec$) if $\Spec \mid I$ is resolved.
 \end{definition}
 
 \paragraph{Clarification.}
@@ -492,20 +498,20 @@ Resolution marks the point at which semantic ambiguity has been fully discharged
 
 \subsection{Restriction and Identification}
 
-Fix a specification $\Spec$ and an interpretation $I$.
+Fix a specification $\Spec$ and a determination $I$.
 For each history $H$, refinement by $I$ produces a restricted set of admissible
 outcomes $(\Spec \mid I)(H)$.
 
-The semantic effect of interpretation has two aspects:
+The semantic effect of a determination has two aspects:
 \emph{restriction}, in which outcomes incompatible with the commitments in $I$ are eliminated and play no further semantic role, and \emph{identification}, in which some of the remaining admissible outcomes become semantically indistinguishable.
 
 Formally, for a history $H$ write
 $O_H^I \triangleq (\Spec \mid I)(H)$.
 We say that two outcomes $o,o' \in O_H^I$ are \emph{equivalent under $I$ at $H$},
-written $o \sim_{I,H} o'$, if no interpretive predicate in $I$ distinguishes between them at $H$.
+written $o \sim_{I,H} o'$, if no commitment in $I$ distinguishes between them at $H$.
 
-\begin{definition}[Interpretation-Induced Quotient]
-  For each history $H$, interpretation $I$ induces a quotient
+\begin{definition}[Determination-Induced Quotient]
+  For each history $H$, determination $I$ induces a quotient
   \[
     O_H^I \big/ {\sim_{I,H}},
   \]
@@ -513,13 +519,13 @@ written $o \sim_{I,H} o'$, if no interpretive predicate in $I$ distinguishes bet
 \end{definition}
 
 The equivalence relation $\sim_{I,H}$ is total on the restricted domain $O_H^I$.
-Outcomes ruled out by the interpretation are not in $O_H^I$, and hence simply absent from the quotient.
+Outcomes ruled out by the determination are not in $O_H^I$, and hence simply absent from the quotient.
 
 \begin{remark}[History-indexed quotients]
-  Because interpretive predicates may depend on the history and on intermediate
-  admissible sets, equivalence under an interpretation is defined relative to a
+  Because commitments may depend on the history and on intermediate
+  admissible sets, equivalence under a determination is defined relative to a
   history.
-  Interpretations therefore induce a family of quotients indexed by histories,
+  Determinations therefore induce a family of quotients indexed by histories,
   rather than a single global quotient on $O$.
 \end{remark}
 
@@ -527,34 +533,34 @@ These notions of refinement, restriction, and identification provide the raw
 semantic substrate on which we build algebraic structure in the next section.
 
 %% ================================================================
-\section{Interpretations and Provenance Structure}
+\section{Determinations and Provenance Structure}
 \label{sec:conditional-semiring}
-This section connects the semantic notion of interpretation
+This section connects the semantic notion of determination
 (Section~\ref{sec:prelim}) to provenance.
-Fix a specification $\Spec$ and a resolving interpretation $I$.
-Interpretation provenance records both the semantic commitments fixed by $I$ and
+Fix a specification $\Spec$ and a resolving determination $I$.
+Determination provenance records both the semantic commitments fixed by $I$ and
 the derivational provenance that applies after conditioning on $I$.
 
-\subsection{Syntax of Interpretation Provenance}
+\subsection{Syntax of Determination Provenance}
 
-We now introduce a compact notation for \emph{interpretation provenance}.
+We now introduce a compact notation for \emph{determination provenance}.
 This subsection introduces no new semantic machinery.
-It packages together notions already defined—interpretations, resolution, and
+It packages together notions already defined—determinations, resolution, and
 classical provenance—into a single explanatory object.
-Throughout the paper, interpretation provenance is expressed by conditioning
-semantic objects on an interpretation.
-We assume no algebraic structure on interpretations or outcomes
+Throughout the paper, determination provenance is expressed by conditioning
+semantic objects on a determination.
+We assume no algebraic structure on determinations or outcomes
 beyond what has already been defined.
 
-\paragraph{Interpretation provenance values.}
+\paragraph{Determination provenance values.}
 Fix a commutative semiring $(K,\otimes,1)$ for derivational provenance
 (e.g., polynomial provenance).
 For a query $Q$ and tuple $t$, write $\Prov_{Q \mid I}(t) \in K$ for the
 ordinary (depth--0) provenance computed under the conditioned specification
 $\Spec \mid I$.
-We define \emph{interpretation provenance} as the pair
+We define \emph{determination provenance} as the pair
 \[
-  \mathsf{IP}_Q(t) \;\triangleq\; (I,\, \Prov_{Q \mid I}(t)).
+  \mathsf{DP}_Q(t) \;\triangleq\; (I,\, \Prov_{Q \mid I}(t)).
 \]
 
 % When convenient, we may write $I \cdot k$ as an abbreviation for the pair $(I,k)$,
@@ -564,73 +570,73 @@ The intended reading is:
 \emph{$k$ explains the derivation, assuming the semantic commitments fixed by $I$.}
 
 \paragraph{Relationship to classical provenance.}
-Once an interpretation $I$ resolves $\Spec$, semantic ambiguity is fixed for the purpose of provenance.
+Once a determination $I$ resolves $\Spec$, semantic ambiguity is fixed for the purpose of provenance.
 Query evaluation under $\Spec \mid I$ is single-valued, and classical semiring
 provenance applies without modification.
-Interpretation provenance therefore records classical provenance under
-conditioning, together with the interpretation that justifies that conditioning.
+Determination provenance therefore records classical provenance under
+conditioning, together with the determination that justifies that conditioning.
 
 In particular, for \emph{depth--0} specifications—where no nontrivial semantic
-commitments are required—interpretation provenance coincides exactly with
+commitments are required—determination provenance coincides exactly with
 classical semiring-based provenance.
 
-\paragraph{Why interpretation provenance is interpretation-relative.}
-Interpretation provenance is defined relative to a \emph{single, fixed}
-interpretation.
+\paragraph{Why determination provenance is determination-relative.}
+Determination provenance is defined relative to a \emph{single, fixed}
+determination.
 A provenance value records how a semantic outcome is derived \emph{given} a
 particular set of semantic commitments; it does not combine or quantify over
-multiple interpretations.
+multiple determinations.
 
-Accordingly, we do not form disjunctions or aggregations over interpretations
+Accordingly, we do not form disjunctions or aggregations over determinations
 within a single provenance object.
 Questions about how outcomes or explanations vary across different
-interpretations—such as robustness, invariance, or sensitivity to semantic
+determinations—such as robustness, invariance, or sensitivity to semantic
 change—are treated explicitly and separately in
 Section~\ref{sec:robustness}.
 
 We illustrate this syntax next in a transactional setting, where
-different ordering commitments induce different interpretations and,
+different ordering commitments induce different determinations and,
 consequently, different provenance for the same query.
 
-\subsection{Algebraic Structure of Interpretations}
+\subsection{Algebraic Structure of Determinations}
 \label{sec:algebra}
 
-Interpretations refine a specification through a sequence of semantic
+Determinations refine a specification through a sequence of semantic
 commitments.
 This process exhibits a layered algebraic structure, which we summarize here to
-clarify the relationship between interpretation provenance and classical algebraic
+clarify the relationship between determination provenance and classical algebraic
 provenance.
 
 \paragraph{Sequential conditioning across layers.}
-Between layers, interpretive predicates compose by sequential conditioning.
+Between layers, commitments compose by sequential conditioning.
 This composition is generally dependent and non-commutative: applying one
-predicate may enable or disable another.
+commitment may enable or disable another.
 Accordingly, the sequencing operator $\seq$ carries no algebraic meaning beyond
 ordered refinement.
 
 \paragraph{Commutative structure within a layer.}
-Within a single layer, interpretive predicates commute.
+Within a single layer, commitments commute.
 Order of application does not affect the resulting restriction of admissible
 outcomes.
-As a result, predicates within a layer form a \emph{conditional commutative
+As a result, commitments within a layer form a \emph{conditional commutative
   monoid}, where conjunction corresponds to joint semantic commitment and the
-identity element is the trivial predicate.
+identity element is the trivial commitment.
 
 The carrier of this monoid is conditional on prior layers: which predicates are
-available, and which outcomes they act upon, depends on the interpretation prefix.
+available, and which outcomes they act upon, depends on the determination prefix.
 
 \paragraph{Special case: semiring structure.}
-In special cases—most notably when interpretive predicates are pointwise and
+In special cases—most notably when commitments are pointwise and
 independent across outcomes—this monoid extends to a commutative semiring.
 Although this structure is familiar from algebraic provenance, we do not exploit
 it here, as our focus is on semantic resolution rather than algebraic
 optimization.
 
 \paragraph{Why semiring provenance applies at layer~0.}
-Once a resolving interpretation $I$ is fixed, all semantic ambiguity has been
+Once a resolving determination $I$ is fixed, all semantic ambiguity has been
 eliminated.
 The conditioned specification $\Spec \mid I$ is single-valued and monotone: no
-further interpretive predicates can rule out admissible outcomes.
+further commitments can rule out admissible outcomes.
 All remaining variation is purely derivational.
 In this setting, explanations combine algebraically exactly as in classical
 semiring provenance.
@@ -640,7 +646,7 @@ over a fixed instance.
 This is precisely the semantic regime studied in prior work on semiring
 provenance.
 
-Accordingly, interpretation provenance pairs a resolving interpretation with
+Accordingly, determination provenance pairs a resolving determination with
 ordinary algebraic provenance computed under the resolved specification.
 Formal details appear in Appendix~\ref{app:algebra}.
 
@@ -651,11 +657,11 @@ We now return to the transactional Example~\ref{ex:example}.
 Recall that values $b, c$ are present in every serializable execution, while value $d$
 is present only under certain execution orders.
 
-We can now show the syntax of interpretation provenance for this example.
-In a conflict serializability context, interpretive predicates correspond to ordering
+We can now show the syntax of determination provenance for this example.
+In a conflict serializability context, commitments correspond to ordering
 commitments among transactions: $\varphi_{T_i \prec T_j}$ commits to
 ordering the actions of transaction $T_i$ before the conflicting actions of $T_j$.
-If we observe $\{(b), (c), (d)\}$ as the query result, then an example Interpretation is
+If we observe $\{(b), (c), (d)\}$ as the query result, then an example determination is
 \[
   I_{\mathsf{in}} \;\triangleq\;
   \bigl(
@@ -671,7 +677,7 @@ If we observe $\{(b), (c), (d)\}$ as the query result, then an example Interpret
   \bigr)
 \]
 All predicates in $I_{\mathsf{in}}$ commute; thus $I_{\mathsf{in}}$ forms a single
-interpretation layer (depth~1).
+determination layer (depth~1).
 The corresponding conditioned (depth--0) provenance is
 \[
   \Prov_{Q \mid I_{\mathsf{in}}}(b)=x_1+x_2,\;
@@ -679,43 +685,43 @@ The corresponding conditioned (depth--0) provenance is
   \Prov_{Q \mid I_{\mathsf{in}}}(d)=x_4.
 \]
 
-Interpretation provenance pairs these expressions with the interpretation,
-e.g., $\mathsf{IP}_Q(b) \triangleq (I_{\mathsf{in}},\, x_1+x_2)$.
+Determination provenance pairs these expressions with the determination,
+e.g., $\mathsf{DP}_Q(b) \triangleq (I_{\mathsf{in}},\, x_1+x_2)$.
 
 In Appendix~\ref{sec:appendix-concurrency} we work this example more fully, including
 the case where $d$ is absent from the query result.
 
-\subsection{Interpretation Parsimony and Discriminating Power}
+\subsection{Determination Parsimony and Discriminating Power}
 \label{sec:parsimony}
 
-Recall that for a history $H$ and interpretation $I$, refinement induces a
+Recall that for a history $H$ and determination $I$, refinement induces a
 quotient $O_H^I \big/ {\sim_{I,H}}$,
 which records which admissible outcomes remain semantically distinguished after
 conditioning (Section~\ref{sec:prelim}).
 
 \paragraph{Discriminating power.}
 Fix a specification $\Spec$.
-An interpretation $I$ \emph{discriminates} between two outcomes
+A determination $I$ \emph{discriminates} between two outcomes
 $o,o' \in \Spec(H)$ if $o \not\sim_{I,H} o'$.
-If $o \sim_{I,H} o'$ for all resolving interpretations,
+If $o \sim_{I,H} o'$ for all resolving determinations,
 then the specification lacks the expressive power to distinguish between the two outcomes.
 
-\paragraph{Parsimonious predicate bases.}
-Let $\mathcal{B}$ be a basis of interpretive predicates.
+\paragraph{Parsimonious commitment bases.}
+Let $\mathcal{B}$ be a basis of commitments.
 We call $\mathcal{B}$ a \emph{parsimonious} basis if:
-(i) for every history $H$, some interpretation formed from $\mathcal{B}$
+(i) for every history $H$, some determination formed from $\mathcal{B}$
 resolves $\Spec$ at $H$; and
 (ii) for every $H$ and every pair of distinct admissible outcomes
-$o \neq o' \in \Spec(H)$, there exists a resolving interpretation from
+$o \neq o' \in \Spec(H)$, there exists a resolving determination from
 $\mathcal{B}$ that discriminates between them.
 
 Intuitively, a parsimonious basis induces quotients that are no coarser than
 necessary: any semantic distinction that exists in principle can be exposed by
-some admissible interpretation.
+some admissible determination.
 
 \paragraph{Parsimony and robustness.}
-Parsimony is a property of the \emph{predicate basis}, not of individual queries.
-The predicate basis determines which semantic distinctions are expressible, and
+Parsimony is a property of the \emph{commitment basis}, not of individual queries.
+The commitment basis determines which semantic distinctions are expressible, and
 therefore which admissible outcomes can be distinguished or collapsed.
 In practice, systems often adopt non-parsimonious bases—for reasons of efficiency,
 policy, or usability—thereby intentionally abstracting away fine-grained
@@ -724,25 +730,25 @@ differences among admissible outcomes.
 In the transactional setting, for example, predicates that commit only to an
 equivalent serial schedule are deliberately coarse.
 Some tuples—such as $a$ and $b$ in Example~\ref{ex:example}—are present under every
-interpretation consistent with that abstraction.
-Interpretation provenance makes this explicit by showing which observations are
-invariant across all interpretations induced by the chosen predicate basis; these
+determination consistent with that abstraction.
+Determination provenance makes this explicit by showing which observations are
+invariant across all determinations induced by the chosen commitment basis; these
 observations require sharper ordering predicates to distinguish. But in many cases,
 including transaction scheduling, such invariance is a side-effect of a semantically
-natural predicate basis.
+natural commitment basis.
 
 % This invariance is not accidental.
-% Observations are robust precisely when the available interpretive vocabulary
+% Observations are robust precisely when the available commitment vocabulary
 % never discriminates between the outcomes on which they would differ.
 This perspective motivates questions studied in
 Section~\ref{sec:robustness}, where this invariance (which we call \emph{robustness}) is defined
-\emph{relative to a fixed predicate basis}, rather than as an absolute semantic
+\emph{relative to a fixed commitment basis}, rather than as an absolute semantic
 property.
 
 \subsection{Summary}
-Interpretation provenance pairs a resolving interpretation with classical
-provenance computed under that interpretation.
-Once an interpretation is fixed, provenance is classical by construction: it is
+Determination provenance pairs a resolving determination with classical
+provenance computed under that determination.
+Once a determination is fixed, provenance is classical by construction: it is
 computed over the conditioned specification $\Spec \mid I$.
 
 The following sections instantiate this framework in two settings with very
@@ -751,23 +757,23 @@ transactional systems.
 
 
 % ================================================================
-\section{Layer Certificates and Interpretation Provenance}
+\section{Layer Certificates and Determination Provenance}
 \label{sec:certificates}
 % ================================================================
 
-Fix a specification $\Spec$ and an interpretation
+Fix a specification $\Spec$ and a determination
 $I=\varphi_1\wedge\cdots\wedge\varphi_k$ with layering $L_1,\ldots,L_k$.
 
 A \emph{provenance query} is a function $q:(\Spec\mid I)\to A$,
 where $A$ is an answer domain (e.g., Boolean, explanations, dependency sets),
 including classical why/why-not provenance and the robustness queries of
 Section~\ref{sec:robustness}.
-Such queries depend only on the restrictions that interpretation places on the
+Such queries depend only on the restrictions that a determination places on the
 space of admissible outcomes.
 A \emph{certificate} summarizes these restrictions.
 
 \begin{definition}[Certificate]
-  Let $\varphi$ be an interpretive predicate.
+  Let $\varphi$ be a commitment.
   A certificate for $\varphi$, written $\varphi\models C$, is a predicate
   $C:O\to\{\mathsf{true},\mathsf{false}\}$ such that for all histories $H$ and
   nonempty $S\subseteq O$,
@@ -777,7 +783,7 @@ A \emph{certificate} summarizes these restrictions.
 \end{definition}
 
 Certificates are sound over-approximations: they may admit false positives, but
-never exclude outcomes admitted by interpretation.
+never exclude outcomes admitted by a determination.
 Whether such lossiness is acceptable depends on the provenance queries being asked.
 To formalize this dependence, write
 \[
@@ -826,7 +832,7 @@ given family of provenance queries.
 This reframes a familiar tradeoff in systems lineage: tracing systems such as
 Dapper retain full histories to support arbitrary diagnostics~\cite{sigelman2010dapper},
 corresponding to certificates that preserve all future queries.
-Interpretation provenance exposes this choice explicitly and enables more
+Determination provenance exposes this choice explicitly and enables more
 parsimonious lineage when the intended query family is known
 (Appendix~\ref{app:systems-lineage}).
 
@@ -841,7 +847,7 @@ parsimonious lineage when the intended query family is known
     \toprule
     \multicolumn{3}{c}{\textbf{(A) Datalog negation semantics}}           \\
     \midrule
-    \textbf{Case} & \textbf{Resolving interpretation(s)} & \textbf{Depth} \\
+    \textbf{Case} & \textbf{Resolving determination(s)} & \textbf{Depth} \\
     \midrule
     Stratified    &
     $\varphi_{\seal}(S_1) \seq \varphi_{\seal}(S_2) \seq \cdots \seq \varphi_{\seal}(S_k)$
@@ -866,7 +872,7 @@ parsimonious lineage when the intended query family is known
     \toprule
     \multicolumn{3}{c}{\textbf{(B) Transactions: serializability and snapshot isolation}} \\
     \midrule
-    \textbf{Case}                & \textbf{One resolving interpretation} & \textbf{Depth} \\
+    \textbf{Case}                & \textbf{One resolving determination} & \textbf{Depth} \\
     \midrule
     SER robust $b$               &
     $\{\varphi_{T_1 \prec T_Q},\varphi_{T_Q \prec T_2},\varphi_{T_2 \prec T_3},
@@ -894,15 +900,15 @@ parsimonious lineage when the intended query family is known
   \end{tabular}
 
   \caption{
-    Interpretation summaries for examples.
+    Determination summaries for examples.
     Depth counts non-commuting stages of semantic commitment; branching among
-    incompatible interpretations does not increase depth.
+    incompatible determinations does not increase depth.
     (\textbf{A}) For Datalog with negation, different semantics induce different
     resolution structures: stratified and well-founded semantics admit a single
-    resolving interpretation, while stable semantics admits multiple incompatible
+    resolving determination, while stable semantics admits multiple incompatible
     ones.
-    (\textbf{B}) For serializable transactions, many serial interpretations may
-    justify the same outcome; we therefore display one resolving interpretation
+    (\textbf{B}) For serializable transactions, many serial determinations may
+    justify the same outcome; we therefore display one resolving determination
     as a witness, since only existence (not enumeration) matters.
     The SI row abbreviates snapshot choices ($\snap(\cdot)$) and the
     first-committer-wins rule ($\FCW$).
@@ -921,14 +927,14 @@ We use Datalog with negation as a controlled setting in which to study
 \emph{semantic ambiguity} within a fixed specification.
 Our goal is not to propose new semantics, but to expose how classical negation
 semantics differ in the \emph{structure} of the semantic commitments they require,
-and how those commitments are reflected in interpretation provenance.
+and how those commitments are reflected in determination provenance.
 
 Even for a fixed program and extensional input, negation can delay semantic
 commitment.
 Whether an atom holds may depend on the absence of other atoms whose status is
 itself unresolved.
-Interpretation provenance makes this explicit by separating ordinary derivational
-consequences—true in all admissible outcomes—from \emph{interpretive predicates}
+Determination provenance makes this explicit by separating ordinary derivational
+consequences—true in all admissible outcomes—from \emph{commitments}
 that rule out some outcomes and thereby resolve ambiguity.
 
 \begin{example}[Datalog with negation]
@@ -944,29 +950,29 @@ that rule out some outcomes and thereby resolve ambiguity.
   ($q(c)$ depends negatively on $p(c)$, and $p(c)$ depends positively on $a(c)$)
   and a cycle through negation ($r \leftrightarrow \neg s$).
   We use this single instance to exhibit, side-by-side, three distinct structures
-  of interpretation provenance.
+  of determination provenance.
 \end{example}
 
 We examine three standard semantics for negation—stratified, well-founded, and
-stable—and record the corresponding resolving interpretations.
-Figure~\ref{fig:interp-tables}(\textbf{A}) summarizes these interpretations and
-their \emph{interpretation depth}, defined as the length of a non-commuting chain
+stable—and record the corresponding resolving determinations.
+Figure~\ref{fig:interp-tables}(\textbf{A}) summarizes these determinations and
+their \emph{determination depth}, defined as the length of a non-commuting chain
 of semantic commitments.
 When a semantics admits multiple incompatible resolutions, we list them;
-when it admits a unique resolution, we record that interpretation alone.
+when it admits a unique resolution, we record that determination alone.
 Here $S_i$ denotes the set of atoms whose truth is sealed at stratum~$i$, and
 $U_i$ denotes the unfounded set eliminated at alternation~$i$ in the
 well-founded construction.
 Full derivations and conditioned provenance appear in
 Appendix~\ref{sec:appendix-datalog}.
 
-\subsection{Negation Semantics as Interpretation Shapes}
+\subsection{Negation Semantics as Determination Shapes}
 
-We illustrate these interpretation structures using the single running program of
+We illustrate these determination structures using the single running program of
 Example~\ref{ex:datalog-negation}, which contains both a stratified fragment
 ($p,q$) and a cycle through negation ($r \leftrightarrow \neg s$).
 Depth counts only non-commuting stages of semantic commitment; branching among
-incompatible interpretations does not increase depth.
+incompatible determinations does not increase depth.
 
 \paragraph{Stratified semantics.}
 In stratified programs, negation flows strictly from higher to lower strata.
@@ -976,9 +982,9 @@ In the example, the lower stratum defining $p(c)$ must be sealed before $q(c)$ c
 be interpreted negatively.
 
 These sealing predicates do not commute: stabilization of stratum~$i$ is a
-prerequisite for interpreting negation in stratum~$i{+}1$.
-Accordingly, a program with $k$ strata has interpretation depth exactly~$k$,
-corresponding to the layered interpretation
+prerequisite for applying negation commitments in stratum~$i{+}1$.
+Accordingly, a program with $k$ strata has determination depth exactly~$k$,
+corresponding to the layered determination
 \[
   \varphi_{\seal}(S_1) \seq \varphi_{\seal}(S_2) \seq \cdots \seq \varphi_{\seal}(S_k)
 \]
@@ -994,7 +1000,7 @@ Rather than choosing among total models, it alternates between positive
 derivation and elimination of unfounded sets, producing a three-valued outcome
 in which atoms may be true, false, or undefined.
 
-Interpretively, this corresponds to an \emph{alternating sequence} of non-commuting
+In determination terms, this corresponds to an \emph{alternating sequence} of non-commuting
 sealing commitments layered after the stratified prefix:
 \[
   \varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k)
@@ -1002,8 +1008,8 @@ sealing commitments layered after the stratified prefix:
 \]
 % [added \seq]
 The number of alternations is not bounded in general, so well-founded semantics
-does not admit a fixed finite interpretation depth.
-Figure~\ref{fig:interp-tables}(\textbf{A}, WFS) records the limit interpretation
+does not admit a fixed finite determination depth.
+Figure~\ref{fig:interp-tables}(\textbf{A}, WFS) records the limit determination
 for the example instance.
 
 \paragraph{Stable model semantics.}
@@ -1015,11 +1021,11 @@ After sealing the stratified prefix of the program, a global hypothesis can be
 made about the truth of atoms in the negation cycle (e.g., $r$ or $s$ in the
 example) and checked for self-consistency.
 
-Each stable model corresponds to a distinct resolving interpretation, and these
-interpretations are mutually incompatible.
-Within any one stable interpretation, however, the commitments are logically
+Each stable model corresponds to a distinct resolving determination, and these
+determinations are mutually incompatible.
+Within any one stable determination, however, the commitments are logically
 simultaneous and commute.
-Thus stable semantics has interpretation depth~$k{+}1$, corresponding to
+Thus stable semantics has determination depth~$k{+}1$, corresponding to
 \[
   \bigl(\varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k)\bigr)
   \seq I^{(r)}
@@ -1036,10 +1042,10 @@ The three semantics differ not only in which outcomes they admit, but in the
 \emph{structure} of semantic resolution.
 Stratified semantics requires a linear chain of stabilization commitments;
 well-founded semantics requires an alternating, potentially unbounded sequence;
-stable semantics branches among shallow but incompatible interpretations after
+stable semantics branches among shallow but incompatible determinations after
 stratification.
 When negation is acyclic, all three semantics coincide extensionally, but
-interpretation provenance still records the sealing commitments required to
+determination provenance still records the sealing commitments required to
 justify negation.
 Full derivations appear in
 Appendix~\ref{sec:appendix-datalog}.
@@ -1053,13 +1059,13 @@ We now turn to transactional systems.
 As in Sandbox~I, our goal is not to propose new correctness criteria, but to use a
 well-studied setting to expose how \emph{semantic ambiguity} arises within a fixed
 specification, and how different resolution regimes induce different
-\emph{interpretation structures}.
+\emph{determination structures}.
 
 In transactional systems, ambiguity arises not from negation but from
 \emph{concurrency}.
 Transactions race to read and write shared state, and the execution history does
 not uniquely determine which effects are observed.
-Interpretation provenance explains how query results depend not only on data, but
+Determination provenance explains how query results depend not only on data, but
 on the semantic commitments used to resolve that concurrency.
 
 \subsection{Concurrency as Semantic Ambiguity}
@@ -1090,27 +1096,27 @@ The history does not determine whether $d$ is visible to the query transaction
 $T_Q$.
 That depends on how concurrency is resolved.
 
-As in Sandbox~I, this single example suffices to exhibit multiple interpretation
+As in Sandbox~I, this single example suffices to exhibit multiple determination
 shapes under different semantics.
 
-\subsection{Serializability as Interpretation Shape}
+\subsection{Serializability as Determination Shape}
 
 Under serializability, admissible outcomes are those explainable by some total
 order of transactions consistent with the history.
 Each outcome corresponds to at least one such serialization.
 
-\paragraph{Interpretive predicates.}
-The primitive interpretive predicates in this setting are \emph{ordering
+\paragraph{Commitments.}
+The primitive commitments in this setting are \emph{ordering
   predicates}.
 For transactions $T_i$ and $T_j$, the predicate $\varphi_{T_i \prec T_j}$ commits
 that $T_i$ precedes $T_j$ in the serialization.
-An interpretation is a finite conjunction of such predicates, inducing a partial
-order; a fully resolving interpretation induces a total order.
+A determination is a finite conjunction of such predicates, inducing a partial
+order; a fully resolving determination induces a total order.
 
 Crucially, ordering predicates commute.
 Committing to $T_1 \prec T_2$ and to $T_2 \prec T_3$ can be done in either order and
 has the same effect.
-As a result, serializability has interpretation depth~1: all semantic commitments
+As a result, serializability has determination depth~1: all semantic commitments
 belong to a single commutative stage, which we can write schematically as
 \[
   \varphi_{T_1 \prec T_2}, \ldots, \varphi_{T_i \prec T_j}
@@ -1121,26 +1127,26 @@ $\{\varphi_{T_i \prec T_j}\}_{i,j}$,
 with no further sequencing required.
 
 \paragraph{Example.}
-Under the interpretation
+Under the determination
 $I_{\mathsf{in}} \triangleq
   \varphi_{T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_Q \prec T_5}$,
 the insert precedes the query and the delete follows it.
 Conditioning on $I_{\mathsf{in}}$ yields a resolved outcome in which $d$ is present,
 with classical provenance $\Prov_{Q \mid I_{\mathsf{in}}}(d)=x_4$.
 
-Under the alternative interpretation
+Under the alternative determination
 $I_{\mathsf{out}} \triangleq
   \varphi_{T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_5 \prec T_Q}$,
 the delete precedes the query and $d$ is absent.
-Prior to fixing an interpretation, there is no single classical provenance question
+Prior to fixing a determination, there is no single classical provenance question
 for $d$.
-Interpretation provenance records the semantic commitments under which each
+Determination provenance records the semantic commitments under which each
 explanation applies.
 
 Figure~\ref{fig:interp-tables}(\textbf{B}, SER) summarizes representative resolving
-interpretations.
+determinations.
 
-\subsection{Snapshot Isolation as Interpretation Shape}
+\subsection{Snapshot Isolation as Determination Shape}
 
 Snapshot isolation (SI) resolves concurrency using a different basis of semantic
 commitments.
@@ -1148,8 +1154,8 @@ Rather than committing to a total order, SI assigns each transaction a snapshot 
 the database state it reads from and enforces a global
 first-committer-wins constraint on writes.
 
-\paragraph{Interpretive predicates.}
-An SI interpretation consists of:
+\paragraph{Commitments.}
+An SI determination consists of:
 (i) snapshot predicates specifying, for each transaction, which committed effects
 it observes; and
 (ii) a global write-conflict admissibility predicate.
@@ -1158,7 +1164,7 @@ potentially many concurrent transactions.
 
 Unlike serializability, these predicates do not commute in general: snapshot
 choices for one transaction constrain admissible choices for others.
-Accordingly, snapshot isolation has worst-case interpretation depth $O(|H|)$,
+Accordingly, snapshot isolation has worst-case determination depth $O(|H|)$,
 reflecting a sequence of non-commuting snapshot commitments, which can be written
 schematically as
 \[
@@ -1168,8 +1174,8 @@ schematically as
 where later snapshot choices depend on earlier ones.
 
 Figure~\ref{fig:interp-tables}(\textbf{B}, SI) records one such resolving
-interpretation for the running example.
-Once an SI interpretation is fixed, the specification again becomes single-valued,
+determination for the running example.
+Once an SI determination is fixed, the specification again becomes single-valued,
 and provenance reduces to ordinary depth--0 derivational provenance.
 What differs from serializability is the \emph{structure and depth} of the semantic
 resolution required to reach that point.
@@ -1183,15 +1189,15 @@ Serializability resolves ambiguity via a single commutative layer of ordering
 commitments.
 Snapshot isolation requires a richer, deeper structure of non-commuting snapshot
 and conflict commitments.
-Interpretation provenance makes these differences explicit, while classical
+Determination provenance makes these differences explicit, while classical
 provenance applies only after resolution is complete.
 
 % ================================================================
-\section{Change and Robustness Across Interpretations}
+\section{Change and Robustness Across Determinations}
 \label{sec:robustness}
 % ================================================================
 
-Interpretation provenance records not only how observations are derived, but the
+Determination provenance records not only how observations are derived, but the
 semantic commitments under which those derivations are valid.
 This section formalizes two such families of questions and grounds them in the
 examples developed earlier.
@@ -1201,20 +1207,20 @@ Here, \emph{observations} refer to observable query answers or derived facts—i
 
 We distinguish two classes of provenance questions.
 \emph{Intra-specification} questions fix a specification $\Spec$ and range over its
-resolving interpretations, asking which observations hold under different
+resolving determinations, asking which observations hold under different
 admissible resolutions of the \emph{same} specification.
 \emph{Inter-specification} questions compare observations across distinct
 specifications $\Spec$ and $\Spec'$, asking which observations persist when the
 specification itself changes—for example, when a transactional system moves from
 serializability to snapshot isolation, or when a logic program adopts a different
 negation semantics.
-Both question families are expressed using interpretation provenance; they simply
+Both question families are expressed using determination provenance; they simply
 quantify over different spaces.
 
 \subsection{Intra-Specification Queries: Robustness}
 
 Robustness is an intra-specification property.
-Fix a specification $\Spec$ and a class $\mathcal{I}$ of resolving interpretations.
+Fix a specification $\Spec$ and a class $\mathcal{I}$ of resolving determinations.
 An observation $o$ is \emph{robust} with respect to $\mathcal{I}$ iff
 \[
   \forall I \in \mathcal{I}.\; o \in (\Spec \mid I)(H),
@@ -1224,21 +1230,21 @@ where (recall Section~\ref{sec:prelim}) each $I \in \mathcal{I}$ is resolving, i
 Equivalently, $o$ does not depend on semantic commitments that vary across
 $\mathcal{I}$.
 In the lens of Section~\ref{sec:parsimony}, robustness is evidence of a lack of
-parsimony in the interpretive predicate basis.
+parsimony in the commitment basis.
 
 \paragraph{Example: robustness under serializability.}
 In the transactional example of
 Appendix~\ref{sec:appendix-concurrency}, the history admits multiple serial orders.
-Interpretive predicates record only ordering commitments between transactions.
+Commitments record only ordering commitments between transactions.
 Under all such orders, the query result includes the values $b$ and $c$, while the
 presence of $d$ depends on whether the insert $T_4$ is ordered before the query
 and the delete $T_5$ after it.
 
-Our interpretive predicate basis captures the level of discrimination natural to
+Our commitment basis captures the level of discrimination natural to
 serializability: it distinguishes executions by transaction order, but not by
 finer-grained, value-specific effects.
 This exposes that $b$ and $c$ are robust under serializability, while $d$ is not.
-The lack of parsimony in the predicate basis here is both meaningful (it exposes artifacts of serializability)
+The lack of parsimony in the commitment basis here is both meaningful (it exposes artifacts of serializability)
 and practical (it avoids an explosion of ordering predicates).
 
 \subsection{Inter-Specification Queries: Preservation under Semantic Change}
@@ -1249,7 +1255,7 @@ are admitted under different specifications for the same history.
 
 \paragraph{Preservation.}
 Given specifications $\Spec$ and $\Spec'$, outcome $o$, and
-sets $\mathcal{I}$ and $\mathcal{I}'$ of all resolving interpretations
+sets $\mathcal{I}$ and $\mathcal{I}'$ of all resolving determinations
 for $\Spec$ and $\Spec'$ respectively,
 $o$ is \emph{preserved} from $\Spec$ to $\Spec'$ iff
 \[
@@ -1261,13 +1267,13 @@ $o$ is \emph{preserved} from $\Spec$ to $\Spec'$ iff
 \]
 
 \paragraph{Serializable outcomes under snapshot isolation.}
-Snapshot isolation admits a larger space of interpretations than serializability.
+Snapshot isolation admits a larger space of determinations than serializability.
 Preservation therefore reduces to the following question:
-\emph{given an SI interpretation, does there exist a serializable interpretation
+\emph{given an SI determination, does there exist a serializable determination
   that admits the same outcome?}
 
-Interpretation provenance provides concrete syntax for this question.
-An SI interpretation records snapshot choices and commit-admissibility constraints.
+Determination provenance provides concrete syntax for this question.
+An SI determination records snapshot choices and commit-admissibility constraints.
 From these predicates, one can check whether the induced visibility and conflict
 relations admit a topological sort constituting a serial execution.
 If so, the outcome is preserved when strengthening from SI to serializability;
@@ -1275,28 +1281,28 @@ otherwise it is inherently non-serializable.
 Appendix~\ref{sec:appendix-concurrency} works through a detailed example.
 
 This reframes preservation as a \emph{semantic validation problem} over
-interpretations rather than as a comparison of executions.
+determinations rather than as a comparison of executions.
 Mixed-consistency execution policies—e.g., allowing SI but ignoring
 any non-serializable outcome rows—can therefore be expressed and enforced directly in
-terms of interpretation provenance, without re-executing the workload.
+terms of determination provenance, without re-executing the workload.
 
 \subsection{Quantitative Variants}
 
 The definitions above are qualitative.
-When the space of interpretations is finite or otherwise measurable, one can ask
-quantitative questions—for example, what fraction of admissible interpretations
+When the space of determinations is finite or otherwise measurable, one can ask
+quantitative questions—for example, what fraction of admissible determinations
 justify a conclusion, or how often a conclusion is preserved across semantic
 changes.
-Interpretation provenance provides the semantic structure needed to formulate such
-questions, though it does not require a measure over interpretations.
+Determination provenance provides the semantic structure needed to formulate such
+questions, though it does not require a measure over determinations.
 
 \paragraph{Summary.}
 Robustness identifies conclusions invariant under the semantic distinctions a
 system chooses to make.
 Semantic change compares conclusions across different semantic regimes.
-Interpretation provenance provides a common framework for expressing both, while
-making explicit the limits of discrimination imposed by the chosen interpretive
-predicates.
+Determination provenance provides a common framework for expressing both, while
+making explicit the limits of discrimination imposed by the chosen
+commitments.
 
 % ================================================================
 \section{Related Work}
@@ -1314,13 +1320,13 @@ explanations
 \cite{buneman2001why,halpern2001causes,meliou2010causality,glavic2015survey}.
 
 From the perspective of this paper, these approaches operate at
-interpretation depth~0: semantic ambiguity has already been resolved, and
+determination depth~0: semantic ambiguity has already been resolved, and
 provenance explains derivations relative to a fixed semantics.
 This includes work on incremental view maintenance and \emph{homeostasis},
 which identifies queries whose answers are invariant under admissible input
 changes and therefore require no additional semantic commitments to maintain
 \cite{gehrke2002homeostasis}.
-Interpretation provenance is complementary: rather than assuming resolved
+Determination provenance is complementary: rather than assuming resolved
 semantics, it explains which semantic commitments are required for observations
 to hold at all, and how classical provenance depends on those commitments once
 resolution has occurred.
@@ -1334,7 +1340,7 @@ We do not propose new semantics.
 Instead, Section~\ref{sec:negation} uses Datalog with negation as a controlled
 setting in which resolution strategies are explicit and formal, making it
 possible to study how different semantic commitments induce distinct
-interpretation structures and provenance behavior.
+determination structures and provenance behavior.
 
 \medskip
 \noindent\textbf{Transactional and systems provenance.}
@@ -1343,7 +1349,7 @@ settings under an assumed execution or isolation level
 \cite{bernstein1987concurrency,adya1999weak,cerone2015consistency,cheney2009provenance,freire2008provenance}.
 In these settings, semantic resolution is implicit: provenance explains results
 relative to a chosen execution, snapshot, or schedule.
-From our perspective, such approaches again operate at interpretation depth~0.
+From our perspective, such approaches again operate at determination depth~0.
 
 A distinct body of systems work studies execution provenance or systems lineage,
 recording causal dependencies among processes, messages, and events to explain
@@ -1351,7 +1357,7 @@ observed behavior
 \cite{seltzer2005provenance,bates2015trustworthy,sigelman2010dapper}.
 These approaches take a maximalist view of provenance, capturing entire execution
 histories to account for ambiguity in scheduling and message interleaving.
-Interpretation provenance provides a semantic foundation for structuring such
+Determination provenance provides a semantic foundation for structuring such
 systems provenance: rather than committing to a single reconstructed execution,
 it makes explicit the semantic commitments required for a diagnostic conclusion
 to hold across admissible executions, supporting principled notions of parsimony
@@ -1373,24 +1379,24 @@ querying, or stress-testing inferred causal structure.
 
 From the perspective of this paper, such modeling choices can be understood as
 semantic commitments that restrict the space of admissible explanations.
-Interpretation provenance does not perform causal inference; rather, it provides
+Determination provenance does not perform causal inference; rather, it provides
 a framework for making these commitments explicit and for reasoning about how
 conclusions depend on them.
 In particular, the robustness and preservation questions studied in
 Section~\ref{sec:robustness} suggest a natural connection: diagnostic conclusions
-may be robust across a class of causal interpretations, or may depend critically
+may be robust across a class of causal determinations, or may depend critically
 on specific causal assumptions.
 Clarifying this connection—by treating causal graph construction and
 summarization as forms of semantic resolution over ambiguous histories—is a
 promising direction for future work.
 
 \medskip
-\noindent\textbf{Interpretation complexity.}
-This work builds on a prior complexity theory of interpretation
+\noindent\textbf{Determination complexity.}
+This work builds on a prior complexity theory of determination
 introduced in~\cite{hellerstein2026interpretation}, which characterizes the cost,
 depth, and coordination requirements of semantic resolution.
 The present paper focuses instead on explanation.
-Interpretations are assumed given, and interpretation provenance explains how
+Determinations are assumed given, and determination provenance explains how
 observations depend on them.
 Connections to descriptive complexity, fixpoint alternation, oracle models, and
 coordination are discussed in detail in~\cite{hellerstein2026interpretation}.
@@ -1405,39 +1411,39 @@ not produce a single semantic outcome from a history, but a space of admissible
 ones.
 In such settings, explaining an observation requires accounting for how ambiguity
 was resolved—not merely how derivations proceeded after the fact.
-Interpretation provenance makes those semantic commitments explicit and
+Determination provenance makes those semantic commitments explicit and
 composable, recovering classical algebraic provenance once resolution is fixed
 while retaining visibility into the assumptions that made resolution possible.
 
 Our development shows that this perspective is not domain-specific.
-In transactional systems, interpretation provenance explains how query
+In transactional systems, determination provenance explains how query
 observations depend on ordering and isolation commitments.
 In logic programming with negation, it exposes the semantic dependencies that
 govern resolution.
 Across domains, certificates provide a minimal interface for carrying forward
 exactly the information required to support further reasoning.
 
-Interpretation provenance also opens a broader research agenda.
+Determination provenance also opens a broader research agenda.
 
 \paragraph{Robustness and semantic sensitivity.}
-Once observations are annotated with the interpretations under which they hold, it
-becomes natural to ask which are robust across interpretations and which are
+Once observations are annotated with the determinations under which they hold, it
+becomes natural to ask which are robust across determinations and which are
 fragile.
 This enables provenance questions about semantic stability, policy change, and
 compatibility across regimes that lie beyond traditional why- and how-provenance.
 Developing principled robustness measures—qualitative or quantitative—remains an
 open direction.
 
-\paragraph{Engineering interpretation provenance.}
-While interpretations are minimal by construction, the choice of
-\emph{interpretive predicate basis} is not.
-Designing effective predicate bases—balancing parsimony against the desire to
+\paragraph{Engineering determination provenance.}
+While determinations are minimal by construction, the choice of
+\emph{commitment basis} is not.
+Designing effective commitment bases—balancing parsimony against the desire to
 expose semantic sensitivity—raises new engineering questions at the boundary of
 specification and provenance.
 Coarser bases yield more robust observations but collapse distinctions; finer
 bases increase discriminating power but can amplify fragility and cost, as
 illustrated by isolation-levels in transactional systems (Section~\ref{sec:robustness}).
-Understanding how to design specifications and predicate bases that make the
+Understanding how to design specifications and commitment bases that make the
 right semantic distinctions explicit, while supporting compact certificates and
 efficient maintenance, is a central direction for future work.
 
@@ -1446,13 +1452,13 @@ Semantic ambiguity and resolution arise well beyond data management.
 Consistency models, coordination protocols, access-control systems, and machine
 learning pipelines all exhibit underspecification followed by structured
 commitment.
-Interpretation provenance provides a vocabulary for reasoning across these
+Determination provenance provides a vocabulary for reasoning across these
 settings, suggesting a unifying foundation for provenance in ambiguous
 computational systems.
 
 The success of algebraic provenance lay in identifying the right semantic object
 to explain.
-Interpretation provenance extends that insight: when meaning itself depends on
+Determination provenance extends that insight: when meaning itself depends on
 resolution, provenance must explain the assumptions that made meaning possible.
 
 \appendix
@@ -1461,17 +1467,17 @@ resolution, provenance must explain the assumptions that made meaning possible.
 \label{app:algebra}
 % ================================================================
 
-This appendix clarifies the algebraic structure induced by interpretations and
+This appendix clarifies the algebraic structure induced by determinations and
 explains why classical algebraic provenance applies once semantic ambiguity has
 been resolved.
-The goal is not to develop a new provenance algebra, but to situate interpretation
+The goal is not to develop a new provenance algebra, but to situate determination
 provenance precisely relative to existing algebraic frameworks.
 
 \subsection{Sequential Conditioning Versus Algebraic Combination}
 
-Interpretations refine a specification by applying interpretive predicates via
+Determinations refine a specification by applying commitments via
 \emph{sequential conditioning}.
-Given a specification $\Spec$ and predicates $\varphi_1,\varphi_2$, refinement
+Given a specification $\Spec$ and commitments $\varphi_1,\varphi_2$, refinement
 \[
   (\Spec \mid \varphi_1)\mid \varphi_2
 \]
@@ -1486,14 +1492,14 @@ does not admit a semiring structure.
 This distinction is essential.
 Sequential conditioning eliminates admissible outcomes; it is a semantic operation,
 not an algebraic one.
-Interpretive predicates therefore do \emph{not} combine explanations, but restrict
+Commitments therefore do \emph{not} combine explanations, but restrict
 the space in which explanations are defined.
 
 \subsection{Commutative Structure Within a Layer}
 
-Within a single interpretation layer, predicates commute by construction.
+Within a single determination layer, commitments commute by construction.
 Fix a specification prefix $\Spec^{\ell}$ obtained after resolving all prior layers.
-Let $L$ be a set of interpretive predicates applicable at that layer.
+Let $L$ be a set of commitments applicable at that layer.
 
 For $\varphi,\psi \in L$,
 \[
@@ -1501,18 +1507,18 @@ For $\varphi,\psi \in L$,
   \;=\;
   (\Spec^{\ell} \mid \psi)\mid \varphi .
 \]
-Thus predicates in $L$ form a \emph{commutative monoid} under conjunction, with the
-identity given by the trivial predicate that performs no restriction.
+Thus commitments in $L$ form a \emph{commutative monoid} under conjunction, with the
+identity given by the trivial commitment that performs no restriction.
 
-This monoid is \emph{conditional}: the available predicates and their effect depend
-on the interpretation prefix.
-No global algebra over predicates is assumed or required.
+This monoid is \emph{conditional}: the available commitments and their effect depend
+on the determination prefix.
+No global algebra over commitments is assumed or required.
 
 \subsection{Special Case: Semiring Structure}
 
 In special cases, the commutative monoid within a layer extends to a semiring.
 This occurs when:
-(i) predicates are pointwise over admissible outcomes; and
+(i) commitments are pointwise over admissible outcomes; and
 (ii) conjunction distributes over disjunction of outcomes.
 
 These conditions coincide with those assumed in classical algebraic provenance.
@@ -1522,7 +1528,7 @@ Our focus is on semantic resolution, not on algebraic optimization or factorizat
 
 \subsection{Resolved Specifications and Monotone Evaluation}
 
-The key transition occurs once a resolving interpretation $I$ has been fixed.
+The key transition occurs once a resolving determination $I$ has been fixed.
 
 \begin{definition}[Resolved specification]
   A specification $\Spec \mid I$ is \emph{resolved} if for every history $H$,
@@ -1533,7 +1539,7 @@ Resolution has two crucial consequences:
 
 \paragraph{Single-valuedness.}
 There are no remaining admissible alternatives.
-Interpretive predicates no longer apply, and semantic conditioning ceases.
+Commitments no longer apply, and semantic conditioning ceases.
 
 \paragraph{Monotonicity.}
 All remaining variation is derivational.
@@ -1547,7 +1553,7 @@ monotone query evaluation.
 
 Classical semiring provenance applies precisely to monotone evaluation over a fixed
 instance.
-Once interpretation is complete, this is exactly the situation we obtain.
+Once determination is complete, this is exactly the situation we obtain.
 
 \begin{proposition}[Resolved specifications admit semiring provenance]
   \label{prop:semiring}
@@ -1574,10 +1580,10 @@ framework with existing algebraic results.
 Many of our examples are naturally expressed in Datalog, and classical provenance
 results apply directly in those cases.
 However, our claim is algebraic rather than syntactic:
-interpretation provenance recovers the algebraic conditions required for semiring
+determination provenance recovers the algebraic conditions required for semiring
 provenance by explicitly discharging semantic ambiguity.
 
-Seen this way, interpretation theory serves as a semantic prelude to algebraic
+Seen this way, determination theory serves as a semantic prelude to algebraic
 provenance.
 It explains \emph{when} and \emph{why} classical provenance applies, rather than
 assuming a fixed monotone semantics from the outset.
@@ -1589,26 +1595,26 @@ representations by separating semantic resolution from algebraic explanation.
 % \section{Appendix: Worked Examples}
 % \label{sec:appendix-examples}
 
-\section{Datalog$^{\neg}$ Worked Interpretation Provenance}
+\section{Datalog$^{\neg}$ Worked Determination Provenance}
 \label{sec:appendix-datalog}
 
-This appendix instantiates interpretation provenance for the Datalog-with-negation
+This appendix instantiates determination provenance for the Datalog-with-negation
 sandbox used throughout Section~\ref{sec:negation}.
 We work through the same running example under stratified, well-founded, and stable
-semantics, making explicit the interpretive predicates, their dependency structure,
+semantics, making explicit the commitments, their dependency structure,
 and the resulting provenance annotations.
-The purpose is to justify the interpretation shapes and depths summarized in
+The purpose is to justify the determination shapes and depths summarized in
 Figure~\ref{fig:interp-tables}(\textbf{A}).
 
 Throughout, we use \emph{sealing predicates}
 $\varphi_{\seal}(X)$, which commit that the set of atoms $X$ is complete:
 no additional atoms in $X$ will be derived in any admissible outcome.
-Such predicates rule out outcomes and therefore constitute genuine interpretive
+Such predicates rule out outcomes and therefore constitute genuine semantic
 commitments.
 
 \subsection{Stratified Semantics}
 
-\paragraph{Interpretive structure.}
+\paragraph{Determination structure.}
 In stratified semantics, predicates are partitioned into strata
 $S_1,\dots,S_k$ such that negation flows strictly from higher to lower strata.
 Resolving ambiguity requires committing that each stratum has stabilized before
@@ -1618,8 +1624,8 @@ For the running example (Example~\ref{ex:datalog-negation}), the stratified frag
 consists of the predicates defining $p(c)$ and $q(c)$.
 Resolution therefore requires sealing the lower stratum containing $p(c)$.
 
-\paragraph{Resolving interpretation.}
-A resolving interpretation for the stratified fragment is
+\paragraph{Resolving determination.}
+A resolving determination for the stratified fragment is
 \[
   I_{\mathrm{strat}}
   \;\triangleq\;
@@ -1632,8 +1638,8 @@ A resolving interpretation for the stratified fragment is
 % [added \seq]
 where each $S_i$ is the set of atoms whose truth is fixed at stratum~$i$.
 These sealing predicates do \emph{not} commute: sealing $S_i$ is a prerequisite
-for interpreting negation in $S_{i+1}$.
-Accordingly, the interpretation depth is exactly $k$, as recorded in
+for applying negation commitments in $S_{i+1}$.
+Accordingly, the determination depth is exactly $k$, as recorded in
 Figure~\ref{fig:interp-tables}(\textbf{A}, Stratified).
 
 \paragraph{Provenance.}
@@ -1641,14 +1647,14 @@ Once $I_{\mathrm{strat}}$ is fixed, the specification is fully resolved.
 Derivational provenance applies without further semantic refinement.
 For example,
 \[
-  \mathsf{IP}(p(c)) \;\triangleq\; (I_{\mathrm{strat}},\, \Prov(a(c))).
+  \mathsf{DP}(p(c)) \;\triangleq\; (I_{\mathrm{strat}},\, \Prov(a(c))).
 \]
 Absences such as $\neg q(c)$ are derivational consequences of the sealed lower stratum
-and require no additional interpretive predicates.
+and require no additional commitments.
 
 \subsection{Well-Founded Semantics}
 
-\paragraph{Interpretive structure.}
+\paragraph{Determination structure.}
 Well-founded semantics (WFS) applies to programs with negation cycles.
 It resolves ambiguity by alternating between positive derivation and the elimination
 of \emph{unfounded sets}, yielding a three-valued outcome domain
@@ -1659,8 +1665,8 @@ semantics: the lower strata must be sealed before negation is interpreted.
 Beyond this prefix, resolution proceeds through an \emph{alternating sequence} of
 additional sealing commitments that classify atoms as determined or undefined.
 
-\paragraph{Resolving interpretation.}
-A resolving interpretation under WFS can be written schematically as
+\paragraph{Resolving determination.}
+A resolving determination under WFS can be written schematically as
 \[
   I_{\mathrm{wfs}}
   \;\triangleq\;
@@ -1677,34 +1683,34 @@ A resolving interpretation under WFS can be written schematically as
 where each $U_i$ is an unfounded set eliminated at alternation~$i$.
 These commitments are non-commuting and may require an unbounded number of
 alternations.
-Hence WFS has no fixed finite interpretation depth in general, as indicated in
+Hence WFS has no fixed finite determination depth in general, as indicated in
 Figure~\ref{fig:interp-tables}(\textbf{A}, Well-founded).
 
 For the running example, the limit of this process yields the unique partial
-interpretation
+outcome
 \[
   p(c)=\mathbf{t},\quad q(c)=\mathbf{f},\quad r(c)=\mathbf{u},\quad s(c)=\mathbf{u}.
 \]
 
 \paragraph{Provenance.}
 Because WFS yields a single resolved outcome (in the lifted domain), there is no
-branching among interpretations.
+branching among determinations.
 Once $I_{\mathrm{wfs}}$ is fixed, provenance is again depth~0:
 \[
-  \mathsf{IP}(p(c)) \;\triangleq\; (I_{\mathrm{wfs}},\, \Prov(a(c))).
+  \mathsf{DP}(p(c)) \;\triangleq\; (I_{\mathrm{wfs}},\, \Prov(a(c))).
 \]
 The difference from stratified semantics lies not in multiplicity of outcomes, but
-in the unbounded, alternating structure of the interpretation itself.
+in the unbounded, alternating structure of the determination itself.
 
 \subsection{Stable Model Semantics}
 
-\paragraph{Interpretive structure.}
+\paragraph{Determination structure.}
 Stable semantics insists on total two-valued models.
-Like WFS, it requires sealing the stratified prefix before negation is interpreted.
+Like WFS, it requires sealing the stratified prefix before negation is resolved.
 Unlike WFS, it does not lift the outcome domain; instead it resolves cycles by
 branching among incompatible global hypotheses.
 
-\paragraph{Resolving interpretations.}
+\paragraph{Resolving determinations.}
 For the running example, resolution begins with the same stratified-prefix sealing
 \[
   \varphi_{\seal}(S_1)
@@ -1737,25 +1743,25 @@ After this prefix, the negation cycle admits two incompatible resolutions:
 \]
 % [added \seq]
 
-Within either interpretation, the remaining commitments are logically simultaneous
+Within either determination, the remaining commitments are logically simultaneous
 and commute.
-Thus the interpretation depth is $k{+}1$: the $k$ stratification stages plus one
+Thus the determination depth is $k{+}1$: the $k$ stratification stages plus one
 additional, non-commuting branching stage.
 This is reflected in Figure~\ref{fig:interp-tables}(\textbf{A}, Stable).
 
 \paragraph{Provenance.}
-Interpretation provenance must record which stable interpretation is assumed:
+Determination provenance must record which stable determination is assumed:
 \[
-  \mathsf{IP}(r(c)) \;\triangleq\; (I^{(r)},\,1),
+  \mathsf{DP}(r(c)) \;\triangleq\; (I^{(r)},\,1),
   \qquad
-  \mathsf{IP}(s(c)) \;\triangleq\; (I^{(s)},\,1).
+  \mathsf{DP}(s(c)) \;\triangleq\; (I^{(s)},\,1).
 \]
 Only after this choice does ordinary derivational provenance apply.
 
 \subsubsection{Semantic Change Across Negation Semantics}
 
 Holding the program and extensional history fixed, different negation semantics
-induce different spaces of resolving interpretations.
+induce different spaces of resolving determinations.
 
 For example, consider the program
 \[
@@ -1764,18 +1770,18 @@ For example, consider the program
   r(c)\leftarrow \neg q(c),
 \]
 with $H=\{a(c)\}$.
-Under WFS, there is a unique resolving interpretation with
+Under WFS, there is a unique resolving determination with
 $q(c)=r(c)=\mathbf{u}$.
-Under stable semantics, there are two incompatible interpretations, one with
+Under stable semantics, there are two incompatible determinations, one with
 $q(c)=\mathbf{t}$ and one with $r(c)=\mathbf{t}$.
 
 The conclusion $p(c)$ is preserved across semantics, while $q(c)$ and $r(c)$ are not.
-Interpretation provenance makes this preservation (and non-preservation) explicit
+Determination provenance makes this preservation (and non-preservation) explicit
 and checkable.
 
 \subsection{Certificates and Semantic-Change Queries}
 
-Fix a specification $\Spec$ and a resolving interpretation $I$.
+Fix a specification $\Spec$ and a resolving determination $I$.
 A \emph{provenance query} is a function
 \[
   q : (\Spec \mid I) \to A,
@@ -1783,13 +1789,13 @@ A \emph{provenance query} is a function
 where $A$ is an answer domain (e.g., Boolean, explanations, dependency sets),
 including classical why/why-not provenance and the semantic-change queries of
 Section~\ref{sec:robustness}.
-Such queries depend only on the restrictions that interpretation imposes on
+Such queries depend only on the restrictions that a determination imposes on
 admissible outcomes, not on the full resolution process.
 
-Interpretive predicates restrict admissible outcomes; a \emph{certificate}
+Commitments restrict admissible outcomes; a \emph{certificate}
 summarizes these restrictions.
 Formally, a certificate is a sound over-approximation: it may admit outcomes that
-a full interpretation would exclude, but must exclude none that interpretation
+a full determination would exclude, but must exclude none that a determination
 admits.
 This lossiness is acceptable precisely because provenance queries are evaluated
 only up to the distinctions they are designed to observe.
@@ -1802,7 +1808,7 @@ In a totally ordered execution, a single timestamp freezes the past; in a
 partially ordered history, an antichain plays the same role, sealing exactly the
 downward closure of a sub-history without imposing an artificial total order.
 
-Under a fixed resolving interpretation, a minimal certificate sufficient for
+Under a fixed resolving determination, a minimal certificate sufficient for
 derivational provenance of $p(c)$ need only preserve the sealing commitments for
 the stratified prefix.
 By contrast, answering a semantic-change query such as
@@ -1815,33 +1821,33 @@ This illustrates the query-parametric nature of certificate sufficiency
 increases the semantic information that must be retained.
 
 % ===============================================================
-\section{Transactional Worked Interpretation Provenance}
+\section{Transactional Worked Determination Provenance}
 \label{sec:appendix-concurrency}
 % ===============================================================
 
-This appendix instantiates interpretation provenance for the transactional sandbox
+This appendix instantiates determination provenance for the transactional sandbox
 used in Section~\ref{sec:transactions}.
-As in the Datalog appendix, we make explicit the interpretive predicates,
+As in the Datalog appendix, we make explicit the commitments,
 their dependency structure, and the resulting provenance annotations.
-The goal is to justify the interpretation shapes and depths summarized in
+The goal is to justify the determination shapes and depths summarized in
 Figure~\ref{fig:interp-tables}(\textbf{B}).
 
-Throughout, interpretive predicates rule out admissible executions and therefore
+Throughout, commitments rule out admissible executions and therefore
 constitute genuine semantic commitments.
-Once a resolving interpretation is fixed, the specification becomes single-valued
+Once a resolving determination is fixed, the specification becomes single-valued
 and provenance reduces to ordinary derivational provenance.
 
 % ===============================================================
 \subsection{Serializability}
 % ===============================================================
 
-\paragraph{Interpretive structure.}
+\paragraph{Determination structure.}
 Under serializability, semantic ambiguity arises because a concurrent history does
 not determine a unique transaction order.
 Outcomes are justified by committing to a \emph{serialization} consistent with the
 history’s conflicts.
 
-The primitive interpretive predicates are \emph{ordering predicates}
+The primitive commitments are \emph{ordering predicates}
 $\varphi_{T_i \prec T_j}$, asserting that transaction $T_i$ precedes $T_j$ in the
 serialization.
 Conditioning on such a predicate eliminates all admissible outcomes whose
@@ -1851,7 +1857,7 @@ Crucially, ordering predicates commute: no ordering commitment enables or disabl
 another.
 Semantic resolution therefore consists of a \emph{single stage} of commitment,
 regardless of how many orderings are asserted.
-Hence serializability has interpretation depth~1.
+Hence serializability has determination depth~1.
 
 \paragraph{Data, query, and history.}
 Let $S(k,y)$ be a relation and consider the query
@@ -1872,8 +1878,8 @@ A query transaction $T_Q$ evaluates $Q$.
 The history alone does not determine whether $d$ is visible to $T_Q$; this depends
 on the relative ordering of $T_4$, $T_5$, and $T_Q$.
 
-\paragraph{Resolving interpretations.}
-Two valid resolving interpretations under serializability are:
+\paragraph{Resolving determinations.}
+Two valid resolving determinations under serializability are:
 \[
   I_{\mathsf{in}} \triangleq
   T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_Q \prec T_5,
@@ -1885,7 +1891,7 @@ Both are conjunctions of ordering predicates and therefore arise in a single
 semantic stage.
 
 \paragraph{Provenance.}
-Once a resolving interpretation is fixed, provenance is purely derivational.
+Once a resolving determination is fixed, provenance is purely derivational.
 Conditioned on $I_{\mathsf{in}}$, the resolved snapshot contains $b,c,d$:
 \[
   \Prov_{Q \mid I_{\mathsf{in}}}(b)=x_1+x_2,\quad
@@ -1895,10 +1901,10 @@ Conditioned on $I_{\mathsf{in}}$, the resolved snapshot contains $b,c,d$:
 Conditioned on $I_{\mathsf{out}}$, tuple $d$ is absent and classical why-not
 provenance applies.
 
-Interpretation provenance records the semantic assumption under which the
+Determination provenance records the semantic assumption under which the
 derivation holds; e.g.,
 \[
-  \mathsf{IP}_Q(d) \triangleq (I_{\mathsf{in}},\, x_4).
+  \mathsf{DP}_Q(d) \triangleq (I_{\mathsf{in}},\, x_4).
 \]
 
 \paragraph{Same observation, different derivational provenance.}
@@ -1908,7 +1914,7 @@ Adding
 $T_{-2}:\ \textsf{delete } S(2,b)$
 yields executions in which $b$ is observed with provenance $x_1$ or $x_1+x_2$,
 depending on the serialization.
-Thus interpretation provenance distinguishes semantic explanations even when the
+Thus determination provenance distinguishes semantic explanations even when the
 observable outcome is unchanged.
 
 % ===============================================================
@@ -1916,14 +1922,14 @@ observable outcome is unchanged.
 \label{sec:appendix-SI}
 % ===============================================================
 
-\paragraph{Interpretive structure.}
+\paragraph{Determination structure.}
 Snapshot isolation (SI) resolves concurrency using a different basis of semantic
 commitments.
-Rather than committing to a total order, an SI interpretation assigns each
+Rather than committing to a total order, an SI determination assigns each
 transaction a \emph{snapshot} of committed transactions whose effects it reads,
 together with a global write-conflict admissibility constraint.
 
-Interpretively, this yields two kinds of predicates:
+In determination terms, this yields two kinds of predicates:
 (i) snapshot predicates $\snap(T)=U$, committing that $T$ reads from the effects of
 exactly the transactions in $U$, and
 (ii) a global \emph{first-committer-wins} predicate $\varphi_{\FCW}$ that restricts
@@ -1931,7 +1937,7 @@ which snapshot assignments are admissible.
 
 Unlike ordering predicates, snapshot commitments do not commute in general.
 Each transaction may require an independent snapshot decision, yielding a staged
-interpretation structure whose depth grows with the history.
+determination structure whose depth grows with the history.
 
 \paragraph{Extended history.}
 In addition to $T_1$–$T_5$, assume the database initially contains $S(5,e)$ and
@@ -1944,8 +1950,8 @@ $S(6,f)$, and the following transactions execute concurrently:
 \]
 A query transaction $T_Q$ again evaluates $Q$.
 
-\paragraph{Resolving interpretation.}
-One admissible SI interpretation is:
+\paragraph{Resolving determination.}
+One admissible SI determination is:
 \[
   \begin{aligned}
     I_{\mathrm{SI}} \triangleq {} &
@@ -1971,17 +1977,17 @@ any serial execution.
 The concurrent writes of $T_6$ and $T_7$ produce the classical write-skew anomaly:
 a dependency cycle that cannot be linearized into a total order.
 
-Interpretation provenance makes this explicit.
-Restricting attention to SI interpretations whose snapshot predicates admit a
+Determination provenance makes this explicit.
+Restricting attention to SI determinations whose snapshot predicates admit a
 topological sort recovers exactly the serializable outcomes.
 
-\paragraph{Interpretation depth.}
+\paragraph{Determination depth.}
 Unlike serializability, which resolves ambiguity in a single commuting stage,
 snapshot isolation may require an independent snapshot commitment for each
 transaction.
-Thus SI has worst-case interpretation depth $O(|H|)$, as recorded in
+Thus SI has worst-case determination depth $O(|H|)$, as recorded in
 Figure~\ref{fig:interp-tables}(\textbf{B}).
-Once an SI interpretation is fixed, provenance again reduces to depth--0
+Once an SI determination is fixed, provenance again reduces to depth--0
 derivational provenance.
 
 % ===============================================================
@@ -1989,9 +1995,9 @@ derivational provenance.
 % ===============================================================
 
 As in the negation sandbox, provenance queries depend only on the restrictions that
-an interpretation imposes on admissible outcomes.
+a determination imposes on admissible outcomes.
 A \emph{certificate} summarizes these restrictions and may safely over-approximate
-the interpretation.
+the determination.
 
 Under serializability, a certificate need only record a set of ordering predicates
 sufficient to justify the observation.
@@ -2003,31 +2009,31 @@ As in Section~\ref{sec:appendix-datalog}, certificates are therefore
 query-parametric.
 Richer provenance questions require retaining strictly more semantic information,
 reflecting the deeper and less-commutative structure of the underlying
-interpretation.
+determination.
 
 % ================================================================
-\section{Appendix: Interpretation Provenance for Systems Lineage}
+\section{Appendix: Determination Provenance for Systems Lineage}
 \label{app:systems-lineage}
 % ================================================================
 
-This appendix illustrates interpretation provenance in a systems setting that
+This appendix illustrates determination provenance in a systems setting that
 lies outside traditional database semantics.
 The example is adapted from the distributed tracing model introduced by
 Sigelman et al.~\cite{sigelman2010dapper}, abstracting its trace semantics rather
 than its implementation details.
 
 The example serves two purposes.
-First, it shows that interpretation provenance extends the database tradition of
+First, it shows that determination provenance extends the database tradition of
 provenance to forms of \emph{systems lineage} that have historically resisted
 formal treatment.
-Second, it demonstrates how the parsimony of interpretations---as minimal semantic
+Second, it demonstrates how the parsimony of determinations---as minimal semantic
 commitments---can refine systems lineage explanations by making explicit which
 assumptions are required to justify diagnostic conclusions.
 
 Unlike the previous appendices, this setting does not admit a fixed canonical
-interpretation depth.
+determination depth.
 Semantic commitments may be staged or bundled depending on the diagnostic query,
-but interpretation provenance still cleanly separates observable evidence from
+but determination provenance still cleanly separates observable evidence from
 the assumptions required to explain it.
 
 \subsection{Trace Specification and Semantic Ambiguity}
@@ -2056,7 +2062,7 @@ on server-side timestamps.
 As a result, multiple executions---with different relative orderings and overlaps
 of spans---are admissible under the same observed history.
 Diagnostic conclusions such as critical-path analysis are therefore semantically
-ambiguous prior to interpretation.
+ambiguous prior to determination.
 
 \subsection{Diagnostic Query: Critical Path}
 
@@ -2072,11 +2078,11 @@ Under the specification $\Spec$, however, different admissible executions may
 yield different critical paths.
 Without additional semantic commitments, the query is ill-posed.
 
-\subsection{Interpretive Predicates}
+\subsection{Commitments}
 
-Interpretation resolves this ambiguity by committing to semantic assumptions that
+Determination resolves this ambiguity by committing to semantic assumptions that
 fix a particular execution.
-Relevant interpretive predicates include:
+Relevant commitments include:
 \begin{itemize}
   \item $\varphi_{\mathrm{align}(h_i,h_j)}$, committing to a concrete clock
         alignment between hosts $h_i$ and $h_j$ within admissible bounds;
@@ -2090,11 +2096,11 @@ These predicates are ambiguity-sensitive and semantically dependent.
 For example, committing to a critical-path witness presupposes commitments that
 fix the relative placement of competing spans.
 
-\subsection{Resolving Interpretations}
+\subsection{Resolving Determinations}
 
 Let $B$ and $C$ be sibling spans whose relative order is not determined by causal
 constraints.
-Two resolving interpretations suffice to illustrate the provenance structure:
+Two resolving determinations suffice to illustrate the provenance structure:
 \[
   I_B \;\triangleq\;
   \varphi_{\mathrm{align}} \wedge \varphi_{\mathrm{order}(B,C)} \wedge
@@ -2105,24 +2111,24 @@ Two resolving interpretations suffice to illustrate the provenance structure:
   \varphi_{\mathrm{align}} \wedge \varphi_{\mathrm{order}(C,B)} \wedge
   \varphi_{\mathrm{cp}=C}.
 \]
-Both interpretations resolve $\Spec$, but they induce different critical-path
+Both determinations resolve $\Spec$, but they induce different critical-path
 outcomes.
 
-\subsection{Interpretation Provenance}
+\subsection{Determination Provenance}
 
-Once an interpretation is fixed, critical-path computation is ordinary.
+Once a determination is fixed, critical-path computation is ordinary.
 Let $k_B$ (resp.\ $k_C$) denote the derivational justification that $B$ (resp.\ $C$)
 is the longest-duration span in the resolved execution.
-Interpretation provenance records:
+Determination provenance records:
 \[
-  \mathsf{IP}(\mathrm{cp}=B) \;\triangleq\; (I_B,\, k_B),
+  \mathsf{DP}(\mathrm{cp}=B) \;\triangleq\; (I_B,\, k_B),
   \qquad
-  \mathsf{IP}(\mathrm{cp}=C) \;\triangleq\; (I_C,\, k_C) .
+  \mathsf{DP}(\mathrm{cp}=C) \;\triangleq\; (I_C,\, k_C) .
 \]
 
 The provenance makes explicit that the diagnostic conclusion depends on semantic
 commitments about clock alignment and span ordering.
-Without fixing an interpretation, the question ``which span is on the critical
+Without fixing a determination, the question ``which span is on the critical
 path?'' has no determinate answer.
 
 \subsection{Certificates and Parsimony}
@@ -2143,14 +2149,14 @@ In a totally ordered execution, a timestamp suffices to delimit the past; in a
 partially ordered trace, an antichain of events plays the same role, sealing the
 relevant downward closure without imposing an artificial linearization.
 
-Interpretation provenance therefore supports a compressed form of systems lineage:
+Determination provenance therefore supports a compressed form of systems lineage:
 only the semantic commitments required for the diagnostic conclusion need be
 retained.
 This refines existing tracing practice by separating observable evidence from the
-interpretive assumptions used to explain it.
+the semantic assumptions used to explain it.
 
 \paragraph{Summary.}
-This appendix demonstrates that interpretation provenance applies naturally to
+This appendix demonstrates that determination provenance applies naturally to
 systems diagnostics.
 It extends provenance beyond data derivations to explanations of execution-level
 properties, while retaining a minimal, explicit account of the semantic
@@ -2159,26 +2165,26 @@ assumptions required to justify those explanations.
 \section{Absence Under Semantic Ambiguity}
 \label{app:whynot}
 In settings with semantic ambiguity, absence admits distinctions that cannot be
-expressed at interpretation depth~0.
+expressed at determination depth~0.
 
 Given a specification $\Spec$ and history $H$, a conclusion may be absent in
 several semantically distinct ways:
-(i) it fails under a particular resolved interpretation;
-(ii) it fails under all resolving interpretations of the fixed specification
+(i) it fails under a particular resolved determination;
+(ii) it fails under all resolving determinations of the fixed specification
 $\Spec$; or
-(iii) it holds under some interpretations of a \emph{different} specification
+(iii) it holds under some determinations of a \emph{different} specification
 $\Spec'$—for example, under a different negation semantics or isolation level—but
-under none of the interpretations admitted by $\Spec$ itself.
+under none of the determinations admitted by $\Spec$ itself.
 Classical why-not provenance collapses these cases, because it conditions on a
 single resolved semantics and a fixed specification.
 
-Interpretation provenance makes the first two cases explicit.
+Determination provenance makes the first two cases explicit.
 By recording the semantic commitments under which observations hold, it explains
 absence in terms of the non-existence (or variability) of supporting
-interpretations of $\Spec$, rather than in terms of blocked derivations.
+determinations of $\Spec$, rather than in terms of blocked derivations.
 The third case is an inter-specification question and is handled via semantic
 change and preservation analysis (Section~\ref{sec:robustness}), rather than by
-interpretation provenance alone.
+determination provenance alone.
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{references}
 

@@ -450,39 +450,48 @@ We use $\seq$ to denote a sequence of such layers:
 Classical provenance requires a unique outcome at each input: derivations
 are traced through a commutative semiring over a fixed instance.
 When $|\Spec(H)| > 1$, this prerequisite fails.
-We show that resolution is both necessary and sufficient for provenance:
-necessary because no semiring scheme can operate under ambiguity
-(Theorem~\ref{thm:necessity}), and sufficient because a persistent basis
-guarantees the resolved outcome is stable
-(Theorem~\ref{thm:resolution-implies-monotone}).
-Together, these results precisely delineate when classical provenance applies.
+The following theorem shows that a resolving determination under a
+persistent basis is both necessary and sufficient for provenance.
 
 \begin{assumption}[Prefix-closure of histories]
   \label{ass:prefix-closed}
   If $H \in \Hist$ and $H' \sqsubseteq H$, then $H' \in \Hist$.
 \end{assumption}
 
-\begin{theorem}[Persistence implies history-invariance]
+\begin{theorem}[Resolution is necessary and sufficient for provenance]
   \label{thm:resolution-implies-monotone}
-  Assume prefix-closure (Assumption~\ref{ass:prefix-closed}).
-  Let $\Phi$ be a persistent commitment basis and let $D$ be a determination
-  over $\Phi$ that resolves $\Spec$.
-  Then $(\Spec \mid D)(H)$ is independent of $H$:
-  for all $H_1 \sqsubseteq H_2$,
-  $(\Spec \mid D)(H_1) = (\Spec \mid D)(H_2)$.
+  \label{thm:necessity}
+  Assume prefix-closure (Assumption~\ref{ass:prefix-closed}) and a
+  persistent commitment basis $\Phi$.
+  \begin{enumerate}[nosep,label=(\alph*)]
+    \item \emph{(Necessity.)}
+          If $|\Spec(H)| \ge 2$ with distinct outcomes inducing distinct
+          instances, then no single semiring annotation can simultaneously
+          explain both outcomes.
+    \item \emph{(Sufficiency.)}
+          If $D$ resolves $\Spec$, then $(\Spec \mid D)$ is
+          history-invariant: $(\Spec \mid D)(H_1) = (\Spec \mid D)(H_2)$
+          for all $H_1 \sqsubseteq H_2$.
+  \end{enumerate}
 \end{theorem}
 
 \begin{proof}
-  Since $D$ resolves $\Spec$, both $(\Spec \mid D)(H_1)$ and
+  (a)~Let $f$ be a base fact present in the instance induced by $o_1$ but
+  absent in that induced by $o_2$.
+  Any query reading $f$ has provenance involving $\alpha(f) \neq 0$ under
+  $o_1$ but not under $o_2$.
+  A single annotation is a function of one instance; it cannot produce both.
+
+  (b)~Since $D$ resolves $\Spec$, both $(\Spec \mid D)(H_1)$ and
   $(\Spec \mid D)(H_2)$ are singletons; call them $\{o_1\}$ and $\{o_2\}$.
   Write $D = \varphi_1 \cdot \cdots \cdot \varphi_m$.
-  Since $(\Spec \mid D)(H_1) = \{o_1\}$, for every $o \neq o_1$ we have
+  For every $o \neq o_1$, we have
   $o \notin \Spec(H_1 \cdot \varphi_1 \cdots \varphi_m)$.
-  Applying persistence inductively along the chain
+  Applying persistence inductively
   ($H_1 \cdot \varphi_1 \cdots \varphi_j \sqsubseteq
   H_2 \cdot \varphi_1 \cdots \varphi_j$ for each $j$),
   we obtain $o \notin \Spec(H_2 \cdot \varphi_1 \cdots \varphi_m)$.
-  Hence $o_2 \neq o$ for every $o \neq o_1$, so $o_2 = o_1$.
+  Hence $o_2 = o_1$.
 \end{proof}
 
 \noindent
@@ -491,27 +500,6 @@ sequence of commitments, not on where in history they are applied.
 We may therefore write $(\Spec \mid D)$ without a history argument
 and abbreviate $D = \varphi_1 \cdot \cdots \cdot \varphi_m$, eliding
 history annotations.
-
-\begin{theorem}[Necessity: ambiguity blocks semiring provenance]
-  \label{thm:necessity}
-  Let $|\Spec(H)| \ge 2$ with distinct $o_1, o_2 \in \Spec(H)$ that
-  induce distinct database instances (i.e., differ on at least one base
-  fact).
-  Then for any query $Q$ that reads the differing fact, the semiring
-  provenance of some tuple under $Q$ differs between $o_1$ and $o_2$,
-  and no single semiring annotation can simultaneously produce both values.
-\end{theorem}
-
-\begin{proof}
-  Let $f$ be a base fact present in the instance induced by $o_1$ but
-  absent in that induced by $o_2$.
-  Under $o_1$, any query reading $f$ has $\Prov_Q(t \mid o_1)$ with a
-  term involving $\alpha(f) \neq 0$.
-  Under $o_2$, the same query cannot use $f$ (it is absent), so
-  $\Prov_Q(t \mid o_2)$ lacks this term.
-  A single annotation $\alpha$ is a function of one instance; it cannot
-  produce both values.
-\end{proof}
 
 %% ================================================================
 \section{Determinations and Provenance Structure}

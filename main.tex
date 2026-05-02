@@ -241,15 +241,17 @@ meaning is determinate.
 \end{definition}
 
 \noindent
-Histories generalize familiar notions of input.
-When the partial order is total, a history is a sequence---e.g., a
-transaction schedule of reads, writes, and commits.
-When no precedence constraints are present, a history collapses to an
-unordered set and coincides with a classical database instance (EDB).
-In general, histories may be partially ordered---the natural case when
-some events can occur in parallel (e.g. two transactional reads),
-others in order (e.g. message send must precede message receive).
-We write $\Hist$ for the class of histories under consideration.
+A history represents a snapshot of what has happened so far in one
+particular run of a system: which events have occurred and which
+preceded which.
+The class $\Hist$ of all histories represents all possible states across
+all possible runs.
+When the partial order is total, a history is a sequence (e.g., a
+transaction schedule).
+When no precedence constraints are present, a history is an unordered set
+(e.g., a classical database instance).
+In general, histories are partially ordered---the natural case when
+transactions run in parallel or events occur at distributed sites.
 
 \begin{definition}[History Extension]
   For histories $H_1=(E_1,\rightarrow_1)$ and $H_2=(E_2,\rightarrow_2)$, we write

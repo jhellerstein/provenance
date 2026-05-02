@@ -408,10 +408,10 @@ commitments, applied as \emph{sequential refinement}.
   where $\varphi_i \in \Phi$, $H_0 = H$, and
   $H_i = H_{i-1} \cdot \varphi_i$ for each $i$.
   Each commitment is annotated with the history at which it is applied;
-  we write simply $I = \varphi_1 \cdot \cdots \cdot \varphi_m$ when the
+  we write simply $D = \varphi_1 \cdot \cdots \cdot \varphi_m$ when the
   histories are clear from context.
-  The result of applying determination $I$ starting at $H$ is
-  $(\Spec \mid I)(H) \triangleq \Spec(H_m)$.
+  The result of applying determination $D$ starting at $H$ is
+  $(\Spec \mid D)(H) \triangleq \Spec(H_m)$.
   The \emph{determination of a history} $D(H)$ is the subsequence of
   commitment events in $H$, listed in the order induced by $\rightarrow$.
 \end{definition}
@@ -447,7 +447,7 @@ of commuting batches.
 \end{definition}
 
 \begin{definition}[Resolving determination]
-  A determination $I$ \emph{resolves} $\Spec$ if $\Spec \mid I$ is determined
+  A determination $D$ \emph{resolves} $\Spec$ if $\Spec \mid D$ is determined
   (Definition~\ref{def:resolved}): a function from histories to outcomes.
 \end{definition}
 
@@ -475,25 +475,25 @@ can operate without it.
 \begin{theorem}[Sufficiency: determined specifications are history-monotone]
   \label{thm:resolution-implies-monotone}
   Assume prefix-closure (Assumption~\ref{ass:prefix-closed}).
-  Let $\Phi$ be a persistent commitment basis and let $I$ be a determination
+  Let $\Phi$ be a persistent commitment basis and let $D$ be a determination
   over $\Phi$ that resolves $\Spec$.
-  Then $\widehat{\Spec}_I(H) \triangleq (\Spec \mid I)(H)$
+  Then $\widehat{\Spec}_I(H) \triangleq (\Spec \mid D)(H)$
   is history-monotone.
 \end{theorem}
 
 \begin{proof}
-  Let $H_1 \sqsubseteq H_2$ and let $(\Spec \mid I)(H_1) = \{o^*\}$.
-  Write $I = \varphi_1 \cdot \cdots \cdot \varphi_m$.
-  Since $I$ resolves $\Spec$ at $H_1$, for every $o \neq o^*$
+  Let $H_1 \sqsubseteq H_2$ and let $(\Spec \mid D)(H_1) = \{o^*\}$.
+  Write $D = \varphi_1 \cdot \cdots \cdot \varphi_m$.
+  Since $D$ resolves $\Spec$ at $H_1$, for every $o \neq o^*$
   there exists $\varphi_j \in I$ that excludes $o$
   at $H_1 \cdot \varphi_1 \cdots \varphi_{j-1}$.
   By persistence, $\varphi_j$ continues
   to exclude $o$ at $H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$
   (since $H_1 \cdot \varphi_1 \cdots \varphi_{j-1} \sqsubseteq
   H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$).
-  Hence $(\Spec \mid I)(H_2) \subseteq \{o^*\}$.
-  Since $(\Spec \mid I)(H_2) \neq \emptyset$ (Definition~\ref{def:commitment}),
-  $(\Spec \mid I)(H_2) = \{o^*\}$.
+  Hence $(\Spec \mid D)(H_2) \subseteq \{o^*\}$.
+  Since $(\Spec \mid D)(H_2) \neq \emptyset$ (Definition~\ref{def:commitment}),
+  $(\Spec \mid D)(H_2) = \{o^*\}$.
 \end{proof}
 
 \begin{theorem}[Necessity: ambiguity blocks semiring provenance]
@@ -550,24 +550,24 @@ This section connects the semantic notion of determination
 (Section~\ref{sec:prelim}) to provenance.
 Throughout, we fix a specification $\Spec$ over a history class $\Hist$ and
 a persistent commitment basis $\Phi$; the set of minimal resolving
-determinations is denoted $\mathcal{I}$.
+determinations is denoted $\mathcal{D}$.
 
 \subsection{Conditioned Provenance}
 
 Fix a commutative semiring $(K, +, \cdot, 0, 1)$ for derivational provenance
 (e.g., the polynomial semiring $\mathbb{N}[X]$ of~\cite{green2007provenance}).
 For a specification $\Spec$, query $Q$, history $H$, tuple $t$, and a
-resolving determination $I \in \mathcal{I}$, the \emph{conditioned
-provenance} of $t$ under $I$ is
-$\Prov_{Q \mid \Spec \mid I}(t, H) \in K$:
+resolving determination $D \in \mathcal{D}$, the \emph{conditioned
+provenance} of $t$ under $D$ is
+$\Prov_{Q \mid \Spec \mid D}(t, H) \in K$:
 the ordinary semiring provenance of $t$ for query $Q$ computed under the
-determined specification $\Spec \mid I$ at history $H$.
+determined specification $\Spec \mid D$ at history $H$.
 When $\Spec$ and $H$ are clear from context, we write simply
-$\Prov_{Q \mid I}(t)$.
+$\Prov_{Q \mid D}(t)$.
 Conditioned provenance is classical provenance, conditioned on a particular
 semantic resolution.
 
-Once $I$ is fixed, $\Spec \mid I$ is single-valued and history-monotone
+Once $D$ is fixed, $\Spec \mid D$ is single-valued and history-monotone
 (Theorem~\ref{thm:resolution-implies-monotone}), so classical semiring
 provenance applies without modification.
 For depth-$0$ specifications---where no nontrivial commitments are
@@ -614,7 +614,7 @@ refinement---it is the mechanism that transitions from one monoid to the next
 by conditioning the specification.
 
 \paragraph{The semiring foundation.}
-At the base of the tower ($i = k$), the specification $\Spec_k = \Spec \mid I$
+At the base of the tower ($i = k$), the specification $\Spec_k = \Spec \mid D$
 is determined: single-valued and, under a persistent basis, history-monotone
 (Theorem~\ref{thm:resolution-implies-monotone}).
 All remaining variation is purely derivational.
@@ -632,8 +632,8 @@ It is a structural decomposition: each monoid represents one layer of
 semantic commitment, and discharge proceeds sequentially until the semiring
 foundation is exposed.
 Classical provenance is the special case of height~$0$.
-Per-determination provenance $\Prov_{Q \mid I}(t)$ is the semiring element
-released by discharging the tower $I$.
+Per-determination provenance $\Prov_{Q \mid D}(t)$ is the semiring element
+released by discharging the tower $D$.
 A fuller algebraic treatment---including potential universality properties
 and composition laws---is deferred to Appendix~\ref{app:algebra-future}.
 
@@ -662,7 +662,7 @@ history, and answering them requires comparing the provenance of a tuple
 across multiple determinations simultaneously.
 
 The resulting algebraic structure is familiar.
-Let $\mathcal{I}$ denote the set of minimal resolving determinations for
+Let $\mathcal{D}$ denote the set of minimal resolving determinations for
 $\Spec$ over the commitment basis $\Phi$; this set is finite.
 
 \begin{definition}[Determination Provenance]
@@ -670,11 +670,11 @@ $\Spec$ over the commitment basis $\Phi$; this set is finite.
   For a specification $\Spec$, query $Q$, history $H$, and tuple $t$, the
   \emph{determination provenance} of $t$ is the function
   \[
-    \Prov_{Q \mid \Spec}(t, H) : \mathcal{I} \to K
+    \Prov_{Q \mid \Spec}(t, H) : \mathcal{D} \to K
   \]
-  mapping each resolving determination $I \in \mathcal{I}$ to the conditioned
-  provenance $\Prov_{Q \mid \Spec \mid I}(t, H)$, with value $0$ when
-  $t \notin (\Spec \mid I)(H)$.
+  mapping each resolving determination $D \in \mathcal{D}$ to the conditioned
+  provenance $\Prov_{Q \mid \Spec \mid D}(t, H)$, with value $0$ when
+  $t \notin (\Spec \mid D)(H)$.
   When $\Spec$ and $H$ are clear from context, we write $\Prov_Q(t)$.
 \end{definition}
 
@@ -683,14 +683,14 @@ Determination provenance is a $K$-relation over
 determinations~\cite{green2007provenance}: it records, for each possible
 semantic resolution, how the tuple is derived under that resolution.
 Conditioned provenance is the special case of evaluating at a single point:
-$\Prov_Q(t)(I) = \Prov_{Q \mid I}(t)$.
-Classical provenance is the further special case where $|\mathcal{I}| = 1$
+$\Prov_Q(t)(D) = \Prov_{Q \mid D}(t)$.
+Classical provenance is the further special case where $|\mathcal{D}| = 1$
 (depth~$0$, no commitments needed).
 
 The \emph{support}
 $\mathrm{supp}(\Prov_Q(t))
   \triangleq
-  \{\, I \in \mathcal{I} \mid \Prov_Q(t)(I) \neq 0 \,\}$
+  \{\, D \in \mathcal{D} \mid \Prov_Q(t)(D) \neq 0 \,\}$
 is the set of determinations under which $t$ holds.
 
 These supports form a commutative semiring under the operations induced by
@@ -706,13 +706,13 @@ query evaluation:
         path.
 \end{itemize}
 The resulting structure on supports is the Boolean algebra
-$(2^{\mathcal{I}}, \cup, \cap, \emptyset, \mathcal{I})$---a commutative
+$(2^{\mathcal{D}}, \cup, \cap, \emptyset, \mathcal{D})$---a commutative
 semiring with $\cup$ as addition and $\cap$ as multiplication.
 This is the \emph{determination semiring}: it captures which determinations
 support a tuple and how those supports compose through queries.
 For instance, in the transactional example of the introduction, values $b$
 and $c$ have full support
-($\mathrm{supp}(\Prov_Q(b)) = \mathrm{supp}(\Prov_Q(c)) = \mathcal{I}$),
+($\mathrm{supp}(\Prov_Q(b)) = \mathrm{supp}(\Prov_Q(c)) = \mathcal{D}$),
 while $d$'s support is a proper subset---it holds only under determinations
 in which $T_Q$ commits before $T_3$.
 Section~\ref{sec:robustness} applies this structure to formalize robustness
@@ -724,8 +724,8 @@ framework of~\cite{green2007provenance}, with determinations playing the role
 of tuple annotations.
 Just as Green et al.\ annotate tuples with elements of a semiring $K$ to
 track how input tuples contribute to query results, we annotate tuples with
-subsets of $\mathcal{I}$ to track which semantic resolutions support them.
-The structure $(2^{\mathcal{I}}, \cup, \cap, \emptyset, \mathcal{I})$ is
+subsets of $\mathcal{D}$ to track which semantic resolutions support them.
+The structure $(2^{\mathcal{D}}, \cup, \cap, \emptyset, \mathcal{D})$ is
 analogous to their $\mathrm{PosBool}(B)$ semiring for incomplete
 databases---positive Boolean formulas with $\vee$ as addition and $\wedge$ as
 multiplication---rather than to their why-provenance semiring (in which both
@@ -743,7 +743,7 @@ determinations with different prefixes cannot be decomposed into a single
 tower.
 
 \paragraph{Computational cost.}
-$|\mathcal{I}|$ may be exponential in the size of the commitment basis.
+$|\mathcal{D}|$ may be exponential in the size of the commitment basis.
 When all commitments commute (a single-layer tower), supports admit compact
 representation as positive Boolean formulas over commitment
 variables (Proposition~\ref{prop:collapse-depth-1}).
@@ -757,35 +757,35 @@ The commitment tower and the determination semiring are not independent
 structures: the tower induces a natural \emph{filtration} on the semiring
 that connects query-relative depth to algebraic structure.
 
-Two determinations $I, I' \in \mathcal{I}$ \emph{agree at level $k$} if
+Two determinations $I, D' \in \mathcal{D}$ \emph{agree at level $k$} if
 they apply the same commitments in layers $1, \ldots, k$.
-Agreement at level $k$ is an equivalence relation on $\mathcal{I}$;
-write $[I]_k$ for the equivalence class of $I$ at level $k$.
+Agreement at level $k$ is an equivalence relation on $\mathcal{D}$;
+write $[D]_k$ for the equivalence class of $D$ at level $k$.
 These classes refine as $k$ increases:
-$[I]_0 = \mathcal{I}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
+$[I]_0 = \mathcal{D}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
 
 \begin{definition}[Level-$k$ support]
-  A set $S \subseteq \mathcal{I}$ is a \emph{level-$k$ support} if it is a
+  A set $S \subseteq \mathcal{D}$ is a \emph{level-$k$ support} if it is a
   union of level-$k$ equivalence classes.
   Equivalently, $S$ is closed under level-$k$ agreement:
-  if $I \in S$ and $I'|_{\le k} = I|_{\le k}$, then $I' \in S$.
+  if $D \in S$ and $D'|_{\le k} = D|_{\le k}$, then $D' \in S$.
 \end{definition}
 
 \begin{definition}[Filtration]
-  Define $\mathcal{F}_k \triangleq \{S \subseteq \mathcal{I} \mid
+  Define $\mathcal{F}_k \triangleq \{S \subseteq \mathcal{D} \mid
   S \text{ is a level-}k\text{ support}\}$.
   This yields:
   \[
     \mathcal{F}_0 \;\subseteq\; \mathcal{F}_1 \;\subseteq\; \cdots
-    \;\subseteq\; \mathcal{F}_d \;=\; 2^{\mathcal{I}},
+    \;\subseteq\; \mathcal{F}_d \;=\; 2^{\mathcal{D}},
   \]
-  where $\mathcal{F}_0 = \{\emptyset, \mathcal{I}\}$.
+  where $\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$.
 \end{definition}
 
 \begin{proposition}[Filtration respects the semiring]
   \label{prop:filtration-semiring}
   Each $\mathcal{F}_k$ is closed under $\cup$ and $\cap$, hence
-  $(\mathcal{F}_k, \cup, \cap, \emptyset, \mathcal{I})$ is a
+  $(\mathcal{F}_k, \cup, \cap, \emptyset, \mathcal{D})$ is a
   sub-semiring of the determination semiring for each $k$.
 \end{proposition}
 \begin{proof}
@@ -797,8 +797,8 @@ $[I]_0 = \mathcal{I}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
   \label{prop:collapse-depth-1}
   When all commitments commute (determination depth $d = 1$), the tower
   is a single commutative monoid, the filtration has exactly two levels
-  ($\mathcal{F}_0 = \{\emptyset, \mathcal{I}\}$ and
-  $\mathcal{F}_1 = 2^{\mathcal{I}}$), and the determination semiring
+  ($\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$ and
+  $\mathcal{F}_1 = 2^{\mathcal{D}}$), and the determination semiring
   coincides with $\mathrm{PosBool}(\Phi)$---positive Boolean formulas
   over commitment variables, with $\vee$ as addition and $\wedge$ as
   multiplication.
@@ -807,7 +807,7 @@ $[I]_0 = \mathcal{I}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
   At depth $1$, all commitments form a single layer.
   Level-$1$ equivalence classes are singletons (each determination is
   uniquely identified by its single-layer content), so
-  $\mathcal{F}_1 = 2^{\mathcal{I}}$.
+  $\mathcal{F}_1 = 2^{\mathcal{D}}$.
   Each determination corresponds to a conjunction of commitment variables
   (which commitments were applied); supports correspond to disjunctions
   of such conjunctions---exactly $\mathrm{PosBool}(\Phi)$.
@@ -824,7 +824,7 @@ $[I]_0 = \mathcal{I}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
   \label{prop:qdepth-characterization}
   \begin{enumerate}[nosep,label=(\alph*)]
     \item $\mathrm{qdepth}(t) = 0$ iff $t$ is robust
-          ($\mathrm{supp} = \mathcal{I}$) or impossible
+          ($\mathrm{supp} = \mathcal{D}$) or impossible
           ($\mathrm{supp} = \emptyset$).
     \item $\mathrm{qdepth}(t) = k$ iff all determinations agreeing on
           layers $1, \ldots, k$ agree on whether $t$ holds, but some
@@ -834,7 +834,7 @@ $[I]_0 = \mathcal{I}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
   \end{enumerate}
 \end{proposition}
 \begin{proof}
-  (a)~$\mathcal{F}_0 = \{\emptyset, \mathcal{I}\}$ by definition.
+  (a)~$\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$ by definition.
   (b)~$\mathrm{supp} \in \mathcal{F}_k$ means the support is closed under
   level-$k$ agreement, so layers $k{+}1, \ldots, d$ are irrelevant.
   Minimality of $k$ means some level-$(k{-}1)$ class is split.
@@ -848,8 +848,8 @@ $[I]_0 = \mathcal{I}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
   Value $b$ has $\mathrm{qdepth}(b) = 0$: it holds under every
   determination (robust).
   Value $d$ has $\mathrm{qdepth}(d) = 1$: its support is a proper subset
-  of $\mathcal{I}$ (the determinations where $T_Q$ commits before $T_3$),
-  which is not in $\mathcal{F}_0 = \{\emptyset, \mathcal{I}\}$.
+  of $\mathcal{D}$ (the determinations where $T_Q$ commits before $T_3$),
+  which is not in $\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$.
   Classical provenance suffices for $b$; determination provenance is needed
   for $d$.
 \end{example}
@@ -1150,18 +1150,18 @@ recorded in the history as conflict edges accumulate.
 Returning to Example~\ref{ex:example}: $T_2$, $T_3$, and $T_Q$ conflict on
 $(2,d)$ with no cycles.
 Two representative determinations:
-$I_{\mathsf{in}} \triangleq
+$D_{\mathsf{in}} \triangleq
   \varphi_{\mathsf{commit}(T_2)} \cdot \varphi_{\mathsf{commit}(T_Q)}
   \cdot \varphi_{\mathsf{commit}(T_3)}$
-yields $\Prov_{Q \mid I_{\mathsf{in}}}(d)=x_2$;
-$I_{\mathsf{out}} \triangleq
+yields $\Prov_{Q \mid D_{\mathsf{in}}}(d)=x_2$;
+$D_{\mathsf{out}} \triangleq
   \varphi_{\mathsf{commit}(T_2)} \cdot \varphi_{\mathsf{commit}(T_3)}
   \cdot \varphi_{\mathsf{commit}(T_Q)}$
 yields $d$ absent.
 Prior to resolution, even the \emph{form} of the provenance question for $d$
 is ambiguous (why vs.\ why-not).
 Values $b$ has full support
-($\mathrm{supp}(\Prov_Q(b)) = \mathcal{I}$)
+($\mathrm{supp}(\Prov_Q(b)) = \mathcal{D}$)
 and is robust; $d$ is contingent.
 
 \subsection{Complexity of Robustness}
@@ -1175,7 +1175,7 @@ and is robust; $d$ is contingent.
 
 \begin{proof}
   \emph{Membership in coNP.}
-  To refute robustness, guess a resolving determination $I$ (a set of
+  To refute robustness, guess a resolving determination $D$ (a set of
   commit/abort decisions that makes $G$ acyclic): guess which transactions
   to abort, verify acyclicity of the remaining conflict graph in polynomial
   time, compute the resulting database state, evaluate $Q$, and check that
@@ -1216,7 +1216,7 @@ and is robust; $d$ is contingent.
 \noindent
 The result complements the algebraic propagation (Corollary~\ref{cor:propagation-filtration}):
 supports compose cleanly through queries, but \emph{deciding} whether a
-support equals $\mathcal{I}$ (full robustness) is computationally hard.
+support equals $\mathcal{D}$ (full robustness) is computationally hard.
 
 \subsection{Snapshot Isolation}
 
@@ -1270,7 +1270,7 @@ conflict-serializable schedule of minimal makespan is NP-complete;
 Cheng et al.~\cite{cheng2024scheduling} give practical heuristics.
 In our framework, a batch-optimal scheduler produces a single-layer
 determination
-$I_{\mathsf{sched}} = \{\varphi_{T_i \prec T_j} \mid
+$D_{\mathsf{sched}} = \{\varphi_{T_i \prec T_j} \mid
 (T_i, T_j) \in \text{chosen ordering}\}$
 of commuting ordering commitments (depth~$1$).
 The NP-completeness of computing this layer illustrates a general
@@ -1365,13 +1365,13 @@ quantify over different spaces.
 \subsection{Intra-Specification Queries: Robustness}
 
 Robustness is an intra-specification property.
-Fix a specification $\Spec$ and the set $\mathcal{I}$ of resolving determinations.
-An outcome $o$ is \emph{robust} with respect to $\mathcal{I}$ iff
-$\mathrm{supp}(\Prov_Q(o)) = \mathcal{I}$---equivalently,
-$\forall I \in \mathcal{I}.\; o \in (\Spec \mid I)(H)$.
+Fix a specification $\Spec$ and the set $\mathcal{D}$ of resolving determinations.
+An outcome $o$ is \emph{robust} with respect to $\mathcal{D}$ iff
+$\mathrm{supp}(\Prov_Q(o)) = \mathcal{D}$---equivalently,
+$\forall D \in \mathcal{D}.\; o \in (\Spec \mid D)(H)$.
 In the determination semiring, robustness
 is the multiplicative identity: the tuple's support is the full set
-$\mathcal{I}$.
+$\mathcal{D}$.
 In Example~\ref{ex:example}, $b$ is robust; $d$ is contingent.
 
 \subsection{Inter-Specification Queries: Preservation under Semantic Change}
@@ -1382,15 +1382,15 @@ are admitted under different specifications for the same history.
 
 \paragraph{Preservation.}
 Given specifications $\Spec$ and $\Spec'$, outcome $o$, and
-sets $\mathcal{I}$ and $\mathcal{I}'$ of all resolving determinations
+sets $\mathcal{D}$ and $\mathcal{D}'$ of all resolving determinations
 for $\Spec$ and $\Spec'$ respectively,
 $o$ is \emph{preserved} from $\Spec$ to $\Spec'$ iff
 \[
-  \forall I \in \mathcal{I},\;
-  \bigl(o \in (\Spec \mid I)(H)\bigr)
+  \forall D \in \mathcal{D},\;
+  \bigl(o \in (\Spec \mid D)(H)\bigr)
   \;\Rightarrow\;
-  \exists I' \in \mathcal{I}'.\;
-  \bigl(o \in (\Spec' \mid I')(H)\bigr).
+  \exists D' \in \mathcal{D}'.\;
+  \bigl(o \in (\Spec' \mid D')(H)\bigr).
 \]
 
 \paragraph{Serializable outcomes under snapshot isolation.}
@@ -1611,7 +1611,7 @@ is open.
 \paragraph{Propagation of determination provenance through queries.}
 Green et al.\ showed that semiring provenance propagates through positive
 relational algebra: annotations compose via $+$ (union) and $\times$ (join).
-The determination semiring $(2^{\mathcal{I}}, \cup, \cap)$ should propagate
+The determination semiring $(2^{\mathcal{D}}, \cup, \cap)$ should propagate
 analogously: join intersects supports (both premises must hold), union takes
 their union (either suffices), and projection/selection preserve supports.
 A formal propagation theorem---stating that determination provenance is
@@ -1693,14 +1693,14 @@ discharged.
 
 \begin{proposition}[Determined specifications admit semiring provenance]
   \label{prop:semiring}
-  If $\Spec \mid I$ is determined and the commitment basis is persistent
+  If $\Spec \mid D$ is determined and the commitment basis is persistent
   (Definition~\ref{def:persistent}), then derivational provenance over
-  $\Spec \mid I$ is captured by a commutative semiring.
+  $\Spec \mid D$ is captured by a commutative semiring.
 \end{proposition}
 \begin{proof}[Proof sketch]
-  By Theorem~\ref{thm:resolution-implies-monotone}, $\Spec \mid I$ is
+  By Theorem~\ref{thm:resolution-implies-monotone}, $\Spec \mid D$ is
   history-monotone.
-  Because it is also single-valued (determined), $(\Spec \mid I)(H)$ is a singleton
+  Because it is also single-valued (determined), $(\Spec \mid D)(H)$ is a singleton
   for every history $H$; no further commitments can eliminate outcomes, so semantic
   conditioning has ceased.
   Because it is monotone, the unique outcome grows monotonically with
@@ -1712,7 +1712,7 @@ discharged.
   semiring multiplication.
   This is precisely the algebraic regime established
   by Green et al.~\cite{green2007provenance} for positive relational queries.
-  Although $\Spec \mid I$ need not syntactically be a Datalog program, it is
+  Although $\Spec \mid D$ need not syntactically be a Datalog program, it is
   algebraically equivalent, for provenance purposes, to monotone evaluation over
   a fixed instance, which suffices.
 \end{proof}
@@ -1785,9 +1785,9 @@ These directions are left for future work.
 This appendix gives the formal development of layer certificates, summarized
 in the body text.
 Fix a specification $\Spec$ and a determination
-$I=\varphi_1 \cdot \cdots \cdot \varphi_k$ with layering $L_1,\ldots,L_k$.
+$D=\varphi_1 \cdot \cdots \cdot \varphi_k$ with layering $L_1,\ldots,L_k$.
 
-A \emph{provenance query} is a function $q:(\Spec\mid I)\to A$,
+A \emph{provenance query} is a function $q:(\Spec\mid D)\to A$,
 where $A$ is an answer domain (e.g., Boolean, explanations, dependency sets).
 
 \begin{definition}[Certificate]
@@ -1874,7 +1874,7 @@ Resolution therefore requires sealing the lower stratum containing $p(c)$.
 \paragraph{Resolving determination.}
 A resolving determination for the stratified fragment is
 \[
-  I_{\mathrm{strat}}
+  D_{\mathrm{strat}}
   \;\triangleq\;
   \varphi_{\seal}(S_1)
   \seq
@@ -1890,11 +1890,11 @@ Accordingly, the determination depth is exactly $k$, as recorded in
 the stratified case.
 
 \paragraph{Provenance.}
-Once $I_{\mathrm{strat}}$ is fixed, the specification is fully resolved.
+Once $D_{\mathrm{strat}}$ is fixed, the specification is fully resolved.
 Derivational provenance applies without further semantic refinement.
 For example,
 \[
-  \Prov_{\mid I_{\mathrm{strat}}}(p(c)) = \Prov(a(c)).
+  \Prov_{\mid D_{\mathrm{strat}}}(p(c)) = \Prov(a(c)).
 \]
 Absences such as $\neg q(c)$ are derivational consequences of the sealed lower stratum
 and require no additional commitments.
@@ -1915,7 +1915,7 @@ additional sealing commitments that classify atoms as determined or undefined.
 \paragraph{Resolving determination.}
 A resolving determination under WFS can be written schematically as
 \[
-  I_{\mathrm{wfs}}
+  D_{\mathrm{wfs}}
   \;\triangleq\;
   \varphi_{\seal}(S_1)
   \seq \cdots \seq
@@ -1942,9 +1942,9 @@ outcome
 \paragraph{Provenance.}
 Because WFS yields a single resolved outcome (in the lifted domain), there is no
 branching among determinations.
-Once $I_{\mathrm{wfs}}$ is fixed, provenance is again depth~0:
+Once $D_{\mathrm{wfs}}$ is fixed, provenance is again depth~0:
 \[
-  \Prov_{\mid I_{\mathrm{wfs}}}(p(c)) = \Prov(a(c)).
+  \Prov_{\mid D_{\mathrm{wfs}}}(p(c)) = \Prov(a(c)).
 \]
 The difference from stratified semantics lies not in multiplicity of outcomes, but
 in the unbounded, alternating structure of the determination itself.
@@ -1967,7 +1967,7 @@ For the running example, resolution begins with the same stratified-prefix seali
 % [added \seq]
 After this prefix, the negation cycle admits two incompatible resolutions:
 \[
-  I^{(r)}
+  D^{(r)}
   \;\triangleq\;
   \bigl(
   \varphi_{\seal}(S_1)
@@ -1978,7 +1978,7 @@ After this prefix, the negation cycle admits two incompatible resolutions:
   (r(c)=\mathbf{t},\,s(c)=\mathbf{f}),
 \]
 \[
-  I^{(s)}
+  D^{(s)}
   \;\triangleq\;
   \bigl(
   \varphi_{\seal}(S_1)
@@ -1999,9 +1999,9 @@ This is reflected in the stable case.
 \paragraph{Provenance.}
 Determination provenance must record which stable determination is assumed:
 \[
-  \Prov_{\mid I^{(r)}}(r(c)) = 1,
+  \Prov_{\mid D^{(r)}}(r(c)) = 1,
   \qquad
-  \Prov_{\mid I^{(s)}}(s(c)) = 1.
+  \Prov_{\mid D^{(s)}}(s(c)) = 1.
 \]
 Only after this choice does ordinary derivational provenance apply.
 
@@ -2028,10 +2028,10 @@ and checkable.
 
 \subsection{Certificates and Semantic-Change Queries}
 
-Fix a specification $\Spec$ and a resolving determination $I$.
+Fix a specification $\Spec$ and a resolving determination $D$.
 A \emph{provenance query} is a function
 \[
-  q : (\Spec \mid I) \to A,
+  q : (\Spec \mid D) \to A,
 \]
 where $A$ is an answer domain (e.g., Boolean, explanations, dependency sets),
 including classical why/why-not provenance and the semantic-change queries of
@@ -2123,10 +2123,10 @@ on the relative ordering of $T_4$, $T_5$, and $T_Q$.
 \paragraph{Resolving determinations.}
 Two valid resolving determinations under serializability are:
 \[
-  I_{\mathsf{in}} \triangleq
+  D_{\mathsf{in}} \triangleq
   T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_Q \prec T_5,
   \qquad
-  I_{\mathsf{out}} \triangleq
+  D_{\mathsf{out}} \triangleq
   T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_5 \prec T_Q.
 \]
 Both are conjunctions of ordering predicates and therefore arise in a single
@@ -2134,19 +2134,19 @@ semantic stage.
 
 \paragraph{Provenance.}
 Once a resolving determination is fixed, provenance is purely derivational.
-Conditioned on $I_{\mathsf{in}}$, the resolved snapshot contains $b,c,d$:
+Conditioned on $D_{\mathsf{in}}$, the resolved snapshot contains $b,c,d$:
 \[
-  \Prov_{Q \mid I_{\mathsf{in}}}(b)=x_1+x_2,\quad
-  \Prov_{Q \mid I_{\mathsf{in}}}(c)=x_3,\quad
-  \Prov_{Q \mid I_{\mathsf{in}}}(d)=x_4.
+  \Prov_{Q \mid D_{\mathsf{in}}}(b)=x_1+x_2,\quad
+  \Prov_{Q \mid D_{\mathsf{in}}}(c)=x_3,\quad
+  \Prov_{Q \mid D_{\mathsf{in}}}(d)=x_4.
 \]
-Conditioned on $I_{\mathsf{out}}$, tuple $d$ is absent and classical why-not
+Conditioned on $D_{\mathsf{out}}$, tuple $d$ is absent and classical why-not
 provenance applies.
 
 Determination provenance records the semantic assumption under which the
 derivation holds; e.g.,
 \[
-  \Prov_{Q \mid I_{\mathsf{in}}}(d) = x_4.
+  \Prov_{Q \mid D_{\mathsf{in}}}(d) = x_4.
 \]
 
 \paragraph{Same observation, different derivational provenance.}
@@ -2199,7 +2199,7 @@ A query transaction $T_Q$ again evaluates $Q$.
 One admissible SI determination is:
 \[
   \begin{aligned}
-    I_{\mathrm{SI}} \triangleq {} &
+    D_{\mathrm{SI}} \triangleq {} &
     \snap(T_1)=\snap(T_2)=\snap(T_3)=\snap(T_4)=\snap(T_6)=\snap(T_7)=\emptyset \\
                                   & \seq\; \snap(T_5)=\{T_4\}                   \\
                                   & \seq\; \snap(T_Q)=\{T_1,\dots,T_7\}         \\
@@ -2209,15 +2209,15 @@ One admissible SI determination is:
 % [added \seq]
 
 \paragraph{Outcome and provenance.}
-Under $I_{\mathrm{SI}}$, the final state contains $b$ and $c$, but not $d,e,f$.
+Under $D_{\mathrm{SI}}$, the final state contains $b$ and $c$, but not $d,e,f$.
 The query result is $\{b,c\}$ with derivational provenance:
 \[
-  \Prov_{Q \mid I_{\mathrm{SI}}}(b)=x_1+x_2,\qquad
-  \Prov_{Q \mid I_{\mathrm{SI}}}(c)=x_3.
+  \Prov_{Q \mid D_{\mathrm{SI}}}(b)=x_1+x_2,\qquad
+  \Prov_{Q \mid D_{\mathrm{SI}}}(c)=x_3.
 \]
 
 \paragraph{Semantic change and serializability.}
-Although $I_{\mathrm{SI}}$ is admissible under snapshot isolation, it does not admit
+Although $D_{\mathrm{SI}}$ is admissible under snapshot isolation, it does not admit
 any serial execution.
 The concurrent writes of $T_6$ and $T_7$ produce the classical write-skew anomaly:
 a dependency cycle that cannot be linearized into a total order.
@@ -2463,18 +2463,18 @@ several semantically distinct ways:
     The conclusion fails under a particular resolved determination but holds
     under others.
     In the transactional example, tuple $d$ is absent under
-    $I_{\mathsf{out}}$ (where $T_5 \prec T_Q$) but present under
-    $I_{\mathsf{in}}$ (where $T_Q \prec T_5$).
-    Classical why-not provenance under $I_{\mathsf{out}}$ explains the
+    $D_{\mathsf{out}}$ (where $T_5 \prec T_Q$) but present under
+    $D_{\mathsf{in}}$ (where $T_Q \prec T_5$).
+    Classical why-not provenance under $D_{\mathsf{out}}$ explains the
     derivational failure; determination provenance additionally records that
     the absence is contingent on the ordering commitment.
 
     In the negation example (Example~\ref{ex:datalog-negation}), atom $s(c)$
-    is absent under stable determination $I^{(r)}$ because $r(c)$ is true.
+    is absent under stable determination $D^{(r)}$ because $r(c)$ is true.
     But $r(c)$ is true only because of the commitment to the $r$-model;
-    under $I^{(s)}$, $s(c)$ is true and $r(c)$ is absent.
-    The why-not explanation for $s(c)$ under $I^{(r)}$ is
-    $\Prov_{\mid I^{(r)}}(\neg s(c))$,
+    under $D^{(s)}$, $s(c)$ is true and $r(c)$ is absent.
+    The why-not explanation for $s(c)$ under $D^{(r)}$ is
+    $\Prov_{\mid D^{(r)}}(\neg s(c))$,
     recording that the absence depends on a semantic commitment, not merely
     on a blocked derivation.
 
@@ -2499,7 +2499,7 @@ several semantically distinct ways:
     under every serialization.
     This is a robust absence: no ordering commitment can make it appear.
     Determination provenance certifies this by showing that the outcome
-    lies outside $(\Spec \mid I)(H)$ for every resolving $I$.
+    lies outside $(\Spec \mid D)(H)$ for every resolving $D$.
 
     In the negation example, $q(c)$ is robustly absent: $p(c)$ holds under
     every semantics (stratified, well-founded, and stable), so the rule

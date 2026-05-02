@@ -2039,6 +2039,40 @@ Richer provenance questions require retaining strictly more semantic information
 reflecting the deeper and less-commutative structure of the underlying
 determination.
 
+% ===============================================================
+\section{Protocol-Specific Determination Structures}
+\label{app:protocols}
+% ===============================================================
+
+The body (Section~\ref{sec:transactions}) presents determination provenance
+for transactions in a protocol-agnostic manner: commitments are ordering and
+abort decisions, and depth depends on the isolation level's acyclicity
+constraint and the conflict-graph topology.
+This appendix instantiates the framework under two specific concurrency
+control protocols---two-phase locking (2PL) and multiversion concurrency
+control (MVCC)---to verify that the semantic characterization is consistent
+with operational behavior and to expose protocol-specific structure.
+
+\subsection{Two-Phase Locking (2PL)}
+
+\jmh{TODO: Under 2PL, ordering commitments are made incrementally as locks
+are acquired (each lock acquisition implicitly commits to an ordering on the
+locked object). Abort commitments arise from deadlock detection and
+resolution. The determination structure differs from the body's
+protocol-agnostic treatment in that ordering commitments are distributed
+throughout execution rather than concentrated at commit time. Formalize:
+lock acquisition as ordering commitment, deadlock cycle as forcing abort
+commitment, depth characterization under 2PL.}
+
+\subsection{Multiversion Concurrency Control (MVCC)}
+
+\jmh{TODO: Under MVCC, each transaction reads from a specific version,
+introducing version-selection commitments analogous to the snapshot
+predicates discussed for SI. The commitment basis includes version-read
+predicates in addition to ordering and abort commitments. Formalize:
+version selection as commitment, interaction with write-visibility rules,
+depth characterization under MVCC. Compare with SI treatment in body.}
+
 % ================================================================
 \section{Appendix: Determination Provenance for Systems Lineage}
 \label{app:systems-lineage}

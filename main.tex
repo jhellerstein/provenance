@@ -402,30 +402,25 @@ commitments, applied as \emph{sequential refinement}.
 
 \begin{definition}[Determination]
   \label{def:determination}%
-  The \emph{determination} $D(H)$ of a history $H$ over a
-  commitment basis $\Phi$ is the sequence
-  $\varphi_1 \cdot \cdots \cdot \varphi_m$
-  ($\varphi_i \in \Phi$) of all commitment events in $H$,
-  listed in the order induced by $\rightarrow$.
-  Each $\varphi_i$ is applied at the prefix
-  $H_i \triangleq H \cdot \varphi_1 \cdots \varphi_{i-1}$
-  (with $H_0 = H$), so its effect depends on the admissible set
-  $\Spec(H_{i-1})$ at that point.
+  A \emph{determination} over a commitment basis $\Phi$ is a finite
+  sequence $I = \varphi_1 \cdot \cdots \cdot \varphi_m$
+  ($\varphi_i \in \Phi$).
+  Its application to a specification $\Spec$ at history $H$ is defined
+  recursively:
+  \[
+    (\Spec \mid \varepsilon)(H) = \Spec(H), \qquad
+    (\Spec \mid \varphi \cdot I')(H) = (\Spec \mid I')(H \cdot \varphi).
+  \]
+  Thus each $\varphi_i$ acts on the admissible set at the history
+  $H \cdot \varphi_1 \cdots \varphi_{i-1}$, which includes the effects
+  of all preceding commitments.
+  The \emph{determination of a history} $D(H)$ is the subsequence of
+  commitment events in $H$, listed in the order induced by $\rightarrow$.
 \end{definition}
 
 \noindent
-Although a history is in general a DAG (events may be partially ordered),
-commitment events form a total order within it: each commitment succeeds all
-maximal events of its prefix, so every pair of commitments is comparable
-under~$\rightarrow$.
-The determination is therefore always a well-defined sequence.
-We write $(\Spec \mid I)(H)$ for the result of applying the full
-determination to $\Spec$ starting from $H$:
-\[
-  (\Spec \mid I)(H)
-  \;\triangleq\;
-  \Spec(H \cdot \varphi_1 \cdot \cdots \cdot \varphi_m).
-\]
+Commitment events form a total order within any history (each succeeds all
+maximal events of its prefix), so $D(H)$ is always a well-defined sequence.
 
 Because commitments may be ambiguity-sensitive, the order of
 commitments can matter.

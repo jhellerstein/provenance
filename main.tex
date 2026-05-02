@@ -246,12 +246,12 @@ particular run of a system: which events have occurred and which
 preceded which.
 The class $\Hist$ of all histories represents all possible states across
 all possible runs.
+An \emph{input history}---the starting point before any system
+processing---is a history consisting solely of external input events.
 When the partial order is total, a history is a sequence (e.g., a
 transaction schedule).
-When no precedence constraints are present, a history is an unordered set
-(e.g., a classical database instance).
-In general, histories are partially ordered---the natural case when
-transactions run in parallel or events occur at distributed sites.
+When no precedence constraints are present, a history is an unordered set;
+an input history with no ordering is simply a database instance.
 
 \begin{definition}[History Extension]
   For histories $H_1=(E_1,\rightarrow_1)$ and $H_2=(E_2,\rightarrow_2)$, we write

@@ -534,18 +534,22 @@ can operate without it.
 
 \begin{theorem}[Necessity: ambiguity blocks semiring provenance]
   \label{thm:necessity}
-  Let $|\Spec(H)| \ge 2$ with $o_1, o_2 \in \Spec(H)$ having
-  contradictory derivational structure: there exists a base fact $f$
-  used in deriving $o_1$ whose absence is required for $o_2$.
+  Let $|\Spec(H)| \ge 2$ with distinct $o_1, o_2 \in \Spec(H)$, and
+  suppose there exists a query $Q$ and tuple $t$ whose semiring provenance
+  differs between $o_1$ and $o_2$:
+  $\Prov_Q(t \mid o_1) \neq \Prov_Q(t \mid o_2)$.
   Then no commutative semiring annotation over a single instance
-  can simultaneously explain both $o_1$ and $o_2$ at $H$.
+  can simultaneously produce both provenance values at $H$.
 \end{theorem}
 
 \begin{proof}
-  A single resolved instance either contains $f$ or does not.
-  If $f$ is present, $o_2$'s derivation is invalid.
-  If absent, $o_1$'s provenance is $0$ (the fact it depends on is missing).
-  No single annotation satisfies both.
+  A semiring annotation is a function of the resolved instance.
+  If the instance corresponds to $o_1$, the annotation yields
+  $\Prov_Q(t \mid o_1)$; if to $o_2$, it yields $\Prov_Q(t \mid o_2)$.
+  Since $\Prov_Q(t \mid o_1) \neq \Prov_Q(t \mid o_2)$, no single
+  instance produces both.
+  Hence the ambiguity between $o_1$ and $o_2$ must be resolved before
+  provenance is well-defined.
 \end{proof}
 
 \noindent

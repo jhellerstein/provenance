@@ -467,11 +467,13 @@ persistent basis is both necessary and sufficient for provenance.
     \item \emph{(Necessity.)}
           If $|\Spec(H)| \ge 2$ with distinct outcomes inducing distinct
           instances, then no single semiring annotation can simultaneously
-          explain both outcomes.
+          explain both outcomes: provenance is ill-defined without resolution.
     \item \emph{(Sufficiency.)}
-          If $D$ resolves $\Spec$, then $(\Spec \mid D)$ is
-          history-invariant: $(\Spec \mid D)(H_1) = (\Spec \mid D)(H_2)$
-          for all $H_1 \sqsubseteq H_2$.
+          If $D$ resolves $\Spec$, then $(\Spec \mid D)$ yields a unique
+          outcome independent of $H$---i.e.,
+          $(\Spec \mid D)(H_1) = (\Spec \mid D)(H_2)$
+          for all $H_1 \sqsubseteq H_2$---so
+          classical semiring provenance over that outcome is well-defined.
   \end{enumerate}
 \end{theorem}
 

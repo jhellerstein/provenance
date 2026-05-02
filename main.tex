@@ -1125,15 +1125,17 @@ under partial control (e.g., hot keys serialized, cold keys uncontrolled),
 the determination records which orderings were chosen and which were observed.
 
 \paragraph{Connection to batch-optimal scheduling.}
-Cheng et al.~\cite{cheng2024scheduling} compute an ordering that minimizes
-aborts for a known batch.
-In our framework, their scheduler produces a single-layer determination
+Baccaert et al.~\cite{baccaert2026makespan} show that finding a
+conflict-serializable schedule of minimal makespan is NP-complete;
+Cheng et al.~\cite{cheng2024scheduling} give practical heuristics.
+In our framework, a batch-optimal scheduler produces a single-layer
+determination
 $I_{\mathsf{sched}} = \{\varphi_{T_i \prec T_j} \mid
 (T_i, T_j) \in \text{chosen ordering}\}$
 of commuting ordering commitments (depth~$1$).
-The scheduler's computational cost is the cost of evaluating this
-layer---an instance of the conservation law
-from~\cite{hellerstein2026complexity}.
+The NP-completeness of computing this layer is an instance of the
+conservation law from~\cite{hellerstein2026complexity}: determination
+depth is traded for computational complexity within the layer.
 The enriched basis extends beyond batch scheduling to online arrival
 (ordering decisions made incrementally, potentially non-commuting),
 partial knowledge (access sets unknown until execution), and mixed control.

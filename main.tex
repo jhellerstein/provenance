@@ -403,14 +403,10 @@ commitments, applied as \emph{sequential refinement}.
 \begin{definition}[Determination]
   \label{def:determination}%
   A \emph{determination} over a commitment basis $\Phi$ is a finite
-  sequence of commitments $D = \varphi_1 \cdot \cdots \cdot \varphi_m$
-  ($\varphi_i \in \Phi$).
-  Applying $D$ at a starting history $H$ produces a chain of histories
-  $H_0 = H$, $H_i = H_{i-1} \cdot \varphi_i$;
-  we write $(\Spec \mid D)(H) \triangleq \Spec(H_m)$ for the resulting
-  admissible set.
-  When the starting history matters, we write the fully qualified form
-  $\varphi_1(H_0) \cdot \varphi_2(H_1) \cdot \cdots \cdot \varphi_m(H_{m-1})$.
+  sequence of commitments applied at successive histories:
+  $D = \varphi_1(H_0) \cdot \varphi_2(H_1) \cdot \cdots \cdot \varphi_m(H_{m-1})$
+  where $\varphi_i \in \Phi$ and $H_i = H_{i-1} \cdot \varphi_i$.
+  The result is $(\Spec \mid D)(H_0) \triangleq \Spec(H_m)$.
   The \emph{determination of a history} $D(H)$ is the subsequence of
   commitment events in $H$, listed in the order induced by $\rightarrow$.
 \end{definition}
@@ -469,20 +465,19 @@ can operate without it.
   If $H \in \Hist$ and $H' \sqsubseteq H$, then $H' \in \Hist$.
 \end{assumption}
 
-\begin{theorem}[Sufficiency: determined specifications are history-monotone]
+\begin{theorem}[Persistence implies history-invariance]
   \label{thm:resolution-implies-monotone}
   Assume prefix-closure (Assumption~\ref{ass:prefix-closed}).
   Let $\Phi$ be a persistent commitment basis and let $D$ be a determination
   over $\Phi$ that resolves $\Spec$.
-  Then $\widehat{\Spec}_D(H) \triangleq (\Spec \mid D)(H)$
-  is history-monotone.
+  Then $(\Spec \mid D)(H)$ is independent of the starting history $H$:
+  for all $H_1 \sqsubseteq H_2$,
+  $(\Spec \mid D)(H_1) = (\Spec \mid D)(H_2)$.
 \end{theorem}
 
 \begin{proof}
-  Let $H_1 \sqsubseteq H_2$.
   Since $D$ resolves $\Spec$, both $(\Spec \mid D)(H_1)$ and
   $(\Spec \mid D)(H_2)$ are singletons; call them $\{o_1\}$ and $\{o_2\}$.
-  We show $o_1 = o_2$.
   Write $D = \varphi_1 \cdot \cdots \cdot \varphi_m$.
   Since $(\Spec \mid D)(H_1) = \{o_1\}$, for every $o \neq o_1$ we have
   $o \notin \Spec(H_1 \cdot \varphi_1 \cdots \varphi_m)$.
@@ -491,10 +486,15 @@ can operate without it.
   H_2 \cdot \varphi_1 \cdots \varphi_j$ for each $j$),
   we obtain $o \notin \Spec(H_2 \cdot \varphi_1 \cdots \varphi_m)$.
   Hence $o_2 \neq o$ for every $o \neq o_1$, so $o_2 = o_1$.
-  That is, $(\Spec \mid D)(H_2) = (\Spec \mid D)(H_1)$:
-  the determined specification is constant across extensions, hence
-  trivially history-monotone.
 \end{proof}
+
+\noindent
+History-invariance means the determined outcome depends only on the
+sequence of commitments, not on where in history they are applied.
+We may therefore write $(\Spec \mid D)$ without a history argument,
+and abbreviate the determination as
+$D = \varphi_1 \cdot \cdots \cdot \varphi_m$ (eliding the history
+annotations from the fully qualified form).
 
 \begin{theorem}[Necessity: ambiguity blocks semiring provenance]
   \label{thm:necessity}

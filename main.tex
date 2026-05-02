@@ -80,7 +80,7 @@
   semantic resolution; its algebraic structure is a \emph{commitment tower}
   (a sequence of commutative monoids resting on a provenance semiring).
   \emph{Determination provenance} collects conditioned provenance across all
-  resolutions into a $K$-relation over determinations, whose supports form a
+  resolutions into a $K$-relation over resolutions, whose supports form a
   commutative semiring---recovering the semiring framework of Green et al.\
   at a new level.
   Classical provenance is the degenerate case where no commitments are needed.
@@ -88,7 +88,7 @@
   arises from concurrency and isolation choices: determination provenance
   distinguishes outcomes that hold under every serializable execution from
   those contingent on a particular scheduling or isolation decision, with
-  determination depth governed by conflict-graph topology.
+  depth governed by conflict-graph topology.
   We further instantiate the framework for Datalog with negation---a
   longstanding gap in provenance past the monotone fragment---and for
   distributed systems observability, demonstrating the generality of the
@@ -135,22 +135,23 @@ This paper introduces two algebraic objects that extend provenance to
 settings with semantic ambiguity.
 
 \emph{Conditioned provenance} explains a query result under a single fixed
-determination.
+\emph{resolution}---a sequence of irrevocable semantic commitments (which we
+call a \emph{determination}) that narrows the admissible set to a singleton.
 Its algebraic structure is a \emph{commitment tower}: each layer of semantic
 commitment forms a commutative monoid, and the layers discharge sequentially
 until a provenance semiring is exposed at the foundation.
-Semirings are inapplicable within a single determination (where only monoids
+Semirings are inapplicable within a single resolution (where only monoids
 arise, because commitments compose by conjunction, not by disjunction), but
 the semiring framework recurs at the next level.
 
 \emph{Determination provenance} collects conditioned provenance across all
-resolving determinations into a $K$-relation over the (finite) set of
+resolutions into a $K$-relation over the (finite) set of
 resolutions.
 Its supports form a commutative semiring---the \emph{determination
 semiring}---that captures which resolutions support a given outcome and how
 those supports compose through queries.
 This recovers the algebraic provenance framework
-of~\cite{green2007provenance} at a new level: determinations play the role
+of~\cite{green2007provenance} at a new level: resolutions play the role
 of tuple annotations, and the determination semiring is analogous to their
 $\mathrm{PosBool}(B)$.
 

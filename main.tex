@@ -1200,6 +1200,60 @@ Values $b$ and $c$ have full support
 ($\mathrm{supp}(\Prov_Q(b)) = \mathrm{supp}(\Prov_Q(c)) = \mathcal{I}$)
 and are robust; $d$ is contingent.
 
+\subsection{Complexity of Robustness}
+
+\begin{theorem}[Robustness under serializability is coNP-complete]
+  \label{thm:robustness-conp}
+  Given a transactional history $H$ with conflict graph $G$, a conjunctive
+  query $Q$, and a tuple $t$: deciding whether $t$ is robust (present in
+  $Q$'s result under every resolving determination) is coNP-complete.
+\end{theorem}
+
+\begin{proof}
+  \emph{Membership in coNP.}
+  To refute robustness, guess a resolving determination $I$ (a set of
+  commit/abort decisions that makes $G$ acyclic): guess which transactions
+  to abort, verify acyclicity of the remaining conflict graph in polynomial
+  time, compute the resulting database state, evaluate $Q$, and check that
+  $t$ is absent.
+  This is a polynomial-time verifiable certificate for non-robustness.
+
+  \emph{coNP-hardness.}
+  We reduce from \textsc{Validity} (given a DNF formula $\psi$ over
+  variables $x_1, \ldots, x_n$, is $\psi$ true under every truth
+  assignment?), which is coNP-complete.
+  Given $\psi$, construct a transactional history as follows.
+  %
+  For each variable $x_i$, create two transactions:
+  $T_i^+$ writes value $\mathsf{true}$ to object $o_i$, and
+  $T_i^-$ writes value $\mathsf{false}$ to object $o_i$.
+  Both $T_i^+$ and $T_i^-$ have committed; their write-write conflict on
+  $o_i$ creates an edge in $G$.
+  Under last-writer-wins semantics, the commit order determines the final
+  value of $o_i$: if $T_i^+$ is ordered after $T_i^-$, then
+  $o_i = \mathsf{true}$ (representing $x_i = \mathsf{true}$), and vice
+  versa.
+  No cycles arise (each pair conflicts only on its own object), so no
+  aborts are needed; every ordering of each pair is a valid determination.
+  %
+  For each term $t_j = \ell_1 \wedge \cdots \wedge \ell_m$ in $\psi$,
+  define a conjunctive query clause that checks whether the corresponding
+  objects have the values matching the literals.
+  The overall query $Q$ returns a distinguished tuple $t^*$ iff at least
+  one term is satisfied (the disjunction of all term-queries).
+
+  Under any resolving determination, the commit ordering of each pair
+  $(T_i^+, T_i^-)$ induces a truth assignment to $x_i$.
+  The tuple $t^*$ is present iff the induced assignment satisfies $\psi$.
+  Hence $t^*$ is robust (present under every determination) iff $\psi$ is
+  valid (true under every assignment).
+\end{proof}
+
+\noindent
+The result complements the algebraic propagation (Corollary~\ref{cor:propagation-filtration}):
+supports compose cleanly through queries, but \emph{deciding} whether a
+support equals $\mathcal{I}$ (full robustness) is computationally hard.
+
 \subsection{Snapshot Isolation}
 
 Snapshot isolation (SI) is multiversion: each transaction reads from a

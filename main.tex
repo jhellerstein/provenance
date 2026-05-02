@@ -322,9 +322,11 @@ We model commitments as events appended to histories.
 A commitment event succeeds all maximal events of~$H$, inducing a cut in the
 history: everything before the commitment is fixed, and the admissible set
 after the commitment can only be smaller.
-Commitments restrict admissible outcomes without introducing new ones.
 We write \mbox{$(\Spec \mid \varphi)(H) \triangleq \Spec(H \cdot \varphi)$}:
 the admissible outcomes after appending $\varphi$ to $H$.
+Viewed relationally, $\Spec(H)$ is a set of outcomes; each commitment is a
+selection predicate on that set; and a determination is a conjunction of
+such predicates that narrows the set to a singleton.
 
 \paragraph{Commitment bases.}
 A \emph{commitment basis} $\Phi$ is the vocabulary of commitments available

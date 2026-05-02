@@ -518,14 +518,56 @@ We now show that monotonicity is not an independent assumption but a
   is history-monotone.
 \end{theorem}
 
+\begin{proof}
+  Let $H_1 \sqsubseteq H_2$ and let $(\Spec \mid I)(H_1) = \{o^*\}$.
+  Write $I = \varphi_1 \cdot \cdots \cdot \varphi_m$.
+  Since $I$ resolves $\Spec$ at $H_1$, for every $o \neq o^*$ in $O$
+  there exists some $\varphi_j \in I$ such that $\varphi_j$ excludes $o$
+  at the prefix $H_1 \cdot \varphi_1 \cdots \varphi_{j-1}$.
+  By persistence (Definition~\ref{def:persistent}), $\varphi_j$ continues
+  to exclude $o$ at $H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$
+  (since $H_1 \cdot \varphi_1 \cdots \varphi_{j-1} \sqsubseteq
+  H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$).
+  Hence every $o \neq o^*$ is excluded at $H_2$ under $I$, so
+  $(\Spec \mid I)(H_2) \subseteq \{o^*\}$.
+  Since $I$ is feasible (Remark~\ref{rem:feasibility}),
+  $(\Spec \mid I)(H_2) \neq \emptyset$, so
+  $(\Spec \mid I)(H_2) = \{o^*\} = (\Spec \mid I)(H_1)$.
+  Thus $\widehat{\Spec}_I(H_2) \subseteq \widehat{\Spec}_I(H_1)$.
+\end{proof}
+
+\begin{theorem}[Necessity of resolution for provenance]
+  \label{thm:necessity}
+  Let $\Spec$ be a specification with $|\Spec(H)| \ge 2$ for some
+  history $H$, and let $o_1, o_2 \in \Spec(H)$ be two admissible outcomes
+  with contradictory derivational structure (i.e., there exists a base
+  fact $f$ such that $f$ is used in deriving $o_1$ but $f$'s absence is
+  required for $o_2$, or vice versa).
+  Then no commutative semiring annotation scheme over a single resolved
+  instance can simultaneously explain both $o_1$ and $o_2$ at $H$.
+\end{theorem}
+
+\begin{proof}
+  Suppose for contradiction that a semiring $(K, +, \cdot, 0, 1)$ and an
+  annotation $\alpha : \text{facts} \to K$ simultaneously explains both
+  outcomes.
+  The provenance of $o_1$ requires $\alpha(f) \neq 0$ (since $f$
+  participates in deriving $o_1$).
+  The provenance of $o_2$ requires that $f$ is absent from the resolved
+  instance (since $o_2$ depends on $f$'s absence).
+  But a single resolved instance either contains $f$ or does not.
+  If $f$ is present, $o_2$'s derivation is invalid; if absent, $o_1$'s
+  provenance is $0$.
+  No single annotation can satisfy both, so the ambiguity must be resolved
+  (by choosing between outcomes) before semiring provenance is well-defined.
+\end{proof}
+
 \noindent
-\emph{Proof sketch.}
-Persistence ensures that once a commitment excludes an outcome at $H_1$, it
-remains excluded at any extension $H_2 \sqsupseteq H_1$.
-Since $I$ resolves $\Spec(H_1)$ to a singleton $\{o_1\}$, every other outcome
-is excluded by some commitment in $I$; by persistence, it remains excluded at
-$H_2$, so $(\Spec \mid I)(H_2) = \{o_1\}$.
-Full proof in Appendix~\ref{app:algebra}.
+Together, Theorems~\ref{thm:resolution-implies-monotone}
+and~\ref{thm:necessity} justify the commitment tower:
+resolution is \emph{necessary} (semiring provenance cannot operate under
+ambiguity) and \emph{sufficient} (once discharged under a persistent basis,
+the resolved specification is monotone and classical provenance applies).
 
 \paragraph{Interpretation and relationship to CALM.}
 The theorem says that once a determination resolves a specification, the

@@ -259,8 +259,11 @@ We write $\Hist$ for the class of histories under consideration.
 \end{definition}
 
 Intuitively, $\sqsubseteq$ represents information growth: an extension may
-add new events (and precedence edges involving them) but may not revise the
-past of any event already present.
+add new events (and precedence edges involving them) but may not insert new
+predecessors of existing events.
+For an EDB viewed as a history, this means facts can be added but not
+retracted; for a transaction schedule, new operations can be appended but
+earlier operations cannot be reordered.
 
 \subsection{Outcomes and Specifications}
 An \emph{outcome} is an element of a set $O$ of externally

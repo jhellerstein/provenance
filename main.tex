@@ -245,7 +245,7 @@ Histories generalize familiar notions of input.
 When the partial order is total, a history is a sequence---e.g., a
 transaction schedule of reads, writes, and commits.
 When no precedence constraints are present, a history collapses to an
-unordered set and coincides with a classical database instance.
+unordered set and coincides with a classical database instance (EDB).
 We write $\Hist$ for the class of histories under consideration.
 
 \begin{definition}[History Extension]
@@ -262,8 +262,8 @@ Intuitively, $\sqsubseteq$ represents information growth: an extension may
 add new events (and precedence edges involving them) but may not insert new
 predecessors of existing events.
 For an EDB viewed as a history, this means facts can be added but not
-retracted; for a transaction schedule, new operations can be appended but
-earlier operations cannot be reordered.
+retracted; for a transaction schedule, new operations cannot be placed
+before existing ones in the order.
 
 \subsection{Outcomes and Specifications}
 An \emph{outcome} is an element of a set $O$ of externally

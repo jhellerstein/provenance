@@ -170,8 +170,8 @@ semiring composes through relational algebra~\cite{green2007provenance}.
   and an initially empty instance.
   Three concurrent transactions are followed by a query:
   \[
-    \underbrace{T_1\!: \textsf{ins } S(1,b)\ (x_1);\quad
-    T_2\!: \textsf{ins } S(2,d)\ (x_2);\quad
+    \underbrace{T_1\!: \textsf{ins } S(1,b);\quad
+    T_2\!: \textsf{ins } S(2,d);\quad
     T_3\!: \textsf{del } S(2,d)}_{\text{concurrent}}
     ;\quad\longrightarrow\quad
     T_Q\!: Q(y) \drule S(k,y).
@@ -183,7 +183,7 @@ semiring composes through relational algebra~\cite{green2007provenance}.
   and $T_3$, and is absent otherwise.
   Before resolving this ambiguity, even the \emph{form} of the provenance
   question for $d$ is undetermined: in one determination the relevant
-  question is \emph{why} $d$ appears ($\Prov(d) = x_2$), while in another
+  question is \emph{why} $d$ appears, while in another
   it is \emph{why-not} $d$.
   Determination provenance makes this dependence explicit by recording the
   commitments under which the query result is determined, together with the

@@ -484,17 +484,13 @@ can operate without it.
   $(\Spec \mid D)(H_2)$ are singletons; call them $\{o_1\}$ and $\{o_2\}$.
   We show $o_1 = o_2$.
   Write $D = \varphi_1 \cdot \cdots \cdot \varphi_m$.
-  Since $(\Spec \mid D)(H_1) = \{o_1\}$, every $o \neq o_1$ is excluded
-  by some $\varphi_j$ applied at $H_1 \cdot \varphi_1 \cdots \varphi_{j-1}$.
-  Since $H_1 \sqsubseteq H_2$ implies
-  $H_1 \cdot \varphi_1 \cdots \varphi_{j-1} \sqsubseteq
-  H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$,
-  persistence gives that $\varphi_j$ also excludes $o$ at
-  $H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$.
-  In particular, $o_1$ is \emph{not} excluded at any step (it survives
-  at $H_1$), so by persistence it is not excluded at $H_2$ either.
-  Since $(\Spec \mid D)(H_2)$ is a singleton and $o_1$ is not excluded,
-  $o_2 = o_1$.
+  Since $(\Spec \mid D)(H_1) = \{o_1\}$, for every $o \neq o_1$ we have
+  $o \notin \Spec(H_1 \cdot \varphi_1 \cdots \varphi_m)$.
+  Applying persistence inductively along the chain
+  ($H_1 \cdot \varphi_1 \cdots \varphi_j \sqsubseteq
+  H_2 \cdot \varphi_1 \cdots \varphi_j$ for each $j$),
+  we obtain $o \notin \Spec(H_2 \cdot \varphi_1 \cdots \varphi_m)$.
+  Hence $o_2 \neq o$ for every $o \neq o_1$, so $o_2 = o_1$.
 \end{proof}
 
 \begin{theorem}[Necessity: ambiguity blocks semiring provenance]

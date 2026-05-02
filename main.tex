@@ -365,7 +365,15 @@ We impose one restriction on bases throughout this paper:
 \noindent
 Persistence says that commitments are irrevocable: new information cannot undo
 a prior exclusion.
-This is the paper's main structural assumption.
+For example, a transaction abort is persistent: once $T_i$ is aborted, no
+future event can make $T_i$'s effects visible again.
+A \emph{non}-persistent predicate would be a speculative lock that can be
+revoked by a later event---e.g., a tentative reservation that is released
+upon timeout.
+Under such a predicate, an outcome excluded at $H_1$ could reappear at
+$H_2 \sqsupseteq H_1$, invalidating earlier provenance.
+
+Persistence is the paper's main structural assumption.
 It guarantees that determined specifications are history-monotone
 (Theorem~\ref{thm:resolution-implies-monotone}), which is what enables
 classical provenance at the foundation of the commitment tower---in contrast

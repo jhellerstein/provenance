@@ -231,22 +231,6 @@ meaning is determinate.
 
 \subsection{Histories}
 
-When semantics are ambiguous, it is no longer sufficient to model input as a
-single static instance.
-Instead, we require a representation of \emph{partial information}: what has
-been observed, and which semantic distinctions remain unresolved.
-
-We model such partial information using \emph{histories}.
-A history records a collection of semantic events together with any known
-precedence constraints among them.
-Histories generalize familiar notions of input:
-in logic programming, a history may consist of a set of ground facts;
-in transactional systems, it may record transaction invocations, reads, writes,
-and commits; in distributed settings, it may include message deliveries or
-observations.
-When no precedence constraints are present, histories collapse to unordered
-sets and coincide with classical database instances.
-
 \begin{definition}[History]
   A \emph{history} is a finite partially ordered set
   $
@@ -256,10 +240,14 @@ sets and coincide with classical database instances.
   (irreflexive and transitive) partial order representing known precedence constraints among events.
 \end{definition}
 
+\noindent
+Histories generalize familiar notions of input:
+in logic programming, a history may consist of a set of ground facts;
+in transactional systems, it may record reads, writes, and commits;
+in distributed settings, it may include message deliveries.
+When no precedence constraints are present, histories collapse to unordered
+sets and coincide with classical database instances.
 We write $\Hist$ for the class of histories under consideration.
-This choice is parametric: histories may represent
-database updates, transaction invocations, message deliveries, or any other
-events that constrain semantic determination.
 
 \begin{definition}[History Extension]
   For histories $H_1=(E_1,\rightarrow_1)$ and $H_2=(E_2,\rightarrow_2)$, we write

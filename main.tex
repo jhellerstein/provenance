@@ -241,11 +241,11 @@ meaning is determinate.
 \end{definition}
 
 \noindent
-Histories generalize familiar notions of input:
-in logic programming, a history may be a set of ground facts;
-in transactional systems, a sequence of reads, writes, and commits.
-When no precedence constraints are present, histories collapse to unordered
-sets and coincide with classical database instances.
+Histories generalize familiar notions of input.
+When the partial order is total, a history is a sequence---e.g., a
+transaction schedule of reads, writes, and commits.
+When no precedence constraints are present, a history collapses to an
+unordered set and coincides with a classical database instance.
 We write $\Hist$ for the class of histories under consideration.
 
 \begin{definition}[History Extension]

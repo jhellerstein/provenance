@@ -1163,6 +1163,99 @@ SI also admits a larger space of outcomes than serializability, which matters
 for the cross-specification preservation questions of
 Section~\ref{sec:robustness}.
 
+\subsection{Enriching the Basis: Scheduling as Commitment}
+\label{sec:scheduling-basis}
+
+The commit/abort basis treats operation interleaving as environment: the
+system observes which conflicting operations arrived in which order, and
+its only decisions are commit or abort.
+This models a system with no scheduler---a pure OCC architecture where
+transactions execute freely and conflicts are detected at commit time.
+
+In practice, many systems actively \emph{schedule} conflicting operations.
+A scheduler that routes conflicting transactions to a serializer, reorders
+pending operations, or batches transactions by access set is making
+irrevocable ordering decisions that narrow the admissible set.
+These decisions are commitments.
+
+\begin{definition}[Ordering commitment]
+  \label{def:ordering-commitment}
+  For conflicting transactions $T_i, T_j$, the \emph{ordering commitment}
+  $\varphi_{T_i \prec T_j}$ records that the system chose to execute
+  $T_i$'s conflicting operation before $T_j$'s.
+  This excludes all outcomes in which $T_j$ precedes $T_i$ on the
+  conflicting object.
+\end{definition}
+
+\noindent
+The enriched basis is
+$\Phi' = \Phi \cup \{\varphi_{T_i \prec T_j} \mid T_i, T_j \text{ conflict}\}$.
+Ordering commitments on distinct edges commute (each independently filters
+outcomes by a single edge orientation).
+
+\paragraph{Environment vs.\ commitment: a modeling choice.}
+The same physical event---``$T_i$'s write executed before $T_j$'s
+read''---is an environment event or a commitment depending on the system
+architecture:
+\begin{itemize}[nosep]
+  \item \emph{No scheduler} (pure OCC): interleaving is environment.
+        Only commit/abort are commitments.
+  \item \emph{Active scheduler} (e.g., deterministic database, batch
+        optimizer): interleaving is a commitment.
+        The scheduler chose this ordering.
+  \item \emph{Partial control}: some orderings are chosen (hot keys
+        routed to a serializer), others are environment (cold keys
+        interleaved freely).
+\end{itemize}
+Determination provenance records this boundary: it distinguishes outcomes
+that arose from scheduling \emph{decisions} from those that arose from
+scheduling \emph{luck} (environment interleaving that happened to avoid
+conflicts).
+
+\paragraph{Capturing batch-optimal scheduling.}
+Cheng et al.~\cite{cheng2024scheduling} show that for a known batch of
+transactions with known access sets, scheduling wins come primarily from
+hot keys: a greedy heuristic that separates conflicting transactions
+minimizes aborts and makespan.
+In our framework, their batch-optimal scheduler computes a single-layer
+determination consisting entirely of ordering commitments:
+\[
+  I_{\mathsf{sched}} = \{\varphi_{T_i \prec T_j} \mid
+  (T_i, T_j) \in \text{scheduler's chosen ordering}\}.
+\]
+These ordering commitments commute (they filter independent edges), so the
+determination has depth~$1$ regardless of conflict-graph complexity.
+The scheduler's computational cost (solving the optimization) is the cost
+of evaluating this single layer---an instance of the conservation law
+from~\cite{hellerstein2026complexity}: determination depth is traded for
+computational complexity within the layer.
+
+\paragraph{Generalizing beyond batch scheduling.}
+The batch setting assumes complete knowledge of the transaction set and
+access sets before any scheduling decision.
+The enriched basis extends naturally to settings that Cheng et al.\ do not
+address:
+\begin{itemize}[nosep]
+  \item \emph{Online arrival}: ordering decisions are made incrementally as
+        transactions arrive.
+        Later arrivals may conflict with earlier decisions, so ordering
+        commitments made at different times may not commute (an ordering
+        chosen for $T_i$ may constrain which orderings are valid for a
+        later-arriving $T_k$).
+        This can increase depth beyond~$1$.
+  \item \emph{Partial knowledge}: access sets are unknown until execution.
+        Some ordering predicates become available only after reads/writes
+        occur, interleaving environment events with scheduling commitments.
+  \item \emph{Mixed control}: some keys are scheduled (hot keys routed to a
+        deterministic serializer), others are uncontrolled (cold keys
+        interleaved by the environment).
+        The determination records which orderings were chosen and which were
+        observed.
+\end{itemize}
+In each case, determination provenance provides a richer explanation than
+the commit/abort basis alone: it attributes outcomes to specific scheduling
+decisions and distinguishes them from environmental happenstance.
+
 
 
 \begin{figure*}[t]

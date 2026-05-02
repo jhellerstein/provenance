@@ -290,7 +290,7 @@ The goal of determination is to narrow a relational specification to a
 functional one.
 
 \begin{definition}[Determined specification]
-  \label{def:resolved}
+  \label{def:determined}
   A specification is \emph{determined} if it is a function:
   $|\Spec(H)| = 1$ for every $H \in \Hist$.
 \end{definition}
@@ -446,7 +446,7 @@ We use $\seq$ to denote a sequence of such layers:
 
 \begin{definition}[Resolving determination]
   A determination $D$ \emph{resolves} $\Spec$ if $\Spec \mid D$ is determined
-  (Definition~\ref{def:resolved}): a function from histories to outcomes.
+  (Definition~\ref{def:determined}): a function from histories to outcomes.
 \end{definition}
 
 \subsection{Resolution Enables Provenance}
@@ -475,7 +475,7 @@ can operate without it.
   Assume prefix-closure (Assumption~\ref{ass:prefix-closed}).
   Let $\Phi$ be a persistent commitment basis and let $D$ be a determination
   over $\Phi$ that resolves $\Spec$.
-  Then $\widehat{\Spec}_I(H) \triangleq (\Spec \mid D)(H)$
+  Then $\widehat{\Spec}_D(H) \triangleq (\Spec \mid D)(H)$
   is history-monotone.
 \end{theorem}
 

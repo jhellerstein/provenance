@@ -324,15 +324,15 @@ We write \mbox{$(\Spec \mid \varphi)(H) \triangleq \Spec(H \cdot \varphi)$}:
 the admissible outcomes after appending $\varphi$ to $H$.
 
 \paragraph{Commitment bases.}
-A \emph{commitment basis} $\Phi$ is the vocabulary of commitments available
-for resolving a specification---the set of constraints from which
+A \emph{commitment basis} $\Phi$ is the vocabulary of predicates available
+for narrowing a specification---the set of selection conditions from which
 determinations are formed.
-The choice of basis is a design variable: it determines which semantic
-distinctions can be expressed and at what granularity.
-In Datalog with stratified negation, the natural basis consists of sealing predicates
-(committing that a stratum is complete); in transactional systems it consists
-of commit and abort decisions (Section~\ref{sec:transactions}), optionally
-enriched with scheduling predicates
+The choice of basis determines which distinctions can be expressed and at
+what granularity.
+In Datalog with stratified negation, the natural predicates are sealing
+conditions (asserting that a stratum is complete); in transactional systems
+they are commit and abort decisions (Section~\ref{sec:transactions}),
+optionally enriched with scheduling predicates
 (Section~\ref{sec:scheduling-basis}).
 Different bases for the same specification yield different determination
 structures, different depths, and different provenance.

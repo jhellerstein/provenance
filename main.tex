@@ -423,11 +423,9 @@ Because each $\varphi_i$ acts on $\Spec(H_{i-1})$---which depends on all
 preceding commitments---the order of application can matter.
 
 \paragraph{Layer-sequencing notation.}
-When reasoning about \emph{depth}, we often group commitments into
-\emph{layers} whose commitments commute (i.e., can be applied in any order without
-changing the result).
-To make this structure explicit, we use $\seq$ as syntactic sugar for a sequence
-of commuting batches.
+Commitments that commute (can be applied in any order without changing the
+result) may be grouped into \emph{layers}.
+We use $\seq$ to denote a sequence of such layers:
 
 \begin{definition}[Sequencing of layers (notation)]
   \label{def:layer-seq}
@@ -757,7 +755,7 @@ The commitment tower and the determination semiring are not independent
 structures: the tower induces a natural \emph{filtration} on the semiring
 that connects query-relative depth to algebraic structure.
 
-Two determinations $I, D' \in \mathcal{D}$ \emph{agree at level $k$} if
+Two determinations $D, D' \in \mathcal{D}$ \emph{agree at level $k$} if
 they apply the same commitments in layers $1, \ldots, k$.
 Agreement at level $k$ is an equivalence relation on $\mathcal{D}$;
 write $[D]_k$ for the equivalence class of $D$ at level $k$.

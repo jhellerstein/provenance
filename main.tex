@@ -299,7 +299,7 @@ functional one.
 \subsection{Semantic Refinement}
 
 Ambiguity is constrained by making additional semantic commitments.
-We model commitments as conjunctive predicates on the specification that
+We model commitments as constraints on the admissible set that
 take effect at specific points in the history.
 
 \begin{definition}[Commitment]
@@ -314,7 +314,7 @@ take effect at specific points in the history.
   (i.e., $e \to \varphi$ for every $e$ with no successor
   in~$H$), giving $H \sqsubseteq H \cdot \varphi$.
   The result may depend on the full set $\Spec(H)$, not only on
-  individual outcomes---this is what allows commitments to be
+  items in $\Spec(H)$ individually---as a result, commitments may be
   non-commutative.
   We require \emph{shrinkage}: $\Spec(H') \subseteq \Spec(H)$ for every
   $H' \sqsupseteq H \cdot \varphi$.
@@ -328,15 +328,15 @@ We write \mbox{$(\Spec \mid \varphi)(H) \triangleq \Spec(H \cdot \varphi)$}:
 the admissible outcomes after appending $\varphi$ to $H$.
 
 \paragraph{Commitment bases.}
-A \emph{commitment basis} $\Phi$ is the vocabulary of predicates available
-for narrowing a specification---the set of selection conditions from which
+A \emph{commitment basis} $\Phi$ is the vocabulary of constraints available
+for narrowing a specification---the set of conditions from which
 determinations are formed.
 The choice of basis determines which distinctions can be expressed and at
 what granularity.
-In Datalog with stratified negation, the natural predicates are sealing
+In Datalog with stratified negation, the natural constraints are sealing
 conditions (asserting that a stratum is complete); in transactional systems
 they are commit and abort decisions (Section~\ref{sec:transactions}),
-optionally enriched with scheduling predicates
+optionally enriched with scheduling constraints
 (Section~\ref{sec:scheduling-basis}).
 Different bases for the same specification yield different determination
 structures, different depths, and different provenance.

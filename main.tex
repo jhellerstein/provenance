@@ -80,10 +80,15 @@
   commutative semiring---recovering the semiring framework of Green et al.\
   at a new level.
   Classical provenance is the degenerate case where no commitments are needed.
-  We formalize \emph{layer certificates} for principled log parsimony, and
-  instantiate the framework in transactional systems (where depth depends on
-  conflict-graph topology) and Datalog with negation (a longstanding
-  gap in provenance past the monotone fragment).
+  We develop the framework in depth for transactional systems, where ambiguity
+  arises from concurrency and isolation choices: determination provenance
+  distinguishes outcomes that hold under every serializable execution from
+  those contingent on a particular scheduling or isolation decision, with
+  determination depth governed by conflict-graph topology.
+  We further instantiate the framework for Datalog with negation---a
+  longstanding gap in provenance past the monotone fragment---and for
+  distributed systems observability, demonstrating the generality of the
+  approach.
 \end{abstract}
 
 \maketitle
@@ -162,22 +167,21 @@ Certificates provide a principled basis for \emph{log parsimony}: retaining
 exactly the semantic commitments needed to justify intended diagnostic
 conclusions, rather than recording full execution histories.
 
-We instantiate the framework in two domains with fundamentally different
-sources of semantic ambiguity.
-Transactional systems provide the primary motivation: ambiguity arises from
-concurrency and isolation choices, and determination provenance distinguishes
-outcomes that hold under every serializable execution from those contingent on
-a particular scheduling or isolation decision.
-Datalog with negation addresses a longstanding gap in provenance theory:
-classical semiring provenance applies only to the monotone
-fragment~\cite{green2007provenance}, and negation introduces semantic
-ambiguity (multiple models for the same program and input).
-Determination provenance fills this gap, characterizing which derived tuples
-are robust across negation semantics and which depend on a particular choice.
-In the appendix we also examine distributed systems
-observability~\cite{sigelman2010dapper}, showing how determination provenance
-provides a semantic foundation for systems lineage.
-We begin with a transactional example to illustrate the ideas:
+  We instantiate the framework in depth for transactional systems, where
+  ambiguity arises from concurrency and isolation choices.
+  Determination provenance distinguishes
+  outcomes that hold under every serializable execution from those contingent on
+  a particular scheduling or isolation decision.
+  We further demonstrate the framework's generality through two additional
+  instantiations developed in the appendices:
+  Datalog with negation, which addresses a longstanding gap in provenance theory
+  (classical semiring provenance applies only to the monotone
+  fragment~\cite{green2007provenance}, and negation introduces semantic
+  ambiguity via multiple models for the same program and input);
+  and distributed systems
+  observability~\cite{sigelman2010dapper}, showing how determination provenance
+  provides a semantic foundation for systems lineage.
+  We begin with a transactional example to illustrate the ideas:
 
 \begin{example}[Provenance under transactional ambiguity]
   \label{ex:example}
@@ -213,19 +217,20 @@ We begin with a transactional example to illustrate the ideas:
 \paragraph{Contributions.}
 \begin{enumerate}[label=(\roman*),nosep,leftmargin=*]
   \item \emph{Conditioned provenance} and the \emph{commitment tower}:
-        the algebraic structure of semantic resolution within a single
-        determination (Section~\ref{sec:conditional-semiring}).
+        a structural decomposition of provenance under semantic ambiguity
+        into layers of commitment (commutative monoids) discharging
+        sequentially until a classical provenance semiring is exposed
+        (Section~\ref{sec:conditional-semiring}).
   \item \emph{Determination provenance} and the \emph{determination
         semiring}: the algebraic structure across determinations, recovering
         Green et al.'s semiring framework at a new level
         (Section~\ref{sec:det-semiring}).
-  \item \emph{Layer certificates} and a query monotonicity theorem providing
-        a principled basis for log parsimony
-        (Appendix~\ref{app:certificates}).
-  \item Instantiation in transactional systems (depth governed by
-        conflict-graph topology; Section~\ref{sec:transactions}) and Datalog
-        with negation (robustness across semantics, why-not provenance under
-        ambiguity; Section~\ref{sec:negation}).
+  \item Instantiation in transactional systems, with determination depth
+        governed by conflict-graph topology
+        (Section~\ref{sec:transactions}); and in Datalog
+        with negation, addressing robustness across semantics and why-not
+        provenance under ambiguity
+        (Appendix~\ref{sec:appendix-datalog}).
 \end{enumerate}
 
 
@@ -603,9 +608,13 @@ directly.
 
 Classical algebraic provenance lives in a commutative
 semiring~\cite{green2007provenance}.
-Determination provenance lives in a richer structure---a \emph{commitment
-tower}---that sits above the semiring and must be discharged before classical
-provenance applies.
+Determination provenance requires a richer structure---a \emph{commitment
+tower}---that decomposes provenance computation into phases: semantic
+commitments must be discharged before classical derivational provenance
+applies.
+The tower is a structural decomposition, not a new algebra; its role is to
+identify \emph{when} and \emph{why} classical provenance applies, by making
+explicit the semantic prerequisites that must be resolved first.
 
 Consider a determination with $k$ layers,
 $L_1 \seq L_2 \seq \cdots \seq L_k$.
@@ -648,9 +657,14 @@ multiplication.
 \paragraph{Summary.}
 A commitment tower is a sequence of commutative monoids
 $M_k, \ldots, M_1$ resting on a provenance semiring $K$.
+It is a structural decomposition: each monoid represents one layer of
+semantic commitment, and discharge proceeds sequentially until the semiring
+foundation is exposed.
 Classical provenance is the special case of height~$0$.
 Per-determination provenance $\Prov_{Q \mid I}(t)$ is the semiring element
 released by discharging the tower $I$.
+A fuller algebraic treatment---including potential universality properties
+and composition laws---is deferred to Appendix~\ref{app:algebra-future}.
 
 \subsection{The Determination Semiring}
 \label{sec:det-semiring}
@@ -798,50 +812,228 @@ Formal definitions and the query monotonicity theorem appear in
 Appendix~\ref{app:certificates}.
 
 % ================================================================
-\section{Transactions as Systems Ambiguity}
+\section{Transactions as Semantic Ambiguity}
 \label{sec:transactions}
 % ================================================================
 
 We now instantiate the framework in transactional systems, where ambiguity
 arises from concurrency: multiple consistent executions may be admissible for
-the same history.
-Our goal is not to propose new correctness criteria, but to expose how
-different resolution regimes induce different \emph{determination structures}.
+the same observed history.
+We formalize the commitment basis, characterize determination depth across
+isolation levels, and show how determination provenance distinguishes robust
+from contingent query results.
 
-\subsection{Serializability as Determination Shape}
+\subsection{Transactional Histories}
 
-We focus on the running example from the introduction (Example~\ref{ex:example}):
-the tuple $d$ inserted by $T_4$ and deleted by $T_5$, whose visibility to $T_Q$
-depends on how concurrency was resolved.
+\begin{definition}[Transactional history]
+  \label{def:txn-history}
+  A \emph{transactional history} is a history $H = (E, \rightarrow)$ whose
+  events include:
+  \begin{itemize}[nosep]
+    \item $\mathsf{begin}(T_i)$, $\mathsf{commit}(T_i)$, $\mathsf{abort}(T_i)$
+          --- lifecycle events for transaction $T_i$;
+    \item $\mathsf{r}(T_i, x, v)$, $\mathsf{w}(T_i, x, v)$ --- read and write
+          operations by $T_i$ on object $x$ with value $v$.
+  \end{itemize}
+  We assume transactions arrive asynchronously, commit requests are handled
+  individually and immediately (not batched), and read/write operations are
+  subject to non-deterministic interleaving across concurrent transactions.
+  Aborted transactions and their operations remain visible in the history;
+  they are not erased.
+\end{definition}
 
-Under conflict serializability, admissible outcomes are those whose
-conflict graph---the directed graph of time-ordered conflicting actions
-across transactions---is acyclic.
-Each acyclic conflict graph determines a unique outcome.
+\noindent
+The retention of aborted transactions in the history is essential: an abort is
+a commitment event that resolved a conflict, and determination provenance must
+record it.
 
-\paragraph{Enforcement and provenance.}
-At runtime, a system enforces serializability by
-(a)~\emph{scheduling} conflicting actions (orienting edges in the conflict
-graph) and
-(b)~\emph{aborting} transactions to break cycles.
-These decisions produce a particular acyclic conflict graph and hence a
-particular outcome.
-Post-hoc, determination provenance records these decisions as commitments
-that explain the observed outcome:
-ordering commitments $\varphi_{T_i \prec T_j}$ (recording edge orientations,
-which commute) and abort commitments $\varphi_{\mathrm{abort}(T_i)}$
-(recording cycle-breaking decisions, which may not commute when cycles
-overlap).
-When the conflict graph is already acyclic, only ordering commitments are
-needed.
-When cycles exist, abort decisions add depth depending on the overlap
-structure of cycles.
+\begin{definition}[Conflict]
+  \label{def:conflict}
+  Two operations from distinct transactions $T_i \neq T_j$ \emph{conflict} if
+  they access the same object $x$ and at least one is a write.
+  Following Adya~\cite{adya1999weak}, we distinguish three conflict types:
+  \emph{write-write} ($\mathsf{ww}$: both write $x$),
+  \emph{write-read} ($\mathsf{wr}$: $T_i$ writes $x$, $T_j$ reads $x$), and
+  \emph{read-write} ($\mathsf{rw}$: $T_i$ reads $x$, $T_j$ writes $x$;
+  also called an \emph{anti-dependency}).
+\end{definition}
 
-\paragraph{Running example.}
-In Example~\ref{ex:example}, the conflict structure is simple: $T_4$, $T_5$,
-and $T_Q$ all access tuple $(4,d)$, but no cycles arise.
-The system scheduled their conflicting actions in some order; provenance
-records that order.
+\begin{definition}[Conflict graph]
+  \label{def:conflict-graph}
+  The \emph{conflict graph} $G(H)$ of a transactional history $H$ is the
+  directed graph whose vertices are the committed transactions in $H$ and
+  whose edges are the conflicts: $T_i \to T_j$ if $T_i$ and $T_j$ conflict
+  and $T_i$'s conflicting operation precedes $T_j$'s in $H$.
+\end{definition}
+
+\subsection{Isolation Levels as Specifications}
+
+Following Adya~\cite{adya1999weak}, each isolation level is characterized by
+which cycles in the conflict graph are forbidden.
+The specification maps a history to the set of outcomes (committed database
+states) consistent with the isolation level's acyclicity constraint.
+
+\begin{definition}[Isolation-level specification]
+  \label{def:isolation-spec}
+  For an isolation level $L$, define
+  $\Spec_L(H) \triangleq \{\, \mathsf{state}(\sigma) \mid
+  \sigma \text{ is a commit order consistent with } H
+  \text{ and } G_L(\sigma) \text{ is acyclic}\,\}$,
+  where $G_L(\sigma)$ restricts the conflict graph to the edge types
+  relevant to level $L$.
+\end{definition}
+
+\noindent
+We consider three levels:
+\begin{itemize}[nosep]
+  \item \textbf{Read committed (RC):} forbids only $\mathsf{wr}$ cycles
+        involving uncommitted writes (dirty reads).
+        No constraint on committed conflict graphs.
+  \item \textbf{Serializability (SER):} forbids all cycles in the full
+        conflict graph ($\mathsf{ww} + \mathsf{wr} + \mathsf{rw}$).
+  \item \textbf{Snapshot isolation (SI):} multiversion; each transaction reads
+        from a snapshot.  Forbids $\mathsf{ww}$ conflicts between concurrent
+        transactions (first-committer-wins) and certain $\mathsf{rw}$
+        cycles~\cite{adya1999weak}.
+\end{itemize}
+
+\subsection{Commitment Basis}
+
+The commitment basis for transactional determination provenance consists of
+two kinds of commitments, whose availability depends on the isolation level.
+
+\begin{definition}[Ordering commitment]
+  \label{def:ordering-commitment}
+  For conflicting transactions $T_i, T_j$, the \emph{ordering commitment}
+  $\varphi_{T_i \prec T_j}$ records that $T_i$'s conflicting operation
+  preceded $T_j$'s---equivalently, that the edge $T_i \to T_j$ is present
+  in the conflict graph.
+  This excludes all outcomes in which $T_j$ precedes $T_i$ on the
+  conflicting object.
+\end{definition}
+
+\begin{definition}[Abort commitment]
+  \label{def:abort-commitment}
+  For a transaction $T_i$, the \emph{abort commitment}
+  $\varphi_{\mathsf{abort}(T_i)}$ records that $T_i$ was aborted.
+  This excludes all outcomes in which $T_i$ is committed.
+\end{definition}
+
+\begin{definition}[Snapshot commitment (SI only)]
+  \label{def:snapshot-commitment}
+  For a transaction $T_i$ and a set $U$ of transactions, the
+  \emph{snapshot commitment} $\varphi_{\snap(T_i) = U}$ records that $T_i$
+  read from a snapshot containing exactly the effects of the transactions
+  in $U$.
+\end{definition}
+
+\begin{proposition}[Commutativity of ordering commitments]
+  \label{prop:ordering-commute}
+  Ordering commitments on distinct conflict edges commute:
+  for edges $(T_i, T_j) \neq (T_k, T_l)$,
+  $\Spec(H \cdot \varphi_{T_i \prec T_j} \cdot \varphi_{T_k \prec T_l})
+    = \Spec(H \cdot \varphi_{T_k \prec T_l} \cdot \varphi_{T_i \prec T_j})$.
+\end{proposition}
+\begin{proof}
+  Each ordering commitment acts as a pointwise filter: it independently
+  excludes outcomes inconsistent with a single edge orientation.
+  Pointwise filters commute (Definition~\ref{def:commitment}).
+\end{proof}
+
+\begin{remark}[Non-commutativity of abort commitments]
+  \label{rem:abort-noncommute}
+  Abort commitments may not commute when cycles overlap.
+  Aborting $T_i$ removes $T_i$ and all its edges from the conflict graph,
+  potentially breaking multiple cycles.
+  Which cycles remain---and hence which further aborts are valid---depends
+  on which transaction was aborted first.
+  Example~\ref{ex:overlapping-cycles} below exhibits this non-commutativity.
+\end{remark}
+
+\subsection{Determination Depth by Isolation Level}
+
+\begin{proposition}[Read committed: depth 0]
+  \label{prop:rc-depth-zero}
+  Under read committed, $\Spec_{\mathit{RC}}$ is future-monotone:
+  extending a history with new committed transactions can only add
+  new visible values, never retract previously visible ones.
+  Hence no commitments are needed and determination depth is~$0$.
+\end{proposition}
+\begin{proof}
+  Under RC, a transaction $T_Q$ may read any value written by a
+  committed transaction.
+  Extending the history with a new committed transaction $T_k$ can only
+  add $T_k$'s writes to the set of values visible to future readers.
+  No previously visible value becomes invisible: committed writes persist.
+  Hence for every $o \in \Obs(H)$ and every extension $H' \sqsupseteq H$,
+  there exists $o' \in \Obs(H')$ with $o \Ord o'$ (where $\Ord$ is set
+  inclusion on visible values).
+  The specification is future-monotone.
+\end{proof}
+
+\begin{proposition}[Serializability: depth from conflict structure]
+  \label{prop:ser-depth}
+  Under serializability with the ordering and abort commitment basis:
+  \begin{enumerate}[nosep,label=(\alph*)]
+    \item When the conflict graph is acyclic, the determination consists
+          entirely of ordering commitments (which commute), giving depth~$1$.
+    \item When cycles exist and are pairwise disjoint (share no transactions),
+          each cycle can be broken independently by a single abort, giving
+          depth~$1$.
+    \item When cycles overlap (share transactions), abort decisions may not
+          commute, and depth is at least~$2$.
+  \end{enumerate}
+\end{proposition}
+\begin{proof}[Proof sketch]
+  (a)~With no cycles, every acyclic orientation of the conflict graph is a
+  valid serialization order.
+  Ordering commitments select one such orientation; by
+  Proposition~\ref{prop:ordering-commute} they commute, so a single layer
+  suffices.
+  (b)~Disjoint cycles share no transactions, so aborting one transaction per
+  cycle breaks all cycles independently.
+  The abort decisions act on disjoint subsets of the outcome space and
+  therefore commute.
+  (c)~See Example~\ref{ex:overlapping-cycles}: aborting $T_1$ leaves Cycle~2
+  intact, requiring a second abort whose validity depends on the first
+  decision.
+  The two abort commitments do not commute (aborting $T_3$ first would have
+  broken both cycles), so they cannot share a layer.
+\end{proof}
+
+\begin{example}[Overlapping cycles and depth]
+  \label{ex:overlapping-cycles}
+  Consider five transactions with two conflict cycles sharing $T_3$:
+  $T_1 \to T_2 \to T_3 \to T_1$ (Cycle~1) and
+  $T_3 \to T_4 \to T_5 \to T_3$ (Cycle~2).
+  If the system broke Cycle~1 by aborting $T_1$,
+  $T_3$ survived and Cycle~2 remained---requiring a second abort.
+  The second abort depended on which transactions survived the first:
+  the two decisions could not be made simultaneously.
+  Hence the determination has depth~$\ge 2$.
+  Had the system instead aborted $T_3$, both cycles would have broken in a
+  single decision (depth~$1$).
+  The determination records which resolution occurred.
+\end{example}
+
+\begin{proposition}[Snapshot isolation: depth from snapshot dependencies]
+  \label{prop:si-depth}
+  Under snapshot isolation, the commitment basis includes snapshot
+  commitments $\varphi_{\snap(T_i) = U}$ in addition to ordering and abort
+  commitments.
+  Snapshot commitments do not commute in general: the first-committer-wins
+  (FCW) rule can render a snapshot choice for $T_j$ infeasible once a
+  conflicting assignment for $T_i$ is fixed.
+  Worst-case determination depth under SI is $O(n)$ where $n$ is the number
+  of transactions, arising from chains of FCW dependencies.
+\end{proposition}
+
+\subsection{Running Example: Provenance Under Serializability}
+
+We return to Example~\ref{ex:example}.
+The conflict structure is simple: $T_4$, $T_5$, and $T_Q$ all access
+tuple $(4,d)$, but no cycles arise.
+The determination consists entirely of ordering commitments (depth~$1$).
 
 If we observe $d$ in the query result, the determination is
 $I_{\mathsf{in}} \triangleq
@@ -859,9 +1051,6 @@ question for $d$---in one case the question is \emph{why}, in the other
 \emph{why-not}.
 Determination provenance makes this dependence explicit.
 
-Figure~\ref{fig:det-tables}(\textbf{B}, SER) summarizes representative
-determinations.
-
 \paragraph{Same observation, different derivational provenance.}
 Even when multiple determinations yield the same observable outcome, they
 need not agree on derivational provenance.
@@ -872,46 +1061,33 @@ $x_1+x_2$, depending on whether $T_{-2}$ preceded $T_Q$.
 Determination provenance distinguishes these explanations even when the
 query result is identical.
 
-\paragraph{Deeper conflict structures.}
-The running example has no cycles, so no aborts were needed.
-When cycles exist, overlapping cycles can force sequential abort decisions:
+\subsection{Robustness Under Serializability}
 
-\begin{example}[Overlapping cycles and depth]
-  \label{ex:overlapping-cycles}
-  Consider five transactions with two conflict cycles sharing $T_3$:
-  $T_1 \to T_2 \to T_3 \to T_1$ (Cycle~1) and
-  $T_3 \to T_4 \to T_5 \to T_3$ (Cycle~2).
-  If the system broke Cycle~1 by aborting $T_1$,
-  $T_3$ survived and Cycle~2 remained---requiring a second abort.
-  The second abort depended on which transactions survived the first:
-  the two decisions could not be made simultaneously.
-  Hence the determination has depth~$\ge 2$.
-  Had the system instead aborted $T_3$, both cycles would have broken in a
-  single decision (depth~$1$).
-  The determination records which resolution occurred.
-\end{example}
+Values $b$ and $c$ in Example~\ref{ex:example} have full support:
+$\mathrm{supp}(\Prov_Q(b)) = \mathrm{supp}(\Prov_Q(c)) = \mathcal{I}$.
+They appear under every serializable execution and are therefore
+\emph{robust} (Section~\ref{sec:robustness}).
+Value $d$ is \emph{contingent}: its support is a proper subset of
+$\mathcal{I}$, depending on the ordering of $T_4$, $T_5$, and $T_Q$.
 
-\subsection{Snapshot Isolation as Determination Shape}
+\subsection{Snapshot Isolation: A Different Determination Shape}
 
 As Adya and Liskov observe~\cite{adya1999weak}, all operationalized isolation
 levels correspond to acyclicity checks in a conflict graph---they differ only
-in which edge types (read-write, write-write, anti-dependency) are included.
-The enforcement and provenance structure described above (orient edges, abort
-to break cycles) applies uniformly.
+in which edge types are included.
 However, the \emph{commitment bases} for different isolation levels differ in
 more than just which cycles are forbidden.
 
-Snapshot isolation (SI) is multiversion: each transaction reads from a
+Snapshot isolation is multiversion: each transaction reads from a
 \emph{snapshot}---a specific committed state---rather than from a single
 global state.
 The determination must therefore record not only conflict-graph orientations
 and aborts, but also \emph{which snapshot each transaction observed}.
 
-\paragraph{Commitments.}
 An SI determination adds snapshot-choice commitments to the basis:
 $\varphi_{\snap(T_i) = U}$ records that $T_i$ read from the effects of
 exactly the transactions in $U$.
-A global first-committer-wins (FCW) predicate constrains which snapshot
+The FCW predicate constrains which snapshot
 assignments are jointly admissible.
 
 These snapshot commitments do not commute in general: the FCW rule can render
@@ -920,10 +1096,6 @@ $T_i$ is fixed.
 This introduces non-commutativity beyond what serializability requires,
 potentially deepening the tower even for conflict graphs that are already
 acyclic.
-
-Figure~\ref{fig:det-tables}(\textbf{B}, SI) records one such resolving
-determination.
-Once fixed, provenance reduces to ordinary depth--0 derivational provenance.
 
 \paragraph{Takeaway.}
 Serializability and snapshot isolation share the same basic enforcement
@@ -970,9 +1142,6 @@ Section~\ref{sec:robustness}.
 
   \vspace{1em}
 
-  % TODO: Redesign panel (B) to use the overlapping-cycles example
-  % (abort decisions, depth structure) rather than the running example
-  % with the old ordering-predicate notation.
   \begin{tabular}{@{}p{0.23\linewidth} p{0.54\linewidth} p{0.12\linewidth}@{}}
     \toprule
     \multicolumn{3}{c}{\textbf{(B) Transactions: serializability and snapshot isolation}} \\
@@ -1008,254 +1177,16 @@ Section~\ref{sec:robustness}.
     Determination summaries for examples.
     Depth counts non-commuting stages; branching among incompatible
     determinations does not increase depth.
-    Panel~(\textbf{A}): Section~\ref{sec:negation};
+    Panel~(\textbf{A}): Appendix~\ref{sec:appendix-datalog};
     Panel~(\textbf{B}): Section~\ref{sec:transactions}.
   }
   \label{fig:det-tables}
 \end{figure*}
 
 % ================================================================
-\section{Datalog with Negation as Semantic Ambiguity}
-\label{sec:negation}
+% Datalog with negation: moved to Appendix~\ref{sec:appendix-datalog}
+% as a second instantiation demonstrating generality.
 % ================================================================
-
-We use Datalog with negation as a controlled setting in which to study
-\emph{semantic ambiguity} within a fixed specification.
-Our goal is not to propose new semantics, but to expose how classical negation
-semantics differ in the \emph{structure} of the semantic commitments they require,
-and how those commitments are reflected in determination provenance.
-
-Even for a fixed program and extensional input, negation can delay semantic
-commitment.
-Whether an atom holds may depend on the absence of other atoms whose status is
-itself unresolved.
-Determination provenance makes this explicit by separating ordinary derivational
-consequences—true in all admissible outcomes—from \emph{commitments}
-that rule out some outcomes and thereby resolve ambiguity.
-
-\begin{example}[Datalog with negation]
-  \label{ex:datalog-negation}
-  Consider the following program $P$ over EDB facts in a history $H$.
-  For notational economy we use a fixed constant $c$ and take all predicates unary, so the EDB fact is $a(c)$ and the derived atoms are $p(c),q(c),r(c),s(c)$.
-  \begin{align*}
-    p(c) & \leftarrow a(c).      & r(c) & \leftarrow \neg s(c). \\[1mm]
-    q(c) & \leftarrow \neg p(c). & s(c) & \leftarrow \neg r(c).
-  \end{align*}
-  Assume $H$ contains the single extensional fact $a(c)$.
-  The pair $(P,H)$ contains both a stratified fragment
-  ($q(c)$ depends negatively on $p(c)$, and $p(c)$ depends positively on $a(c)$)
-  and a cycle through negation ($r \leftrightarrow \neg s$).
-  We use this single instance to exhibit, side-by-side, three distinct structures
-  of determination provenance.
-\end{example}
-
-We examine three standard semantics for negation—stratified, well-founded, and
-stable—and record the corresponding resolving determinations.
-Figure~\ref{fig:det-tables}(\textbf{A}) summarizes these determinations and
-their \emph{determination depth}, defined as the length of a non-commuting chain
-of semantic commitments.
-When a semantics admits multiple incompatible resolutions, we list them;
-when it admits a unique resolution, we record that determination alone.
-Here $S_i$ denotes the set of atoms whose truth is sealed at stratum~$i$, and
-$U_i$ denotes the unfounded set eliminated at alternation~$i$ in the
-well-founded construction.
-Full derivations and conditioned provenance appear in
-Appendix~\ref{sec:appendix-datalog}.
-
-\subsection{Negation Semantics as Determination Shapes}
-
-We illustrate these determination structures using the single running program of
-Example~\ref{ex:datalog-negation}, which contains both a stratified fragment
-($p,q$) and a cycle through negation ($r \leftrightarrow \neg s$).
-Depth counts only non-commuting stages of semantic commitment; branching among
-incompatible determinations does not increase depth.
-
-\paragraph{Stratified semantics.}
-In stratified programs, negation flows strictly from higher to lower strata.
-Resolving ambiguity therefore requires committing that each stratum has
-\emph{stabilized}: no additional facts for predicates in that stratum will appear.
-In the example, the lower stratum defining $p(c)$ must be sealed before $q(c)$ can
-be interpreted negatively.
-
-These sealing predicates do not commute: stabilization of stratum~$i$ is a
-prerequisite for applying negation commitments in stratum~$i{+}1$.
-Accordingly, a program with $k$ strata has determination depth exactly~$k$,
-corresponding to the layered determination
-\[
-  \varphi_{\seal}(S_1) \seq \varphi_{\seal}(S_2) \seq \cdots \seq \varphi_{\seal}(S_k)
-\]
-% [added \seq]
-Figure~\ref{fig:det-tables}(\textbf{A}, Stratified) schematically represents
-this chain; the explicit predicates appear in
-Appendix~\ref{sec:appendix-datalog}.
-
-\begin{proposition}[Stratified determination depth]
-  \label{prop:stratified-depth}
-  A stratified Datalog program with $k$ strata has determination depth
-  exactly~$k$ under the sealing commitment basis.
-\end{proposition}
-\begin{proof}[Proof sketch]
-  Each stratum $S_i$ requires a sealing commitment $\varphi_{\seal}(S_i)$ that
-  commits to the completeness of atoms in $S_i$.
-  Sealing $S_i$ is a prerequisite for evaluating negation in $S_{i+1}$, so
-  $\varphi_{\seal}(S_i)$ and $\varphi_{\seal}(S_{i+1})$ do not commute.
-  Hence $k$ layers are necessary.
-  Within each stratum, all sealing commitments commute (they act on disjoint
-  predicate sets), so $k$ layers are also sufficient.
-\end{proof}
-
-\paragraph{Well-founded semantics.}
-Well-founded semantics applies to programs with negation cycles, such as the
-$r/s$ fragment of the example.
-Rather than choosing among total models, it alternates between positive
-derivation and elimination of unfounded sets, producing a three-valued outcome
-in which atoms may be true, false, or undefined.
-
-In determination terms, this corresponds to an \emph{alternating sequence} of non-commuting
-sealing commitments layered after the stratified prefix:
-\[
-  \varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k)
-  \seq \varphi_{\seal}(U_1) \seq \varphi_{\seal}(U_2) \seq \cdots
-\]
-% [added \seq]
-The number of alternations is not bounded in general, so well-founded semantics
-does not admit a fixed finite determination depth.
-Figure~\ref{fig:det-tables}(\textbf{A}, WFS) records the limit determination
-for the example instance.
-
-\paragraph{Stable model semantics.}
-Stable semantics insists on total two-valued models.
-Stable-model truth assignments rely on stratification to give negation a
-closed-world meaning and therefore do not commute with stratification
-commitments.
-After sealing the stratified prefix of the program, a global hypothesis can be
-made about the truth of atoms in the negation cycle (e.g., $r$ or $s$ in the
-example) and checked for self-consistency.
-
-Each stable model corresponds to a distinct resolving determination, and these
-determinations are mutually incompatible.
-Within any one stable determination, however, the commitments are logically
-simultaneous and commute.
-Thus stable semantics has determination depth~$k{+}1$, corresponding to
-\[
-  \bigl(\varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k)\bigr)
-  \seq I^{(r)}
-  \quad\text{or}\quad
-  \bigl(\varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k)\bigr)
-  \seq I^{(s)}
-\]
-% [added \seq]
-despite potentially exponential branching across alternatives
-(Figure~\ref{fig:det-tables}(\textbf{A}, Stable)).
-
-\paragraph{Takeaway.}
-The three semantics differ not only in which outcomes they admit, but in the
-\emph{structure} of semantic resolution.
-Stratified semantics requires a linear chain of stabilization commitments;
-well-founded semantics requires an alternating, potentially unbounded sequence;
-stable semantics branches among shallow but incompatible determinations after
-stratification.
-When negation is acyclic, all three semantics coincide extensionally, but
-determination provenance still records the sealing commitments required to
-justify negation.
-Full derivations appear in
-Appendix~\ref{sec:appendix-datalog}.
-
-\subsection{Robustness Across Negation Semantics}
-\label{sec:negation-robustness}
-
-Determination provenance enables a question that is natural but has no clean
-formulation in classical provenance: \emph{does a derived tuple depend on the
-choice of negation semantics, or does it hold under every standard semantics?}
-
-For the running example (Example~\ref{ex:datalog-negation}), the atom $p(c)$
-is derived by the rule $p(c) \leftarrow a(c)$, which involves no negation.
-It appears in the resolved outcome under stratified, well-founded, and stable
-semantics alike.
-Determination provenance certifies this: the derivational provenance
-$\Prov(a(c))$ is identical across all three resolving determinations, and the
-sealing commitments that differ across semantics do not affect $p(c)$.
-In the terminology of Section~\ref{sec:robustness}, $p(c)$ is \emph{robust}
-across the class of all resolving determinations induced by the three
-semantics.
-
-The atom $q(c)$, derived via $q(c) \leftarrow \neg p(c)$, is also robust:
-$p(c)$ holds under every semantics, so $q(c)$ is false under every semantics.
-No determination can make $q(c)$ true.
-
-The atoms $r(c)$ and $s(c)$ are not robust.
-Under well-founded semantics, both are undefined; under stable semantics,
-exactly one is true (depending on which stable model is chosen).
-Determination provenance makes this dependence explicit: the provenance of
-$r(c)$ under stable determination $I^{(r)}$ is $(I^{(r)}, 1)$, recording
-that $r(c)$ holds only under the specific commitment to the $r$-model.
-Under well-founded semantics, $r(c)$ has no determinate provenance at all---it
-is assigned the value $\mathbf{u}$ (undefined), reflecting the fact that the
-well-founded determination does not resolve the $r/s$ cycle.
-
-More broadly, determination provenance supports a spectrum of cross-semantics
-questions.
-Given a program $P$ and history $H$:
-\begin{itemize}[nosep,leftmargin=*]
-  \item Which atoms hold under \emph{every} standard semantics?
-        These are the semantics-robust atoms---derivable without any
-        commitment that varies across semantics.
-  \item Which atoms hold under \emph{some} semantics but not others?
-        These are semantics-contingent, and their provenance must record
-        which semantic commitments are required.
-  \item Which atoms are \emph{preserved} when the semantics changes---e.g.,
-        from well-founded to stable?
-        This is an inter-specification preservation question
-        (Section~\ref{sec:robustness}), answered by comparing the
-        determinations induced by each semantics.
-\end{itemize}
-These questions are instances of the robustness and preservation framework
-developed in Section~\ref{sec:robustness}, instantiated here for the
-negation-semantics setting.
-Classical provenance, which operates under a single fixed semantics, cannot
-pose them.
-
-\paragraph{Why-not provenance under negation.}
-Determination provenance also provides the first clean account of
-\emph{why-not} provenance for queries with negation.
-Classical why-not provenance explains a derivational failure under a fixed
-semantics~\cite{buneman2001why}; under semantic ambiguity, absence itself
-becomes determination-dependent.
-In the running example, $s(c)$ is absent under stable determination $I^{(r)}$
-because $r(c)$ is true---but $r(c)$ is true only because of the commitment to
-the $r$-model.
-Under $I^{(s)}$, the situation reverses: $s(c)$ is true and $r(c)$ is absent.
-The why-not explanation for $s(c)$ under $I^{(r)}$ is not a derivational
-fact but a semantic commitment---exactly the kind of explanation that
-determination provenance records.
-Under well-founded semantics, neither $r(c)$ nor $s(c)$ is absent in the
-classical sense; both are \emph{undefined}, reflecting the fact that the
-well-founded determination does not resolve the cycle.
-Classical why-not provenance has no clean answer here; determination
-provenance does, by recording that the commitment tower is incomplete.
-Meanwhile, $q(c)$ is \emph{robustly absent}: it fails under every semantics,
-because $p(c)$ holds under every determination.
-No semantic commitment can make $q(c)$ true.
-These three cases---contingent absence, undefinedness, and robust
-absence---parallel the taxonomy of absence under transactional ambiguity
-developed in Appendix~\ref{app:whynot}, which works through both settings
-in detail.
-
-\paragraph{Two layers of counterfactual.}
-Classical why-not provenance involves \emph{derivational counterfactuals}
-within a fixed semantics: which potential derivation paths were attempted,
-and where did each one fail~\cite{buneman2001why}?
-Determination provenance adds a second, outer layer of \emph{semantic
-counterfactuals}: what if a different determination had been chosen?
-The commitment tower separates these two layers cleanly.
-Semantic counterfactuals are discharged through the tower (each layer
-resolves a what-if about the specification); derivational counterfactuals
-are resolved at the semiring foundation (each traces a what-if about a
-potential derivation within the resolved instance).
-A full why-not explanation under semantic ambiguity composes both: the
-determination records which semantic what-ifs were resolved and how, and
-the derivational why-not explains which proof attempts fail within that
-resolution.
 
 
 % ================================================================
@@ -1380,7 +1311,7 @@ Classical semantics for Datalog with negation provide well-understood mechanisms
 for resolving semantic ambiguity, with established relationships under syntactic
 restrictions.
 We do not propose new semantics.
-Instead, Section~\ref{sec:negation} uses Datalog with negation as a controlled
+Instead, Appendix~\ref{sec:appendix-datalog} uses Datalog with negation as a controlled
 setting in which resolution strategies are explicit and formal, making it
 possible to study how different semantic commitments induce distinct
 determination structures and provenance behavior.
@@ -1487,9 +1418,9 @@ resolution, provenance must explain the assumptions that made meaning possible.
 \label{app:algebra}
 % ================================================================
 
-This appendix gives precise algebraic content to the commitment tower
+This appendix gives precise structural content to the commitment tower
 introduced in Section~\ref{sec:algebra}.
-The goal is not to develop a new provenance algebra, but to situate
+The goal is to situate
 determination provenance precisely relative to existing algebraic frameworks
 and to justify the claim that classical semiring provenance applies once the
 tower has been fully discharged.
@@ -1593,6 +1524,44 @@ provenance: it explains \emph{when} and \emph{why} classical provenance
 applies, rather than assuming a fixed monotone semantics from the outset.
 
 % ================================================================
+\section{Toward an Algebraic Theory of Commitment Towers}
+\label{app:algebra-future}
+% ================================================================
+
+The commitment tower as presented in this paper is a structural decomposition:
+it identifies the phases of provenance computation (commitment discharge
+followed by derivational evaluation) without claiming a new algebraic object
+with universal properties.
+Several directions for algebraic development remain open.
+
+\paragraph{Collapse at depth 1.}
+When all commitments commute (determination depth~$1$), the tower reduces to a
+single commutative monoid tensored with the provenance semiring.
+In this case, the determination semiring coincides with
+$\mathrm{PosBool}(B)$~\cite{green2007provenance}, where $B$ is the set of
+commitment variables.
+A formal proof of this collapse and characterization of the resulting structure
+is straightforward but deferred.
+
+\paragraph{Universality.}
+Green et al.\ showed that $\mathbb{N}[X]$ is the most general provenance
+semiring for positive relational algebra: every other semiring annotation is a
+homomorphic image.
+An analogous question for the commitment tower would ask: is there a ``most
+general'' tower from which all others are homomorphic images?
+The conditioning between layers (each monoid depends on the discharge of the
+previous) makes this question non-trivial, as the tower is not a fixed algebraic
+structure but a \emph{dependent} one.
+
+\paragraph{Composition laws.}
+When two determinations share a common prefix, their towers share initial layers.
+A formal treatment of tower morphisms---how towers relate under prefix extension,
+restriction, and substitution of commitment layers---would enable compositional
+reasoning about determination provenance across sub-specifications.
+
+These directions are left for future work.
+
+% ================================================================
 \section{Layer Certificates}
 \label{app:certificates}
 % ================================================================
@@ -1645,12 +1614,28 @@ where $A$ is an answer domain (e.g., Boolean, explanations, dependency sets).
 \label{sec:appendix-datalog}
 
 This appendix instantiates determination provenance for the Datalog-with-negation
-sandbox used throughout Section~\ref{sec:negation}.
-We work through the same running example under stratified, well-founded, and stable
+sandbox.
+We work through the running example below under stratified, well-founded, and stable
 semantics, making explicit the commitments, their dependency structure,
 and the resulting provenance annotations.
 The purpose is to justify the determination shapes and depths summarized in
 Figure~\ref{fig:det-tables}(\textbf{A}).
+
+\begin{example}[Datalog with negation]
+  \label{ex:datalog-negation}
+  Consider the following program $P$ over EDB facts in a history $H$.
+  For notational economy we use a fixed constant $c$ and take all predicates unary, so the EDB fact is $a(c)$ and the derived atoms are $p(c),q(c),r(c),s(c)$.
+  \begin{align*}
+    p(c) & \leftarrow a(c).      & r(c) & \leftarrow \neg s(c). \\[1mm]
+    q(c) & \leftarrow \neg p(c). & s(c) & \leftarrow \neg r(c).
+  \end{align*}
+  Assume $H$ contains the single extensional fact $a(c)$.
+  The pair $(P,H)$ contains both a stratified fragment
+  ($q(c)$ depends negatively on $p(c)$, and $p(c)$ depends positively on $a(c)$)
+  and a cycle through negation ($r \leftrightarrow \neg s$).
+  We use this single instance to exhibit, side-by-side, three distinct structures
+  of determination provenance.
+\end{example}
 
 Throughout, we use \emph{sealing predicates}
 $\varphi_{\seal}(X)$, which commit that the set of atoms $X$ is complete:

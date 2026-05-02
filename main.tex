@@ -265,9 +265,9 @@ the instance.
 Intuitively, $\sqsubseteq$ represents information growth: an extension may
 add new events (and precedence edges involving them) but may not insert new
 predecessors of existing events.
-For an EDB viewed as a history, this means facts can be added but not
-retracted; for a transaction schedule, new operations cannot be placed
-before existing ones in the order.
+For a transaction schedule, new operations cannot be placed before existing
+ones; for an unordered history of tuple insertions, new insertions (or
+deletions) may be added but cannot be placed before existing ones.
 
 \subsection{Outcomes and Specifications}
 An \emph{outcome} is an element of a set $O$ of externally

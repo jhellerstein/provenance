@@ -1171,38 +1171,17 @@ Section~\ref{sec:robustness}.
   \setlength{\tabcolsep}{6pt}
   \renewcommand{\arraystretch}{1.15}
 
-  \begin{tabular}{@{}p{0.12\linewidth} p{0.65\linewidth} p{0.12\linewidth}@{}}
+  \begin{tabular}{@{}p{0.18\linewidth} p{0.60\linewidth} p{0.12\linewidth}@{}}
     \toprule
-    \multicolumn{3}{c}{\textbf{(A) Datalog negation semantics}}           \\
+    \multicolumn{3}{c}{\textbf{Determination structure by isolation level}} \\
     \midrule
-    \textbf{Case} & \textbf{Resolving determination(s)} & \textbf{Depth} \\
+    \textbf{Isolation level}     & \textbf{Resolving determination (Example~\ref{ex:example})} & \textbf{Depth} \\
     \midrule
-    Stratified    &
-    $\varphi_{\seal}(S_1) \seq \varphi_{\seal}(S_2) \seq \cdots \seq \varphi_{\seal}(S_k)$
-                  & $k$                                                   \\
-
-    Well-founded  &
-    $\varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k)
-      \seq \varphi_{\seal}(U_1) \seq \varphi_{\seal}(U_2) \seq \cdots$
-                  & unbounded                                             \\
-
-    Stable        &
-    $(\varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k) \seq I^{(r)})
-      \;\text{or}\;
-      (\varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k) \seq I^{(s)})$
-                  & $k{+}1$                                               \\
-    \bottomrule
-  \end{tabular}
-
-  \vspace{1em}
-
-  \begin{tabular}{@{}p{0.23\linewidth} p{0.54\linewidth} p{0.12\linewidth}@{}}
-    \toprule
-    \multicolumn{3}{c}{\textbf{(B) Transactions: serializability and snapshot isolation}} \\
-    \midrule
-    \textbf{Case}                & \textbf{One resolving determination} & \textbf{Depth} \\
-    \midrule
-    SER robust $b$               &
+    Read committed               &
+    (none needed---specification is future-monotone)
+                                 & $0$                                                    \\
+    %
+    SER (no cycles, all commit)  &
     $\{\varphi_{\mathsf{commit}(T_1)},\varphi_{\mathsf{commit}(T_2)},
       \varphi_{\mathsf{commit}(T_3)},
       \varphi_{\mathsf{commit}(T_4)},\varphi_{\mathsf{commit}(T_5)},
@@ -1221,22 +1200,30 @@ Section~\ref{sec:robustness}.
       \varphi_{\mathsf{commit}(T_Q)}$
                                  & $1$                                                    \\
     %
-    SI (write-skew $e/f$)        &
+    SER (overlapping cycles)     &
+    $\varphi_{\mathsf{abort}(T_1)} \seq \varphi_{\mathsf{abort}(T_4)}$
+    \quad (Example~\ref{ex:overlapping-cycles})
+                                 & $\ge 2$                                               \\
+    %
+    SI (write-skew)              &
     $\varphi_{\snap(T_6)=\emptyset}
       \seq \varphi_{\snap(T_7)=\emptyset}
       \seq \varphi_{\mathsf{commit}(T_6)}
       \seq \varphi_{\mathsf{commit}(T_7)}
       \seq \varphi_{\snap(T_Q)=\{T_1,\dots,T_7\}}$
-                                 & $O(|H|)$                                               \\
+                                 & $O(n)$                                                \\
     \bottomrule
   \end{tabular}
 
   \caption{
-    Determination summaries for examples.
-    Depth counts non-commuting stages; branching among incompatible
-    determinations does not increase depth.
-    Panel~(\textbf{A}): Appendix~\ref{sec:appendix-datalog};
-    Panel~(\textbf{B}): Section~\ref{sec:transactions}.
+    Determination structure across isolation levels.
+    Depth counts non-commuting stages of commitment.
+    Read committed requires no commitments (depth~$0$).
+    Serializability has depth~$1$ when the conflict graph is acyclic,
+    but depth~$\ge 2$ when overlapping cycles force sequential abort decisions.
+    Snapshot isolation introduces additional depth from snapshot-choice
+    dependencies.
+    See also Appendix~\ref{sec:appendix-datalog} for Datalog negation semantics.
   }
   \label{fig:det-tables}
 \end{figure*}
@@ -1676,8 +1663,8 @@ sandbox.
 We work through the running example below under stratified, well-founded, and stable
 semantics, making explicit the commitments, their dependency structure,
 and the resulting provenance annotations.
-The purpose is to justify the determination shapes and depths summarized in
-Figure~\ref{fig:det-tables}(\textbf{A}).
+The purpose is to justify the determination shapes and depths for Datalog
+negation (see also Figure~\ref{fig:det-tables} for the transactional cases).
 
 \begin{example}[Datalog with negation]
   \label{ex:datalog-negation}
@@ -1729,7 +1716,7 @@ where each $S_i$ is the set of atoms whose truth is fixed at stratum~$i$.
 These sealing predicates do \emph{not} commute: sealing $S_i$ is a prerequisite
 for applying negation commitments in $S_{i+1}$.
 Accordingly, the determination depth is exactly $k$, as recorded in
-Figure~\ref{fig:det-tables}(\textbf{A}, Stratified).
+the stratified case.
 
 \paragraph{Provenance.}
 Once $I_{\mathrm{strat}}$ is fixed, the specification is fully resolved.
@@ -1773,7 +1760,7 @@ where each $U_i$ is an unfounded set eliminated at alternation~$i$.
 These commitments are non-commuting and may require an unbounded number of
 alternations.
 Hence WFS has no fixed finite determination depth in general, as indicated in
-Figure~\ref{fig:det-tables}(\textbf{A}, Well-founded).
+the well-founded case.
 
 For the running example, the limit of this process yields the unique partial
 outcome
@@ -1836,7 +1823,7 @@ Within either determination, the remaining commitments are logically simultaneou
 and commute.
 Thus the determination depth is $k{+}1$: the $k$ stratification stages plus one
 additional, non-commuting branching stage.
-This is reflected in Figure~\ref{fig:det-tables}(\textbf{A}, Stable).
+This is reflected in the stable case.
 
 \paragraph{Provenance.}
 Determination provenance must record which stable determination is assumed:
@@ -1919,7 +1906,7 @@ used in Section~\ref{sec:transactions}.
 As in the Datalog appendix, we make explicit the commitments,
 their dependency structure, and the resulting provenance annotations.
 The goal is to justify the determination shapes and depths summarized in
-Figure~\ref{fig:det-tables}(\textbf{B}).
+Figure~\ref{fig:det-tables}.
 
 Throughout, commitments rule out admissible executions and therefore
 constitute genuine semantic commitments.
@@ -2072,7 +2059,7 @@ Unlike serializability, which resolves ambiguity in a single commuting stage,
 snapshot isolation may require an independent snapshot commitment for each
 transaction.
 Thus SI has worst-case determination depth $O(|H|)$, as recorded in
-Figure~\ref{fig:det-tables}(\textbf{B}).
+Figure~\ref{fig:det-tables}.
 Once an SI determination is fixed, provenance again reduces to depth--0
 derivational provenance.
 

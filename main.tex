@@ -363,10 +363,14 @@ We impose one restriction on bases throughout this paper:
 \end{definition}
 
 \noindent
-Persistence is distinct from shrinkage: shrinkage says that after applying
-$\varphi$ at $H_1$, the admissible set does not re-grow at extensions of
-$H_1 \cdot \varphi$; persistence says that applying the same $\varphi$ at a
-later $H_2 \sqsupseteq H_1$ excludes at least the same outcomes.
+Persistence is distinct from shrinkage.
+Shrinkage is a property of a single commitment event applied at a fixed
+history: after applying $\varphi$ at $H_1$, the admissible set does not
+re-grow at extensions of $H_1 \cdot \varphi$.
+Persistence compares two events with the same predicate applied at
+different histories: applying $\varphi$ at a later
+$H_2 \sqsupseteq H_1$ must exclude at least the same outcomes as applying
+it at $H_1$.
 (A ``majority vote'' predicate satisfies shrinkage but not persistence:
 at $H_1$ with votes $2{:}A, 1{:}B$ it excludes $B$; at $H_2$ with
 $2{:}A, 3{:}B$ it excludes $A$ instead.)

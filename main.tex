@@ -853,12 +853,15 @@ from contingent query results.
 The retention of aborted transactions in the history is essential: an abort is
 a commitment event that resolved a conflict, and determination provenance must
 record it.
-Commit events serve a dual role: as environment events they finalize a
-transaction's effects, and as witnesses they establish the conflict edges
-whose orientations constitute ordering commitments.
-When $T_i$ and $T_j$ both commit with conflicting operations, the commit
-order determines the edge direction $T_i \to T_j$ or $T_j \to T_i$;
-the ordering commitment $\varphi_{T_i \prec T_j}$ records this fact.
+Commit events also serve as commitment events: committing $T_i$ irrevocably
+finalizes $T_i$'s position in the serial order and removes its edges from
+the active conflict graph.
+The ordering among conflicting operations is established by the interleaving
+of reads and writes during execution; the commit makes that ordering
+irrevocable.
+The ordering commitment $\varphi_{T_i \prec T_j}$ records that $T_i$'s
+conflicting operation preceded $T_j$'s and that $T_i$ committed (finalizing
+this ordering).
 
 \begin{definition}[Conflict]
   \label{def:conflict}
@@ -874,9 +877,14 @@ the ordering commitment $\varphi_{T_i \prec T_j}$ records this fact.
 \begin{definition}[Conflict graph]
   \label{def:conflict-graph}
   The \emph{conflict graph} $G(H)$ of a transactional history $H$ is the
-  directed graph whose vertices are the committed transactions in $H$ and
-  whose edges are the conflicts: $T_i \to T_j$ if $T_i$ and $T_j$ conflict
-  and $T_i$'s conflicting operation precedes $T_j$'s in $H$.
+  directed graph whose vertices are the \emph{active} (uncommitted,
+  non-aborted) transactions in $H$ and whose edges represent conflicts:
+  $T_i \to T_j$ if $T_i$ and $T_j$ conflict and $T_i$'s conflicting
+  operation precedes $T_j$'s in $H$.
+  When $T_i$ commits, all edges adjacent to $T_i$ are removed from the
+  active conflict graph: $T_i$'s position in the serial order is finalized.
+  When $T_i$ aborts, all edges adjacent to $T_i$ are likewise removed
+  (its operations are rolled back).
 \end{definition}
 
 \subsection{Isolation Levels as Specifications}
@@ -888,12 +896,14 @@ states) consistent with the isolation level's acyclicity constraint.
 
 \begin{definition}[Isolation-level specification]
   \label{def:isolation-spec}
-  For an isolation level $L$, define
+  For an isolation level $L$, the specification $\Spec_L(H)$ is the set of
+  database states reachable by some serial ordering of the committed
+  transactions in $H$ that is consistent with the conflict edges established
+  during execution and satisfies the acyclicity constraint of level $L$.
+  Formally,
   $\Spec_L(H) \triangleq \{\, \mathsf{state}(\sigma) \mid
-  \sigma \text{ is a commit order consistent with } H
-  \text{ and } G_L(\sigma) \text{ is acyclic}\,\}$,
-  where $G_L(\sigma)$ restricts the conflict graph to the edge types
-  relevant to level $L$.
+  \sigma \text{ is a serial order of committed transactions in } H
+  \text{ consistent with } L\text{'s constraints}\,\}$.
 \end{definition}
 
 \noindent

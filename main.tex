@@ -481,13 +481,13 @@ can operate without it.
 \begin{proof}
   Let $H_1 \sqsubseteq H_2$ and let $(\Spec \mid D)(H_1) = \{o^*\}$.
   Write $D = \varphi_1 \cdot \cdots \cdot \varphi_m$.
-  Since $D$ resolves $\Spec$ at $H_1$, for every $o \neq o^*$
-  there exists $\varphi_j \in I$ that excludes $o$
+  For every $o \neq o^*$, some $\varphi_j$ excludes $o$ when applied
   at $H_1 \cdot \varphi_1 \cdots \varphi_{j-1}$.
-  By persistence, $\varphi_j$ continues
-  to exclude $o$ at $H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$
-  (since $H_1 \cdot \varphi_1 \cdots \varphi_{j-1} \sqsubseteq
-  H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$).
+  Since $H_1 \sqsubseteq H_2$ implies
+  $H_1 \cdot \varphi_1 \cdots \varphi_{j-1} \sqsubseteq
+  H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$,
+  persistence gives that $\varphi_j$ also excludes $o$ when applied
+  at $H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$.
   Hence $(\Spec \mid D)(H_2) \subseteq \{o^*\}$.
   Since $(\Spec \mid D)(H_2) \neq \emptyset$ (Definition~\ref{def:commitment}),
   $(\Spec \mid D)(H_2) = \{o^*\}$.

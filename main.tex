@@ -363,11 +363,14 @@ We impose one restriction on bases throughout this paper:
 \end{definition}
 
 \noindent
-This is distinct from shrinkage (Definition~\ref{def:commitment}), which
-concerns a single application: once $\varphi$ is applied at $H$, the
-admissible set does not re-grow at extensions of $H \cdot \varphi$.
-Persistence compares two \emph{independent} applications of the same
-predicate at different histories.
+Persistence is distinct from shrinkage (Definition~\ref{def:commitment}).
+Given histories $H_1 \sqsubseteq H_2$, shrinkage is a property of a specific
+commitment event: it ensures that the $\Spec(H_1 \cdot \varphi)$ resulting
+from applying commitment $\varphi$ at $H_1$ filters the same outcomes at $H_2$.
+Persistence compares the result of two alternative commitment events with the same 
+predicate---$\Spec(H_1 \cdot \varphi)$ vs.\ $\Spec(H_2 \cdot \varphi)$---and ensures that
+the outcomes that would have been filtered by commiting $\varphi$ at $H_1$ would also
+be filtered by committing $\varphi$ at $H_2$
 A ``majority vote'' predicate illustrates the distinction: at $H_1$ with
 votes $(2{:}A, 1{:}B)$ it excludes $B$; applied at
 $H_2 \sqsupseteq H_1$ with votes $(2{:}A, 3{:}B)$ it excludes $A$ instead.
@@ -377,6 +380,22 @@ Persistence is the paper's main structural assumption.
 It guarantees that determined specifications are history-monotone
 (Theorem~\ref{thm:resolution-implies-monotone}), enabling
 classical provenance at the foundation of the commitment tower.
+
+\begin{remark}[Why persistence is specific to provenance]
+  \label{rem:why-persistence}
+  Persistence is not needed for characterizing \emph{whether} coordination
+  is required: the Coordination
+  Criterion~\cite{hellerstein2026coordinationcriterion} operates on the
+  unresolved specification and never applies commitments.
+  Nor is it needed for counting \emph{how many} commitment layers are
+  required: the complexity theory~\cite{hellerstein2026complexity} needs
+  only shrinkage (commitments make progress toward resolution).
+  Persistence is needed specifically for \emph{explanation}: it guarantees
+  that once a determination produces an outcome, that outcome and its
+  derivational provenance remain valid as the history grows.
+  Without persistence, an explanation valid at $H_1$ could be invalidated
+  at $H_2 \sqsupseteq H_1$, and classical provenance would not apply.
+\end{remark}
 The sealing basis for Datalog with negation, the commit/abort basis for
 serializability, and snapshot predicates under snapshot isolation are all
 persistent.

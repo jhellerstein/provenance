@@ -168,19 +168,21 @@ semiring composes through relational algebra~\cite{green2007provenance}.
   \label{ex:example}
   Consider a database with a binary relation $S$
   and an initially empty instance.
-  Three concurrent transactions are followed by a query:
+  Four transactions execute:
   \[
-    \underbrace{T_1\!: \textsf{ins } S(1,b);\quad
-    T_2\!: \textsf{ins } S(2,d);\quad
-    T_3\!: \textsf{del } S(2,d)}_{\text{concurrent}}
-    ;\quad\longrightarrow\quad
+    T_1\!: \textsf{ins } S(1,b);\qquad
+    T_2\!: \textsf{ins } S(2,d);\qquad
+    T_3\!: \textsf{del } S(2,d);\qquad
     T_Q\!: Q(y) \drule S(k,y).
   \]
+  $T_1$ and $T_2$ commit before $T_3$ and $T_Q$, but the relative
+  order of $T_3$ and $T_Q$ is not determined by the history.
 
   Under serializability, value $b$ appears in $Q$'s result under every
   admissible execution: it is \emph{robust}.
-  Value $d$ is \emph{contingent}: it appears if $T_Q$ commits between $T_2$
-  and $T_3$, and is absent otherwise.
+  Value $d$ is \emph{contingent}: it appears if $T_Q$ commits before
+  $T_3$ (reading $T_2$'s insert), and is absent if $T_3$ commits first
+  (deleting $d$ before the query reads).
   Before resolving this ambiguity, even the \emph{form} of the provenance
   question for $d$ is undetermined: in one determination the relevant
   question is \emph{why} $d$ appears, while in another

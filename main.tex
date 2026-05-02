@@ -168,11 +168,12 @@ semiring composes through relational algebra~\cite{green2007provenance}.
   \label{ex:example}
   Consider a database with a binary relation $S$
   and an initially empty instance.
-  Three transactions execute concurrently, followed by a query:
+  Three concurrent transactions are followed by a query:
   \[
-    T_1\!: \textsf{insert } S(1,b)\ (x_1);\qquad
-    T_2\!: \textsf{insert } S(2,d)\ (x_2);\qquad
-    T_3\!: \textsf{delete } S(2,d);\qquad
+    \underbrace{T_1\!: \textsf{ins } S(1,b)\ (x_1);\quad
+    T_2\!: \textsf{ins } S(2,d)\ (x_2);\quad
+    T_3\!: \textsf{del } S(2,d)}_{\text{concurrent}}
+    ;\quad\longrightarrow\quad
     T_Q\!: Q(y) \drule S(k,y).
   \]
 

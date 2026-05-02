@@ -407,9 +407,10 @@ commitments, applied as \emph{sequential refinement}.
   $\varphi_1 \cdot \cdots \cdot \varphi_m$
   ($\varphi_i \in \Phi$) of all commitment events in $H$,
   listed in the order induced by $\rightarrow$.
-  We also write $I = \varphi_1 \cdot \cdots \cdot \varphi_m$
-  for a determination considered as an abstract sequence of
-  commitments.
+  Each $\varphi_i$ is applied at the prefix
+  $H_i \triangleq H \cdot \varphi_1 \cdots \varphi_{i-1}$
+  (with $H_0 = H$), so its effect depends on the admissible set
+  $\Spec(H_{i-1})$ at that point.
 \end{definition}
 
 \noindent
@@ -417,8 +418,9 @@ Although a history is in general a DAG (events may be partially ordered),
 commitment events form a total order within it: each commitment succeeds all
 maximal events of its prefix, so every pair of commitments is comparable
 under~$\rightarrow$.
-The determination is therefore always a well-defined sequence, and refinement
-is defined by sequential application:
+The determination is therefore always a well-defined sequence.
+We write $(\Spec \mid I)(H)$ for the result of applying the full
+determination to $\Spec$ starting from $H$:
 \[
   (\Spec \mid I)(H)
   \;\triangleq\;

@@ -336,6 +336,13 @@ optionally enriched with scheduling predicates
 (Section~\ref{sec:scheduling-basis}).
 Different bases for the same specification yield different determination
 structures, different depths, and different provenance.
+A finer basis (many predicates, each excluding few outcomes) produces
+shallower, more transparent determinations; a coarser basis (fewer
+predicates, each more selective) may reduce depth but makes each
+predicate harder to interpret.
+The transactional section illustrates this concretely: the commit/abort
+basis and the scheduling-enriched basis yield different tower structures
+for the same workload (Section~\ref{sec:scheduling-basis}).
 
 We impose one restriction on bases throughout this paper:
 

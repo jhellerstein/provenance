@@ -463,17 +463,18 @@ persistent basis is both necessary and sufficient for provenance.
   \label{thm:necessity}
   Assume prefix-closure (Assumption~\ref{ass:prefix-closed}) and a
   persistent commitment basis $\Phi$.
+  Classical semiring provenance over $\Spec$ is well-defined if and only if
+  $\Spec$ is determined:
   \begin{enumerate}[nosep,label=(\alph*)]
     \item \emph{(Necessity.)}
           If $|\Spec(H)| \ge 2$ with distinct outcomes inducing distinct
-          instances, then no single semiring annotation can simultaneously
-          explain both outcomes: provenance is ill-defined without resolution.
+          instances, no single semiring annotation can simultaneously
+          explain both outcomes.
     \item \emph{(Sufficiency.)}
           If $D$ resolves $\Spec$, then $(\Spec \mid D)$ yields a unique
-          outcome independent of $H$---i.e.,
+          outcome independent of $H$:
           $(\Spec \mid D)(H_1) = (\Spec \mid D)(H_2)$
-          for all $H_1 \sqsubseteq H_2$---so
-          classical semiring provenance over that outcome is well-defined.
+          for all $H_1 \sqsubseteq H_2$.
   \end{enumerate}
 \end{theorem}
 

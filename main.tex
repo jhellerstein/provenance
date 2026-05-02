@@ -155,19 +155,14 @@ semiring composes through relational algebra~\cite{green2007provenance}.
 
   We instantiate the framework in depth for transactional systems, where
   ambiguity arises from concurrency and isolation choices.
-  Determination provenance distinguishes
-  outcomes that hold under every serializable execution from those contingent on
-  a particular scheduling or isolation decision.
-  We further demonstrate the framework's generality through two additional
-  instantiations developed in the appendices:
-  Datalog with negation, which addresses a longstanding gap in provenance theory
-  (classical semiring provenance applies only to the monotone
-  fragment~\cite{green2007provenance}, and negation introduces semantic
-  ambiguity via multiple models for the same program and input);
-  and distributed systems
-  observability~\cite{sigelman2010dapper}, showing how determination provenance
-  provides a semantic foundation for systems lineage.
-  We begin with a transactional example to illustrate the ideas:
+  Determination provenance distinguishes outcomes that hold under every
+  serializable execution from those contingent on a particular scheduling
+  or isolation decision.
+  We further demonstrate generality through two appendix instantiations:
+  Datalog with negation (addressing a longstanding gap in provenance past
+  the monotone fragment~\cite{green2007provenance}) and distributed systems
+  observability~\cite{sigelman2010dapper}.
+  We begin with a transactional example:
 
 \begin{example}[Provenance under transactional ambiguity]
   \label{ex:example}

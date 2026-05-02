@@ -271,32 +271,29 @@ deletions) may be added but cannot be ordered before existing ones.
 
 \subsection{Outcomes and Specifications}
 An \emph{outcome} is an element of a set $O$ of externally
-observable results.
-Examples include a query result, a database state, or a model of a logic
-program.
+observable results (e.g., a query result, a database state, or a model of a
+logic program).
 
 \begin{definition}[Specification]
-  A \emph{specification} is a mapping $\Spec : \Hist \to 2^O$
-  assigning to each history a set of \emph{admissible outcomes}.
-  We call $\Spec(H)$ the \emph{admissible set} at~$H$.
+  A \emph{specification} is a relation $\Spec \subseteq \Hist \times O$:
+  it associates each history with a set of \emph{admissible outcomes}.
+  We write $\Spec(H) \triangleq \{o \in O \mid (H,o) \in \Spec\}$ for the
+  admissible set at~$H$.
 \end{definition}
 
-The set $\Spec(H)$ captures all outcomes consistent with the evidence in $H$.
-When $|\Spec(H)| > 1$, the specification admits multiple admissible outcomes for $H$,
-reflecting unresolved semantic ambiguity.
-When $|\Spec(H)| = 1$, the meaning of $H$ is fully determined.
+\noindent
+A specification is a \emph{relation}: a given input (history) may map to
+multiple admissible outcomes, reflecting unresolved semantic ambiguity.
+A specification that maps every history to exactly one outcome is a
+\emph{function}---no ambiguity remains.
+The goal of determination is to narrow a relational specification to a
+functional one.
 
-\begin{remark}[Scope of ambiguity]
-  The outcome domain $O$ may itself carry internal structure---for example,
-  outcomes may be distributions over possible worlds, as in probabilistic
-  databases.
-  Our framework applies to all outcome domains uniformly: it treats elements
-  of $O$ as opaque and is concerned only with whether multiple such elements
-  are admissible for the same history.
-  The ambiguity we study lives in the \emph{powerset domain} $2^{O}$---the
-  multiplicity of admissible outcomes---independent of the internal structure
-  of any single outcome.
-\end{remark}
+\begin{definition}[Resolved specification]
+  \label{def:resolved}
+  A specification is \emph{resolved} if it is a function:
+  $|\Spec(H)| = 1$ for every $H \in \Hist$.
+\end{definition}
 
 
 \subsection{Semantic Refinement}
@@ -324,10 +321,9 @@ history: everything before the commitment is fixed, and the admissible set
 after the commitment can only be smaller.
 We write \mbox{$(\Spec \mid \varphi)(H) \triangleq \Spec(H \cdot \varphi)$}:
 the admissible outcomes after appending $\varphi$ to $H$.
-Viewed relationally, $\Spec(H)$ is a set of outcomes; each commitment is a
-selection predicate on that set; and a determination is a conjunction of
-such predicates that narrows the specification to a function (one outcome
-per input).
+Each commitment is thus a selection predicate on the admissible set;
+a determination is a conjunction of such predicates applied sequentially
+until the specification becomes a function.
 
 \paragraph{Commitment bases.}
 A \emph{commitment basis} $\Phi$ is the vocabulary of commitments available
@@ -451,9 +447,9 @@ of commuting batches.
   structure beyond commutativity within each layer.
 \end{definition}
 
-\begin{definition}[Resolved specification and resolving determination]
-  A specification $\Spec$ is \emph{resolved} if for every history $H$, $|\Spec(H)| = 1$.
-  A determination $I$ \emph{resolves} $\Spec$ (i.e., $I$ is \emph{resolving for} $\Spec$) if $\Spec \mid I$ is resolved.
+\begin{definition}[Resolving determination]
+  A determination $I$ \emph{resolves} $\Spec$ if $\Spec \mid I$ is resolved
+  (Definition~\ref{def:resolved}): a function from histories to outcomes.
 \end{definition}
 
 \subsection{Resolution Enables Provenance}

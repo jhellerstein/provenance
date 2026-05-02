@@ -375,16 +375,14 @@ it at $H_1$.
 at $H_1$ with votes $2{:}A, 1{:}B$ it excludes $B$; at $H_2$ with
 $2{:}A, 3{:}B$ it excludes $A$ instead.)
 
-Persistence is the paper's main structural assumption.
-It guarantees that determined specifications are history-monotone
+Persistence is the paper's main structural assumption
+(we also assume feasibility: no commitment empties the admissible set).
+Together they guarantee that determined specifications are history-monotone
 (Theorem~\ref{thm:resolution-implies-monotone}), enabling classical
 provenance at the foundation of the commitment tower.
 The sealing basis for Datalog with negation, the commit/abort basis for
 serializability, and snapshot predicates under snapshot isolation are all
 persistent.
-We additionally assume all commitments are \emph{feasible}:
-$\Spec(H) \neq \emptyset \Longrightarrow \Spec(H \cdot \varphi) \neq \emptyset$
-(no commitment empties the admissible set).
 
 \noindent
 Multiple commitments may be applied by iterating refinement.

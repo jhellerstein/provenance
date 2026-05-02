@@ -246,6 +246,9 @@ When the partial order is total, a history is a sequence---e.g., a
 transaction schedule of reads, writes, and commits.
 When no precedence constraints are present, a history collapses to an
 unordered set and coincides with a classical database instance (EDB).
+In general, histories may be partially ordered---the natural case when
+some events can occur in parallel (e.g. two transactional reads),
+others in order (e.g. message send must precede message receive).
 We write $\Hist$ for the class of histories under consideration.
 
 \begin{definition}[History Extension]
@@ -264,17 +267,12 @@ predecessors of existing events.
 For an EDB viewed as a history, this means facts can be added but not
 retracted; for a transaction schedule, new operations cannot be placed
 before existing ones in the order.
-In general, histories may be partially ordered---the natural case when
-transactions run in parallel or distributed processes contribute events
-without a fixed global sequence.
 
 \subsection{Outcomes and Specifications}
 An \emph{outcome} is an element of a set $O$ of externally
 observable results.
-Outcomes represent what an observer may conclude once all semantic commitments have
-been fixed.
-Examples include a database state, a serial execution of transactions, a model of
-a logic program, the visible state of an automaton, or a completed task result.
+Examples include a query result, a database state, or a model of a logic
+program.
 
 \begin{definition}[Specification]
   A \emph{specification} is a mapping $\Spec : \Hist \to 2^O$

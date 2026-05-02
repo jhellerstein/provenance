@@ -375,10 +375,8 @@ it at $H_1$.
 at $H_1$ with votes $2{:}A, 1{:}B$ it excludes $B$; at $H_2$ with
 $2{:}A, 3{:}B$ it excludes $A$ instead.)
 
-Persistence is the paper's main structural assumption
-(we also assume feasibility: no commitment empties the admissible set,
-which would leave the specification without a valid outcome).
-Together they guarantee that determined specifications are history-monotone
+Persistence is the paper's main structural assumption.
+It guarantees that determined specifications are history-monotone
 (Theorem~\ref{thm:resolution-implies-monotone}), enabling classical
 provenance at the foundation of the commitment tower.
 The sealing basis for Datalog with negation, the commit/abort basis for
@@ -498,7 +496,8 @@ can operate without it.
   (since $H_1 \cdot \varphi_1 \cdots \varphi_{j-1} \sqsubseteq
   H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$).
   Hence $(\Spec \mid I)(H_2) \subseteq \{o^*\}$.
-  Feasibility gives $(\Spec \mid I)(H_2) \neq \emptyset$, so
+  Since commitments are feasible (they do not empty the admissible set),
+  $(\Spec \mid I)(H_2) \neq \emptyset$, so
   $(\Spec \mid I)(H_2) = \{o^*\}$.
 \end{proof}
 

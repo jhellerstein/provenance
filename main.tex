@@ -383,18 +383,19 @@ classical provenance at the foundation of the commitment tower.
 
 \begin{remark}[Why persistence is specific to provenance]
   \label{rem:why-persistence}
-  Persistence is not needed for characterizing \emph{whether} coordination
-  is required: the Coordination
-  Criterion~\cite{hellerstein2026coordinationcriterion} operates on the
-  unresolved specification and never applies commitments.
-  Nor is it needed for counting \emph{how many} commitment layers are
-  required: the complexity theory~\cite{hellerstein2026complexity} needs
-  only shrinkage (commitments make progress toward resolution).
-  Persistence is needed specifically for \emph{explanation}: it guarantees
-  that once a determination produces an outcome, that outcome and its
-  derivational provenance remain valid as the history grows.
-  Without persistence, an explanation valid at $H_1$ could be invalidated
-  at $H_2 \sqsupseteq H_1$, and classical provenance would not apply.
+  A coordination criterion (in the spirit of
+  CALM~\cite{ameloot2013relational}) asks whether a specification is
+  already determined---a property of the specification alone, independent
+  of any commitment basis.
+  A coordination complexity question asks how many commitments from a
+  given basis are needed to achieve determination---a property of the
+  basis's expressive power.
+  Our question is different: we ask which bases yield determinations
+  whose explanations remain stable as the history grows.
+  Persistence is the answer: it is the property of a basis that
+  guarantees provenance validity is preserved under history extension.
+  Without it, an explanation valid at $H_1$ could be invalidated at
+  $H_2 \sqsupseteq H_1$, and classical provenance would not apply.
 \end{remark}
 The sealing basis for Datalog with negation, the commit/abort basis for
 serializability, and snapshot predicates under snapshot isolation are all

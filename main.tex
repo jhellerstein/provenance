@@ -135,7 +135,7 @@ This paper extends provenance to settings with semantic ambiguity.
 The key idea is simple: before we can explain \emph{how} a result was
 derived, we must first account for \emph{which semantic commitments} made
 that derivation possible.
-A transactional system that committed $T_4$ before $T_5$ made a choice;
+A transactional system that committed $T_2$ before $T_3$ made a choice;
 a different commit order would have produced a different result with
 different provenance.
 We call such a sequence of irrevocable commitments a \emph{determination}.
@@ -167,32 +167,30 @@ semiring composes through relational algebra~\cite{green2007provenance}.
 \begin{example}[Provenance under transactional ambiguity]
   \label{ex:example}
   Consider a database with a binary relation $S$
-  and an initially empty instance (EDB).
-  The following transactions execute concurrently.
+  and an initially empty instance.
+  Three transactions execute concurrently:
   \[
-    \begin{array}{ll}
-      T_1: \textsf{begin};\ \textsf{insert } S(1,b)\ (x_1);\ \textsf{commit} \qquad &
-      T_2: \textsf{begin};\ \textsf{insert } S(2,b)\ (x_2);\ \textsf{commit}          \\
-      T_3: \textsf{begin};\ \textsf{insert } S(3,c)\ (x_3);\ \textsf{commit} \qquad &
-      T_4: \textsf{begin};\ \textsf{insert } S(4,d)\ (x_4);\ \textsf{commit}          \\
-      T_5: \textsf{begin};\ \textsf{delete } S(4,d);\ \textsf{commit}.              &
+    \begin{array}{l}
+      T_1: \textsf{insert } S(1,b)\ (x_1);\; \textsf{commit} \\
+      T_2: \textsf{insert } S(2,d)\ (x_2);\; \textsf{commit} \\
+      T_3: \textsf{delete } S(2,d);\; \textsf{commit}
     \end{array}
   \]
   Subsequently, a query transaction $T_Q$ executes
-  $\textsf{begin};\ Q(y) \drule S(k,y);\ \textsf{commit}$.
+  $Q(y) \drule S(k,y)$.
 
-  Under serializability, the observed history admits multiple executions.
-  The query returns $y$-values $b$ and $c$ under every serializable execution.
-  Value $d$ is contingent: it appears in some executions and not others, depending
-  on whether $T_5$ commits before or after $T_Q$.
-  Before resolving this ambiguity, even the \emph{family} of provenance expressions
-  for $d$ is ambiguous: in one resolution the relevant question is \emph{why} $d$
-  appears, while in another it is \emph{why-not} $d$.
+  Under serializability, value $b$ appears in $Q$'s result under every
+  admissible execution: it is \emph{robust}.
+  Value $d$ is \emph{contingent}: it appears if $T_Q$ commits between $T_2$
+  and $T_3$, and is absent otherwise.
+  Before resolving this ambiguity, even the \emph{form} of the provenance
+  question for $d$ is undetermined: in one determination the relevant
+  question is \emph{why} $d$ appears ($\Prov(d) = x_2$), while in another
+  it is \emph{why-not} $d$.
   Determination provenance makes this dependence explicit by recording the
-  commitments under which the query result is determined, together with the ordinary
+  commitments under which the query result is determined, together with the
   derivational explanation that applies once those commitments are fixed.
-  Section~\ref{sec:transactions} formalizes this example;
-  Appendix~\ref{sec:appendix-concurrency} works it in full.
+  Section~\ref{sec:transactions} formalizes this example.
 \end{example}
 
 \paragraph{Contributions.}
@@ -732,7 +730,7 @@ For instance, in the transactional example of the introduction, values $b$
 and $c$ have full support
 ($\mathrm{supp}(\Prov_Q(b)) = \mathrm{supp}(\Prov_Q(c)) = \mathcal{I}$),
 while $d$'s support is a proper subset---it holds only under determinations
-in which $T_4$ and $T_Q$ commit before $T_5$.
+in which $T_Q$ commits before $T_3$.
 Section~\ref{sec:robustness} applies this structure to formalize robustness
 and sensitivity across determinations.
 
@@ -866,7 +864,7 @@ $[I]_0 = \mathcal{I}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
   Value $b$ has $\mathrm{qdepth}(b) = 0$: it holds under every
   determination (robust).
   Value $d$ has $\mathrm{qdepth}(d) = 1$: its support is a proper subset
-  of $\mathcal{I}$ (the determinations where $T_Q$ commits before $T_5$),
+  of $\mathcal{I}$ (the determinations where $T_Q$ commits before $T_3$),
   which is not in $\mathcal{F}_0 = \{\emptyset, \mathcal{I}\}$.
   Classical provenance suffices for $b$; determination provenance is needed
   for $d$.
@@ -1165,22 +1163,22 @@ recorded in the history as conflict edges accumulate.
 
 \subsection{Running Example Revisited}
 
-Returning to Example~\ref{ex:example}: $T_4$, $T_5$, and $T_Q$ conflict on
-$(4,d)$ with no cycles.
+Returning to Example~\ref{ex:example}: $T_2$, $T_3$, and $T_Q$ conflict on
+$(2,d)$ with no cycles.
 Two representative determinations:
 $I_{\mathsf{in}} \triangleq
-  \varphi_{\mathsf{commit}(T_4)} \cdot \varphi_{\mathsf{commit}(T_Q)}
-  \cdot \varphi_{\mathsf{commit}(T_5)}$
-yields $\Prov_{Q \mid I_{\mathsf{in}}}(d)=x_4$;
+  \varphi_{\mathsf{commit}(T_2)} \cdot \varphi_{\mathsf{commit}(T_Q)}
+  \cdot \varphi_{\mathsf{commit}(T_3)}$
+yields $\Prov_{Q \mid I_{\mathsf{in}}}(d)=x_2$;
 $I_{\mathsf{out}} \triangleq
-  \varphi_{\mathsf{commit}(T_4)} \cdot \varphi_{\mathsf{commit}(T_5)}
+  \varphi_{\mathsf{commit}(T_2)} \cdot \varphi_{\mathsf{commit}(T_3)}
   \cdot \varphi_{\mathsf{commit}(T_Q)}$
 yields $d$ absent.
 Prior to resolution, even the \emph{form} of the provenance question for $d$
 is ambiguous (why vs.\ why-not).
-Values $b$ and $c$ have full support
-($\mathrm{supp}(\Prov_Q(b)) = \mathrm{supp}(\Prov_Q(c)) = \mathcal{I}$)
-and are robust; $d$ is contingent.
+Values $b$ has full support
+($\mathrm{supp}(\Prov_Q(b)) = \mathcal{I}$)
+and is robust; $d$ is contingent.
 
 \subsection{Complexity of Robustness}
 
@@ -1314,13 +1312,13 @@ partial knowledge (access sets unknown until execution), and mixed control.
     (none---future-monotone) & $0$ \\
     %
     SER, no cycles &
-    $\{\varphi_{\mathsf{c}}(T_1), \ldots, \varphi_{\mathsf{c}}(T_Q)\}$ & $1$ \\
+    $\{\varphi_{\mathsf{c}}(T_1), \varphi_{\mathsf{c}}(T_2), \varphi_{\mathsf{c}}(T_3), \varphi_{\mathsf{c}}(T_Q)\}$ & $1$ \\
     %
     SER, $d$ visible &
-    $\varphi_{\mathsf{c}}(T_4) \cdot \varphi_{\mathsf{c}}(T_Q) \cdot \varphi_{\mathsf{c}}(T_5)$ & $1$ \\
+    $\varphi_{\mathsf{c}}(T_2) \cdot \varphi_{\mathsf{c}}(T_Q) \cdot \varphi_{\mathsf{c}}(T_3)$ & $1$ \\
     %
     SER, $d$ absent &
-    $\varphi_{\mathsf{c}}(T_4) \cdot \varphi_{\mathsf{c}}(T_5) \cdot \varphi_{\mathsf{c}}(T_Q)$ & $1$ \\
+    $\varphi_{\mathsf{c}}(T_2) \cdot \varphi_{\mathsf{c}}(T_3) \cdot \varphi_{\mathsf{c}}(T_Q)$ & $1$ \\
     %
     SER, overlapping cycles &
     $\varphi_{\mathsf{a}}(T_1) \seq \varphi_{\mathsf{a}}(T_4)$
@@ -1390,7 +1388,7 @@ $\forall I \in \mathcal{I}.\; o \in (\Spec \mid I)(H)$.
 In the determination semiring, robustness
 is the multiplicative identity: the tuple's support is the full set
 $\mathcal{I}$.
-In Example~\ref{ex:example}, $b$ and $c$ are robust; $d$ is contingent.
+In Example~\ref{ex:example}, $b$ is robust; $d$ is contingent.
 
 \subsection{Inter-Specification Queries: Preservation under Semantic Change}
 \label{sec:semantic-change}

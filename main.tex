@@ -936,55 +936,58 @@ We consider three levels:
 
 \subsection{Commitment Basis}
 
-The commitment basis for transactional determination provenance consists of
-two kinds of commitments, whose availability depends on the isolation level.
+The interleaving of read and write operations is determined by the
+environment: operations arrive non-deterministically and are serviced
+immediately.
+The conflict edges that result are therefore \emph{environment events}---they
+are observed, not chosen.
+The system's only irrevocable decisions are \emph{commit} and \emph{abort}:
 
-\begin{definition}[Ordering commitment]
-  \label{def:ordering-commitment}
-  For conflicting transactions $T_i, T_j$, the \emph{ordering commitment}
-  $\varphi_{T_i \prec T_j}$ records that $T_i$'s conflicting operation
-  preceded $T_j$'s---equivalently, that the edge $T_i \to T_j$ is present
-  in the conflict graph.
-  This excludes all outcomes in which $T_j$ precedes $T_i$ on the
-  conflicting object.
+\begin{definition}[Commit commitment]
+  \label{def:commit-commitment}
+  The commitment $\varphi_{\mathsf{commit}(T_i)}$ irrevocably finalizes
+  $T_i$'s operations: $T_i$'s effects become durable and $T_i$ is removed
+  from the active conflict graph (along with all its adjacent edges).
+  This commitment is valid only if, after removing $T_i$, the acyclicity
+  invariant of the isolation level is not violated---that is, committing
+  $T_i$ does not leave a forbidden cycle among the remaining active
+  transactions.
 \end{definition}
 
 \begin{definition}[Abort commitment]
   \label{def:abort-commitment}
-  For a transaction $T_i$, the \emph{abort commitment}
-  $\varphi_{\mathsf{abort}(T_i)}$ records that $T_i$ was aborted.
-  This excludes all outcomes in which $T_i$ is committed.
+  The commitment $\varphi_{\mathsf{abort}(T_i)}$ irrevocably discards
+  $T_i$'s operations: $T_i$'s effects are rolled back and $T_i$ is removed
+  from the active conflict graph.
+  Abort is always valid (a transaction may always be aborted).
 \end{definition}
 
-\begin{definition}[Snapshot commitment (SI only)]
-  \label{def:snapshot-commitment}
-  For a transaction $T_i$ and a set $U$ of transactions, the
-  \emph{snapshot commitment} $\varphi_{\snap(T_i) = U}$ records that $T_i$
-  read from a snapshot containing exactly the effects of the transactions
-  in $U$.
-\end{definition}
+\noindent
+The commitment basis is thus $\Phi = \{\varphi_{\mathsf{commit}(T_i)},
+\varphi_{\mathsf{abort}(T_i)} \mid T_i \text{ active}\}$.
+Ordering predicates are not commitments---they are environment facts
+recorded in the history as conflict edges accumulate.
 
-\begin{proposition}[Commutativity of ordering commitments]
-  \label{prop:ordering-commute}
-  Ordering commitments on distinct conflict edges commute:
-  for edges $(T_i, T_j) \neq (T_k, T_l)$,
-  $\Spec(H \cdot \varphi_{T_i \prec T_j} \cdot \varphi_{T_k \prec T_l})
-    = \Spec(H \cdot \varphi_{T_k \prec T_l} \cdot \varphi_{T_i \prec T_j})$.
+\begin{proposition}[Commutativity of commit/abort on independent transactions]
+  \label{prop:commit-commute}
+  Commit and abort commitments on transactions that share no conflict edges
+  commute: their joint effect on the active conflict graph and the admissible
+  set is independent of application order.
 \end{proposition}
 \begin{proof}
-  Each ordering commitment acts as a pointwise filter: it independently
-  excludes outcomes inconsistent with a single edge orientation.
-  Pointwise filters commute (Definition~\ref{def:commitment}).
+  If $T_i$ and $T_j$ share no edges, removing one does not affect the
+  other's adjacency or the validity of committing/aborting the other.
+  The resulting conflict graph is the same regardless of order.
 \end{proof}
 
-\begin{remark}[Non-commutativity of abort commitments]
-  \label{rem:abort-noncommute}
-  Abort commitments may not commute when cycles overlap.
-  Aborting $T_i$ removes $T_i$ and all its edges from the conflict graph,
-  potentially breaking multiple cycles.
-  Which cycles remain---and hence which further aborts are valid---depends
-  on which transaction was aborted first.
-  Example~\ref{ex:overlapping-cycles} below exhibits this non-commutativity.
+\begin{remark}[Non-commutativity under shared conflicts]
+  \label{rem:commit-noncommute}
+  When $T_i$ and $T_j$ participate in a common cycle, committing one may
+  make committing the other invalid (the remaining cycle would violate the
+  acyclicity invariant), while aborting one may make committing the other
+  valid (the cycle is broken).
+  In such cases, commit/abort decisions do not commute, and the
+  determination has depth $> 1$.
 \end{remark}
 
 \subsection{Determination Depth by Isolation Level}
@@ -992,15 +995,15 @@ two kinds of commitments, whose availability depends on the isolation level.
 \begin{proposition}[Read committed: depth 0]
   \label{prop:rc-depth-zero}
   Under read committed, $\Spec_{\mathit{RC}}$ is future-monotone:
-  extending a history with new committed transactions can only add
-  new visible values, never retract previously visible ones.
+  extending a history with new operations and commit/abort events can only
+  add new visible values, never retract previously visible ones.
   Hence no commitments are needed and determination depth is~$0$.
 \end{proposition}
 \begin{proof}
   Under RC, a transaction $T_Q$ may read any value written by a
   committed transaction.
-  Extending the history with a new committed transaction $T_k$ can only
-  add $T_k$'s writes to the set of values visible to future readers.
+  New commit events can only add committed writes to the set of values
+  visible to future readers.
   No previously visible value becomes invisible: committed writes persist.
   Hence for every $o \in \Obs(H)$ and every extension $H' \sqsupseteq H$,
   there exists $o' \in \Obs(H')$ with $o \Ord o'$ (where $\Ord$ is set
@@ -1010,32 +1013,34 @@ two kinds of commitments, whose availability depends on the isolation level.
 
 \begin{proposition}[Serializability: depth from conflict structure]
   \label{prop:ser-depth}
-  Under serializability with the ordering and abort commitment basis:
+  Under serializability with the commit/abort commitment basis:
   \begin{enumerate}[nosep,label=(\alph*)]
-    \item When the conflict graph is acyclic, the determination consists
-          entirely of ordering commitments (which commute), giving depth~$1$.
+    \item When the active conflict graph is acyclic, every active transaction
+          can be committed independently.  All commit decisions commute
+          (Proposition~\ref{prop:commit-commute}, since no cycles exist),
+          giving depth~$1$.
     \item When cycles exist and are pairwise disjoint (share no transactions),
           each cycle can be broken independently by a single abort, giving
           depth~$1$.
-    \item When cycles overlap (share transactions), abort decisions may not
-          commute, and depth is at least~$2$.
+    \item When cycles overlap (share transactions), commit/abort decisions
+          may not commute, and depth is at least~$2$.
   \end{enumerate}
 \end{proposition}
 \begin{proof}[Proof sketch]
-  (a)~With no cycles, every acyclic orientation of the conflict graph is a
-  valid serialization order.
-  Ordering commitments select one such orientation; by
-  Proposition~\ref{prop:ordering-commute} they commute, so a single layer
-  suffices.
+  (a)~With no cycles, committing any transaction preserves acyclicity
+  (removing a vertex from an acyclic graph leaves it acyclic).
+  All commit decisions are independently valid and act on disjoint vertices,
+  so they commute.
   (b)~Disjoint cycles share no transactions, so aborting one transaction per
   cycle breaks all cycles independently.
-  The abort decisions act on disjoint subsets of the outcome space and
-  therefore commute.
+  The abort decisions act on disjoint vertices and therefore commute.
   (c)~See Example~\ref{ex:overlapping-cycles}: aborting $T_1$ leaves Cycle~2
   intact, requiring a second abort whose validity depends on the first
   decision.
-  The two abort commitments do not commute (aborting $T_3$ first would have
-  broken both cycles), so they cannot share a layer.
+  Committing $T_3$ (rather than aborting it) would leave both cycles intact;
+  aborting $T_3$ breaks both.
+  The choice for $T_3$ affects which subsequent decisions are valid, so the
+  decisions do not commute.
 \end{proof}
 
 \begin{example}[Overlapping cycles and depth]
@@ -1069,20 +1074,27 @@ two kinds of commitments, whose availability depends on the isolation level.
 
 We return to Example~\ref{ex:example}.
 The conflict structure is simple: $T_4$, $T_5$, and $T_Q$ all access
-tuple $(4,d)$, but no cycles arise.
-The determination consists entirely of ordering commitments (depth~$1$).
+tuple $(4,d)$, and the interleaving of their operations (an environment
+event) determines the conflict edges.
+No cycles arise, so no aborts are needed.
 
-If we observe $d$ in the query result, the determination is
+The determination consists of commit decisions.
+If $T_4$ commits before $T_Q$ executes its read, and $T_Q$ commits before
+$T_5$ executes its delete, the determination is
 $I_{\mathsf{in}} \triangleq
-  \varphi_{T_4 \prec T_Q} \cdot \varphi_{T_Q \prec T_5}$:
-$T_4$'s insert preceded $T_Q$'s read, and $T_Q$'s read preceded $T_5$'s
-delete.
-Conditioning yields $\Prov_{Q \mid I_{\mathsf{in}}}(d)=x_4$.
+  \varphi_{\mathsf{commit}(T_4)} \cdot \varphi_{\mathsf{commit}(T_Q)}
+  \cdot \varphi_{\mathsf{commit}(T_5)}$
+(in the order these commits occurred).
+Under this determination, $d$ is visible to $T_Q$:
+conditioning yields $\Prov_{Q \mid I_{\mathsf{in}}}(d)=x_4$.
 
-If instead we observe $d$ absent, the determination is
+If instead $T_5$ commits before $T_Q$ reads, the determination is
 $I_{\mathsf{out}} \triangleq
-  \varphi_{T_4 \prec T_5} \cdot \varphi_{T_5 \prec T_Q}$:
-the delete preceded the query.
+  \varphi_{\mathsf{commit}(T_4)} \cdot \varphi_{\mathsf{commit}(T_5)}
+  \cdot \varphi_{\mathsf{commit}(T_Q)}$:
+the delete was finalized before the query read.
+Under this determination, $d$ is absent.
+
 Prior to knowing which outcome was observed, there is no single provenance
 question for $d$---in one case the question is \emph{why}, in the other
 \emph{why-not}.
@@ -1118,16 +1130,21 @@ more than just which cycles are forbidden.
 Snapshot isolation is multiversion: each transaction reads from a
 \emph{snapshot}---a specific committed state---rather than from a single
 global state.
-The determination must therefore record not only conflict-graph orientations
-and aborts, but also \emph{which snapshot each transaction observed}.
+The determination must therefore record not only commit/abort decisions,
+but also \emph{which snapshot each transaction observed}.
 
-An SI determination adds snapshot-choice commitments to the basis:
-$\varphi_{\snap(T_i) = U}$ records that $T_i$ read from the effects of
-exactly the transactions in $U$.
-The FCW predicate constrains which snapshot
+\begin{definition}[Snapshot commitment (SI only)]
+  \label{def:snapshot-commitment}
+  For a transaction $T_i$ and a set $U$ of transactions, the
+  \emph{snapshot commitment} $\varphi_{\snap(T_i) = U}$ records that $T_i$
+  read from a snapshot containing exactly the effects of the transactions
+  in $U$.
+\end{definition}
+
+\noindent
+The first-committer-wins (FCW) rule constrains which snapshot
 assignments are jointly admissible.
-
-These snapshot commitments do not commute in general: the FCW rule can render
+Snapshot commitments do not commute in general: the FCW rule can render
 a snapshot choice for $T_j$ infeasible once a conflicting assignment for
 $T_i$ is fixed.
 This introduces non-commutativity beyond what serializability requires,
@@ -1186,26 +1203,30 @@ Section~\ref{sec:robustness}.
     \textbf{Case}                & \textbf{One resolving determination} & \textbf{Depth} \\
     \midrule
     SER robust $b$               &
-    $\{\varphi_{T_1 \prec T_Q},\varphi_{T_Q \prec T_2},\varphi_{T_2 \prec T_3},
-      \varphi_{T_3 \prec T_4},\varphi_{T_4 \prec T_5}\}$
+    $\{\varphi_{\mathsf{commit}(T_1)},\varphi_{\mathsf{commit}(T_2)},
+      \varphi_{\mathsf{commit}(T_3)},
+      \varphi_{\mathsf{commit}(T_4)},\varphi_{\mathsf{commit}(T_5)},
+      \varphi_{\mathsf{commit}(T_Q)}\}$
                                  & $1$                                                    \\
     %
     SER contingent $d$ (why)     &
-    $\{\varphi_{T_1 \prec T_2},\varphi_{T_2 \prec T_3},\varphi_{T_3 \prec T_4},
-      \varphi_{T_4 \prec T_Q},\varphi_{T_Q \prec T_5}\}$
+    $\varphi_{\mathsf{commit}(T_4)} \cdot
+      \varphi_{\mathsf{commit}(T_Q)} \cdot
+      \varphi_{\mathsf{commit}(T_5)}$
                                  & $1$                                                    \\
     %
     SER contingent $d$ (why-not) &
-    $\{\varphi_{T_1 \prec T_2},\varphi_{T_2 \prec T_3},\varphi_{T_3 \prec T_4},
-      \varphi_{T_4 \prec T_5},\varphi_{T_5 \prec T_Q}\}$
+    $\varphi_{\mathsf{commit}(T_4)} \cdot
+      \varphi_{\mathsf{commit}(T_5)} \cdot
+      \varphi_{\mathsf{commit}(T_Q)}$
                                  & $1$                                                    \\
     %
     SI (write-skew $e/f$)        &
-    $\varphi_{\snap(T_1)=\emptyset} \seq \cdots \seq
-      \varphi_{\snap(T_7)=\emptyset}
-      \seq \varphi_{T_4 \in \snap(T_5)}
-      \seq \varphi_{\snap(T_Q)=\{T_1,\dots,T_7\}}
-      \seq \varphi_{\FCW}(\{T_1,\dots,T_7\})$
+    $\varphi_{\snap(T_6)=\emptyset}
+      \seq \varphi_{\snap(T_7)=\emptyset}
+      \seq \varphi_{\mathsf{commit}(T_6)}
+      \seq \varphi_{\mathsf{commit}(T_7)}
+      \seq \varphi_{\snap(T_Q)=\{T_1,\dots,T_7\}}$
                                  & $O(|H|)$                                               \\
     \bottomrule
   \end{tabular}

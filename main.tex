@@ -534,22 +534,23 @@ can operate without it.
 
 \begin{theorem}[Necessity: ambiguity blocks semiring provenance]
   \label{thm:necessity}
-  Let $|\Spec(H)| \ge 2$ with distinct $o_1, o_2 \in \Spec(H)$, and
-  suppose there exists a query $Q$ and tuple $t$ whose semiring provenance
-  differs between $o_1$ and $o_2$:
-  $\Prov_Q(t \mid o_1) \neq \Prov_Q(t \mid o_2)$.
-  Then no commutative semiring annotation over a single instance
-  can simultaneously produce both provenance values at $H$.
+  Let $|\Spec(H)| \ge 2$ with distinct $o_1, o_2 \in \Spec(H)$ that
+  induce distinct database instances (i.e., differ on at least one base
+  fact).
+  Then for any query $Q$ that reads the differing fact, the semiring
+  provenance of some tuple under $Q$ differs between $o_1$ and $o_2$,
+  and no single semiring annotation can simultaneously produce both values.
 \end{theorem}
 
 \begin{proof}
-  A semiring annotation is a function of the resolved instance.
-  If the instance corresponds to $o_1$, the annotation yields
-  $\Prov_Q(t \mid o_1)$; if to $o_2$, it yields $\Prov_Q(t \mid o_2)$.
-  Since $\Prov_Q(t \mid o_1) \neq \Prov_Q(t \mid o_2)$, no single
-  instance produces both.
-  Hence the ambiguity between $o_1$ and $o_2$ must be resolved before
-  provenance is well-defined.
+  Let $f$ be a base fact present in the instance induced by $o_1$ but
+  absent in that induced by $o_2$.
+  Under $o_1$, any query reading $f$ has $\Prov_Q(t \mid o_1)$ with a
+  term involving $\alpha(f) \neq 0$.
+  Under $o_2$, the same query cannot use $f$ (it is absent), so
+  $\Prov_Q(t \mid o_2)$ lacks this term.
+  A single annotation $\alpha$ is a function of one instance; it cannot
+  produce both values.
 \end{proof}
 
 \noindent
@@ -781,18 +782,9 @@ tower.
 $|\mathcal{I}|$ may be exponential in the size of the commitment basis.
 When all commitments commute (a single-layer tower), supports admit compact
 representation as positive Boolean formulas over commitment
-variables~\cite{green2007provenance}.
+variables (Proposition~\ref{prop:collapse-depth-1}).
 For deeper towers, compact representation requires respecting inter-layer
 validity constraints; this remains open.
-We use the determination semiring primarily as a conceptual tool for stating
-robustness; computational questions are deferred to future work.
-
-\subsection{Summary}
-Once a determination is fixed, provenance is classical: it is
-computed over the conditioned specification $\Spec \mid I$.
-The following section instantiates this framework in transactional systems;
-Appendix~\ref{sec:appendix-datalog} provides a second instantiation for
-Datalog with negation.
 
 \subsection{Filtration of the Determination Semiring}
 \label{sec:filtration}
@@ -837,6 +829,26 @@ $[I]_0 = \mathcal{I}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
   unions-of-equivalence-classes.
 \end{proof}
 
+\begin{proposition}[Collapse at depth 1]
+  \label{prop:collapse-depth-1}
+  When all commitments commute (determination depth $d = 1$), the tower
+  is a single commutative monoid, the filtration has exactly two levels
+  ($\mathcal{F}_0 = \{\emptyset, \mathcal{I}\}$ and
+  $\mathcal{F}_1 = 2^{\mathcal{I}}$), and the determination semiring
+  coincides with $\mathrm{PosBool}(\Phi)$---positive Boolean formulas
+  over commitment variables, with $\vee$ as addition and $\wedge$ as
+  multiplication.
+\end{proposition}
+\begin{proof}
+  At depth $1$, all commitments form a single layer.
+  Level-$1$ equivalence classes are singletons (each determination is
+  uniquely identified by its single-layer content), so
+  $\mathcal{F}_1 = 2^{\mathcal{I}}$.
+  Each determination corresponds to a conjunction of commitment variables
+  (which commitments were applied); supports correspond to disjunctions
+  of such conjunctions---exactly $\mathrm{PosBool}(\Phi)$.
+\end{proof}
+
 \begin{definition}[Query-relative depth]
   \label{def:query-depth}
   The \emph{query-relative depth} of a tuple $t$ is
@@ -865,6 +877,19 @@ $[I]_0 = \mathcal{I}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
   (c)~Immediate from (b).
 \end{proof}
 
+\begin{example}[Query-relative depth in the transactional setting]
+  \label{ex:qdepth-txn}
+  In Example~\ref{ex:example}, the tower has depth~$1$ (all commit
+  decisions commute when no cycles exist).
+  Value $b$ has $\mathrm{qdepth}(b) = 0$: it holds under every
+  determination (robust).
+  Value $d$ has $\mathrm{qdepth}(d) = 1$: its support is a proper subset
+  of $\mathcal{I}$ (the determinations where $T_Q$ commits before $T_5$),
+  which is not in $\mathcal{F}_0 = \{\emptyset, \mathcal{I}\}$.
+  Classical provenance suffices for $b$; determination provenance is needed
+  for $d$.
+\end{example}
+
 \begin{corollary}[Query evaluation respects the filtration]
   \label{cor:propagation-filtration}
   Under positive relational algebra:
@@ -889,6 +914,16 @@ tuples at grade~$d$ (full tower required).
 A system answering queries at depth $\le k$ need only retain the first $k$
 layers---the formal basis for \emph{log parsimony}
 (Appendix~\ref{app:certificates}).
+
+\begin{remark}[Dependence on layering]
+  \label{rem:layering-dependence}
+  The filtration depends on the canonical layering of the tower (the Foata
+  normal form: commitments grouped into maximal commuting batches).
+  Different valid orderings \emph{within} a layer do not affect the
+  equivalence classes, since intra-layer commitments commute by definition.
+  The filtration is therefore well-defined up to the choice of layer
+  boundaries, which are determined by the commutation structure.
+\end{remark}
 
 % ================================================================
 \section{Transactions as Semantic Ambiguity}

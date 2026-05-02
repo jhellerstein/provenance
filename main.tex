@@ -363,15 +363,24 @@ We impose one restriction on bases throughout this paper:
 \end{definition}
 
 \noindent
-Persistence says that commitments are irrevocable: new information cannot undo
-a prior exclusion.
-For example, a transaction abort is persistent: once $T_i$ is aborted, no
-future event can make $T_i$'s effects visible again.
-A \emph{non}-persistent predicate would be a speculative lock that can be
-revoked by a later event---e.g., a tentative reservation that is released
-upon timeout.
-Under such a predicate, an outcome excluded at $H_1$ could reappear at
-$H_2 \sqsupseteq H_1$, invalidating earlier provenance.
+Persistence constrains how a predicate's effect varies with the history at
+which it is applied: if $\varphi$ excludes $o$ when applied at $H_1$
+(i.e., $o \notin \Spec(H_1 \cdot \varphi)$), then $\varphi$ still excludes
+$o$ when applied at any later $H_2 \sqsupseteq H_1$
+(i.e., $o \notin \Spec(H_2 \cdot \varphi)$).
+This is distinct from shrinkage, which says that once $\varphi$ is applied,
+the admissible set does not re-grow at extensions
+($\Spec(H') \subseteq \Spec(H)$ for $H' \sqsupseteq H \cdot \varphi$).
+Shrinkage concerns what happens \emph{after} a commitment is applied;
+persistence concerns whether the \emph{same commitment applied later}
+still excludes the same outcomes.
+
+A ``majority vote'' predicate illustrates the distinction: at $H_1$ with
+votes $(2{:}A, 1{:}B)$, the predicate ``accept the majority'' excludes $B$;
+but at $H_2 \sqsupseteq H_1$ with votes $(2{:}A, 3{:}B)$, the same
+predicate excludes $A$ instead.
+The predicate satisfies shrinkage (once applied, the winner is fixed) but
+not persistence (its effect depends on the history at which it is applied).
 
 Persistence is the paper's main structural assumption.
 It guarantees that determined specifications are history-monotone

@@ -402,15 +402,16 @@ commitments, applied as \emph{sequential refinement}.
 
 \begin{definition}[Determination]
   \label{def:determination}%
-  A \emph{determination} over a commitment basis $\Phi$ is a finite
-  sequence $I = \varphi_1 \cdot \cdots \cdot \varphi_m$
-  ($\varphi_i \in \Phi$).
-  Its application to a specification $\Spec$ at history $H$ is defined
-  recursively:
-  \[
-    (\Spec \mid \varepsilon)(H) = \Spec(H), \qquad
-    (\Spec \mid \varphi \cdot I')(H) = (\Spec \mid I')(H \cdot \varphi).
-  \]
+  A \emph{determination} over a commitment basis $\Phi$ starting at
+  history $H$ is a finite sequence
+  $\varphi_1(H_0) \cdot \varphi_2(H_1) \cdot \cdots \cdot \varphi_m(H_{m-1})$
+  where $\varphi_i \in \Phi$, $H_0 = H$, and
+  $H_i = H_{i-1} \cdot \varphi_i$ for each $i$.
+  Each commitment is annotated with the history at which it is applied;
+  we write simply $\varphi_1 \cdot \cdots \cdot \varphi_m$ when the
+  histories are clear from context.
+  The result of applying the full determination is
+  $(\Spec \mid I)(H) \triangleq \Spec(H_m)$.
   The \emph{determination of a history} $D(H)$ is the subsequence of
   commitment events in $H$, listed in the order induced by $\rightarrow$.
 \end{definition}
@@ -418,10 +419,8 @@ commitments, applied as \emph{sequential refinement}.
 \noindent
 Commitment events form a total order within any history (each succeeds all
 maximal events of its prefix), so $D(H)$ is always a well-defined sequence.
-
-Because commitments may be ambiguity-sensitive, the order of
-commitments can matter.
-This non-commutativity induces semantic dependency.
+Because each $\varphi_i$ acts on $\Spec(H_{i-1})$---which depends on all
+preceding commitments---the order of application can matter.
 
 \paragraph{Layer-sequencing notation.}
 When reasoning about \emph{depth}, we often group commitments into

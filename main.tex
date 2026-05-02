@@ -380,7 +380,7 @@ at $H_1$ with votes $2{:}A, 1{:}B$ it excludes $B$; at $H_2$ with
 $2{:}A, 3{:}B$ it excludes $A$ instead.)
 
 Persistence is the paper's main structural assumption.
-It guarantees that determined specifications are history-monotone
+It guarantees that determined specifications are history-invariant
 (Theorem~\ref{thm:resolution-implies-monotone}), enabling classical
 provenance at the foundation of the commitment tower.
 The sealing basis for Datalog with negation, the commit/abort basis for
@@ -453,12 +453,6 @@ When $|\Spec(H)| > 1$, this prerequisite fails.
 We establish that resolution under a persistent basis both \emph{suffices}
 to restore the prerequisite and is \emph{necessary}---no semiring scheme
 can operate without it.
-
-\begin{definition}[History-monotone specification]
-  \label{def:set-mono}
-  A specification $\Spec : \Hist \to 2^O$ is \emph{history-monotone} if
-  $H_1 \sqsubseteq H_2 \;\Longrightarrow\; \Spec(H_2) \subseteq \Spec(H_1)$.
-\end{definition}
 
 \begin{assumption}[Prefix-closure of histories]
   \label{ass:prefix-closed}
@@ -567,7 +561,7 @@ $\Prov_{Q \mid D}(t)$.
 Conditioned provenance is classical provenance, conditioned on a particular
 semantic resolution.
 
-Once $D$ is fixed, $\Spec \mid D$ is single-valued and history-monotone
+Once $D$ is fixed, $\Spec \mid D$ is single-valued and history-invariant
 (Theorem~\ref{thm:resolution-implies-monotone}), so classical semiring
 provenance applies without modification.
 For depth-$0$ specifications---where no nontrivial commitments are
@@ -615,7 +609,7 @@ by conditioning the specification.
 
 \paragraph{The semiring foundation.}
 At the base of the tower ($i = k$), the specification $\Spec_k = \Spec \mid D$
-is determined: single-valued and, under a persistent basis, history-monotone
+is determined: single-valued and, under a persistent basis, history-invariant
 (Theorem~\ref{thm:resolution-implies-monotone}).
 All remaining variation is purely derivational.
 At this point the algebraic regime shifts: we leave the world of commitment
@@ -1699,7 +1693,7 @@ discharged.
 \end{proposition}
 \begin{proof}[Proof sketch]
   By Theorem~\ref{thm:resolution-implies-monotone}, $\Spec \mid D$ is
-  history-monotone.
+  history-invariant.
   Because it is also single-valued (determined), $(\Spec \mid D)(H)$ is a singleton
   for every history $H$; no further commitments can eliminate outcomes, so semantic
   conditioning has ceased.

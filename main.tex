@@ -289,9 +289,9 @@ A specification that maps every history to exactly one outcome is a
 The goal of determination is to narrow a relational specification to a
 functional one.
 
-\begin{definition}[Resolved specification]
+\begin{definition}[Determined specification]
   \label{def:resolved}
-  A specification is \emph{resolved} if it is a function:
+  A specification is \emph{determined} if it is a function:
   $|\Spec(H)| = 1$ for every $H \in \Hist$.
 \end{definition}
 
@@ -359,7 +359,7 @@ We impose one restriction on bases throughout this paper:
 Persistence says that commitments are irrevocable: new information cannot undo
 a prior exclusion.
 This is the paper's main structural assumption.
-It guarantees that resolved specifications are history-monotone
+It guarantees that determined specifications are history-monotone
 (Theorem~\ref{thm:resolution-implies-monotone}), which is what enables
 classical provenance at the foundation of the commitment tower---in contrast
 to CALM monotonicity, which characterizes specifications needing no
@@ -448,7 +448,7 @@ of commuting batches.
 \end{definition}
 
 \begin{definition}[Resolving determination]
-  A determination $I$ \emph{resolves} $\Spec$ if $\Spec \mid I$ is resolved
+  A determination $I$ \emph{resolves} $\Spec$ if $\Spec \mid I$ is determined
   (Definition~\ref{def:resolved}): a function from histories to outcomes.
 \end{definition}
 
@@ -473,7 +473,7 @@ can operate without it.
   If $H \in \Hist$ and $H' \sqsubseteq H$, then $H' \in \Hist$.
 \end{assumption}
 
-\begin{theorem}[Sufficiency: resolved specifications are history-monotone]
+\begin{theorem}[Sufficiency: determined specifications are history-monotone]
   \label{thm:resolution-implies-monotone}
   Assume prefix-closure (Assumption~\ref{ass:prefix-closed}).
   Let $\Phi$ be a persistent commitment basis and let $I$ be a determination
@@ -531,7 +531,7 @@ shrinks) is distinct from CALM monotonicity ($\mathit{LFP}(H_1) \subseteq
 CALM monotonicity is a property of the specification: when it holds, no
 commitments are needed and classical provenance applies
 directly~\cite{hellerstein2026coordinationcriterion}.
-History-monotonicity is a property of a \emph{resolved} specification:
+History-monotonicity is a property of a \emph{determined} specification:
 it is guaranteed by the determination, not assumed of the specification.
 Negation violates CALM monotonicity (adding facts can shrink answer sets),
 requiring commitments; but once those commitments resolve the specification,
@@ -562,7 +562,7 @@ resolving determination $I \in \mathcal{I}$, the \emph{conditioned
 provenance} of $t$ under $I$ is
 $\Prov_{Q \mid \Spec \mid I}(t, H) \in K$:
 the ordinary semiring provenance of $t$ for query $Q$ computed under the
-resolved specification $\Spec \mid I$ at history $H$.
+determined specification $\Spec \mid I$ at history $H$.
 When $\Spec$ and $H$ are clear from context, we write simply
 $\Prov_{Q \mid I}(t)$.
 Conditioned provenance is classical provenance, conditioned on a particular
@@ -616,7 +616,7 @@ by conditioning the specification.
 
 \paragraph{The semiring foundation.}
 At the base of the tower ($i = k$), the specification $\Spec_k = \Spec \mid I$
-is resolved: single-valued and, under a persistent basis, history-monotone
+is determined: single-valued and, under a persistent basis, history-monotone
 (Theorem~\ref{thm:resolution-implies-monotone}).
 All remaining variation is purely derivational.
 At this point the algebraic regime shifts: we leave the world of commitment
@@ -1535,7 +1535,7 @@ ambiguous computational systems.
 \paragraph{Reversible commitments.}
 The main structural assumption of this paper is \emph{persistence}: once a
 commitment excludes an outcome, it remains excluded at all history extensions.
-This is what guarantees history-monotonicity of resolved specifications
+This is what guarantees history-monotonicity of determined specifications
 (Theorem~\ref{thm:resolution-implies-monotone}) and enables classical
 provenance at the foundation of the commitment tower.
 All examples in this paper satisfy persistence naturally.
@@ -1575,7 +1575,7 @@ Whether $\varphi$ and $\psi$ commute depends on the current admissible set,
 which changes as earlier layers are discharged.
 A formal characterization of the tower as a dynamic Foata normal form---and
 conditions under which two determinations are equivalent (produce the same
-resolved specification)---would give the tower a precise algebraic identity
+determined specification)---would give the tower a precise algebraic identity
 beyond its definition.
 
 \paragraph{Tower height under history extension.}
@@ -1692,16 +1692,16 @@ specification prefix for the next layer.
 The key algebraic transition occurs when the last commitment layer is
 discharged.
 
-\begin{proposition}[Resolved specifications admit semiring provenance]
+\begin{proposition}[Determined specifications admit semiring provenance]
   \label{prop:semiring}
-  If $\Spec \mid I$ is resolved and the commitment basis is persistent
+  If $\Spec \mid I$ is determined and the commitment basis is persistent
   (Definition~\ref{def:persistent}), then derivational provenance over
   $\Spec \mid I$ is captured by a commutative semiring.
 \end{proposition}
 \begin{proof}[Proof sketch]
   By Theorem~\ref{thm:resolution-implies-monotone}, $\Spec \mid I$ is
   history-monotone.
-  Because it is also single-valued (resolved), $(\Spec \mid I)(H)$ is a singleton
+  Because it is also single-valued (determined), $(\Spec \mid I)(H)$ is a singleton
   for every history $H$; no further commitments can eliminate outcomes, so semantic
   conditioning has ceased.
   Because it is monotone, the unique outcome grows monotonically with
@@ -1954,7 +1954,7 @@ in the unbounded, alternating structure of the determination itself.
 
 \paragraph{Determination structure.}
 Stable semantics insists on total two-valued models.
-Like WFS, it requires sealing the stratified prefix before negation is resolved.
+Like WFS, it requires sealing the stratified prefix before negation is determined.
 Unlike WFS, it does not lift the outcome domain; instead it resolves cycles by
 branching among incompatible global hypotheses.
 

@@ -384,10 +384,9 @@ The sealing basis for Datalog with negation, the commit/abort basis for
 serializability, and snapshot predicates under snapshot isolation are all
 persistent.
 
-\noindent
-Multiple commitments may be applied by iterating refinement.
-Because a commitment's effect on the admissible set may depend on which
-outcomes are jointly present, refinements need not commute:
+Multiple commitments may be applied in sequence.
+Because a commitment's effect may depend on which outcomes are jointly
+present, the order of application can matter:
 $\Spec(H \cdot \varphi \cdot \psi)$ and
 $\Spec(H \cdot \psi \cdot \varphi)$ may differ.
 

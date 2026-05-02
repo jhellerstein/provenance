@@ -264,6 +264,9 @@ predecessors of existing events.
 For an EDB viewed as a history, this means facts can be added but not
 retracted; for a transaction schedule, new operations cannot be placed
 before existing ones in the order.
+In general, histories may be partially ordered---the natural case when
+concurrent transactions or distributed processes contribute events without
+a fixed global sequence.
 
 \subsection{Outcomes and Specifications}
 An \emph{outcome} is an element of a set $O$ of externally

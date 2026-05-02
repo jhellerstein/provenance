@@ -131,29 +131,27 @@ The same phenomenon arises in database theory: a Datalog program with
 negation may admit multiple models, and whether a derived tuple holds
 may depend on which model is chosen.
 
-This paper introduces two algebraic objects that extend provenance to
-settings with semantic ambiguity.
+This paper extends provenance to settings with semantic ambiguity.
+The key idea is simple: before we can explain \emph{how} a result was
+derived, we must first account for \emph{which semantic commitments} made
+that derivation possible.
+A transactional system that committed $T_4$ before $T_5$ made a choice;
+a different commit order would have produced a different result with
+different provenance.
+We call such a sequence of irrevocable commitments a \emph{determination}.
 
-\emph{Conditioned provenance} explains a query result under a single fixed
-\emph{determination}---a sequence of irrevocable semantic commitments that
-narrows the admissible set to a singleton.
-Its algebraic structure is a \emph{commitment tower}: each layer of semantic
-commitment forms a commutative monoid, and the layers discharge sequentially
-until a provenance semiring is exposed at the foundation.
-Semirings are inapplicable within a single determination (where only monoids
-arise, because commitments compose by conjunction, not by disjunction), but
-the semiring framework recurs at the next level.
-
-\emph{Determination provenance} collects conditioned provenance across all
-determinations into a $K$-relation over the (finite) set of
-determinations.
-Its supports form a commutative semiring---the \emph{determination
-semiring}---that captures which determinations support a given outcome and how
-those supports compose through queries.
-This recovers the algebraic provenance framework
-of~\cite{green2007provenance} at a new level: determinations play the role
-of tuple annotations, and the determination semiring is analogous to their
-$\mathrm{PosBool}(B)$.
+Once a determination is fixed, classical provenance applies---the ambiguity
+is gone and derivations can be traced through a semiring as usual.
+The interesting structure lives in two places.
+First, \emph{within} a single determination: commitments may depend on each
+other (later commitments may be valid only after earlier ones are
+discharged), giving rise to a layered structure we call the
+\emph{commitment tower}.
+Second, \emph{across} determinations: different determinations may support
+different tuples, and tracking which determinations support a given tuple
+yields a semiring structure---the \emph{determination semiring}---that
+composes through queries in the same way that Green et al.'s provenance
+semiring composes through relational algebra~\cite{green2007provenance}.
 
   Layer certificates---compact summaries of commitment layers sufficient for
   a given family of provenance queries---provide a principled basis for

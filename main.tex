@@ -1462,6 +1462,28 @@ execution, backtracking search), commitments can be undone.
 Extending the tower to reversible commitments---replacing monoids with
 groups at each layer---and characterizing the resulting provenance structure
 is open.
+
+\paragraph{Propagation of determination provenance through queries.}
+Green et al.\ showed that semiring provenance propagates through positive
+relational algebra: annotations compose via $+$ (union) and $\times$ (join).
+The determination semiring $(2^{\mathcal{I}}, \cup, \cap)$ should propagate
+analogously: join intersects supports (both premises must hold), union takes
+their union (either suffices), and projection/selection preserve supports.
+A formal propagation theorem---stating that determination provenance is
+computed by evaluating the query over the determination semiring---would
+precisely parallel Green et al.'s foundational result at the new level.
+
+\paragraph{Complexity of robustness.}
+Deciding whether a tuple is robust under serializability (present under
+\emph{every} resolving determination) appears to be coNP-complete.
+The upper bound is clear: to refute robustness, guess an abort set (a
+feedback vertex set of the conflict graph), verify acyclicity, evaluate the
+query, and check that the tuple is absent---an NP certificate for
+non-robustness.
+A hardness reduction (likely from tautology or a variant of ``is this tuple
+in every minimal model?'') would establish that robustness checking is
+inherently intractable, complementing the algebraic propagation result:
+propagation is compositional, but deciding full support is hard.
 % ================================================================
 \section{Appendix: The Commitment Tower---Algebraic Details}
 \label{app:algebra}

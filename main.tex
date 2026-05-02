@@ -479,18 +479,22 @@ can operate without it.
 \end{theorem}
 
 \begin{proof}
-  Let $H_1 \sqsubseteq H_2$ and let $(\Spec \mid D)(H_1) = \{o^*\}$.
+  Let $H_1 \sqsubseteq H_2$.
+  Since $D$ resolves $\Spec$, both $(\Spec \mid D)(H_1)$ and
+  $(\Spec \mid D)(H_2)$ are singletons; call them $\{o_1\}$ and $\{o_2\}$.
+  We show $o_1 = o_2$.
   Write $D = \varphi_1 \cdot \cdots \cdot \varphi_m$.
-  For every $o \neq o^*$, some $\varphi_j$ excludes $o$ when applied
-  at $H_1 \cdot \varphi_1 \cdots \varphi_{j-1}$.
+  Since $(\Spec \mid D)(H_1) = \{o_1\}$, every $o \neq o_1$ is excluded
+  by some $\varphi_j$ applied at $H_1 \cdot \varphi_1 \cdots \varphi_{j-1}$.
   Since $H_1 \sqsubseteq H_2$ implies
   $H_1 \cdot \varphi_1 \cdots \varphi_{j-1} \sqsubseteq
   H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$,
-  persistence gives that $\varphi_j$ also excludes $o$ when applied
-  at $H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$.
-  Hence $(\Spec \mid D)(H_2) \subseteq \{o^*\}$.
-  Since $(\Spec \mid D)(H_2) \neq \emptyset$ (Definition~\ref{def:commitment}),
-  $(\Spec \mid D)(H_2) = \{o^*\}$.
+  persistence gives that $\varphi_j$ also excludes $o$ at
+  $H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$.
+  In particular, $o_1$ is \emph{not} excluded at any step (it survives
+  at $H_1$), so by persistence it is not excluded at $H_2$ either.
+  Since $(\Spec \mid D)(H_2)$ is a singleton and $o_1$ is not excluded,
+  $o_2 = o_1$.
 \end{proof}
 
 \begin{theorem}[Necessity: ambiguity blocks semiring provenance]

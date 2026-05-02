@@ -340,6 +340,8 @@ A fine-grained basis (many simple predicates) may require more sequential
 layers because each predicate excludes little; a coarse basis (fewer,
 more powerful predicates) can reduce depth but each predicate is harder
 to evaluate.
+(A formal conservation law relating predicate complexity to determination
+depth appears in~\cite{hellerstein2026complexity}.)
 The transactional section illustrates this concretely: the commit/abort
 basis and the scheduling-enriched basis yield different tower structures
 for the same workload (Section~\ref{sec:scheduling-basis}).

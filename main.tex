@@ -896,14 +896,29 @@ states) consistent with the isolation level's acyclicity constraint.
 
 \begin{definition}[Isolation-level specification]
   \label{def:isolation-spec}
-  For an isolation level $L$, the specification $\Spec_L(H)$ is the set of
-  admissible commit/abort outcomes for the transactions in $H$.
-  An outcome is admissible if the conflict graph restricted to committed
-  transactions, considering only the edge types relevant to $L$, satisfies
-  $L$'s acyclicity constraint~\cite{adya1999weak}.
-  Different isolation levels forbid different cycle structures:
-  stronger levels forbid more edge types in cycles.
+  For an isolation level $L$, the specification $\Spec_L$ is an invariant
+  on the active conflict graph: at every point in the history, the conflict
+  graph over running (uncommitted, non-aborted) transactions, restricted to
+  the edge types relevant to $L$, must satisfy $L$'s acyclicity
+  constraint~\cite{adya1999weak}.
+  An outcome (the sequence of commit and abort decisions) is admissible if
+  this invariant is maintained throughout the history.
+  Stronger isolation levels forbid more edge types in cycles; weaker levels
+  permit more.
 \end{definition}
+
+\begin{remark}[Transactional histories as conflict-graph streams]
+  \label{rem:history-as-stream}
+  The transactional history in our framework is not a traditional transaction
+  schedule (a linear interleaving of operations).
+  It is a stream of conflict-graph states---or equivalently, deltas to the
+  active conflict graph---punctuated by commit and abort events that remove
+  vertices and their adjacent edges.
+  Each read or write event may add an edge; each commit or abort removes a
+  vertex.
+  The specification's acyclicity constraint is an invariant over this evolving
+  graph.
+\end{remark}
 
 \noindent
 We consider three levels:

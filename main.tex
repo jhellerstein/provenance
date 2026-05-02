@@ -785,18 +785,101 @@ The following section instantiates this framework in transactional systems;
 Appendix~\ref{sec:appendix-datalog} provides a second instantiation for
 Datalog with negation.
 
+\subsection{Filtration of the Determination Semiring}
+\label{sec:filtration}
 
-% ================================================================
-% Layer certificates: formal development in Appendix~\ref{app:certificates}.
-% ================================================================
+The commitment tower and the determination semiring are not independent
+structures: the tower induces a natural \emph{filtration} on the semiring
+that connects query-relative depth to algebraic structure.
 
-\paragraph{Layer certificates and log parsimony.}
-How much of the determination must a system retain to support downstream
-provenance queries?
-A \emph{layer certificate} over-approximates a layer's effect while
-preserving answers to a specified query family; expanding the family can
-only require more information (query monotonicity).
-Formal definitions appear in Appendix~\ref{app:certificates}.
+Two determinations $I, I' \in \mathcal{I}$ \emph{agree at level $k$} if
+they apply the same commitments in layers $1, \ldots, k$.
+Agreement at level $k$ is an equivalence relation on $\mathcal{I}$;
+write $[I]_k$ for the equivalence class of $I$ at level $k$.
+These classes refine as $k$ increases:
+$[I]_0 = \mathcal{I}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
+
+\begin{definition}[Level-$k$ support]
+  A set $S \subseteq \mathcal{I}$ is a \emph{level-$k$ support} if it is a
+  union of level-$k$ equivalence classes.
+  Equivalently, $S$ is closed under level-$k$ agreement:
+  if $I \in S$ and $I'|_{\le k} = I|_{\le k}$, then $I' \in S$.
+\end{definition}
+
+\begin{definition}[Filtration]
+  Define $\mathcal{F}_k \triangleq \{S \subseteq \mathcal{I} \mid
+  S \text{ is a level-}k\text{ support}\}$.
+  This yields:
+  \[
+    \mathcal{F}_0 \;\subseteq\; \mathcal{F}_1 \;\subseteq\; \cdots
+    \;\subseteq\; \mathcal{F}_d \;=\; 2^{\mathcal{I}},
+  \]
+  where $\mathcal{F}_0 = \{\emptyset, \mathcal{I}\}$.
+\end{definition}
+
+\begin{proposition}[Filtration respects the semiring]
+  \label{prop:filtration-semiring}
+  Each $\mathcal{F}_k$ is closed under $\cup$ and $\cap$, hence
+  $(\mathcal{F}_k, \cup, \cap, \emptyset, \mathcal{I})$ is a
+  sub-semiring of the determination semiring for each $k$.
+\end{proposition}
+\begin{proof}
+  Unions and intersections of unions-of-equivalence-classes are again
+  unions-of-equivalence-classes.
+\end{proof}
+
+\begin{definition}[Query-relative depth]
+  \label{def:query-depth}
+  The \emph{query-relative depth} of a tuple $t$ is
+  $\mathrm{qdepth}(t) \triangleq
+  \min\{k \mid \mathrm{supp}(\Prov_Q(t)) \in \mathcal{F}_k\}$.
+\end{definition}
+
+\begin{proposition}[Characterization]
+  \label{prop:qdepth-characterization}
+  \begin{enumerate}[nosep,label=(\alph*)]
+    \item $\mathrm{qdepth}(t) = 0$ iff $t$ is robust
+          ($\mathrm{supp} = \mathcal{I}$) or impossible
+          ($\mathrm{supp} = \emptyset$).
+    \item $\mathrm{qdepth}(t) = k$ iff all determinations agreeing on
+          layers $1, \ldots, k$ agree on whether $t$ holds, but some
+          pair agreeing on layers $1, \ldots, k{-}1$ disagrees.
+    \item $\mathrm{qdepth}(t) = d$ iff $t$'s presence depends on the
+          full determination.
+  \end{enumerate}
+\end{proposition}
+\begin{proof}
+  (a)~$\mathcal{F}_0 = \{\emptyset, \mathcal{I}\}$ by definition.
+  (b)~$\mathrm{supp} \in \mathcal{F}_k$ means the support is closed under
+  level-$k$ agreement, so layers $k{+}1, \ldots, d$ are irrelevant.
+  Minimality of $k$ means some level-$(k{-}1)$ class is split.
+  (c)~Immediate from (b).
+\end{proof}
+
+\begin{corollary}[Query evaluation respects the filtration]
+  \label{cor:propagation-filtration}
+  Under positive relational algebra:
+  $\mathrm{qdepth}(t_1 \bowtie t_2) \le
+  \max(\mathrm{qdepth}(t_1), \mathrm{qdepth}(t_2))$,
+  and likewise for union.
+  Query evaluation cannot increase query-relative depth beyond the maximum
+  depth of its inputs.
+\end{corollary}
+\begin{proof}
+  Join computes $\mathrm{supp}(t_1) \cap \mathrm{supp}(t_2)$;
+  union computes $\mathrm{supp}(t_1) \cup \mathrm{supp}(t_2)$.
+  By Proposition~\ref{prop:filtration-semiring}, both remain in
+  $\mathcal{F}_{\max(k_1, k_2)}$.
+\end{proof}
+
+\noindent
+The filtration says the tower is reflected \emph{inside} the semiring as a
+graded sub-semiring structure.
+Robust tuples live at grade~$0$ (classical provenance); fully contingent
+tuples at grade~$d$ (full tower required).
+A system answering queries at depth $\le k$ need only retain the first $k$
+layers---the formal basis for \emph{log parsimony}
+(Appendix~\ref{app:certificates}).
 
 % ================================================================
 \section{Transactions as Semantic Ambiguity}

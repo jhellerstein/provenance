@@ -352,8 +352,8 @@ We impose one restriction on bases throughout this paper:
   \label{def:persistent}
   A commitment basis $\Phi$ is \emph{persistent} if for every
   $\varphi \in \Phi$ and all histories $H_1 \sqsubseteq H_2$:
-  once $\varphi$ excludes an outcome at $H_1$, it continues to
-  exclude that outcome at $H_2$.
+  if applying $\varphi$ at $H_1$ excludes an outcome $o$, then
+  applying $\varphi$ at $H_2$ also excludes $o$.
   Formally, for all outcomes $o \in O$,
   $
     o \notin \Spec(H_1 \cdot \varphi)

@@ -402,16 +402,15 @@ commitments, applied as \emph{sequential refinement}.
 
 \begin{definition}[Determination]
   \label{def:determination}%
-  A \emph{determination} over a commitment basis $\Phi$ starting at
-  history $H$ is a finite sequence
-  $\varphi_1(H_0) \cdot \varphi_2(H_1) \cdot \cdots \cdot \varphi_m(H_{m-1})$
-  where $\varphi_i \in \Phi$, $H_0 = H$, and
-  $H_i = H_{i-1} \cdot \varphi_i$ for each $i$.
-  Each commitment is annotated with the history at which it is applied;
-  we write simply $D = \varphi_1 \cdot \cdots \cdot \varphi_m$ when the
-  histories are clear from context.
-  The result of applying determination $D$ starting at $H$ is
-  $(\Spec \mid D)(H) \triangleq \Spec(H_m)$.
+  A \emph{determination} over a commitment basis $\Phi$ is a finite
+  sequence of commitments $D = \varphi_1 \cdot \cdots \cdot \varphi_m$
+  ($\varphi_i \in \Phi$).
+  Applying $D$ at a starting history $H$ produces a chain of histories
+  $H_0 = H$, $H_i = H_{i-1} \cdot \varphi_i$;
+  we write $(\Spec \mid D)(H) \triangleq \Spec(H_m)$ for the resulting
+  admissible set.
+  When the starting history matters, we write the fully qualified form
+  $\varphi_1(H_0) \cdot \varphi_2(H_1) \cdot \cdots \cdot \varphi_m(H_{m-1})$.
   The \emph{determination of a history} $D(H)$ is the subsequence of
   commitment events in $H$, listed in the order induced by $\rightarrow$.
 \end{definition}

@@ -168,14 +168,13 @@ semiring composes through relational algebra~\cite{green2007provenance}.
   \label{ex:example}
   Consider a database with a binary relation $S$
   and an initially empty instance.
-  Three transactions execute concurrently:
+  Three transactions and a query execute concurrently:
   \[
     T_1\!: \textsf{insert } S(1,b)\ (x_1);\qquad
     T_2\!: \textsf{insert } S(2,d)\ (x_2);\qquad
-    T_3\!: \textsf{delete } S(2,d).
+    T_3\!: \textsf{delete } S(2,d);\qquad
+    T_Q\!: Q(y) \drule S(k,y).
   \]
-  Subsequently, a query transaction $T_Q$ executes
-  $Q(y) \drule S(k,y)$.
 
   Under serializability, value $b$ appears in $Q$'s result under every
   admissible execution: it is \emph{robust}.

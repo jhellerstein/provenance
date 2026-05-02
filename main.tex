@@ -174,8 +174,7 @@ semiring composes through relational algebra~\cite{green2007provenance}.
     T_3\!: \textsf{del } S(2,d);\qquad
     T_Q\!: Q(y) \drule S(k,y).
   \]
-  All four are concurrent; the order in which their operations take effect
-  is not determined by the history.
+  All four are concurrent; any interleaving of their operations is possible.
 
   Value $b$ appears in $Q$'s result regardless of how the operations are
   ordered: the initial tuple $S(0,b)$ is never deleted.

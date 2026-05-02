@@ -481,9 +481,10 @@ persistent basis is both necessary and sufficient for provenance.
 \begin{proof}
   (a)~Let $f$ be a base fact present in the instance induced by $o_1$ but
   absent in that induced by $o_2$.
-  Any query reading $f$ has provenance involving $\alpha(f) \neq 0$ under
-  $o_1$ but not under $o_2$.
-  A single annotation is a function of one instance; it cannot produce both.
+  Under $o_1$, a query that reads $f$ derives results that depend on $f$;
+  under $o_2$, $f$ does not exist and those derivations are absent.
+  No single instance contains and lacks $f$ simultaneously, so no
+  semiring annotation can explain both outcomes.
 
   (b)~Since $D$ resolves $\Spec$, both $(\Spec \mid D)(H_1)$ and
   $(\Spec \mid D)(H_2)$ are singletons; call them $\{o_1\}$ and $\{o_2\}$.

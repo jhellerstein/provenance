@@ -897,13 +897,12 @@ states) consistent with the isolation level's acyclicity constraint.
 \begin{definition}[Isolation-level specification]
   \label{def:isolation-spec}
   For an isolation level $L$, the specification $\Spec_L(H)$ is the set of
-  database states reachable by some serial ordering of the committed
-  transactions in $H$ that is consistent with the conflict edges established
-  during execution and satisfies the acyclicity constraint of level $L$.
-  Formally,
-  $\Spec_L(H) \triangleq \{\, \mathsf{state}(\sigma) \mid
-  \sigma \text{ is a serial order of committed transactions in } H
-  \text{ consistent with } L\text{'s constraints}\,\}$.
+  admissible commit/abort outcomes for the transactions in $H$.
+  An outcome is admissible if the conflict graph restricted to committed
+  transactions, considering only the edge types relevant to $L$, satisfies
+  $L$'s acyclicity constraint~\cite{adya1999weak}.
+  Different isolation levels forbid different cycle structures:
+  stronger levels forbid more edge types in cycles.
 \end{definition}
 
 \noindent

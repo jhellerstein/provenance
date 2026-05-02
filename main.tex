@@ -448,11 +448,14 @@ We use $\seq$ to denote a sequence of such layers:
 \label{sec:mono-theorem}
 
 Classical provenance requires a unique outcome at each input: derivations
-are traced through a commutative semiring over a fixed, resolved instance.
+are traced through a commutative semiring over a fixed instance.
 When $|\Spec(H)| > 1$, this prerequisite fails.
-We establish that resolution under a persistent basis both \emph{suffices}
-to restore the prerequisite and is \emph{necessary}---no semiring scheme
-can operate without it.
+We show that resolution is both necessary and sufficient for provenance:
+necessary because no semiring scheme can operate under ambiguity
+(Theorem~\ref{thm:necessity}), and sufficient because a persistent basis
+guarantees the resolved outcome is stable
+(Theorem~\ref{thm:resolution-implies-monotone}).
+Together, these results precisely delineate when classical provenance applies.
 
 \begin{assumption}[Prefix-closure of histories]
   \label{ass:prefix-closed}

@@ -267,7 +267,7 @@ add new events (and precedence edges involving them) but may not insert new
 predecessors of existing events.
 For a transaction schedule, new operations cannot be placed before existing
 ones; for an unordered history of tuple insertions, new insertions (or
-deletions) may be added but cannot be placed before existing ones.
+deletions) may be added but cannot be ordered before existing ones.
 
 \subsection{Outcomes and Specifications}
 An \emph{outcome} is an element of a set $O$ of externally
@@ -323,7 +323,7 @@ A commitment event succeeds all maximal events of~$H$, inducing a cut in the
 history: everything before the commitment is fixed, and the admissible set
 after the commitment can only be smaller.
 Commitments restrict admissible outcomes without introducing new ones.
-We write $(\Spec \mid \varphi)(H) \triangleq \Spec(H \cdot \varphi)$
+We write \mbox{$(\Spec \mid \varphi)(H) \triangleq \Spec(H \cdot \varphi)$}
 as shorthand for the \emph{refinement} of $\Spec$ by $\varphi$:
 the specification evaluated at the extended history.
 

@@ -174,15 +174,15 @@ semiring composes through relational algebra~\cite{green2007provenance}.
     T_3\!: \textsf{del } S(2,d);\qquad
     T_Q\!: Q(y) \drule S(k,y).
   \]
-  All four are concurrent; the serialization order is not determined by
-  the history.
+  All four are concurrent; the order in which their operations take effect
+  is not determined by the history.
 
-  Under serializability, value $b$ appears in $Q$'s result under every
-  admissible serialization: the initial tuple $S(0,b)$ guarantees it
-  regardless of ordering.
+  Value $b$ appears in $Q$'s result regardless of how the operations are
+  ordered: the initial tuple $S(0,b)$ is never deleted.
   Thus $b$ is \emph{robust}.
-  Value $d$ is \emph{contingent}: it appears if $T_2$ is serialized before
-  $T_Q$ and $T_Q$ before $T_3$, but is absent if $T_3$ precedes $T_Q$.
+  Value $d$ is \emph{contingent}: it appears if $T_2$'s insert takes effect
+  before $T_Q$'s read and $T_3$'s delete takes effect after, but is absent
+  if $T_3$'s delete precedes $T_Q$'s read.
   Before resolving this ambiguity, even the \emph{form} of the provenance
   question for $d$ is undetermined: in one determination the relevant
   question is \emph{why} $d$ appears, while in another

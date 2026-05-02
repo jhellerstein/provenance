@@ -166,23 +166,23 @@ semiring composes through relational algebra~\cite{green2007provenance}.
 
 \begin{example}[Provenance under transactional ambiguity]
   \label{ex:example}
-  Consider a database with a binary relation $S$
-  and an initially empty instance.
-  Four transactions execute:
+  Consider a relation $S(k,y)$ with initial contents $\{S(0,b)\}$.
+  Three transactions execute concurrently with a query:
   \[
     T_1\!: \textsf{ins } S(1,b);\qquad
     T_2\!: \textsf{ins } S(2,d);\qquad
     T_3\!: \textsf{del } S(2,d);\qquad
     T_Q\!: Q(y) \drule S(k,y).
   \]
-  $T_1$ and $T_2$ commit before $T_3$ and $T_Q$, but the relative
-  order of $T_3$ and $T_Q$ is not determined by the history.
+  All four are concurrent; the serialization order is not determined by
+  the history.
 
   Under serializability, value $b$ appears in $Q$'s result under every
-  admissible execution: it is \emph{robust}.
-  Value $d$ is \emph{contingent}: it appears if $T_Q$ commits before
-  $T_3$ (reading $T_2$'s insert), and is absent if $T_3$ commits first
-  (deleting $d$ before the query reads).
+  admissible serialization: the initial tuple $S(0,b)$ guarantees it
+  regardless of ordering.
+  Thus $b$ is \emph{robust}.
+  Value $d$ is \emph{contingent}: it appears if $T_2$ is serialized before
+  $T_Q$ and $T_Q$ before $T_3$, but is absent if $T_3$ precedes $T_Q$.
   Before resolving this ambiguity, even the \emph{form} of the provenance
   question for $d$ is undetermined: in one determination the relevant
   question is \emph{why} $d$ appears, while in another

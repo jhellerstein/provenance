@@ -163,13 +163,9 @@ of~\cite{green2007provenance} at a new level: determinations play the role
 of tuple annotations, and the determination semiring is analogous to their
 $\mathrm{PosBool}(B)$.
 
-We formalize \emph{layer certificates}---compact summaries of commitment
-layers sufficient for a given family of provenance queries---and prove that
-expanding the query family can only require retaining more semantic
-information.
-Certificates provide a principled basis for \emph{log parsimony}: retaining
-exactly the semantic commitments needed to justify intended diagnostic
-conclusions, rather than recording full execution histories.
+  Layer certificates---compact summaries of commitment layers sufficient for
+  a given family of provenance queries---provide a principled basis for
+  \emph{log parsimony} (Appendix~\ref{app:certificates}).
 
   We instantiate the framework in depth for transactional systems, where
   ambiguity arises from concurrency and isolation choices.
@@ -769,16 +765,13 @@ The distinction matters: in our setting, joint use of two premises
 \emph{intersects} their supports (both must hold), while alternative
 derivation paths \emph{union} them (either suffices).
 
-\paragraph{Why the two algebras do not flatten.}
-The commitment tower (inner algebra) and the determination semiring (outer
-algebra) are complementary but do not compose into a single flat structure.
+\paragraph{The two algebras do not flatten.}
 The outer algebra treats determinations as atomic indices; the inner algebra
-decomposes each into layers discharged sequentially.
-Flattening would require distributing disjunction ($\cup$) into layered
-sequencing ($\seq$), but disjunction does not distribute over sequencing:
-commitments at later layers depend on the discharge of earlier ones, so a
-disjunction of determinations with different prefixes cannot be decomposed
-into a single tower.
+decomposes each into sequentially discharged layers.
+Disjunction ($\cup$) does not distribute over sequencing ($\seq$) because
+later layers depend on earlier discharges, so a disjunction of
+determinations with different prefixes cannot be decomposed into a single
+tower.
 
 \paragraph{Computational cost.}
 $|\mathcal{I}|$ may be exponential in the size of the commitment basis.
@@ -803,19 +796,12 @@ Datalog with negation.
 % ================================================================
 
 \paragraph{Layer certificates and log parsimony.}
-A practical question arises from the commitment tower: how much of the
-determination must a system retain to support downstream provenance queries?
-A \emph{layer certificate} is a compact summary of a commitment layer---a
-predicate on outcomes that over-approximates the layer's effect---sufficient
-to preserve the answers to a specified family of queries.
-Expanding the query family can only require retaining more semantic
-information, never less (query monotonicity).
-This provides a principled basis for \emph{log parsimony}: systems need
-retain only the certificates sufficient for their intended diagnostic
-queries, rather than full execution
-traces~\cite{sigelman2010dapper}.
-Formal definitions and the query monotonicity theorem appear in
-Appendix~\ref{app:certificates}.
+How much of the determination must a system retain to support downstream
+provenance queries?
+A \emph{layer certificate} over-approximates a layer's effect while
+preserving answers to a specified query family; expanding the family can
+only require more information (query monotonicity).
+Formal definitions appear in Appendix~\ref{app:certificates}.
 
 % ================================================================
 \section{Transactions as Semantic Ambiguity}
@@ -1073,191 +1059,84 @@ recorded in the history as conflict edges accumulate.
   of transactions, arising from chains of FCW dependencies.
 \end{proposition}
 
-\subsection{Running Example: Provenance Under Serializability}
+\subsection{Running Example Revisited}
 
-We return to Example~\ref{ex:example}.
-The conflict structure is simple: $T_4$, $T_5$, and $T_Q$ all access
-tuple $(4,d)$, and the interleaving of their operations (an environment
-event) determines the conflict edges.
-No cycles arise, so no aborts are needed.
-
-The determination consists of commit decisions.
-If $T_4$ commits before $T_Q$ executes its read, and $T_Q$ commits before
-$T_5$ executes its delete, the determination is
+Returning to Example~\ref{ex:example}: $T_4$, $T_5$, and $T_Q$ conflict on
+$(4,d)$ with no cycles.
+Two representative determinations:
 $I_{\mathsf{in}} \triangleq
   \varphi_{\mathsf{commit}(T_4)} \cdot \varphi_{\mathsf{commit}(T_Q)}
   \cdot \varphi_{\mathsf{commit}(T_5)}$
-(in the order these commits occurred).
-Under this determination, $d$ is visible to $T_Q$:
-conditioning yields $\Prov_{Q \mid I_{\mathsf{in}}}(d)=x_4$.
-
-If instead $T_5$ commits before $T_Q$ reads, the determination is
+yields $\Prov_{Q \mid I_{\mathsf{in}}}(d)=x_4$;
 $I_{\mathsf{out}} \triangleq
   \varphi_{\mathsf{commit}(T_4)} \cdot \varphi_{\mathsf{commit}(T_5)}
-  \cdot \varphi_{\mathsf{commit}(T_Q)}$:
-the delete was finalized before the query read.
-Under this determination, $d$ is absent.
+  \cdot \varphi_{\mathsf{commit}(T_Q)}$
+yields $d$ absent.
+Prior to resolution, even the \emph{form} of the provenance question for $d$
+is ambiguous (why vs.\ why-not).
+Values $b$ and $c$ have full support
+($\mathrm{supp}(\Prov_Q(b)) = \mathrm{supp}(\Prov_Q(c)) = \mathcal{I}$)
+and are robust; $d$ is contingent.
 
-Prior to knowing which outcome was observed, there is no single provenance
-question for $d$---in one case the question is \emph{why}, in the other
-\emph{why-not}.
-Determination provenance makes this dependence explicit.
+\subsection{Snapshot Isolation}
 
-\paragraph{Same observation, different derivational provenance.}
-Even when multiple determinations yield the same observable outcome, they
-need not agree on derivational provenance.
-For instance, adding a transaction
-$T_{-2}:\ \textsf{delete } S(2,b)$
-yields determinations in which $b$ is observed with provenance $x_1$ or
-$x_1+x_2$, depending on whether $T_{-2}$ preceded $T_Q$.
-Determination provenance distinguishes these explanations even when the
-query result is identical.
-
-\subsection{Robustness Under Serializability}
-
-Values $b$ and $c$ in Example~\ref{ex:example} have full support:
-$\mathrm{supp}(\Prov_Q(b)) = \mathrm{supp}(\Prov_Q(c)) = \mathcal{I}$.
-They appear under every serializable execution and are therefore
-\emph{robust} (Section~\ref{sec:robustness}).
-Value $d$ is \emph{contingent}: its support is a proper subset of
-$\mathcal{I}$, depending on the ordering of $T_4$, $T_5$, and $T_Q$.
-
-\subsection{Snapshot Isolation: A Different Determination Shape}
-
-As Adya and Liskov observe~\cite{adya1999weak}, all operationalized isolation
-levels correspond to acyclicity checks in a conflict graph---they differ only
-in which edge types are included.
-However, the \emph{commitment bases} for different isolation levels differ in
-more than just which cycles are forbidden.
-
-Snapshot isolation is multiversion: each transaction reads from a
-\emph{snapshot}---a specific committed state---rather than from a single
-global state.
-The determination must therefore record not only commit/abort decisions,
-but also \emph{which snapshot each transaction observed}.
+Snapshot isolation (SI) is multiversion: each transaction reads from a
+snapshot.
+The commitment basis adds snapshot predicates:
 
 \begin{definition}[Snapshot commitment (SI only)]
   \label{def:snapshot-commitment}
-  For a transaction $T_i$ and a set $U$ of transactions, the
-  \emph{snapshot commitment} $\varphi_{\snap(T_i) = U}$ records that $T_i$
-  read from a snapshot containing exactly the effects of the transactions
-  in $U$.
+  $\varphi_{\snap(T_i) = U}$ records that $T_i$
+  read from a snapshot containing exactly the effects of transactions in $U$.
 \end{definition}
 
 \noindent
 The first-committer-wins (FCW) rule constrains which snapshot
 assignments are jointly admissible.
-Snapshot commitments do not commute in general: the FCW rule can render
-a snapshot choice for $T_j$ infeasible once a conflicting assignment for
-$T_i$ is fixed.
-This introduces non-commutativity beyond what serializability requires,
-potentially deepening the tower even for conflict graphs that are already
-acyclic.
-
-\paragraph{Takeaway.}
-Serializability and snapshot isolation share the same basic enforcement
-pattern (orient edges, break cycles), but the \emph{sources of sequentiality}
-in their commitment towers differ.
-Under serializability, depth arises from overlapping abort decisions.
-Under SI, depth arises additionally from snapshot-choice dependencies
-induced by the FCW rule.
-Determination provenance makes these structural differences explicit.
-SI also admits a larger space of outcomes than serializability, which matters
-for the cross-specification preservation questions of
-Section~\ref{sec:robustness}.
+Snapshot commitments do not commute in general (FCW can render
+a choice for $T_j$ infeasible once $T_i$'s is fixed),
+introducing non-commutativity beyond serializability and
+potentially deepening the tower even for acyclic conflict graphs.
+Worst-case depth under SI is $O(n)$ (Proposition~\ref{prop:si-depth}).
 
 \subsection{Enriching the Basis: Scheduling as Commitment}
 \label{sec:scheduling-basis}
 
-The commit/abort basis treats operation interleaving as environment: the
-system observes which conflicting operations arrived in which order, and
-its only decisions are commit or abort.
-This models a system with no scheduler---a pure OCC architecture where
-transactions execute freely and conflicts are detected at commit time.
-
-In practice, many systems actively \emph{schedule} conflicting operations.
-A scheduler that routes conflicting transactions to a serializer, reorders
-pending operations, or batches transactions by access set is making
-irrevocable ordering decisions that narrow the admissible set.
-These decisions are commitments.
+The commit/abort basis treats operation interleaving as environment.
+When a system actively \emph{schedules} conflicting operations, those
+ordering decisions are commitments:
 
 \begin{definition}[Ordering commitment]
   \label{def:ordering-commitment}
-  For conflicting transactions $T_i, T_j$, the \emph{ordering commitment}
   $\varphi_{T_i \prec T_j}$ records that the system chose to execute
-  $T_i$'s conflicting operation before $T_j$'s.
-  This excludes all outcomes in which $T_j$ precedes $T_i$ on the
-  conflicting object.
+  $T_i$'s conflicting operation before $T_j$'s, excluding outcomes with
+  the reverse order.
 \end{definition}
 
 \noindent
 The enriched basis is
 $\Phi' = \Phi \cup \{\varphi_{T_i \prec T_j} \mid T_i, T_j \text{ conflict}\}$.
-Ordering commitments on distinct edges commute (each independently filters
-outcomes by a single edge orientation).
+Ordering commitments on distinct edges commute.
+The boundary between environment and commitment is a \emph{modeling choice}
+reflecting system architecture:
+under pure OCC, interleaving is environment;
+under an active scheduler, it is commitment;
+under partial control (e.g., hot keys serialized, cold keys uncontrolled),
+the determination records which orderings were chosen and which were observed.
 
-\paragraph{Environment vs.\ commitment: a modeling choice.}
-The same physical event---``$T_i$'s write executed before $T_j$'s
-read''---is an environment event or a commitment depending on the system
-architecture:
-\begin{itemize}[nosep]
-  \item \emph{No scheduler} (pure OCC): interleaving is environment.
-        Only commit/abort are commitments.
-  \item \emph{Active scheduler} (e.g., deterministic database, batch
-        optimizer): interleaving is a commitment.
-        The scheduler chose this ordering.
-  \item \emph{Partial control}: some orderings are chosen (hot keys
-        routed to a serializer), others are environment (cold keys
-        interleaved freely).
-\end{itemize}
-Determination provenance records this boundary: it distinguishes outcomes
-that arose from scheduling \emph{decisions} from those that arose from
-scheduling \emph{luck} (environment interleaving that happened to avoid
-conflicts).
-
-\paragraph{Capturing batch-optimal scheduling.}
-Cheng et al.~\cite{cheng2024scheduling} show that for a known batch of
-transactions with known access sets, scheduling wins come primarily from
-hot keys: a greedy heuristic that separates conflicting transactions
-minimizes aborts and makespan.
-In our framework, their batch-optimal scheduler computes a single-layer
-determination consisting entirely of ordering commitments:
-\[
-  I_{\mathsf{sched}} = \{\varphi_{T_i \prec T_j} \mid
-  (T_i, T_j) \in \text{scheduler's chosen ordering}\}.
-\]
-These ordering commitments commute (they filter independent edges), so the
-determination has depth~$1$ regardless of conflict-graph complexity.
-The scheduler's computational cost (solving the optimization) is the cost
-of evaluating this single layer---an instance of the conservation law
-from~\cite{hellerstein2026complexity}: determination depth is traded for
-computational complexity within the layer.
-
-\paragraph{Generalizing beyond batch scheduling.}
-The batch setting assumes complete knowledge of the transaction set and
-access sets before any scheduling decision.
-The enriched basis extends naturally to settings that Cheng et al.\ do not
-address:
-\begin{itemize}[nosep]
-  \item \emph{Online arrival}: ordering decisions are made incrementally as
-        transactions arrive.
-        Later arrivals may conflict with earlier decisions, so ordering
-        commitments made at different times may not commute (an ordering
-        chosen for $T_i$ may constrain which orderings are valid for a
-        later-arriving $T_k$).
-        This can increase depth beyond~$1$.
-  \item \emph{Partial knowledge}: access sets are unknown until execution.
-        Some ordering predicates become available only after reads/writes
-        occur, interleaving environment events with scheduling commitments.
-  \item \emph{Mixed control}: some keys are scheduled (hot keys routed to a
-        deterministic serializer), others are uncontrolled (cold keys
-        interleaved by the environment).
-        The determination records which orderings were chosen and which were
-        observed.
-\end{itemize}
-In each case, determination provenance provides a richer explanation than
-the commit/abort basis alone: it attributes outcomes to specific scheduling
-decisions and distinguishes them from environmental happenstance.
+\paragraph{Connection to batch-optimal scheduling.}
+Cheng et al.~\cite{cheng2024scheduling} compute an ordering that minimizes
+aborts for a known batch.
+In our framework, their scheduler produces a single-layer determination
+$I_{\mathsf{sched}} = \{\varphi_{T_i \prec T_j} \mid
+(T_i, T_j) \in \text{chosen ordering}\}$
+of commuting ordering commitments (depth~$1$).
+The scheduler's computational cost is the cost of evaluating this
+layer---an instance of the conservation law
+from~\cite{hellerstein2026complexity}.
+The enriched basis extends beyond batch scheduling to online arrival
+(ordering decisions made incrementally, potentially non-commuting),
+partial knowledge (access sets unknown until execution), and mixed control.
 
 
 
@@ -1348,17 +1227,10 @@ Fix a specification $\Spec$ and the set $\mathcal{I}$ of resolving determination
 An outcome $o$ is \emph{robust} with respect to $\mathcal{I}$ iff
 $\mathrm{supp}(\Prov_Q(o)) = \mathcal{I}$---equivalently,
 $\forall I \in \mathcal{I}.\; o \in (\Spec \mid I)(H)$.
-In the determination semiring (Section~\ref{sec:det-semiring}), robustness
+In the determination semiring, robustness
 is the multiplicative identity: the tuple's support is the full set
-$\mathcal{I}$, meaning no determination discriminates against it.
-
-\paragraph{Example: robustness under serializability.}
-As shown in Section~\ref{sec:transactions}, values $b$ and $c$ in the
-transactional example have full support
-($\mathrm{supp}(\Prov_Q(b)) = \mathrm{supp}(\Prov_Q(c)) = \mathcal{I}$):
-they are robust.
-Value $d$ is contingent---its support is a proper subset of $\mathcal{I}$,
-depending on the commit order of $T_4$, $T_5$, and $T_Q$.
+$\mathcal{I}$.
+In Example~\ref{ex:example}, $b$ and $c$ are robust; $d$ is contingent.
 
 \subsection{Inter-Specification Queries: Preservation under Semantic Change}
 \label{sec:semantic-change}

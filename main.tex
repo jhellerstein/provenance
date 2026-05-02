@@ -487,15 +487,15 @@ of commuting batches.
   A determination $I$ \emph{resolves} $\Spec$ (i.e., $I$ is \emph{resolving for} $\Spec$) if $\Spec \mid I$ is resolved.
 \end{definition}
 
-\subsection{Resolution Induces Monotonicity}
+\subsection{Resolution Enables Provenance}
 \label{sec:mono-theorem}
 
-A central claim of this paper is that classical provenance applies once a
-determination has resolved a specification.
-Classical provenance requires monotone evaluation: facts accumulate and
-explanations only grow.
-We now show that monotonicity is not an independent assumption but a
-\emph{consequence} of resolution, under a mild condition on the commitment basis.
+Classical provenance requires a unique outcome at each input: derivations
+are traced through a commutative semiring over a fixed, resolved instance.
+When $|\Spec(H)| > 1$, this prerequisite fails.
+We establish that resolution under a persistent basis both \emph{suffices}
+to restore the prerequisite and is \emph{necessary}---no semiring scheme
+can operate without it.
 
 \begin{definition}[History-monotone specification]
   \label{def:set-mono}
@@ -508,107 +508,70 @@ We now show that monotonicity is not an independent assumption but a
   If $H \in \Hist$ and $H' \sqsubseteq H$, then $H' \in \Hist$.
 \end{assumption}
 
-\begin{theorem}[Resolved specifications are history-monotone]
+\begin{theorem}[Sufficiency: resolved specifications are history-monotone]
   \label{thm:resolution-implies-monotone}
   Assume prefix-closure (Assumption~\ref{ass:prefix-closed}).
   Let $\Phi$ be a persistent commitment basis and let $I$ be a determination
   over $\Phi$ that resolves $\Spec$.
-  Then the induced singleton-valued specification
-  $\widehat{\Spec}_I(H) \triangleq (\Spec \mid I)(H)$
+  Then $\widehat{\Spec}_I(H) \triangleq (\Spec \mid I)(H)$
   is history-monotone.
 \end{theorem}
 
 \begin{proof}
   Let $H_1 \sqsubseteq H_2$ and let $(\Spec \mid I)(H_1) = \{o^*\}$.
   Write $I = \varphi_1 \cdot \cdots \cdot \varphi_m$.
-  Since $I$ resolves $\Spec$ at $H_1$, for every $o \neq o^*$ in $O$
-  there exists some $\varphi_j \in I$ such that $\varphi_j$ excludes $o$
-  at the prefix $H_1 \cdot \varphi_1 \cdots \varphi_{j-1}$.
-  By persistence (Definition~\ref{def:persistent}), $\varphi_j$ continues
+  Since $I$ resolves $\Spec$ at $H_1$, for every $o \neq o^*$
+  there exists $\varphi_j \in I$ that excludes $o$
+  at $H_1 \cdot \varphi_1 \cdots \varphi_{j-1}$.
+  By persistence, $\varphi_j$ continues
   to exclude $o$ at $H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$
   (since $H_1 \cdot \varphi_1 \cdots \varphi_{j-1} \sqsubseteq
   H_2 \cdot \varphi_1 \cdots \varphi_{j-1}$).
-  Hence every $o \neq o^*$ is excluded at $H_2$ under $I$, so
-  $(\Spec \mid I)(H_2) \subseteq \{o^*\}$.
-  Since $I$ is feasible (Remark~\ref{rem:feasibility}),
-  $(\Spec \mid I)(H_2) \neq \emptyset$, so
-  $(\Spec \mid I)(H_2) = \{o^*\} = (\Spec \mid I)(H_1)$.
-  Thus $\widehat{\Spec}_I(H_2) \subseteq \widehat{\Spec}_I(H_1)$.
+  Hence $(\Spec \mid I)(H_2) \subseteq \{o^*\}$.
+  Feasibility gives $(\Spec \mid I)(H_2) \neq \emptyset$, so
+  $(\Spec \mid I)(H_2) = \{o^*\}$.
 \end{proof}
 
-\begin{theorem}[Necessity of resolution for provenance]
+\begin{theorem}[Necessity: ambiguity blocks semiring provenance]
   \label{thm:necessity}
-  Let $\Spec$ be a specification with $|\Spec(H)| \ge 2$ for some
-  history $H$, and let $o_1, o_2 \in \Spec(H)$ be two admissible outcomes
-  with contradictory derivational structure (i.e., there exists a base
-  fact $f$ such that $f$ is used in deriving $o_1$ but $f$'s absence is
-  required for $o_2$, or vice versa).
-  Then no commutative semiring annotation scheme over a single resolved
-  instance can simultaneously explain both $o_1$ and $o_2$ at $H$.
+  Let $|\Spec(H)| \ge 2$ with $o_1, o_2 \in \Spec(H)$ having
+  contradictory derivational structure: there exists a base fact $f$
+  used in deriving $o_1$ whose absence is required for $o_2$.
+  Then no commutative semiring annotation over a single instance
+  can simultaneously explain both $o_1$ and $o_2$ at $H$.
 \end{theorem}
 
 \begin{proof}
-  Suppose for contradiction that a semiring $(K, +, \cdot, 0, 1)$ and an
-  annotation $\alpha : \text{facts} \to K$ simultaneously explains both
-  outcomes.
-  The provenance of $o_1$ requires $\alpha(f) \neq 0$ (since $f$
-  participates in deriving $o_1$).
-  The provenance of $o_2$ requires that $f$ is absent from the resolved
-  instance (since $o_2$ depends on $f$'s absence).
-  But a single resolved instance either contains $f$ or does not.
-  If $f$ is present, $o_2$'s derivation is invalid; if absent, $o_1$'s
-  provenance is $0$.
-  No single annotation can satisfy both, so the ambiguity must be resolved
-  (by choosing between outcomes) before semiring provenance is well-defined.
+  A single resolved instance either contains $f$ or does not.
+  If $f$ is present, $o_2$'s derivation is invalid.
+  If absent, $o_1$'s provenance is $0$ (the fact it depends on is missing).
+  No single annotation satisfies both.
 \end{proof}
 
 \noindent
-Together, Theorems~\ref{thm:resolution-implies-monotone}
-and~\ref{thm:necessity} justify the commitment tower:
-resolution is \emph{necessary} (semiring provenance cannot operate under
-ambiguity) and \emph{sufficient} (once discharged under a persistent basis,
-the resolved specification is monotone and classical provenance applies).
+Together, these theorems justify the commitment tower:
+resolution is necessary (Theorem~\ref{thm:necessity}) and sufficient
+(Theorem~\ref{thm:resolution-implies-monotone}).
+The tower is the structure that bridges from ambiguity to the semiring regime.
 
-\paragraph{Interpretation and relationship to CALM.}
-The theorem says that once a determination resolves a specification, the
-resolved outcome persists across all history extensions---it cannot be
-undone by new information.
-This is \emph{not} the monotonicity familiar from
-CALM~\cite{ameloot2013relational}.
-The two properties operate at different levels:
-CALM monotonicity concerns containment \emph{within} $O$---extending the
-input should only grow each outcome (e.g., the derived fact set of a positive
-Datalog program satisfies
-$\mathit{LFP}(H_1) \subseteq \mathit{LFP}(H_2)$ whenever
-$H_1 \sqsubseteq H_2$).
-History-monotonicity concerns containment in $2^O$---extending the history
-can only shrink the set of admissible outcomes
-($\Spec(H_2) \subseteq \Spec(H_1)$).
-
-CALM monotonicity is a property of the \emph{specification}
-(containment in $O$): when it holds, no commitments are needed
-(determination depth~$0$) and classical provenance applies
+\paragraph{Relationship to CALM.}
+History-monotonicity ($\Spec(H_2) \subseteq \Spec(H_1)$: the admissible set
+shrinks) is distinct from CALM monotonicity ($\mathit{LFP}(H_1) \subseteq
+\mathit{LFP}(H_2)$: each outcome grows).
+CALM monotonicity is a property of the specification: when it holds, no
+commitments are needed and classical provenance applies
 directly~\cite{hellerstein2026coordinationcriterion}.
-Negation violates it---adding an input fact can shrink an answer set---so
-commitments are required\footnote{Here we
-illustrate CALM monotonicity via set inclusion on derived facts.
-In the transactional and distributed settings of later sections, the relevant
-notion of outcome refinement is domain-specific (e.g., prefix extension on
-schedules); the Coordination
+History-monotonicity is a property of a \emph{resolved} specification:
+it is guaranteed by the determination, not assumed of the specification.
+Negation violates CALM monotonicity (adding facts can shrink answer sets),
+requiring commitments; but once those commitments resolve the specification,
+history-monotonicity holds and provenance applies.\footnote{In the
+transactional setting, the relevant refinement order is domain-specific
+(e.g., prefix extension on schedules); the Coordination
 Criterion~\cite{hellerstein2026coordinationcriterion} develops this
-generalization, and our formalism in this section aligns with that expanded
-model.}. By contrast,
-history-monotonicity is a property of a \emph{determination}
-(containment in $2^O$): a resolving determination under a persistent basis
-guarantees that the admissible set only shrinks as the history grows,
-stabilizing to a singleton that classical provenance can explain.
-When history-monotonicity fails---because the basis is not persistent or the
-determination does not fully resolve---excluded outcomes can reappear at
-later histories, derivations can be invalidated, and classical provenance
-does not apply.
+generalization.}
 
-These notions of refinement, resolution, and the monotonicity
-of resolved specifications provide the semantic substrate on which we build
+These results provide the semantic substrate on which we build
 provenance structure in the next section.
 
 %% ================================================================

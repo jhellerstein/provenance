@@ -516,22 +516,15 @@ resolution is necessary (Theorem~\ref{thm:necessity}) and sufficient
 (Theorem~\ref{thm:resolution-implies-monotone}).
 The tower is the structure that bridges from ambiguity to the semiring regime.
 
-\paragraph{Relationship to CALM.}
-History-monotonicity ($\Spec(H_2) \subseteq \Spec(H_1)$: the admissible set
-shrinks) is distinct from CALM monotonicity ($\mathit{LFP}(H_1) \subseteq
-\mathit{LFP}(H_2)$: each outcome grows).
-CALM monotonicity is a property of the specification: when it holds, no
-commitments are needed and classical provenance applies
-directly~\cite{hellerstein2026coordinationcriterion}.
-History-monotonicity is a property of a \emph{determined} specification:
-it is guaranteed by the determination, not assumed of the specification.
-Negation violates CALM monotonicity (adding facts can shrink answer sets),
-requiring commitments; but once those commitments resolve the specification,
-history-monotonicity holds and provenance applies.\footnote{In the
-transactional setting, the relevant refinement order is domain-specific
-(e.g., prefix extension on schedules); the Coordination
-Criterion~\cite{hellerstein2026coordinationcriterion} develops this
-generalization.}
+\begin{remark}[Relationship to CALM]
+  When a specification is monotone in the sense of
+  CALM~\cite{ameloot2013relational}---extending the input can only grow
+  the output---no commitments are needed and classical provenance applies
+  directly (determination depth~$0$).
+  Our framework addresses the complementary case: when commitments
+  \emph{are} needed, history-invariance guarantees that once they are
+  applied, provenance is well-defined.
+\end{remark}
 
 These results provide the semantic substrate on which we build
 provenance structure in the next section.

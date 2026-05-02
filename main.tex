@@ -304,17 +304,20 @@ take effect at specific points in the history.
 
 \begin{definition}[Commitment]
   \label{def:commitment}%
-  A \emph{commitment} $\varphi$ is a constraint on outcomes.
+  A \emph{commitment} $\varphi$ is a function on outcome sets:
+  given a history $H$ with admissible set $\Spec(H)$, applying $\varphi$
+  produces a nonempty subset
+  $\Spec(H \cdot \varphi) \subseteq \Spec(H)$.
   We write $H \cdot \varphi$ for the history obtained by
   adding a commitment event $\varphi$ after all maximal
   events of~$H$
   (i.e., $e \to \varphi$ for every $e$ with no successor
   in~$H$), giving $H \sqsubseteq H \cdot \varphi$.
-  Adding a commitment permanently narrows the admissible
-  set without emptying it:
-  $\emptyset \neq \Spec(H \cdot \varphi) \subseteq \Spec(H)$,
-  and $\Spec(H') \subseteq \Spec(H)$ for every
-  $H' \sqsupseteq H \cdot \varphi$ (\emph{shrinkage}).
+  The result may depend on the full set $\Spec(H)$, not only on
+  individual outcomes---this is what allows commitments to be
+  non-commutative.
+  We require \emph{shrinkage}: $\Spec(H') \subseteq \Spec(H)$ for every
+  $H' \sqsupseteq H \cdot \varphi$.
 \end{definition}
 
 \noindent

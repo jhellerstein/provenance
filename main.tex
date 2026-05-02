@@ -135,7 +135,6 @@ Prior work introduced \emph{determinations}---structured sequences of
 irrevocable commitments that narrow the space of admissible outcomes---and
 developed a complexity theory characterizing the cost and depth of semantic
 resolution~\cite{hellerstein2026complexity}.
-That work explicitly identifies determination provenance as an open problem.
 A companion paper~\cite{hellerstein2026coordinationcriterion} characterizes
 when semantic ambiguity can be tolerated without coordination; this paper
 addresses what happens when it cannot.
@@ -336,8 +335,7 @@ When $|\Spec(H)| = 1$, the meaning of $H$ is fully determined.
 \subsection{Semantic Refinement}
 
 Ambiguity is constrained by making additional semantic commitments.
-Following~\cite{hellerstein2026complexity}, we model commitments as events
-appended to histories.
+We model commitments as events appended to histories.
 
 \begin{definition}[Commitment]
   \label{def:commitment}%
@@ -412,9 +410,6 @@ persistent.
   $\Spec(H) \neq \emptyset$: no outcome remains admissible.
   (This is distinct from an outcome that is itself the empty set, e.g., an
   empty query answer---$\emptyset$ may be a valid element of~$O$.)
-  In the companion complexity
-  theory~\cite{hellerstein2026complexity}, infeasible commitments arise
-  naturally in adversarial strategies.
   Here we restrict to \emph{feasible} commitments:
   $\Spec(H) \neq \emptyset \Longrightarrow
   \Spec(H \cdot \varphi) \neq \emptyset$.
@@ -621,7 +616,7 @@ explicit the semantic prerequisites that must be resolved first.
 Consider a determination with $k$ layers,
 $L_1 \seq L_2 \seq \cdots \seq L_k$.
 The number of layers $k$ is the \emph{determination
-depth}~\cite{hellerstein2026complexity}---the height of the commitment tower.
+depth}---the height of the commitment tower.
 Write $\Spec_0 = \Spec$ for the original specification and
 $\Spec_i = \Spec \mid (L_1 \seq \cdots \seq L_i)$ for the specification
 after discharging the first $i$ layers.
@@ -1133,9 +1128,9 @@ determination
 $I_{\mathsf{sched}} = \{\varphi_{T_i \prec T_j} \mid
 (T_i, T_j) \in \text{chosen ordering}\}$
 of commuting ordering commitments (depth~$1$).
-The NP-completeness of computing this layer is an instance of the
-conservation law from~\cite{hellerstein2026complexity}: determination
-depth is traded for computational complexity within the layer.
+The NP-completeness of computing this layer illustrates a general
+tradeoff: determination depth can be traded for computational complexity
+within a single layer.
 The enriched basis extends beyond batch scheduling to online arrival
 (ordering decisions made incrementally, potentially non-commuting),
 partial knowledge (access sets unknown until execution), and mixed control.
@@ -1345,14 +1340,12 @@ checkable.
 
 \medskip
 \noindent\textbf{Determination complexity.}
-This work builds on a prior complexity theory of determination
-introduced in~\cite{hellerstein2026complexity}, which characterizes the cost,
-depth, and coordination requirements of semantic resolution.
-The present paper focuses instead on explanation.
-Determinations are assumed given, and determination provenance explains how
+A companion paper~\cite{hellerstein2026complexity} develops a complexity
+theory for determinations, characterizing the cost and depth of semantic
+resolution.
+The present paper focuses on explanation rather than complexity:
+determinations are assumed given, and determination provenance explains how
 observations depend on them.
-Connections to descriptive complexity, fixpoint alternation, oracle models, and
-coordination are discussed in detail in~\cite{hellerstein2026complexity}.
 
 % ================================================================
 \section{Conclusion}
@@ -1405,9 +1398,8 @@ reversed---transactional rollback, speculative execution, backtracking
 search---where persistence fails.
 Extending the framework to reversible commitments (a group rather than a
 monoid at each layer) and characterizing the resulting provenance structure
-is an open direction; the companion complexity
-theory~\cite{hellerstein2026complexity} identifies this as a central open
-problem.
+is an open direction; a companion paper~\cite{hellerstein2026complexity}
+discusses related structural questions.
 
 The success of algebraic provenance lay in identifying the right semantic object
 to explain.

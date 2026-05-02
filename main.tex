@@ -6,6 +6,7 @@
 \usepackage{caption}
 \usepackage{booktabs}
 \usepackage{tikz}
+\usepackage{xcolor}
 
 % Tighten paragraph heading spacing
 \makeatletter
@@ -373,7 +374,9 @@ The choice of basis is a design variable: it determines which semantic
 distinctions can be expressed and at what granularity.
 In Datalog with stratified negation, the natural basis consists of sealing predicates
 (committing that a stratum is complete); in transactional systems it consists
-of ordering predicates (committing to a relative transaction order).
+of commit and abort decisions (Section~\ref{sec:transactions}), optionally
+enriched with scheduling predicates
+(Section~\ref{sec:scheduling-basis}).
 Different bases for the same specification yield different determination
 structures, different depths, and different provenance.
 
@@ -402,7 +405,7 @@ It guarantees that resolved specifications are history-monotone
 classical provenance at the foundation of the commitment tower---in contrast
 to CALM monotonicity, which characterizes specifications needing no
 commitments at all (see Section~\ref{sec:mono-theorem} for the distinction).
-The sealing basis for Datalog with negation, the ordering basis for
+The sealing basis for Datalog with negation, the commit/abort basis for
 serializability, and snapshot predicates under snapshot isolation are all
 persistent.
 
@@ -746,7 +749,7 @@ For instance, in the transactional example of the introduction, values $b$
 and $c$ have full support
 ($\mathrm{supp}(\Prov_Q(b)) = \mathrm{supp}(\Prov_Q(c)) = \mathcal{I}$),
 while $d$'s support is a proper subset---it holds only under determinations
-that order $T_4$ before $T_Q$ before $T_5$.
+in which $T_4$ and $T_Q$ commit before $T_5$.
 Section~\ref{sec:robustness} applies this structure to formalize robustness
 and sensitivity across determinations.
 
@@ -790,9 +793,9 @@ robustness; computational questions are deferred to future work.
 \subsection{Summary}
 Once a determination is fixed, provenance is classical: it is
 computed over the conditioned specification $\Spec \mid I$.
-The following sections instantiate this framework in two settings with very
-different sources of semantic ambiguity: scheduling in transactional systems
-and negation in Datalog.
+The following section instantiates this framework in transactional systems;
+Appendix~\ref{sec:appendix-datalog} provides a second instantiation for
+Datalog with negation.
 
 
 % ================================================================
@@ -858,10 +861,10 @@ finalizes $T_i$'s position in the serial order and removes its edges from
 the active conflict graph.
 The ordering among conflicting operations is established by the interleaving
 of reads and writes during execution; the commit makes that ordering
-irrevocable.
-The ordering commitment $\varphi_{T_i \prec T_j}$ records that $T_i$'s
-conflicting operation preceded $T_j$'s and that $T_i$ committed (finalizing
-this ordering).
+irrevocable by finalizing $T_i$'s effects.
+The conflict edge $T_i \to T_j$ (recording that $T_i$'s conflicting
+operation preceded $T_j$'s) becomes a permanent fact in the history once
+$T_i$ commits.
 
 \begin{definition}[Conflict]
   \label{def:conflict}
@@ -1355,7 +1358,7 @@ transactional example have full support
 ($\mathrm{supp}(\Prov_Q(b)) = \mathrm{supp}(\Prov_Q(c)) = \mathcal{I}$):
 they are robust.
 Value $d$ is contingent---its support is a proper subset of $\mathcal{I}$,
-depending on the ordering of $T_4$, $T_5$, and $T_Q$.
+depending on the commit order of $T_4$, $T_5$, and $T_Q$.
 
 \subsection{Inter-Specification Queries: Preservation under Semantic Change}
 \label{sec:semantic-change}
@@ -2000,15 +2003,16 @@ and provenance reduces to ordinary derivational provenance.
 \paragraph{Determination structure.}
 Under conflict serializability, admissible outcomes are those whose conflict
 graph is acyclic.
-At runtime, the system enforces this by scheduling conflicting actions
-(orienting edges) and aborting transactions to break cycles.
-Post-hoc, the determination records these decisions: ordering commitments
-$\varphi_{T_i \prec T_j}$ (recording which conflicting action preceded which)
-and, when cycles existed, abort commitments.
-Ordering commitments commute; abort commitments may not (when cycles overlap).
+At runtime, the system's commit and abort decisions resolve ambiguity.
+When the system also controls scheduling (Section~\ref{sec:scheduling-basis}),
+ordering commitments $\varphi_{T_i \prec T_j}$ record which interleaving was
+chosen; otherwise, the interleaving is an environment fact and only
+commit/abort decisions are commitments.
+This appendix uses the enriched (scheduling) basis for expository clarity.
 
 For the running example below, the conflict graph is acyclic---no aborts were
-needed---so the determination consists entirely of ordering commitments.
+needed---so the determination consists entirely of ordering commitments
+(scheduling decisions that determined the conflict edges).
 \paragraph{Data, query, and history.}
 Let $S(k,y)$ be a relation and consider the query
 $Q(y) \drule S(k,y)$.

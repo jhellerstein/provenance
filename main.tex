@@ -1306,7 +1306,15 @@ Rather than choosing a total model, well-founded semantics leaves the
 negation cycle unresolved: both $r(c)$ and $s(c)$ are assigned the value
 \emph{undefined}.
 In our framework, this corresponds to an incomplete determination---one
-that does not fully resolve the specification.
+that resolves the stratified fragment ($p, q$) but does not resolve the
+cycle.
+The determination provenance of $r(c)$ under well-founded semantics is
+simply empty: $P(r(c)) = \emptyset$.
+This is distinct from both robust absence (where $r(c)$ is false under
+every determination) and contingent absence (where it is false under some
+but true under others).
+Undefinedness is a third case: the determination is \emph{insufficient}
+to assign provenance at all.
 
 \paragraph{Stable model semantics.}
 Stable semantics insists on a total two-valued model, resolving the cycle

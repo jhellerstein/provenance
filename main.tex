@@ -525,8 +525,18 @@ history annotations.
 %% ================================================================
 \section{Determinations and Provenance Structure}
 \label{sec:conditional-semiring}
-This section connects the semantic notion of determination
-(Section~\ref{sec:prelim}) to provenance.
+
+A single determination has no interesting algebraic structure---it is
+just a sequence of commitments.
+But the \emph{family} of all resolving determinations does.
+The supports of outcomes across determinations form a commutative
+semiring (Section~\ref{sec:det-semiring}), enabling us to define
+robustness (an outcome supported by every determination).
+Moreover, the layered structure of determinations induces a filtration
+of sub-semirings (Section~\ref{sec:filtration}), enabling finer
+distinctions: an outcome may depend on only the first $k$ layers,
+allowing more parsimonious provenance for restricted query families.
+
 Throughout, we fix a specification $\Spec$ over a history class $\Hist$ and
 a persistent commitment basis $\Phi$; the set of minimal resolving
 determinations is denoted $\mathcal{D}_{\Spec,\Phi}$ (abbreviated

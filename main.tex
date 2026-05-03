@@ -1305,16 +1305,17 @@ This is a natural multi-layer example of the filtration
 Rather than choosing a total model, well-founded semantics leaves the
 negation cycle unresolved: both $r(c)$ and $s(c)$ are assigned the value
 \emph{undefined}.
-In our framework, this corresponds to an incomplete determination---one
-that resolves the stratified fragment ($p, q$) but does not resolve the
-cycle.
+In our framework, this means the determination resolves the stratified
+fragment ($p, q$) but leaves the admissible set non-singleton for the
+cycle---multiple outcomes remain, and the determination does not choose
+among them.
 The determination provenance of $r(c)$ under well-founded semantics is
 simply empty: $P(r(c)) = \emptyset$.
 This is distinct from both robust absence (where $r(c)$ is false under
 every determination) and contingent absence (where it is false under some
 but true under others).
-Undefinedness is a third case: the determination is \emph{insufficient}
-to assign provenance at all.
+Undefinedness is a third case: the admissible set has not been narrowed
+enough to assign provenance.
 
 \paragraph{Stable model semantics.}
 Stable semantics insists on a total two-valued model, resolving the cycle

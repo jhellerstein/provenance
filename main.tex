@@ -708,6 +708,9 @@ Different valid orderings within a layer do not affect the construction.
 
 Two determinations $D, D' \in \mathcal{D}$ \emph{agree at level $k$} if
 they apply the same commitments in layers $1, \ldots, k$.
+That is, writing $D = L_1 \seq L_2 \seq \cdots \seq L_m$ and
+$D' = L'_1 \seq L'_2 \seq \cdots \seq L'_{m'}$,
+agreement at level $k$ means $L_i = L'_i$ for $i = 1, \ldots, k$.
 Agreement at level $k$ is an equivalence relation on $\mathcal{D}$;
 write $[D]_k$ for the equivalence class of $D$ at level $k$.
 These classes refine as $k$ increases:

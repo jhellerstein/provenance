@@ -85,9 +85,9 @@
   Classical provenance is the degenerate case where no commitments are needed.
   We develop the framework in depth for transactional systems, where ambiguity
   arises from concurrency and isolation choices: determination provenance
-  distinguishes outcomes that hold under every serializable execution from
-  those contingent on a particular scheduling or isolation decision, with
-  depth governed by conflict-graph topology.
+  distinguishes outcomes that hold under every admissible commit ordering
+  from those contingent on a particular ordering, and identifies which
+  outcomes would persist if the isolation level were changed.
   We further instantiate the framework for Datalog with negation---a
   longstanding gap in provenance past the monotone fragment---and for
   distributed systems observability, demonstrating the generality of the
@@ -154,8 +154,8 @@ semiring composes through relational algebra~\cite{green2007provenance}.
   We instantiate the framework in depth for transactional systems, where
   ambiguity arises from concurrency and isolation choices.
   Determination provenance distinguishes outcomes that hold under every
-  admissible execution from those contingent on a particular commit ordering
-  or isolation decision.
+  admissible commit ordering from those contingent on a particular one,
+  and identifies which outcomes persist across isolation levels.
   We further demonstrate generality through two appendix instantiations:
   Datalog with negation (addressing a longstanding gap in provenance past
   the monotone fragment~\cite{green2007provenance}) and distributed systems

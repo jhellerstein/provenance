@@ -523,52 +523,38 @@ history annotations.
 \end{proof}
 
 %% ================================================================
-\section{Determinations and Provenance Structure}
+\section{The Algebra of Determinations}
 \label{sec:conditional-semiring}
-
+Classical data provenance is useful and concise due to its
+beautiful algebraic simplicity.
 A single determination has no interesting algebraic structure---it is
 just a sequence of commitments.
 But the \emph{family} of all resolving determinations does.
 The supports of outcomes across determinations form a commutative
 semiring (Section~\ref{sec:det-semiring}), enabling us to define
-robustness (an outcome supported by every determination).
-Moreover, the layered structure of determinations induces a filtration
-of sub-semirings (Section~\ref{sec:filtration}), enabling finer
-distinctions: an outcome may depend on only the first $k$ layers,
-allowing more parsimonious provenance for restricted query families.
+robustness (outcomes supported by every determination).
+Moreover, the layered structure of determinations forms a \emph{filtration}---a sequence
+of sub-semirings (Section~\ref{sec:filtration})---enabling
+finer distinctions: an outcome can require only the first $k$ layers of
+commitment, giving more parsimonious provenance for restricted query families.
 
 Throughout, we fix a specification $\Spec$ over a history class $\Hist$ and
 a persistent commitment basis $\Phi$; the set of minimal resolving
 determinations is denoted $\mathcal{D}_{\Spec,\Phi}$ (abbreviated
 $\mathcal{D}$ when $\Spec$ and $\Phi$ are clear from context).
 
-\subsection{Conditioned Provenance}
+\subsection{The Determination Semiring}
+\label{sec:det-semiring}
+\label{sec:algebra}
 
 Fix a commutative semiring $(K, +, \cdot, 0, 1)$ for derivational provenance
 (e.g., the polynomial semiring $\mathbb{N}[X]$ of~\cite{green2007provenance}).
 A \emph{$K$-relation} assigns each tuple a value in $K$: alternative
 derivations combine by $+$, joint use of facts by $\cdot$, absence by $0$.
-For a specification $\Spec$, provenance query $P$, tuple $t$, and a
-resolving determination $D \in \mathcal{D}$, the \emph{conditioned
-provenance} of $t$ under $D$ is
-$P_{\Spec \mid D}(t) \in K$:
-the semiring provenance of $t$ under $P$ computed over the
-determined specification $\Spec \mid D$.
-When $\Spec$ is clear from context, we write simply
-$P_D(t)$.
-Conditioned provenance is classical provenance, conditioned on a particular
-semantic resolution.
-
-Once $D$ is fixed, $\Spec \mid D$ is single-valued and history-invariant
-(Theorem~\ref{thm:resolution-implies-monotone}), so classical semiring
-provenance applies without modification.
-For depth-$0$ specifications---where no nontrivial commitments are
-required---conditioned provenance coincides with classical provenance
-directly.
-
-\subsection{The Determination Semiring}
-\label{sec:det-semiring}
-\label{sec:algebra}
+For a fixed determination $D \in \mathcal{D}$, the \emph{conditioned
+provenance} $P_D(t) \in K$ is the classical semiring provenance of tuple $t$
+computed over the determined specification $\Spec \mid D$
+(well-defined by Theorem~\ref{thm:resolution-implies-monotone}).
 
 Conditioned provenance explains a single determination.
 In many settings, a single determination is the natural object of study:

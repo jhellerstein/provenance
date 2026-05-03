@@ -629,47 +629,44 @@ semiring with $\cup$ as addition and $\cap$ as multiplication.
 This is the \emph{determination semiring}: it captures which determinations
 support a tuple and how those supports compose through queries.
 
-\begin{example}[Determination semiring for Example~\ref{ex:example}]
+\begin{example}[Full determination provenance for Example~\ref{ex:example}]
   \label{ex:det-semiring}
   The running example has two resolving determinations:
   $D_{\mathsf{in}}$ (where $T_Q$ commits before $T_3$, making $d$ visible)
   and $D_{\mathsf{out}}$ (where $T_3$ commits before $T_Q$, making $d$
   absent).
   So $\mathcal{D} = \{D_{\mathsf{in}}, D_{\mathsf{out}}\}$.
-  The supports are:
-  $\mathrm{supp}(P(b)) = \mathcal{D}$ (robust);
-  $\mathrm{supp}(P(d)) = \{D_{\mathsf{in}}\}$ (contingent).
-  Now consider a join query $R(y) \drule S(k,y),\, T(y)$ where $T$
-  contains only $b$.
-  Then $\mathrm{supp}(P_R(b)) = \mathrm{supp}(P(b)) \cap
-  \mathrm{supp}(P_T(b)) = \mathcal{D} \cap \mathcal{D} = \mathcal{D}$:
-  the join of two robust tuples is robust.
-  A union query returning both $b$ and $d$ has
+
+  The determination provenance of each query result combines the
+  determination layer (which $D$ supports the tuple) with the classical
+  layer (the semiring annotation under that $D$):
+  \[
+    \begin{array}{l@{\qquad}l}
+      P(b)(D_{\mathsf{in}}) = x_0, & P(b)(D_{\mathsf{out}}) = x_0, \\
+      P(d)(D_{\mathsf{in}}) = x_2, & P(d)(D_{\mathsf{out}}) = 0.
+    \end{array}
+  \]
+  Here $x_0$ annotates the initial tuple $S(0,b)$ and $x_2$ annotates
+  $T_2$'s insert of $S(2,d)$.
+  The supports are
+  $\mathrm{supp}(P(b)) = \mathcal{D}$ (robust: same provenance under
+  both determinations) and
+  $\mathrm{supp}(P(d)) = \{D_{\mathsf{in}}\}$ (contingent: present only
+  when $T_Q$ commits before $T_3$).
+
+  The semiring operations compose supports through queries.
+  A join $R(y) \drule S(k,y),\, T(y)$ (where $T$ contains only $b$)
+  gives $\mathrm{supp}(P_R(b)) = \mathcal{D} \cap \mathcal{D} =
+  \mathcal{D}$: joining two robust tuples yields a robust result.
+  A union returning both $b$ and $d$ gives
   $\mathrm{supp}(P(b) + P(d)) = \mathcal{D} \cup \{D_{\mathsf{in}}\}
-  = \mathcal{D}$: the result holds under every determination (since $b$
-  alone suffices).
+  = \mathcal{D}$: the result holds under every determination since $b$
+  alone suffices.
 \end{example}
 
 \noindent
 Section~\ref{sec:robustness} applies this structure to formalize robustness
 and sensitivity across determinations.
-
-\begin{example}[Determination provenance of $d$]
-  \label{ex:det-prov-d}
-  Returning to Example~\ref{ex:example}, the determination provenance of
-  $d$ is the function $P(d) : \mathcal{D} \to K$ with
-  \[
-    P(d)(D_{\mathsf{in}}) = x_2, \qquad P(d)(D_{\mathsf{out}}) = 0.
-  \]
-  Here $x_2$ is the semiring annotation of $T_2$'s insert (the base fact
-  that derives $d$), and $0$ records that $d$ is absent under
-  $D_{\mathsf{out}}$.
-  The support is $\mathrm{supp}(P(d)) = \{D_{\mathsf{in}}\}$: $d$ is
-  contingent on the first determination.
-  By contrast, $P(b)(D_{\mathsf{in}}) = P(b)(D_{\mathsf{out}}) = x_0$
-  (where $x_0$ annotates the initial tuple $S(0,b)$), giving
-  $\mathrm{supp}(P(b)) = \mathcal{D}$: $b$ is robust.
-\end{example}
 
 \paragraph{Computational cost.}
 $|\mathcal{D}|$ may be exponential in the size of the commitment basis.

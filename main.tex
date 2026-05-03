@@ -1104,16 +1104,18 @@ Two representative determinations:
 $D_{\mathsf{in}} \triangleq
   \varphi_{\mathsf{commit}(T_2)} \cdot \varphi_{\mathsf{commit}(T_Q)}
   \cdot \varphi_{\mathsf{commit}(T_3)}$
-yields $P_{D_{\mathsf{in}}}(d)=x_2$;
+and
 $D_{\mathsf{out}} \triangleq
   \varphi_{\mathsf{commit}(T_2)} \cdot \varphi_{\mathsf{commit}(T_3)}
-  \cdot \varphi_{\mathsf{commit}(T_Q)}$
-yields $d$ absent.
+  \cdot \varphi_{\mathsf{commit}(T_Q)}$.
+The determination provenance is:
+\[
+  P(b) = \mathcal{D} \times \{x_0\}, \qquad
+  P(d) = \{(D_{\mathsf{in}},\, x_2)\}.
+\]
 Prior to resolution, even the \emph{form} of the provenance question for $d$
 is ambiguous (why vs.\ why-not).
-Values $b$ has full support
-($\mathrm{supp}(P(b)) = \mathcal{D}$)
-and is robust; $d$ is contingent.
+$b$ is robust (nonzero under every determination); $d$ is contingent.
 
 \subsection{Complexity of Robustness}
 

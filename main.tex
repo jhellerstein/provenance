@@ -636,39 +636,39 @@ and sensitivity across determinations.
 In Green et al.'s framework, provenance is read off as a polynomial:
 $P(t) = x_1 \cdot x_2 + x_3$ means ``derived from $x_1$ and $x_2$
 together, or from $x_3$ alone.''
-Determination provenance admits an analogous compact notation.
-Each determination $D \in \mathcal{D}$ acts as a coefficient on the
-classical provenance polynomial, yielding a \emph{determination polynomial}:
+Determination provenance has an analogous compact form: a
+\emph{tuple of polynomials}, one per determination.
+With $|\mathcal{D}| = n$, the determination provenance of $t$ is
 \[
-  P(t) = \sum_{D \in \mathcal{D}} D \cdot P_D(t),
+  P(t) = \bigl(\, P_{D_1}(t),\;\; P_{D_2}(t),\;\; \ldots,\;\; P_{D_n}(t) \,\bigr),
 \]
-where $P_D(t) \in K$ is the classical provenance under $D$
-(with $P_D(t) = 0$ when $t$ is absent under $D$).
-Multiplication by $D$ records which determination supports the derivation;
-the sum ranges over all resolving determinations.
+where each $P_{D_i}(t) \in K$ is a classical provenance polynomial
+(or $0$ if $t$ is absent under $D_i$).
+The two levels of algebraic structure are independent:
+the operations within each polynomial ($+_K$, $\cdot_K$) are the
+derivational semiring; the operations across the tuple positions
+($\cup$, $\cap$ on supports) are the determination semiring.
+These need not be the same algebra.
 
 \begin{example}[Determination polynomials for Example~\ref{ex:example}]
   \label{ex:det-semiring}
   With $\mathcal{D} = \{D_{\mathsf{in}}, D_{\mathsf{out}}\}$:
   \[
-    P(b) = D_{\mathsf{in}} \cdot x_0 + D_{\mathsf{out}} \cdot x_0
-         = \mathcal{D} \cdot x_0,
-    \qquad
-    P(d) = D_{\mathsf{in}} \cdot x_2.
+    P(b) = (x_0,\; x_0), \qquad P(d) = (x_2,\; 0).
   \]
   Here $x_0$ annotates the initial tuple $S(0,b)$ and $x_2$ annotates
   $T_2$'s insert of $S(2,d)$.
-  The polynomial for $b$ has full support ($\mathcal{D}$): $b$ is robust.
-  The polynomial for $d$ has partial support ($\{D_{\mathsf{in}}\}$):
-  $d$ is contingent.
+  Both entries of $P(b)$ are nonzero: $b$ is robust
+  ($\mathrm{supp} = \mathcal{D}$).
+  Only the first entry of $P(d)$ is nonzero: $d$ is contingent
+  ($\mathrm{supp} = \{D_{\mathsf{in}}\}$).
 
-  Composition follows the semiring rules.
-  A join with a robust tuple $T(b)$ (annotated $y$) gives
-  $P(b \bowtie T(b)) = \mathcal{D} \cdot (x_0 \cdot y)$: still robust.
-  A union of $b$ and $d$ gives
-  $P(b) + P(d) = \mathcal{D} \cdot x_0 + D_{\mathsf{in}} \cdot x_2$:
-  the combined result holds under every determination (since the $b$ term
-  covers $\mathcal{D}$).
+  Composition operates pointwise on the tuple.
+  A join with a tuple annotated $y$ multiplies each entry:
+  $P(b \bowtie T(b)) = (x_0 \cdot_K y,\; x_0 \cdot_K y)$---still robust.
+  A union adds entries pointwise:
+  $P(b) +_K P(d) = (x_0 +_K x_2,\; x_0)$---the result has full support
+  (both entries nonzero) since $b$ contributes under both determinations.
 \end{example}
 
 \paragraph{Computational cost.}

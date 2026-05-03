@@ -1304,12 +1304,14 @@ Three standard semantics resolve this program differently, and each
 corresponds to a different determination structure.
 
 \paragraph{Stratified semantics.}
+Stratified semantics applies only to the acyclic fragment ($p, q$).
 Each stratum must be sealed---committed as complete---before negation in
 the next stratum is evaluated.
 Sealing stratum~$1$ (fixing $p(c) = \mathbf{t}$) is a prerequisite for
 evaluating $\neg p(c)$ in stratum~$2$.
 These sealing commitments do not commute across strata, giving a
 determination with $k$ layers for a $k$-stratum program.
+The negation cycle ($r, s$) is not stratifiable and is left unresolved.
 This is a natural multi-layer example of the filtration
 (Section~\ref{sec:filtration}).
 

@@ -580,7 +580,7 @@ across multiple determinations simultaneously.
 
 The resulting algebraic structure is familiar.
 Let $\mathcal{D}$ denote the set of minimal resolving determinations for
-$\Spec$ over the commitment basis $\Phi$; this set is finite.
+$\Spec$ over a commitment basis $\Phi$; this set is finite.
 
 \begin{definition}[Determination Provenance]
   \label{def:det-provenance}
@@ -597,8 +597,8 @@ $\Spec$ over the commitment basis $\Phi$; this set is finite.
 
 \noindent
 Determination provenance is a $K$-relation over
-determinations~\cite{green2007provenance}: it records, for each possible
-semantic resolution, how the tuple is derived under that resolution.
+determinations: it assigns each $D \in \mathcal{D}$ a semiring value
+recording how $t$ is derived under $D$.
 Conditioned provenance is the special case of evaluating at a single point:
 $P(t)(D) = P_D(t)$.
 Classical provenance is the further special case where $|\mathcal{D}| = 1$

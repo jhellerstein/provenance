@@ -21,7 +21,6 @@
 \newcommand{\Hist}{\mathcal{H}}
 \newcommand{\Spec}{\mathsf{Spec}}
 \newcommand{\drule}{\mathrel{:\!-}}
-\newcommand{\Prov}{\mathsf{Prov}}
 \newcommand{\snap}{\mathsf{snap}}
 \newcommand{\seal}{\mathsf{seal}}
 \newcommand{\FCW}{\mathsf{FCW}}
@@ -481,9 +480,9 @@ persistent basis is both necessary and sufficient for provenance.
 \end{proof}
 
 \noindent
-Intuitively, persistent commitments are retrospective: having observed a
-determined history, we could equivalently imagine the commitments applied
-at any earlier point and the outcome would be the same.
+History-invariance fits the declarative nature of
+provenance: given a determined history, we don't care how or when an algorithm
+chose the commitments, only that they were applied in a particular order.
 We may therefore write $(\Spec \mid D)$ without a history argument
 and abbreviate $D = \varphi_1 \cdot \cdots \cdot \varphi_m$, eliding
 history annotations.
@@ -541,11 +540,11 @@ Fix a commutative semiring $(K, +, \cdot, 0, 1)$ for derivational provenance
 For a specification $\Spec$, query $Q$, history $H$, tuple $t$, and a
 resolving determination $D \in \mathcal{D}$, the \emph{conditioned
 provenance} of $t$ under $D$ is
-$\Prov_{Q \mid \Spec \mid D}(t, H) \in K$:
+$P_{\Spec \mid D}(t, H) \in K$:
 the ordinary semiring provenance of $t$ for query $Q$ computed under the
 determined specification $\Spec \mid D$ at history $H$.
 When $\Spec$ and $H$ are clear from context, we write simply
-$\Prov_{Q \mid D}(t)$.
+$P_D(t)$.
 Conditioned provenance is classical provenance, conditioned on a particular
 semantic resolution.
 
@@ -614,7 +613,7 @@ It is a structural decomposition: each monoid represents one layer of
 semantic commitment, and discharge proceeds sequentially until the semiring
 foundation is exposed.
 Classical provenance is the special case of height~$0$.
-Per-determination provenance $\Prov_{Q \mid D}(t)$ is the semiring element
+Per-determination provenance $P_D(t)$ is the semiring element
 released by discharging the tower $D$.
 A fuller algebraic treatment---including potential universality properties
 and composition laws---is deferred to Appendix~\ref{app:algebra-future}.
@@ -652,12 +651,12 @@ $\Spec$ over the commitment basis $\Phi$; this set is finite.
   For a specification $\Spec$, query $Q$, history $H$, and tuple $t$, the
   \emph{determination provenance} of $t$ is the function
   \[
-    \Prov_{Q \mid \Spec}(t, H) : \mathcal{D} \to K
+    P_{\Spec}(t, H) : \mathcal{D} \to K
   \]
   mapping each resolving determination $D \in \mathcal{D}$ to the conditioned
-  provenance $\Prov_{Q \mid \Spec \mid D}(t, H)$, with value $0$ when
+  provenance $P_{\Spec \mid D}(t, H)$, with value $0$ when
   $t \notin (\Spec \mid D)(H)$.
-  When $\Spec$ and $H$ are clear from context, we write $\Prov_Q(t)$.
+  When $\Spec$ and $H$ are clear from context, we write $P(t)$.
 \end{definition}
 
 \noindent
@@ -665,14 +664,14 @@ Determination provenance is a $K$-relation over
 determinations~\cite{green2007provenance}: it records, for each possible
 semantic resolution, how the tuple is derived under that resolution.
 Conditioned provenance is the special case of evaluating at a single point:
-$\Prov_Q(t)(D) = \Prov_{Q \mid D}(t)$.
+$P(t)(D) = P_D(t)$.
 Classical provenance is the further special case where $|\mathcal{D}| = 1$
 (depth~$0$, no commitments needed).
 
 The \emph{support}
-$\mathrm{supp}(\Prov_Q(t))
+$\mathrm{supp}(P(t))
   \triangleq
-  \{\, D \in \mathcal{D} \mid \Prov_Q(t)(D) \neq 0 \,\}$
+  \{\, D \in \mathcal{D} \mid P(t)(D) \neq 0 \,\}$
 is the set of determinations under which $t$ holds.
 
 These supports form a commutative semiring under the operations induced by
@@ -694,7 +693,7 @@ This is the \emph{determination semiring}: it captures which determinations
 support a tuple and how those supports compose through queries.
 For instance, in the transactional example of the introduction, values $b$
 and $c$ have full support
-($\mathrm{supp}(\Prov_Q(b)) = \mathrm{supp}(\Prov_Q(c)) = \mathcal{D}$),
+($\mathrm{supp}(P(b)) = \mathrm{supp}(P(c)) = \mathcal{D}$),
 while $d$'s support is a proper subset---it holds only under determinations
 in which $T_Q$ commits before $T_3$.
 Section~\ref{sec:robustness} applies this structure to formalize robustness
@@ -799,7 +798,7 @@ $[I]_0 = \mathcal{D}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
   \label{def:query-depth}
   The \emph{query-relative depth} of a tuple $t$ is
   $\mathrm{qdepth}(t) \triangleq
-  \min\{k \mid \mathrm{supp}(\Prov_Q(t)) \in \mathcal{F}_k\}$.
+  \min\{k \mid \mathrm{supp}(P(t)) \in \mathcal{F}_k\}$.
 \end{definition}
 
 \begin{proposition}[Characterization]
@@ -1135,7 +1134,7 @@ Two representative determinations:
 $D_{\mathsf{in}} \triangleq
   \varphi_{\mathsf{commit}(T_2)} \cdot \varphi_{\mathsf{commit}(T_Q)}
   \cdot \varphi_{\mathsf{commit}(T_3)}$
-yields $\Prov_{Q \mid D_{\mathsf{in}}}(d)=x_2$;
+yields $P_{D_{\mathsf{in}}}(d)=x_2$;
 $D_{\mathsf{out}} \triangleq
   \varphi_{\mathsf{commit}(T_2)} \cdot \varphi_{\mathsf{commit}(T_3)}
   \cdot \varphi_{\mathsf{commit}(T_Q)}$
@@ -1143,7 +1142,7 @@ yields $d$ absent.
 Prior to resolution, even the \emph{form} of the provenance question for $d$
 is ambiguous (why vs.\ why-not).
 Values $b$ has full support
-($\mathrm{supp}(\Prov_Q(b)) = \mathcal{D}$)
+($\mathrm{supp}(P(b)) = \mathcal{D}$)
 and is robust; $d$ is contingent.
 
 \subsection{Complexity of Robustness}
@@ -1349,7 +1348,7 @@ quantify over different spaces.
 Robustness is an intra-specification property.
 Fix a specification $\Spec$ and the set $\mathcal{D}$ of resolving determinations.
 An outcome $o$ is \emph{robust} with respect to $\mathcal{D}$ iff
-$\mathrm{supp}(\Prov_Q(o)) = \mathcal{D}$---equivalently,
+$\mathrm{supp}(P(o)) = \mathcal{D}$---equivalently,
 $\forall D \in \mathcal{D}.\; o \in (\Spec \mid D)(H)$.
 In the determination semiring, robustness
 is the multiplicative identity: the tuple's support is the full set
@@ -1876,7 +1875,7 @@ Once $D_{\mathrm{strat}}$ is fixed, the specification is fully resolved.
 Derivational provenance applies without further semantic refinement.
 For example,
 \[
-  \Prov_{\mid D_{\mathrm{strat}}}(p(c)) = \Prov(a(c)).
+  P_{D_{\mathrm{strat}}}(p(c)) = P(a(c)).
 \]
 Absences such as $\neg q(c)$ are derivational consequences of the sealed lower stratum
 and require no additional commitments.
@@ -1926,7 +1925,7 @@ Because WFS yields a single resolved outcome (in the lifted domain), there is no
 branching among determinations.
 Once $D_{\mathrm{wfs}}$ is fixed, provenance is again depth~0:
 \[
-  \Prov_{\mid D_{\mathrm{wfs}}}(p(c)) = \Prov(a(c)).
+  P_{D_{\mathrm{wfs}}}(p(c)) = P(a(c)).
 \]
 The difference from stratified semantics lies not in multiplicity of outcomes, but
 in the unbounded, alternating structure of the determination itself.
@@ -1981,9 +1980,9 @@ This is reflected in the stable case.
 \paragraph{Provenance.}
 Determination provenance must record which stable determination is assumed:
 \[
-  \Prov_{\mid D^{(r)}}(r(c)) = 1,
+  P_{D^{(r)}}(r(c)) = 1,
   \qquad
-  \Prov_{\mid D^{(s)}}(s(c)) = 1.
+  P_{D^{(s)}}(s(c)) = 1.
 \]
 Only after this choice does ordinary derivational provenance apply.
 
@@ -2118,9 +2117,9 @@ semantic stage.
 Once a resolving determination is fixed, provenance is purely derivational.
 Conditioned on $D_{\mathsf{in}}$, the resolved snapshot contains $b,c,d$:
 \[
-  \Prov_{Q \mid D_{\mathsf{in}}}(b)=x_1+x_2,\quad
-  \Prov_{Q \mid D_{\mathsf{in}}}(c)=x_3,\quad
-  \Prov_{Q \mid D_{\mathsf{in}}}(d)=x_4.
+  P_{D_{\mathsf{in}}}(b)=x_1+x_2,\quad
+  P_{D_{\mathsf{in}}}(c)=x_3,\quad
+  P_{D_{\mathsf{in}}}(d)=x_4.
 \]
 Conditioned on $D_{\mathsf{out}}$, tuple $d$ is absent and classical why-not
 provenance applies.
@@ -2128,7 +2127,7 @@ provenance applies.
 Determination provenance records the semantic assumption under which the
 derivation holds; e.g.,
 \[
-  \Prov_{Q \mid D_{\mathsf{in}}}(d) = x_4.
+  P_{D_{\mathsf{in}}}(d) = x_4.
 \]
 
 \paragraph{Same observation, different derivational provenance.}
@@ -2194,8 +2193,8 @@ One admissible SI determination is:
 Under $D_{\mathrm{SI}}$, the final state contains $b$ and $c$, but not $d,e,f$.
 The query result is $\{b,c\}$ with derivational provenance:
 \[
-  \Prov_{Q \mid D_{\mathrm{SI}}}(b)=x_1+x_2,\qquad
-  \Prov_{Q \mid D_{\mathrm{SI}}}(c)=x_3.
+  P_{D_{\mathrm{SI}}}(b)=x_1+x_2,\qquad
+  P_{D_{\mathrm{SI}}}(c)=x_3.
 \]
 
 \paragraph{Semantic change and serializability.}
@@ -2392,9 +2391,9 @@ Let $k_B$ (resp.\ $k_C$) denote the derivational justification that $B$ (resp.\ 
 is the longest-duration span in the resolved execution.
 Determination provenance records:
 \[
-  \Prov_{\mid I_B}(\mathrm{cp}=B) = k_B,
+  P_{I_B}(\mathrm{cp}=B) = k_B,
   \qquad
-  \Prov_{\mid I_C}(\mathrm{cp}=C) = k_C .
+  P_{I_C}(\mathrm{cp}=C) = k_C .
 \]
 
 The provenance makes explicit that the diagnostic conclusion depends on semantic
@@ -2456,7 +2455,7 @@ several semantically distinct ways:
     But $r(c)$ is true only because of the commitment to the $r$-model;
     under $D^{(s)}$, $s(c)$ is true and $r(c)$ is absent.
     The why-not explanation for $s(c)$ under $D^{(r)}$ is
-    $\Prov_{\mid D^{(r)}}(\neg s(c))$,
+    $P_{D^{(r)}}(\neg s(c))$,
     recording that the absence depends on a semantic commitment, not merely
     on a blocked derivation.
 

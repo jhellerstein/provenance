@@ -697,6 +697,9 @@ depend on the first $k$ layers but be indifferent to the rest.
 The layered structure of a determination induces a \emph{filtration}---a
 nested chain of sub-semirings $\mathcal{F}_0 \subseteq \mathcal{F}_1
 \subseteq \cdots$---on the determination semiring that formalizes this.
+Intermediate levels arise when determinations have multiple layers, as in
+the overlapping-cycles scenario of Example~\ref{ex:overlapping-cycles}
+and in stratified Datalog (Appendix~\ref{sec:appendix-datalog}).
 Throughout this subsection, we fix the canonical layering of each
 determination---its Foata normal form (commitments grouped into maximal
 commuting batches).
@@ -1080,6 +1083,9 @@ recorded in the history as conflict edges accumulate.
   Had the system instead aborted $T_3$, both cycles would have broken in a
   single decision (depth~$1$).
   The determination records which resolution occurred.
+  A tuple whose presence depends on the first abort but not the second
+  lives at filtration level~$1$ (Section~\ref{sec:filtration}): its
+  provenance requires only one layer of commitment information.
 \end{example}
 
 \begin{proposition}[Snapshot isolation: depth from snapshot dependencies]

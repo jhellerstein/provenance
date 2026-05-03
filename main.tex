@@ -537,13 +537,13 @@ determinations is denoted $\mathcal{D}$.
 
 Fix a commutative semiring $(K, +, \cdot, 0, 1)$ for derivational provenance
 (e.g., the polynomial semiring $\mathbb{N}[X]$ of~\cite{green2007provenance}).
-For a specification $\Spec$, provenance query $P$, history $H$, tuple $t$, and a
+For a specification $\Spec$, provenance query $P$, tuple $t$, and a
 resolving determination $D \in \mathcal{D}$, the \emph{conditioned
 provenance} of $t$ under $D$ is
-$P_{\Spec \mid D}(t, H) \in K$:
+$P_{\Spec \mid D}(t) \in K$:
 the semiring provenance of $t$ under $P$ computed over the
-determined specification $\Spec \mid D$ at history $H$.
-When $\Spec$ and $H$ are clear from context, we write simply
+determined specification $\Spec \mid D$.
+When $\Spec$ is clear from context, we write simply
 $P_D(t)$.
 Conditioned provenance is classical provenance, conditioned on a particular
 semantic resolution.
@@ -648,15 +648,15 @@ $\Spec$ over the commitment basis $\Phi$; this set is finite.
 
 \begin{definition}[Determination Provenance]
   \label{def:det-provenance}
-  For a specification $\Spec$, provenance query $P$, history $H$, and tuple $t$, the
+  For a specification $\Spec$, provenance query $P$, and tuple $t$, the
   \emph{determination provenance} of $t$ is the function
   \[
-    P_{\Spec}(t, H) : \mathcal{D} \to K
+    P_{\Spec}(t) : \mathcal{D} \to K
   \]
   mapping each resolving determination $D \in \mathcal{D}$ to the conditioned
-  provenance $P_{\Spec \mid D}(t, H)$, with value $0$ when
-  $t \notin (\Spec \mid D)(H)$.
-  When $\Spec$ and $H$ are clear from context, we write $P(t)$.
+  provenance $P_{\Spec \mid D}(t)$, with value $0$ when
+  $t \notin (\Spec \mid D)$.
+  When $\Spec$ is clear from context, we write $P(t)$.
 \end{definition}
 
 \noindent

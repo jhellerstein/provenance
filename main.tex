@@ -636,39 +636,43 @@ and sensitivity across determinations.
 In Green et al.'s framework, provenance is read off as a polynomial:
 $P(t) = x_1 \cdot x_2 + x_3$ means ``derived from $x_1$ and $x_2$
 together, or from $x_3$ alone.''
-Determination provenance has an analogous compact form: a
-\emph{tuple of polynomials}, one per determination.
-With $|\mathcal{D}| = n$, the determination provenance of $t$ is
+Determination provenance pairs each such polynomial with the determination
+under which it applies.
+We write it as a set of (determination, polynomial) pairs:
 \[
-  P(t) = \bigl(\, P_{D_1}(t),\;\; P_{D_2}(t),\;\; \ldots,\;\; P_{D_n}(t) \,\bigr),
+  P(t) = \{\,(D,\; p) \mid D \in \mathcal{D},\; p = P_D(t) \neq 0\,\}.
 \]
-where each $P_{D_i}(t) \in K$ is a classical provenance polynomial
-(or $0$ if $t$ is absent under $D_i$).
-The two levels of algebraic structure are independent:
-the operations within each polynomial ($+_K$, $\cdot_K$) are the
-derivational semiring; the operations across the tuple positions
-($\cup$, $\cap$ on supports) are the determination semiring.
-These need not be the same algebra.
+Entries with zero provenance (tuple absent under that determination) are
+omitted.
+The support $\mathrm{supp}(P(t))$ is the projection onto the first
+component.
+The two algebraic structures are independent: within each pair, the
+polynomial lives in the derivational semiring $K$; across pairs, the
+supports compose in the determination semiring
+$(2^{\mathcal{D}}, \cup, \cap)$.
 
 \begin{example}[Determination polynomials for Example~\ref{ex:example}]
   \label{ex:det-semiring}
   With $\mathcal{D} = \{D_{\mathsf{in}}, D_{\mathsf{out}}\}$:
   \[
-    P(b) = (x_0,\; x_0), \qquad P(d) = (x_2,\; 0).
+    P(b) = \{(D_{\mathsf{in}},\, x_0),\; (D_{\mathsf{out}},\, x_0)\},
+    \qquad
+    P(d) = \{(D_{\mathsf{in}},\, x_2)\}.
   \]
   Here $x_0$ annotates the initial tuple $S(0,b)$ and $x_2$ annotates
   $T_2$'s insert of $S(2,d)$.
-  Both entries of $P(b)$ are nonzero: $b$ is robust
-  ($\mathrm{supp} = \mathcal{D}$).
-  Only the first entry of $P(d)$ is nonzero: $d$ is contingent
-  ($\mathrm{supp} = \{D_{\mathsf{in}}\}$).
+  $P(b)$ has full support ($\mathcal{D}$): $b$ is robust.
+  $P(d)$ has partial support ($\{D_{\mathsf{in}}\}$): $d$ is contingent.
 
-  Composition operates pointwise on the tuple.
-  A join with a tuple annotated $y$ multiplies each entry:
-  $P(b \bowtie T(b)) = (x_0 \cdot_K y,\; x_0 \cdot_K y)$---still robust.
-  A union adds entries pointwise:
-  $P(b) +_K P(d) = (x_0 +_K x_2,\; x_0)$---the result has full support
-  (both entries nonzero) since $b$ contributes under both determinations.
+  Composition operates on both components.
+  A join multiplies the polynomials pointwise (within each determination)
+  and intersects supports:
+  $P(b \bowtie T(b)) = \{(D_{\mathsf{in}},\, x_0 \cdot y),\;
+  (D_{\mathsf{out}},\, x_0 \cdot y)\}$---still robust.
+  A union adds polynomials pointwise and unions supports:
+  $P(b) \cup P(d) = \{(D_{\mathsf{in}},\, x_0 + x_2),\;
+  (D_{\mathsf{out}},\, x_0)\}$---full support, since $b$ contributes
+  under both determinations.
 \end{example}
 
 \paragraph{Computational cost.}

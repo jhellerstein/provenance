@@ -691,9 +691,10 @@ validity constraints; this remains open.
 \label{sec:filtration}
 
 In Example~\ref{ex:example}, the provenance of $b$ is the same under both
-$D_{\mathsf{in}}$ and $D_{\mathsf{out}}$---it does not depend on any
-commitment.
-The provenance of $d$ depends on which determination was applied.
+$D_{\mathsf{in}}$ and $D_{\mathsf{out}}$---knowing which determination was
+applied adds nothing to the explanation.
+The provenance of $d$ differs across determinations: explaining $d$ requires
+knowing that $D_{\mathsf{in}}$ was applied.
 This suggests a grading: some outcomes need zero layers of commitment
 information to explain, others need one, and in general an outcome may
 depend on the first $k$ layers but be indifferent to the rest.

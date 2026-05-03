@@ -529,12 +529,17 @@ history annotations.
 Classical provenance owes its power to algebraic structure: derivations
 compose through a commutative semiring, and query evaluation preserves
 that structure~\cite{green2007provenance}.
+This enables compositional reasoning---annotate base tuples once, and the
+semiring propagates through any query automatically.
 One might expect that layered determinations---sequences of non-commuting
 commitments---resist such clean algebraic treatment.
 In fact, the space of all resolving determinations forms a commutative
 semiring, and the layering within each determination is reflected as a
 filtration of sub-semirings that query evaluation respects.
-The layers are not ad hoc; they have algebraic content.
+The result is the same compositional power for contingency that classical
+provenance provides for derivation: annotate base tuples with their
+determination supports once, and the semiring propagates robustness,
+contingency, and depth through any query automatically.
 
 Throughout, we fix a specification $\Spec$ over a history class $\Hist$ and
 a persistent commitment basis $\Phi$; the set of minimal resolving

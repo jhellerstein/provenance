@@ -525,18 +525,18 @@ history annotations.
 %% ================================================================
 \section{The Algebra of Determinations}
 \label{sec:conditional-semiring}
-Classical data provenance is useful and concise due to its
-beautiful algebraic simplicity.
+
 A single determination has no interesting algebraic structure---it is
 just a sequence of commitments.
 But the \emph{family} of all resolving determinations does.
 The supports of outcomes across determinations form a commutative
 semiring (Section~\ref{sec:det-semiring}), enabling us to define
-robustness (outcomes supported by every determination).
-Moreover, the layered structure of determinations forms a \emph{filtration}---a sequence
-of sub-semirings (Section~\ref{sec:filtration})---enabling
-finer distinctions: an outcome can require only the first $k$ layers of
-commitment, giving more parsimonious provenance for restricted query families.
+robustness (an outcome supported by every determination).
+Moreover, the layered structure forced by non-commutativity is not merely
+operational: it is reflected as a filtration of sub-semirings
+(Section~\ref{sec:filtration}) that query evaluation respects.
+The layers of a determination have algebraic content, not just sequential
+ordering.
 
 Throughout, we fix a specification $\Spec$ over a history class $\Hist$ and
 a persistent commitment basis $\Phi$; the set of minimal resolving
@@ -689,14 +689,17 @@ validity constraints; this remains open.
 In Example~\ref{ex:example}, the provenance of $b$ is the same under both
 $D_{\mathsf{in}}$ and $D_{\mathsf{out}}$---knowing which determination was
 applied adds nothing to the explanation.
-By contrast, the provenance of $d$ differs across determinations: explaining $d$ requires
+The provenance of $d$ differs across determinations: explaining $d$ requires
 knowing that $D_{\mathsf{in}}$ was applied.
-This suggests a hierarchy: some outcomes need zero layers of commitment
-information to explain, others need one, and in general an outcome may
-depend on the first $k$ layers but be indifferent to the rest.
-The layered structure of a determination induces a \emph{filtration}---a
-nested chain of sub-semirings $\mathcal{F}_0 \subseteq \mathcal{F}_1
-\subseteq \cdots$---on the determination semiring that formalizes this.
+This distinction is not accidental.
+The layered structure of a determination---forced by non-commutativity of
+commitments---is reflected as genuine algebraic structure in the semiring:
+a \emph{filtration} (a nested chain of sub-semirings
+$\mathcal{F}_0 \subseteq \mathcal{F}_1 \subseteq \cdots$) that query
+evaluation respects.
+The layers are not merely an operational artifact of sequential commitment;
+they correspond to algebraic strata that compose cleanly with relational
+algebra.
 Intermediate levels arise when determinations have multiple layers, as in
 the overlapping-cycles scenario of Example~\ref{ex:overlapping-cycles}
 and in stratified Datalog (Appendix~\ref{sec:appendix-datalog}).
@@ -832,15 +835,12 @@ No layer information is needed to make this distinction.
 \end{proof}
 
 \noindent
-The filtration says which provenance questions a system can answer given
-partial commitment information.
-A system retaining only the first $k$ layers can answer any provenance
-question whose result has support in $\mathcal{F}_k$---that is, any
-question about tuples whose provenance depends on at most $k$ layers.
-Robust tuples (grade~$0$) need no commitment information;
-fully contingent tuples (grade~$d$) require the full determination.
-This is the formal basis for \emph{log parsimony}
-(Appendix~\ref{app:certificates}).
+The filtration shows that the layered structure of determinations is not
+merely a sequential artifact but has algebraic content: each
+$\mathcal{F}_k$ is a sub-semiring closed under query evaluation
+(Corollary~\ref{cor:propagation-filtration}), and the nesting
+$\mathcal{F}_0 \subset \cdots \subset \mathcal{F}_d = 2^{\mathcal{D}}$
+reflects the layers of the determination inside the semiring itself.
 
 
 % ================================================================

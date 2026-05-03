@@ -637,14 +637,15 @@ In Green et al.'s framework, provenance is read off as a polynomial:
 $P(t) = x_1 \cdot x_2 + x_3$ means ``derived from $x_1$ and $x_2$
 together, or from $x_3$ alone.''
 Determination provenance admits an analogous compact notation.
-We tag each classical provenance term with the determinations under which
-it applies, writing:
+Each determination $D \in \mathcal{D}$ acts as a coefficient on the
+classical provenance polynomial, yielding a \emph{determination polynomial}:
 \[
   P(t) = \sum_{D \in \mathcal{D}} D \cdot P_D(t),
 \]
-where $D$ acts as a coefficient indicating support and $P_D(t) \in K$ is
-the classical provenance under $D$ (with $P_D(t) = 0$ when $t$ is absent
-under $D$).
+where $P_D(t) \in K$ is the classical provenance under $D$
+(with $P_D(t) = 0$ when $t$ is absent under $D$).
+Multiplication by $D$ records which determination supports the derivation;
+the sum ranges over all resolving determinations.
 
 \begin{example}[Determination polynomials for Example~\ref{ex:example}]
   \label{ex:det-semiring}

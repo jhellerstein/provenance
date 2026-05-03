@@ -670,14 +670,6 @@ The distinction matters: in our setting, joint use of two premises
 \emph{intersects} their supports (both must hold), while alternative
 derivation paths \emph{union} them (either suffices).
 
-\paragraph{The two algebras do not flatten.}
-The outer algebra treats determinations as atomic indices; the inner algebra
-decomposes each into sequentially discharged layers.
-Disjunction ($\cup$) does not distribute over sequencing ($\seq$) because
-later layers depend on earlier discharges, so a disjunction of
-determinations with different prefixes cannot be decomposed into a single
-determination.
-
 \paragraph{Computational cost.}
 $|\mathcal{D}|$ may be exponential in the size of the commitment basis.
 When all commitments commute (a single-layer determination), supports admit compact

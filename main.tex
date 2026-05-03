@@ -628,45 +628,47 @@ $(2^{\mathcal{D}}, \cup, \cap, \emptyset, \mathcal{D})$---a commutative
 semiring with $\cup$ as addition and $\cap$ as multiplication.
 This is the \emph{determination semiring}: it captures which determinations
 support a tuple and how those supports compose through queries.
+Section~\ref{sec:robustness} applies this structure to formalize robustness
+and sensitivity across determinations.
 
-\begin{example}[Full determination provenance for Example~\ref{ex:example}]
+\subsection{Determination Polynomials}
+
+In Green et al.'s framework, provenance is read off as a polynomial:
+$P(t) = x_1 \cdot x_2 + x_3$ means ``derived from $x_1$ and $x_2$
+together, or from $x_3$ alone.''
+Determination provenance admits an analogous compact notation.
+We tag each classical provenance term with the determinations under which
+it applies, writing:
+\[
+  P(t) = \sum_{D \in \mathcal{D}} D \cdot P_D(t),
+\]
+where $D$ acts as a coefficient indicating support and $P_D(t) \in K$ is
+the classical provenance under $D$ (with $P_D(t) = 0$ when $t$ is absent
+under $D$).
+
+\begin{example}[Determination polynomials for Example~\ref{ex:example}]
   \label{ex:det-semiring}
-  The running example has two resolving determinations:
-  $D_{\mathsf{in}}$ (where $T_Q$ commits before $T_3$, making $d$ visible)
-  and $D_{\mathsf{out}}$ (where $T_3$ commits before $T_Q$, making $d$
-  absent).
-  So $\mathcal{D} = \{D_{\mathsf{in}}, D_{\mathsf{out}}\}$.
-
-  The determination provenance of each query result combines the
-  determination layer (which $D$ supports the tuple) with the classical
-  layer (the semiring annotation under that $D$):
+  With $\mathcal{D} = \{D_{\mathsf{in}}, D_{\mathsf{out}}\}$:
   \[
-    \begin{array}{l@{\qquad}l}
-      P(b)(D_{\mathsf{in}}) = x_0, & P(b)(D_{\mathsf{out}}) = x_0, \\
-      P(d)(D_{\mathsf{in}}) = x_2, & P(d)(D_{\mathsf{out}}) = 0.
-    \end{array}
+    P(b) = D_{\mathsf{in}} \cdot x_0 + D_{\mathsf{out}} \cdot x_0
+         = \mathcal{D} \cdot x_0,
+    \qquad
+    P(d) = D_{\mathsf{in}} \cdot x_2.
   \]
   Here $x_0$ annotates the initial tuple $S(0,b)$ and $x_2$ annotates
   $T_2$'s insert of $S(2,d)$.
-  The supports are
-  $\mathrm{supp}(P(b)) = \mathcal{D}$ (robust: same provenance under
-  both determinations) and
-  $\mathrm{supp}(P(d)) = \{D_{\mathsf{in}}\}$ (contingent: present only
-  when $T_Q$ commits before $T_3$).
+  The polynomial for $b$ has full support ($\mathcal{D}$): $b$ is robust.
+  The polynomial for $d$ has partial support ($\{D_{\mathsf{in}}\}$):
+  $d$ is contingent.
 
-  The semiring operations compose supports through queries.
-  A join $R(y) \drule S(k,y),\, T(y)$ (where $T$ contains only $b$)
-  gives $\mathrm{supp}(P_R(b)) = \mathcal{D} \cap \mathcal{D} =
-  \mathcal{D}$: joining two robust tuples yields a robust result.
-  A union returning both $b$ and $d$ gives
-  $\mathrm{supp}(P(b) + P(d)) = \mathcal{D} \cup \{D_{\mathsf{in}}\}
-  = \mathcal{D}$: the result holds under every determination since $b$
-  alone suffices.
+  Composition follows the semiring rules.
+  A join with a robust tuple $T(b)$ (annotated $y$) gives
+  $P(b \bowtie T(b)) = \mathcal{D} \cdot (x_0 \cdot y)$: still robust.
+  A union of $b$ and $d$ gives
+  $P(b) + P(d) = \mathcal{D} \cdot x_0 + D_{\mathsf{in}} \cdot x_2$:
+  the combined result holds under every determination (since the $b$ term
+  covers $\mathcal{D}$).
 \end{example}
-
-\noindent
-Section~\ref{sec:robustness} applies this structure to formalize robustness
-and sensitivity across determinations.
 
 \paragraph{Computational cost.}
 $|\mathcal{D}|$ may be exponential in the size of the commitment basis.

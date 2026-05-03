@@ -832,12 +832,14 @@ No layer information is needed to make this distinction.
 \end{proof}
 
 \noindent
-The filtration says the determination is reflected \emph{inside} the semiring as a
-graded sub-semiring structure.
-Robust tuples live at grade~$0$ (classical provenance); fully contingent
-tuples at grade~$d$ (full determination required).
-A system answering queries at depth $\le k$ need only retain the first $k$
-layers---the formal basis for \emph{log parsimony}
+The filtration says which provenance questions a system can answer given
+partial commitment information.
+A system retaining only the first $k$ layers can answer any provenance
+question whose result has support in $\mathcal{F}_k$---that is, any
+question about tuples whose provenance depends on at most $k$ layers.
+Robust tuples (grade~$0$) need no commitment information;
+fully contingent tuples (grade~$d$) require the full determination.
+This is the formal basis for \emph{log parsimony}
 (Appendix~\ref{app:certificates}).
 
 
@@ -1084,8 +1086,9 @@ recorded in the history as conflict edges accumulate.
   single decision (depth~$1$).
   The determination records which resolution occurred.
   A tuple whose presence depends on the first abort but not the second
-  lives at filtration level~$1$ (Section~\ref{sec:filtration}): its
-  provenance requires only one layer of commitment information.
+  lives at filtration level~$1$ (Section~\ref{sec:filtration}): a system
+  retaining only the first layer of commitment information can answer
+  provenance questions about it.
 \end{example}
 
 \begin{proposition}[Snapshot isolation: depth from snapshot dependencies]
@@ -1859,13 +1862,12 @@ Stratified programs provide a natural example of intermediate filtration
 levels (Section~\ref{sec:filtration}).
 With $k$ strata, the filtration has $k+1$ levels
 $\mathcal{F}_0 \subset \mathcal{F}_1 \subset \cdots \subset \mathcal{F}_k$.
-An atom derived purely from EDB facts (like $p(c) \leftarrow a(c)$) has
-support in $\mathcal{F}_0$: it holds under every determination regardless
-of how negation is resolved.
-An atom that depends on negation at stratum~$j$ (like $q(c) \leftarrow
-\neg p(c)$) has support in $\mathcal{F}_j \setminus \mathcal{F}_{j-1}$:
-its provenance requires knowing that strata $1, \ldots, j$ were sealed,
-but is indifferent to later strata.
+A system retaining only the first $j$ layers of commitment information
+can answer provenance questions about any atom whose derivation depends on
+negation no deeper than stratum~$j$: for instance, with just layer~$1$
+(the sealing of the lowest stratum), we can explain all atoms derived via
+first-stratum negation, but not those depending on higher strata.
+Atoms derived purely from EDB facts (like $p(c)$) require no layers at all.
 
 \subsection{Well-Founded Semantics}
 

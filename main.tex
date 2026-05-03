@@ -556,10 +556,9 @@ computed over the determined specification $\Spec \mid D$
 
 Conditioned provenance explains a single determination.
 Conditioned provenance suffices for explaining a single execution.
-But some questions require reasoning \emph{across} determinations or
-across specifications:
-Does this result hold under every admissible commit ordering?
-Would it persist under a weaker isolation level?
+But some questions require reasoning \emph{across} determinations:
+Does this result hold under every admissible commit ordering, or is it
+contingent on a particular one?
 Answering such questions requires comparing provenance across multiple
 determinations.
 

@@ -1085,10 +1085,10 @@ recorded in the history as conflict edges accumulate.
   Had the system instead aborted $T_3$, both cycles would have broken in a
   single decision (depth~$1$).
   The determination records which resolution occurred.
-  A tuple whose presence depends on the first abort but not the second
-  lives at filtration level~$1$ (Section~\ref{sec:filtration}): a system
-  retaining only the first layer of commitment information can answer
-  provenance questions about it.
+  A system that logs only the first abort decision (retaining filtration
+  level~$1$; Section~\ref{sec:filtration}) can still answer provenance
+  questions about any tuple whose presence depends only on that first
+  decision---without recording the second.
 \end{example}
 
 \begin{proposition}[Snapshot isolation: depth from snapshot dependencies]
@@ -1862,12 +1862,12 @@ Stratified programs provide a natural example of intermediate filtration
 levels (Section~\ref{sec:filtration}).
 With $k$ strata, the filtration has $k+1$ levels
 $\mathcal{F}_0 \subset \mathcal{F}_1 \subset \cdots \subset \mathcal{F}_k$.
-A system retaining only the first $j$ layers of commitment information
-can answer provenance questions about any atom whose derivation depends on
-negation no deeper than stratum~$j$: for instance, with just layer~$1$
-(the sealing of the lowest stratum), we can explain all atoms derived via
-first-stratum negation, but not those depending on higher strata.
-Atoms derived purely from EDB facts (like $p(c)$) require no layers at all.
+A system that logs only the sealing decisions for the first $j$ strata
+can answer provenance questions about any atom whose derivation uses
+negation no deeper than stratum~$j$.
+For instance, logging just the first stratum's sealing suffices to explain
+all atoms derived via first-stratum negation.
+Atoms derived purely from EDB facts (like $p(c)$) require no log at all.
 
 \subsection{Well-Founded Semantics}
 

@@ -644,7 +644,11 @@ specification---e.g., from snapshot isolation to serializability
 Vandevoort et al.~\cite{vandevoort2025mixed} study exactly this question
 for transaction programs: which transactions can run at a weaker isolation
 level while guaranteeing serializable behavior?
-Determination provenance provides a language for such analyses.
+The same question arises for Datalog negation: does a derived tuple survive
+a change from stable to well-founded semantics
+(Appendix~\ref{sec:appendix-datalog})?
+Determination provenance provides a uniform language for such analyses
+across domains.
 
 \subsection{Notation and Example}
 

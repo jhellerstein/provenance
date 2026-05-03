@@ -479,10 +479,19 @@ persistent basis is both necessary and sufficient for provenance.
 \end{theorem}
 
 \begin{proof}
-  (a)~Let $f$ be a base fact present in the instance induced by $o_1$ but
-  absent in that induced by $o_2$.
-  Semiring provenance is computed over a single instance; no instance both
-  contains and lacks $f$, so no single annotation explains both outcomes.
+  (a)~Semiring provenance over commutative semirings expresses only
+  \emph{positive} dependence on base facts: a derivation can require a
+  fact's presence but cannot require its
+  absence~\cite{green2007provenance}.
+  When two admissible outcomes differ on a fact $f$ (present in $o_1$,
+  absent in $o_2$), any derivation that depends on $f$'s absence---as
+  arises under negation or deletion---has no representation in the
+  semiring.
+  The ambiguity between $o_1$ and $o_2$ therefore lies outside the
+  semiring's expressive power and must be resolved before provenance
+  is computed.
+  (See Appendix~\ref{sec:appendix-datalog} for the Datalog negation
+  instantiation.)
 
   (b)~Since $D$ resolves $\Spec$, both $(\Spec \mid D)(H_1)$ and
   $(\Spec \mid D)(H_2)$ are singletons; call them $\{o_1\}$ and $\{o_2\}$.

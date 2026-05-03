@@ -76,8 +76,8 @@
   We introduce two new algebraic objects that extend provenance to this
   setting.
   \emph{Conditioned provenance} explains a query result under a single
-  determination; its algebraic structure is a \emph{commitment tower}
-  (a sequence of commutative monoids resting on a provenance semiring).
+  determination---a sequence of irrevocable commitments organized into
+  layers that discharge sequentially until a provenance semiring is exposed.
   \emph{Determination provenance} collects conditioned provenance across all
   determinations into a $K$-relation, whose supports form a
   commutative semiring---recovering the semiring framework of Green et al.\
@@ -144,8 +144,7 @@ is gone and derivations can be traced through a semiring as usual.
 The interesting structure lives in two places.
 First, \emph{within} a single determination: commitments may depend on each
 other (later commitments may be valid only after earlier ones are
-discharged), giving rise to a layered structure we call the
-\emph{commitment tower}.
+discharged), organizing naturally into non-commuting layers.
 Second, \emph{across} determinations: different determinations may yield
 different outcomes, and tracking which determinations support a given outcome
 yields a semiring structure---the \emph{determination semiring}---that
@@ -193,16 +192,15 @@ semiring composes through relational algebra~\cite{green2007provenance}.
 
 \paragraph{Contributions.}
 \begin{enumerate}[label=(\roman*),nosep,leftmargin=*]
-  \item \emph{Conditioned provenance} and the \emph{commitment tower}:
-        a structural decomposition of provenance under semantic ambiguity
-        into layers of commitment (commutative monoids) discharging
-        sequentially until a classical provenance semiring is exposed
+  \item \emph{Conditioned provenance}: provenance under a single
+        determination, with commitments organized into layers that
+        discharge sequentially until classical semiring provenance applies
         (Section~\ref{sec:conditional-semiring}).
   \item \emph{Determination provenance} and the \emph{determination
         semiring}: the algebraic structure across determinations, recovering
         Green et al.'s semiring framework at a new level
         (Section~\ref{sec:det-semiring}).
-  \item Instantiation in transactional systems, with tower height
+  \item Instantiation in transactional systems, with number of layers
         governed by conflict-graph topology
         (Section~\ref{sec:transactions}); and in Datalog
         with negation, addressing robustness across semantics and why-not
@@ -346,7 +344,7 @@ to evaluate.
 (A formal conservation law relating predicate complexity to determination
 depth appears in~\cite{hellerstein2026complexity}.)
 The transactional section illustrates this concretely: the commit/abort
-basis and the scheduling-enriched basis yield different tower structures
+basis and the scheduling-enriched basis yield different determination structures
 for the same workload (Section~\ref{sec:scheduling-basis}).
 
 We impose one restriction on bases throughout this paper:
@@ -555,72 +553,11 @@ For depth-$0$ specifications---where no nontrivial commitments are
 required---conditioned provenance coincides with classical provenance
 directly.
 
-\subsection{The Commitment Tower}
-\label{sec:algebra}
-
-Classical algebraic provenance lives in a commutative
-semiring~\cite{green2007provenance}.
-Determination provenance requires a richer structure---a \emph{commitment
-tower}---that decomposes provenance into phases: semantic commitments must
-be discharged before classical derivational provenance applies.
-The tower is a structural decomposition; its role is to identify
-\emph{when} and \emph{why} classical provenance applies, by making explicit
-the semantic prerequisites that must be resolved first.
-
-Consider a determination with $k$ layers,
-$L_1 \seq L_2 \seq \cdots \seq L_k$.
-The number of layers $k$ is the height of the commitment tower.
-Write $\Spec_0 = \Spec$ for the original specification and
-$\Spec_i = \Spec \mid (L_1 \seq \cdots \seq L_i)$ for the specification
-after discharging the first $i$ layers.
-
-\paragraph{Each layer is a commutative monoid.}
-Within layer~$i$, commitments commute: the order of application does not
-affect the resulting admissible set.
-The commitments in $L_i$ therefore form a commutative monoid $M_i$ under
-conjunction, with the trivial commitment (no restriction) as identity.
-Which monoid arises at layer~$i$ is conditioned on the layers above:
-the carrier of $M_i$---which commitments are valid and which outcomes they
-act upon---is determined by the specification prefix $\Spec_{i-1}$.
-Discharging $M_i$ (applying all commitments in $L_i$) produces $\Spec_i$,
-which in turn determines the monoid $M_{i+1}$.
-
-\paragraph{Layers compose by sequential discharge.}
-Between layers, composition is sequential and generally non-commutative:
-applying one layer may enable or disable commitments in the next.
-The sequencing operator $\seq$ carries no algebraic meaning beyond ordered
-refinement---it is the mechanism that transitions from one monoid to the next
-by conditioning the specification.
-
-\paragraph{The semiring foundation.}
-At the base of the tower ($i = k$), the specification $\Spec_k = \Spec \mid D$
-is determined: single-valued and, under a persistent basis, history-invariant
-(Theorem~\ref{thm:resolution-implies-monotone}).
-All remaining variation is purely derivational.
-At this point the algebraic regime shifts: we leave the world of commitment
-monoids and enter the world of provenance semirings.
-Derivations compose exactly as in classical semiring
-provenance~\cite{green2007provenance}---alternative derivations of the same
-fact combine by semiring addition, joint use of multiple facts by semiring
-multiplication.
-
-\paragraph{Summary.}
-A commitment tower is a sequence of commutative monoids
-$M_k, \ldots, M_1$ resting on a provenance semiring $K$.
-It is a structural decomposition: each monoid represents one layer of
-semantic commitment, and discharge proceeds sequentially until the semiring
-foundation is exposed.
-Classical provenance is the special case of height~$0$.
-Per-determination provenance $P_D(t)$ is the semiring element
-released by discharging the tower $D$.
-A fuller algebraic treatment---including potential universality properties
-and composition laws---is deferred to Appendix~\ref{app:algebra-future}.
-
 \subsection{The Determination Semiring}
 \label{sec:det-semiring}
+\label{sec:algebra}
 
-The commitment tower describes the algebraic structure \emph{within} a single
-determination.
+Conditioned provenance explains a single determination.
 In many settings, a single determination is the natural object of study:
 when explaining what happened in a particular execution, one fixes the
 determination that corresponds to that execution and reads off the
@@ -719,21 +656,21 @@ decomposes each into sequentially discharged layers.
 Disjunction ($\cup$) does not distribute over sequencing ($\seq$) because
 later layers depend on earlier discharges, so a disjunction of
 determinations with different prefixes cannot be decomposed into a single
-tower.
+determination.
 
 \paragraph{Computational cost.}
 $|\mathcal{D}|$ may be exponential in the size of the commitment basis.
-When all commitments commute (a single-layer tower), supports admit compact
+When all commitments commute (a single-layer determination), supports admit compact
 representation as positive Boolean formulas over commitment
 variables (Proposition~\ref{prop:collapse-depth-1}).
-For deeper towers, compact representation requires respecting inter-layer
+For deeper determinations, compact representation requires respecting inter-layer
 validity constraints; this remains open.
 
 \subsection{Filtration of the Determination Semiring}
 \label{sec:filtration}
 
-The commitment tower and the determination semiring are not independent
-structures: the tower induces a natural \emph{filtration} on the semiring
+The layered structure of a determination and the determination semiring are
+not independent: the layers induce a natural \emph{filtration} on the semiring
 that connects query-relative depth to algebraic structure.
 
 Two determinations $D, D' \in \mathcal{D}$ \emph{agree at level $k$} if
@@ -774,7 +711,7 @@ $[I]_0 = \mathcal{D}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
 
 \begin{proposition}[Collapse at depth 1]
   \label{prop:collapse-depth-1}
-  When all commitments commute (tower height $d = 1$), the tower
+  When all commitments commute (number of layers $d = 1$), the determination
   is a single commutative monoid, the filtration has exactly two levels
   ($\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$ and
   $\mathcal{F}_1 = 2^{\mathcal{D}}$), and the determination semiring
@@ -822,7 +759,7 @@ $[I]_0 = \mathcal{D}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
 
 \begin{example}[Query-relative depth in the transactional setting]
   \label{ex:qdepth-txn}
-  In Example~\ref{ex:example}, the tower has depth~$1$ (all commit
+  In Example~\ref{ex:example}, the determination has depth~$1$ (all commit
   decisions commute when no cycles exist).
   Value $b$ has $\mathrm{qdepth}(b) = 0$: it holds under every
   determination (robust).
@@ -850,17 +787,17 @@ $[I]_0 = \mathcal{D}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
 \end{proof}
 
 \noindent
-The filtration says the tower is reflected \emph{inside} the semiring as a
+The filtration says the determination is reflected \emph{inside} the semiring as a
 graded sub-semiring structure.
 Robust tuples live at grade~$0$ (classical provenance); fully contingent
-tuples at grade~$d$ (full tower required).
+tuples at grade~$d$ (full determination required).
 A system answering queries at depth $\le k$ need only retain the first $k$
 layers---the formal basis for \emph{log parsimony}
 (Appendix~\ref{app:certificates}).
 
 \begin{remark}[Dependence on layering]
   \label{rem:layering-dependence}
-  The filtration depends on the canonical layering of the tower (the Foata
+  The filtration depends on the canonical layering of the determination (the Foata
   normal form: commitments grouped into maximal commuting batches).
   Different valid orderings \emph{within} a layer do not affect the
   equivalence classes, since intra-layer commitments commute by definition.
@@ -876,7 +813,7 @@ layers---the formal basis for \emph{log parsimony}
 We now instantiate the framework in transactional systems, where ambiguity
 arises from concurrency: multiple consistent executions may be admissible for
 the same observed history.
-We formalize the commitment basis, characterize tower height across
+We formalize the commitment basis, characterize number of layers across
 isolation levels, and show how determination provenance distinguishes robust
 from contingent query results.
 
@@ -1051,7 +988,7 @@ recorded in the history as conflict edges accumulate.
   Under read committed, $\Spec_{\mathit{RC}}$ is future-monotone:
   extending a history with new operations and commit/abort events can only
   add new visible values, never retract previously visible ones.
-  Hence no commitments are needed and tower height is~$0$.
+  Hence no commitments are needed and number of layers is~$0$.
 \end{proposition}
 \begin{proof}
   Under RC, a transaction $T_Q$ may read any value written by a
@@ -1120,7 +1057,7 @@ recorded in the history as conflict edges accumulate.
   Snapshot commitments do not commute in general: the first-committer-wins
   (FCW) rule can render a snapshot choice for $T_j$ infeasible once a
   conflicting assignment for $T_i$ is fixed.
-  Worst-case tower height under SI is $O(n)$ where $n$ is the number
+  Worst-case number of layers under SI is $O(n)$ where $n$ is the number
   of transactions, arising from chains of FCW dependencies.
 \end{proposition}
 
@@ -1215,7 +1152,7 @@ assignments are jointly admissible.
 Snapshot commitments do not commute in general (FCW can render
 a choice for $T_j$ infeasible once $T_i$'s is fixed),
 introducing non-commutativity beyond serializability and
-potentially deepening the tower even for acyclic conflict graphs.
+potentially deepening the determination even for acyclic conflict graphs.
 Worst-case depth under SI is $O(n)$ (Proposition~\ref{prop:si-depth}).
 
 \subsection{Enriching the Basis: Scheduling as Commitment}
@@ -1253,7 +1190,7 @@ $D_{\mathsf{sched}} = \{\varphi_{T_i \prec T_j} \mid
 (T_i, T_j) \in \text{chosen ordering}\}$
 of commuting ordering commitments (depth~$1$).
 The NP-completeness of computing this layer illustrates a general
-tradeoff: tower height can be traded for computational complexity
+tradeoff: number of layers can be traded for computational complexity
 within a single layer.
 The enriched basis extends beyond batch scheduling to online arrival
 (ordering decisions made incrementally, potentially non-commuting),
@@ -1413,14 +1350,14 @@ explanations
 \cite{buneman2001why,halpern2001causes,meliou2010causality,glavic2015survey}.
 
 From the perspective of this paper, these approaches operate at
-no tower is needed: semantic ambiguity has already been resolved, and
+no determination is needed: semantic ambiguity has already been resolved, and
 provenance explains derivations relative to a fixed semantics.
 This includes work on incremental view maintenance and \emph{homeostasis},
 which identifies queries whose answers are invariant under admissible input
 changes and therefore require no additional semantic commitments to maintain
 \cite{gehrke2002homeostasis}.
 In our framework, homeostasis corresponds precisely to robustness at
-no tower is needed: the query answer is invariant across all admissible
+no determination is needed: the query answer is invariant across all admissible
 outcomes of the specification, so no commitment is needed to justify it.
 Determination provenance generalizes this by explaining which commitments are
 required when invariance fails, and how classical provenance depends on those
@@ -1444,7 +1381,7 @@ settings under an assumed execution or isolation level
 \cite{bernstein1987concurrency,adya1999weak,cerone2015consistency,cheney2009provenance,freire2008provenance}.
 In these settings, semantic resolution is implicit: provenance explains results
 relative to a chosen execution, snapshot, or schedule.
-From our perspective, such approaches again require no tower.
+From our perspective, such approaches again require no determination.
 
 A distinct body of systems work studies execution provenance or systems lineage,
 recording causal dependencies among processes, messages, and events to explain
@@ -1515,7 +1452,7 @@ The main structural assumption of this paper is \emph{persistence}: once a
 commitment excludes an outcome, it remains excluded at all history extensions.
 This is what guarantees history-monotonicity of determined specifications
 (Theorem~\ref{thm:resolution-implies-monotone}) and enables classical
-provenance at the foundation of the commitment tower.
+provenance once all layers have been discharged.
 All examples in this paper satisfy persistence naturally.
 However, many practical settings involve commitments that can be
 reversed---transactional rollback, speculative execution, backtracking
@@ -1533,57 +1470,57 @@ resolution, provenance must explain the assumptions that made meaning possible.
 \appendix
 
 % ================================================================
-\section{Open Questions: Tower Structure}
+\section{Open Questions: Determination Structure}
 \label{app:open-questions}
 % ================================================================
 
-The commitment tower is defined as the layered normal form of a resolving
+A determination is organized into its layered normal form: a resolving
 determination: commitments grouped into maximal commuting batches, discharged
 sequentially.
 Several structural questions about this object remain open.
 
-\paragraph{The tower as Foata normal form.}
+\paragraph{The determination as Foata normal form.}
 In classical trace theory~\cite{mazurkiewicz1977concurrent}, the Foata normal
 form canonically represents a word in a partially commutative monoid as a
 sequence of maximal independent layers.
-The commitment tower is the analog for determinations---but with a crucial
+The layered normal form is the analog for determinations---but with a crucial
 difference: commutation is \emph{dynamic} (history-contingent) rather than
 static.
 Whether $\varphi$ and $\psi$ commute depends on the current admissible set,
 which changes as earlier layers are discharged.
-A formal characterization of the tower as a dynamic Foata normal form---and
+A formal characterization of the determination as a dynamic Foata normal form---and
 conditions under which two determinations are equivalent (produce the same
-determined specification)---would give the tower a precise algebraic identity
+determined specification)---would give the determination a precise algebraic identity
 beyond its definition.
 
-\paragraph{Tower height under history extension.}
+\paragraph{Layers under history extension.}
 Under a persistent basis, the admissible set can only shrink as history grows.
 Fewer admissible outcomes means fewer commitments are needed and fewer
 opportunities for non-commutativity.
-\emph{Conjecture:} for a persistent basis, the tower height (determination
+\emph{Conjecture:} for a persistent basis, the determination height (determination
 depth) is monotonically non-increasing under history extension.
 If true, this would mean that as more information arrives, resolution becomes
 easier (or at least no harder)---a natural property that connects to the
 Coordination Criterion's characterization of depth-$0$ specifications as
 those requiring no commitments at all.
 
-\paragraph{Query-relative tower height.}
-A provenance provenance query $P$ may depend on only a subset of the tower's layers.
+\paragraph{Query-relative number of layers.}
+A provenance provenance query $P$ may depend on only a subset of the determination's layers.
 If $P$'s answer is determined after discharging $k < d$ layers (the remaining
-layers resolve ambiguity irrelevant to $P$), the effective tower for $P$ has
+layers resolve ambiguity irrelevant to $P$), the effective determination for $P$ has
 height~$k$.
 This connects to layer certificates (Appendix~\ref{app:certificates}):
 a certificate for layer~$i$ is sufficient for $P$ precisely when $P$ does not
 depend on finer distinctions within that layer.
-Characterizing query-relative tower height---which queries require which
+Characterizing query-relative number of layers---which queries require which
 layers---would provide a formal basis for adaptive log retention.
 
 \paragraph{Reversible commitments.}
-The persistent-basis assumption guarantees that the tower discharges
+The persistent-basis assumption guarantees that the determination discharges
 irreversibly.
 In settings with rollback (transactional abort-and-retry, speculative
 execution, backtracking search), commitments can be undone.
-Extending the tower to reversible commitments---replacing monoids with
+Extending the determination to reversible commitments---replacing monoids with
 groups at each layer---and characterizing the resulting provenance structure
 is open.
 
@@ -1609,16 +1546,16 @@ in every minimal model?'') would establish that robustness checking is
 inherently intractable, complementing the algebraic propagation result:
 propagation is compositional, but deciding full support is hard.
 % ================================================================
-\section{Appendix: The Commitment Tower---Algebraic Details}
+\section{Appendix: The Layered Determination---Algebraic Details}
 \label{app:algebra}
 % ================================================================
 
-This appendix gives precise structural content to the commitment tower
+This appendix gives precise structural content to the layered determination structure
 introduced in Section~\ref{sec:algebra}.
 The goal is to situate
 determination provenance precisely relative to existing algebraic frameworks
 and to justify the claim that classical semiring provenance applies once the
-tower has been fully discharged.
+determination has been fully discharged.
 
 \subsection{Sequential Discharge Versus Algebraic Combination}
 
@@ -1696,9 +1633,9 @@ discharged.
   a fixed instance, which suffices.
 \end{proof}
 
-\subsection{The Tower as a Whole}
+\subsection{The Layered Determination as a Whole}
 
-A commitment tower of height~$k$ over a provenance semiring $K$ consists of:
+A determination of height~$k$ over a provenance semiring $K$ consists of:
 \begin{enumerate}[nosep]
   \item commutative monoids $M_k, M_{k-1}, \ldots, M_1$, where
         each $M_i$ is conditioned on the specification prefix obtained by
@@ -1713,24 +1650,24 @@ just the semiring.
 
 Determination provenance recovers the algebraic conditions required for
 semiring provenance by explicitly discharging semantic ambiguity through the
-tower.
-Seen this way, the commitment tower is a semantic prelude to algebraic
+layered determination.
+Seen this way, a layered determination is a semantic prelude to algebraic
 provenance: it explains \emph{when} and \emph{why} classical provenance
 applies, rather than assuming a fixed monotone semantics from the outset.
 
 % ================================================================
-\section{Toward an Algebraic Theory of Commitment Towers}
+\section{Toward an Algebraic Theory of Layered Determinations}
 \label{app:algebra-future}
 % ================================================================
 
-The commitment tower as presented in this paper is a structural decomposition:
+The layered structure of determinations as presented in this paper is a structural decomposition:
 it identifies the phases of provenance computation (commitment discharge
 followed by derivational evaluation) without claiming a new algebraic object
 with universal properties.
 Several directions for algebraic development remain open.
 
 \paragraph{Collapse at depth 1.}
-When all commitments commute (tower height~$1$), the tower reduces to a
+When all commitments commute (number of layers~$1$), the determination reduces to a
 single commutative monoid tensored with the provenance semiring.
 In this case, the determination semiring coincides with
 $\mathrm{PosBool}(B)$~\cite{green2007provenance}, where $B$ is the set of
@@ -1742,15 +1679,15 @@ is straightforward but deferred.
 Green et al.\ showed that $\mathbb{N}[X]$ is the most general provenance
 semiring for positive relational algebra: every other semiring annotation is a
 homomorphic image.
-An analogous question for the commitment tower would ask: is there a ``most
-general'' tower from which all others are homomorphic images?
+An analogous question for layered determinations would ask: is there a ``most
+general'' determination from which all others are homomorphic images?
 The conditioning between layers (each monoid depends on the discharge of the
-previous) makes this question non-trivial, as the tower is not a fixed algebraic
+previous) makes this question non-trivial, as the determination is not a fixed algebraic
 structure but a \emph{dependent} one.
 
 \paragraph{Composition laws.}
-When two determinations share a common prefix, their towers share initial layers.
-A formal treatment of tower morphisms---how towers relate under prefix extension,
+When two determinations share a common prefix, their determinations share initial layers.
+A formal treatment of determination morphisms---how determinations relate under prefix extension,
 restriction, and substitution of commitment layers---would enable compositional
 reasoning about determination provenance across sub-specifications.
 
@@ -1865,7 +1802,7 @@ A resolving determination for the stratified fragment is
 where each $S_i$ is the set of atoms whose truth is fixed at stratum~$i$.
 These sealing predicates do \emph{not} commute: sealing $S_i$ is a prerequisite
 for applying negation commitments in $S_{i+1}$.
-Accordingly, the tower height is exactly $k$, as recorded in
+Accordingly, the determination height is exactly $k$, as recorded in
 the stratified case.
 
 \paragraph{Provenance.}
@@ -1909,7 +1846,7 @@ A resolving determination under WFS can be written schematically as
 where each $U_i$ is an unfounded set eliminated at alternation~$i$.
 These commitments are non-commuting and may require an unbounded number of
 alternations.
-Hence WFS has no fixed finite tower height in general, as indicated in
+Hence WFS has no fixed finite number of layers in general, as indicated in
 the well-founded case.
 
 For the running example, the limit of this process yields the unique partial
@@ -1971,7 +1908,7 @@ After this prefix, the negation cycle admits two incompatible resolutions:
 
 Within either determination, the remaining commitments are logically simultaneous
 and commute.
-Thus the tower height is $k{+}1$: the $k$ stratification stages plus one
+Thus the determination height is $k{+}1$: the $k$ stratification stages plus one
 additional, non-commuting branching stage.
 This is reflected in the stable case.
 
@@ -2209,7 +2146,7 @@ topological sort recovers exactly the serializable outcomes.
 Unlike serializability, which resolves ambiguity in a single commuting stage,
 snapshot isolation may require an independent snapshot commitment for each
 transaction.
-Thus SI has worst-case tower height $O(|H|)$, as recorded in
+Thus SI has worst-case number of layers $O(|H|)$, as recorded in
 Figure~\ref{fig:det-tables}.
 Once an SI determination is fixed, provenance again reduces to depth--0
 derivational provenance.
@@ -2289,7 +2226,7 @@ commitments---can refine systems lineage explanations by making explicit which
 assumptions are required to justify diagnostic conclusions.
 
 Unlike the previous appendices, this setting does not admit a fixed canonical
-tower height.
+number of layers.
 Semantic commitments may be staged or bundled depending on the diagnostic query,
 but determination provenance still cleanly separates observable evidence from
 the assumptions required to explain it.
@@ -2433,7 +2370,7 @@ assumptions required to justify those explanations.
 \section{Absence Under Semantic Ambiguity}
 \label{app:whynot}
 In settings with semantic ambiguity, absence admits distinctions that cannot be
-expressed without a tower.
+expressed without a determination.
 
 Given a specification $\Spec$ and history $H$, a conclusion may be absent in
 several semantically distinct ways:
@@ -2464,7 +2401,7 @@ several semantically distinct ways:
     In the running example, both $r(c)$ and $s(c)$ receive the value
     $\mathbf{u}$ under the well-founded determination.
     Classical why-not provenance has no clean answer here---the atom is not
-    absent due to a derivational failure, but because the commitment tower
+    absent due to a derivational failure, but because the determination
     is incomplete: the well-founded determination does not discharge the
     layer needed to resolve the $r/s$ cycle.
     This case has no transactional analog (serializable executions are
@@ -2509,11 +2446,11 @@ of the non-existence, incompleteness, or variability of supporting
 determinations rather than in terms of blocked derivations alone.
 
 The taxonomy above classifies \emph{what kind} of absence holds.
-The commitment tower provides a natural decomposition of the counterfactual
+The layered structure provides a natural decomposition of the counterfactual
 reasoning needed to explain each case: contingent absence involves semantic
 counterfactuals (what if a different determination had been chosen?) composed
 with derivational counterfactuals (what if a missing premise had been
-present?); undefinedness reflects an incomplete tower; robust absence involves
+present?); undefinedness reflects an incomplete determination; robust absence involves
 only derivational counterfactuals; and inter-specification absence requires
 changing the specification itself.
 

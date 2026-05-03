@@ -1854,6 +1854,19 @@ For example,
 Absences such as $\neg q(c)$ are derivational consequences of the sealed lower stratum
 and require no additional commitments.
 
+\paragraph{Filtration.}
+Stratified programs provide a natural example of intermediate filtration
+levels (Section~\ref{sec:filtration}).
+With $k$ strata, the filtration has $k+1$ levels
+$\mathcal{F}_0 \subset \mathcal{F}_1 \subset \cdots \subset \mathcal{F}_k$.
+An atom derived purely from EDB facts (like $p(c) \leftarrow a(c)$) has
+support in $\mathcal{F}_0$: it holds under every determination regardless
+of how negation is resolved.
+An atom that depends on negation at stratum~$j$ (like $q(c) \leftarrow
+\neg p(c)$) has support in $\mathcal{F}_j \setminus \mathcal{F}_{j-1}$:
+its provenance requires knowing that strata $1, \ldots, j$ were sealed,
+but is indifferent to later strata.
+
 \subsection{Well-Founded Semantics}
 
 \paragraph{Determination structure.}

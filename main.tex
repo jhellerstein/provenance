@@ -526,17 +526,15 @@ history annotations.
 \section{The Algebra of Determinations}
 \label{sec:conditional-semiring}
 
-A single determination has no interesting algebraic structure---it is
-just a sequence of commitments.
-But the \emph{family} of all resolving determinations does.
-The supports of outcomes across determinations form a commutative
-semiring (Section~\ref{sec:det-semiring}), enabling us to define
-robustness (an outcome supported by every determination).
-Moreover, the layered structure forced by non-commutativity is not merely
-operational: it is reflected as a filtration of sub-semirings
-(Section~\ref{sec:filtration}) that query evaluation respects.
-The layers of a determination have algebraic content, not just sequential
-ordering.
+Classical provenance owes its power to algebraic structure: derivations
+compose through a commutative semiring, and query evaluation preserves
+that structure~\cite{green2007provenance}.
+One might expect that layered determinations---sequences of non-commuting
+commitments---resist such clean algebraic treatment.
+In fact, the space of all resolving determinations forms a commutative
+semiring, and the layering within each determination is reflected as a
+filtration of sub-semirings that query evaluation respects.
+The layers are not ad hoc; they have algebraic content.
 
 Throughout, we fix a specification $\Spec$ over a history class $\Hist$ and
 a persistent commitment basis $\Phi$; the set of minimal resolving

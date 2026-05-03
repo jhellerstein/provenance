@@ -633,12 +633,11 @@ and sensitivity across determinations.
 
 \subsection{Notation and Example}
 
-In Green et al.'s framework, provenance is read off as a polynomial:
-$P(t) = x_1 \cdot x_2 + x_3$ means ``derived from $x_1$ and $x_2$
-together, or from $x_3$ alone.''
-Determination provenance pairs each such polynomial with the determination
-under which it applies.
-We write it as a set of (determination, polynomial) pairs:
+In Green et al.'s framework, provenance is read off as a semiring
+expression: $P(t) = x_1 \cdot x_2 + x_3$ means ``derived from $x_1$ and
+$x_2$ together, or from $x_3$ alone.''
+Determination provenance is a function from determinations to provenance
+values, displayed as a set of pairs (omitting zero entries):
 \[
   P(t) = \{\,(D,\; p) \mid D \in \mathcal{D},\; p = P_D(t) \neq 0\,\}.
 \]
@@ -647,7 +646,7 @@ omitted.
 The support $\mathrm{supp}(P(t))$ is the projection onto the first
 component.
 The two algebraic structures are independent: within each pair, the
-polynomial lives in the derivational semiring $K$; across pairs, the
+provenance value lives in the derivational semiring $K$; across pairs, the
 supports compose in the determination semiring
 $(2^{\mathcal{D}}, \cup, \cap)$.
 
@@ -665,11 +664,11 @@ $(2^{\mathcal{D}}, \cup, \cap)$.
   $P(d)$ has partial support ($\{D_{\mathsf{in}}\}$): $d$ is contingent.
 
   Composition operates on both components.
-  A join multiplies the polynomials pointwise (within each determination)
+  A join multiplies provenance values pointwise (within each determination)
   and intersects supports:
   $P(b \bowtie T(b)) = \{(D_{\mathsf{in}},\, x_0 \cdot y),\;
   (D_{\mathsf{out}},\, x_0 \cdot y)\}$---still robust.
-  A union adds polynomials pointwise and unions supports:
+  A union adds provenance values pointwise and unions supports:
   $P(b) \cup P(d) = \{(D_{\mathsf{in}},\, x_0 + x_2),\;
   (D_{\mathsf{out}},\, x_0)\}$---full support, since $b$ contributes
   under both determinations.

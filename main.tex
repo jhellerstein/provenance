@@ -537,11 +537,11 @@ determinations is denoted $\mathcal{D}$.
 
 Fix a commutative semiring $(K, +, \cdot, 0, 1)$ for derivational provenance
 (e.g., the polynomial semiring $\mathbb{N}[X]$ of~\cite{green2007provenance}).
-For a specification $\Spec$, query $Q$, history $H$, tuple $t$, and a
+For a specification $\Spec$, provenance query $P$, history $H$, tuple $t$, and a
 resolving determination $D \in \mathcal{D}$, the \emph{conditioned
 provenance} of $t$ under $D$ is
 $P_{\Spec \mid D}(t, H) \in K$:
-the ordinary semiring provenance of $t$ for query $Q$ computed under the
+the semiring provenance of $t$ under $P$ computed over the
 determined specification $\Spec \mid D$ at history $H$.
 When $\Spec$ and $H$ are clear from context, we write simply
 $P_D(t)$.
@@ -648,7 +648,7 @@ $\Spec$ over the commitment basis $\Phi$; this set is finite.
 
 \begin{definition}[Determination Provenance]
   \label{def:det-provenance}
-  For a specification $\Spec$, query $Q$, history $H$, and tuple $t$, the
+  For a specification $\Spec$, provenance query $P$, history $H$, and tuple $t$, the
   \emph{determination provenance} of $t$ is the function
   \[
     P_{\Spec}(t, H) : \mathcal{D} \to K
@@ -1150,8 +1150,8 @@ and is robust; $d$ is contingent.
 \begin{theorem}[Robustness under serializability is coNP-complete]
   \label{thm:robustness-conp}
   Given a transactional history $H$ with conflict graph $G$, a conjunctive
-  query $Q$, and a tuple $t$: deciding whether $t$ is robust (present in
-  $Q$'s result under every resolving determination) is coNP-complete.
+  provenance query $P$, and a tuple $t$: deciding whether $t$ is robust (present in
+  $P$'s result under every resolving determination) is coNP-complete.
 \end{theorem}
 
 \begin{proof}
@@ -1184,7 +1184,7 @@ and is robust; $d$ is contingent.
   For each term $t_j = \ell_1 \wedge \cdots \wedge \ell_m$ in $\psi$,
   define a conjunctive query clause that checks whether the corresponding
   objects have the values matching the literals.
-  The overall query $Q$ returns a distinguished tuple $t^*$ iff at least
+  The overall provenance query $P$ returns a distinguished tuple $t^*$ iff at least
   one term is satisfied (the disjunction of all term-queries).
 
   Under any resolving determination, the commit ordering of each pair
@@ -1570,12 +1570,12 @@ Coordination Criterion's characterization of depth-$0$ specifications as
 those requiring no commitments at all.
 
 \paragraph{Query-relative tower height.}
-A provenance query $Q$ may depend on only a subset of the tower's layers.
-If $Q$'s answer is determined after discharging $k < d$ layers (the remaining
-layers resolve ambiguity irrelevant to $Q$), the effective tower for $Q$ has
+A provenance provenance query $P$ may depend on only a subset of the tower's layers.
+If $P$'s answer is determined after discharging $k < d$ layers (the remaining
+layers resolve ambiguity irrelevant to $P$), the effective tower for $P$ has
 height~$k$.
 This connects to layer certificates (Appendix~\ref{app:certificates}):
-a certificate for layer~$i$ is sufficient for $Q$ precisely when $Q$ does not
+a certificate for layer~$i$ is sufficient for $P$ precisely when $P$ does not
 depend on finer distinctions within that layer.
 Characterizing query-relative tower height---which queries require which
 layers---would provide a formal basis for adaptive log retention.

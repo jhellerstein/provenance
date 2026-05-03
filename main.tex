@@ -480,6 +480,14 @@ persistent basis is both necessary and sufficient for provenance.
   Hence $o_2 = o_1$.
 \end{proof}
 
+\noindent
+Intuitively, persistent commitments are retrospective: having observed a
+determined history, we could equivalently imagine the commitments applied
+at any earlier point and the outcome would be the same.
+We may therefore write $(\Spec \mid D)$ without a history argument
+and abbreviate $D = \varphi_1 \cdot \cdots \cdot \varphi_m$, eliding
+history annotations.
+
 \begin{theorem}[Resolution is necessary and sufficient for provenance]
   \label{thm:resolution-implies-monotone}
   \label{thm:necessity}
@@ -516,13 +524,6 @@ persistent basis is both necessary and sufficient for provenance.
 
   (b)~Immediate from Lemma~\ref{lem:history-invariance}.
 \end{proof}
-
-\noindent
-By Lemma~\ref{lem:history-invariance}, the determined outcome depends only on the
-sequence of commitments, not on where in history they are applied.
-We may therefore write $(\Spec \mid D)$ without a history argument
-and abbreviate $D = \varphi_1 \cdot \cdots \cdot \varphi_m$, eliding
-history annotations.
 
 %% ================================================================
 \section{Determinations and Provenance Structure}

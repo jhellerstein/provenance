@@ -1286,33 +1286,52 @@ partial knowledge (access sets unknown until execution), and mixed control.
 % ================================================================
 
 The framework applies beyond transactional ambiguity.
-Datalog with negation provides a second, structurally different instantiation
+Datalog with negation provides a second instantiation with structurally
+different determinations
 (developed fully in Appendix~\ref{sec:appendix-datalog}).
-Consider the program:
-$p(c) \leftarrow a(c)$;\;
-$q(c) \leftarrow \neg p(c)$;\;
-$r(c) \leftarrow \neg s(c)$;\;
-$s(c) \leftarrow \neg r(c)$,
+
+Consider the program
+\begin{align*}
+  p(c) & \leftarrow a(c).      & r(c) & \leftarrow \neg s(c). \\
+  q(c) & \leftarrow \neg p(c). & s(c) & \leftarrow \neg r(c).
+\end{align*}
 with EDB $\{a(c)\}$.
-The pair $(p,q)$ is stratified; the pair $(r,s)$ forms a cycle through
-negation.
+The pair $(p,q)$ is stratified: $p$ is derived positively, and $q$ depends
+negatively on $p$.
+The pair $(r,s)$ forms a cycle through negation: each depends on the
+absence of the other.
+Three standard semantics resolve this program differently, and each
+corresponds to a different determination structure.
 
-Under \emph{stratified semantics}, each stratum must be sealed (committed as
-complete) before negation in the next stratum is evaluated.
-Sealing commitments do not commute across strata, giving a determination
-with $k$ layers for a $k$-stratum program---a natural multi-layer example
-of the filtration (Section~\ref{sec:filtration}).
-Under \emph{well-founded semantics}, the negation cycle is left unresolved
-(atoms $r,s$ are assigned the value \emph{undefined}), corresponding to an
-incomplete determination that does not fully resolve the specification.
-Under \emph{stable model semantics}, the cycle is resolved by choosing one
-of two incompatible total models ($r$ true or $s$ true), corresponding to
-branching among determinations at depth $k{+}1$.
+\paragraph{Stratified semantics.}
+Each stratum must be sealed---committed as complete---before negation in
+the next stratum is evaluated.
+Sealing stratum~$1$ (fixing $p(c) = \mathbf{t}$) is a prerequisite for
+evaluating $\neg p(c)$ in stratum~$2$.
+These sealing commitments do not commute across strata, giving a
+determination with $k$ layers for a $k$-stratum program.
+This is a natural multi-layer example of the filtration
+(Section~\ref{sec:filtration}).
 
-Determination provenance distinguishes atoms that are robust across all
-three semantics (like $p(c)$, derived without negation) from those that are
-semantics-contingent (like $r(c)$, present only under a specific stable
-determination).
+\paragraph{Well-founded semantics.}
+Rather than choosing a total model, well-founded semantics leaves the
+negation cycle unresolved: both $r(c)$ and $s(c)$ are assigned the value
+\emph{undefined}.
+In our framework, this corresponds to an incomplete determination---one
+that does not fully resolve the specification.
+
+\paragraph{Stable model semantics.}
+Stable semantics insists on a total two-valued model, resolving the cycle
+by choosing $r(c) = \mathbf{t}, s(c) = \mathbf{f}$ or vice versa.
+These are two incompatible determinations that branch after the stratified
+prefix, giving depth $k{+}1$.
+
+\paragraph{Provenance consequences.}
+Atom $p(c)$ is robust: it holds under every semantics and every
+determination, with classical provenance $P(a(c))$.
+Atom $r(c)$ is contingent: it holds only under the stable determination
+that chose $r$.
+Determination provenance makes this dependence explicit.
 
 % ================================================================
 \section{Related Work}

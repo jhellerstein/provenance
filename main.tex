@@ -690,14 +690,15 @@ validity constraints; this remains open.
 \subsection{Filtration of the Determination Semiring}
 \label{sec:filtration}
 
-Not all provenance questions require the full determination.
-A robust tuple ($\mathrm{supp} = \mathcal{D}$) needs no commitment
-information at all; a tuple contingent on only the first layer needs only
-that layer.
-The layered structure of a determination induces a natural
-\emph{filtration} on the semiring that makes this precise: it stratifies
-supports by how many layers they depend on, and shows that query evaluation
-respects this stratification.
+In Example~\ref{ex:example}, the provenance of $b$ is the same under both
+$D_{\mathsf{in}}$ and $D_{\mathsf{out}}$---it does not depend on any
+commitment.
+The provenance of $d$ depends on which determination was applied.
+This suggests a grading: some outcomes need zero layers of commitment
+information to explain, others need one, and in general an outcome may
+depend on the first $k$ layers but be indifferent to the rest.
+The layered structure of a determination induces a \emph{filtration} on the
+determination semiring that formalizes this grading.
 Throughout this subsection, we fix the canonical layering of each
 determination---its Foata normal form (commitments grouped into maximal
 commuting batches).

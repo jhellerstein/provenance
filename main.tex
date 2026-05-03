@@ -1311,16 +1311,37 @@ that does not fully resolve the specification.
 \paragraph{Stable model semantics.}
 Stable semantics insists on a total two-valued model, resolving the cycle
 by choosing $r(c) = \mathbf{t}, s(c) = \mathbf{f}$ or vice versa.
-These are two incompatible determinations that branch after the stratified
-prefix, giving depth $k{+}1$.
+These are two incompatible determinations $D^{(r)}$ and $D^{(s)}$ that
+branch after the stratified prefix.
+The determination semiring has $\mathcal{D} = \{D^{(r)}, D^{(s)}\}$, and
+the support of $r(c)$ is $\{D^{(r)}\}$: it holds under exactly one of the
+two stable models.
 
-\paragraph{Provenance consequences.}
-Atom $p(c)$ is preserved across all three semantics: it holds under every
-determination of each, with classical provenance $P(a(c))$.
-Atom $r(c)$ is not preserved: it holds under one stable determination but
-is undefined under well-founded semantics and unstratifiable under
-stratified semantics.
-Determination provenance makes this dependence explicit.
+\paragraph{Why-not under ambiguity.}
+Under $D^{(r)}$, atom $s(c)$ is absent.
+But the reason for its absence is not a blocked derivation---it is a
+\emph{semantic commitment}: the determination chose $r(c) = \mathbf{t}$,
+which forced $s(c) = \mathbf{f}$ via the rule $s(c) \leftarrow \neg r(c)$.
+Under $D^{(s)}$, the situation reverses.
+Classical why-not provenance cannot express this: it explains absence
+within a fixed semantics, but here the absence \emph{is} the semantics.
+Determination provenance handles it naturally: the why-not explanation
+for $s(c)$ under $D^{(r)}$ is the commitment $D^{(r)}$ itself.
+
+\paragraph{Worked provenance.}
+Under stable semantics, the full determination provenance is:
+\[
+  P(p(c)) = \mathcal{D} \times \{x_a\}, \quad
+  P(r(c)) = \{(D^{(r)},\, 1)\}, \quad
+  P(s(c)) = \{(D^{(s)},\, 1)\}.
+\]
+Here $x_a$ annotates the EDB fact $a(c)$; the constant $1$ indicates
+that $r(c)$ and $s(c)$ are derived by assumption (the stable-model
+hypothesis) rather than from base facts.
+Atom $p(c)$ is robust ($\mathrm{supp} = \mathcal{D}$); atoms $r(c)$ and
+$s(c)$ are contingent on their respective determinations.
+Preservation across semantics: $p(c)$ is preserved from stable to
+well-founded to stratified; $r(c)$ is not.
 
 % ================================================================
 \section{Related Work}

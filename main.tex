@@ -202,7 +202,7 @@ semiring composes through relational algebra~\cite{green2007provenance}.
         semiring}: the algebraic structure across determinations, recovering
         Green et al.'s semiring framework at a new level
         (Section~\ref{sec:det-semiring}).
-  \item Instantiation in transactional systems, with determination depth
+  \item Instantiation in transactional systems, with tower height
         governed by conflict-graph topology
         (Section~\ref{sec:transactions}); and in Datalog
         with negation, addressing robustness across semantics and why-not
@@ -569,8 +569,7 @@ the semantic prerequisites that must be resolved first.
 
 Consider a determination with $k$ layers,
 $L_1 \seq L_2 \seq \cdots \seq L_k$.
-The number of layers $k$ is the \emph{determination
-depth}---the height of the commitment tower.
+The number of layers $k$ is the height of the commitment tower.
 Write $\Spec_0 = \Spec$ for the original specification and
 $\Spec_i = \Spec \mid (L_1 \seq \cdots \seq L_i)$ for the specification
 after discharging the first $i$ layers.
@@ -775,7 +774,7 @@ $[I]_0 = \mathcal{D}$ (vacuous) and $[I]_d = \{I\}$ (full agreement).
 
 \begin{proposition}[Collapse at depth 1]
   \label{prop:collapse-depth-1}
-  When all commitments commute (determination depth $d = 1$), the tower
+  When all commitments commute (tower height $d = 1$), the tower
   is a single commutative monoid, the filtration has exactly two levels
   ($\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$ and
   $\mathcal{F}_1 = 2^{\mathcal{D}}$), and the determination semiring
@@ -877,7 +876,7 @@ layers---the formal basis for \emph{log parsimony}
 We now instantiate the framework in transactional systems, where ambiguity
 arises from concurrency: multiple consistent executions may be admissible for
 the same observed history.
-We formalize the commitment basis, characterize determination depth across
+We formalize the commitment basis, characterize tower height across
 isolation levels, and show how determination provenance distinguishes robust
 from contingent query results.
 
@@ -1052,7 +1051,7 @@ recorded in the history as conflict edges accumulate.
   Under read committed, $\Spec_{\mathit{RC}}$ is future-monotone:
   extending a history with new operations and commit/abort events can only
   add new visible values, never retract previously visible ones.
-  Hence no commitments are needed and determination depth is~$0$.
+  Hence no commitments are needed and tower height is~$0$.
 \end{proposition}
 \begin{proof}
   Under RC, a transaction $T_Q$ may read any value written by a
@@ -1121,7 +1120,7 @@ recorded in the history as conflict edges accumulate.
   Snapshot commitments do not commute in general: the first-committer-wins
   (FCW) rule can render a snapshot choice for $T_j$ infeasible once a
   conflicting assignment for $T_i$ is fixed.
-  Worst-case determination depth under SI is $O(n)$ where $n$ is the number
+  Worst-case tower height under SI is $O(n)$ where $n$ is the number
   of transactions, arising from chains of FCW dependencies.
 \end{proposition}
 
@@ -1254,7 +1253,7 @@ $D_{\mathsf{sched}} = \{\varphi_{T_i \prec T_j} \mid
 (T_i, T_j) \in \text{chosen ordering}\}$
 of commuting ordering commitments (depth~$1$).
 The NP-completeness of computing this layer illustrates a general
-tradeoff: determination depth can be traded for computational complexity
+tradeoff: tower height can be traded for computational complexity
 within a single layer.
 The enriched basis extends beyond batch scheduling to online arrival
 (ordering decisions made incrementally, potentially non-commuting),
@@ -1414,14 +1413,14 @@ explanations
 \cite{buneman2001why,halpern2001causes,meliou2010causality,glavic2015survey}.
 
 From the perspective of this paper, these approaches operate at
-determination depth~0: semantic ambiguity has already been resolved, and
+no tower is needed: semantic ambiguity has already been resolved, and
 provenance explains derivations relative to a fixed semantics.
 This includes work on incremental view maintenance and \emph{homeostasis},
 which identifies queries whose answers are invariant under admissible input
 changes and therefore require no additional semantic commitments to maintain
 \cite{gehrke2002homeostasis}.
 In our framework, homeostasis corresponds precisely to robustness at
-determination depth~0: the query answer is invariant across all admissible
+no tower is needed: the query answer is invariant across all admissible
 outcomes of the specification, so no commitment is needed to justify it.
 Determination provenance generalizes this by explaining which commitments are
 required when invariance fails, and how classical provenance depends on those
@@ -1445,7 +1444,7 @@ settings under an assumed execution or isolation level
 \cite{bernstein1987concurrency,adya1999weak,cerone2015consistency,cheney2009provenance,freire2008provenance}.
 In these settings, semantic resolution is implicit: provenance explains results
 relative to a chosen execution, snapshot, or schedule.
-From our perspective, such approaches again operate at determination depth~0.
+From our perspective, such approaches again require no tower.
 
 A distinct body of systems work studies execution provenance or systems lineage,
 recording causal dependencies among processes, messages, and events to explain
@@ -1731,7 +1730,7 @@ with universal properties.
 Several directions for algebraic development remain open.
 
 \paragraph{Collapse at depth 1.}
-When all commitments commute (determination depth~$1$), the tower reduces to a
+When all commitments commute (tower height~$1$), the tower reduces to a
 single commutative monoid tensored with the provenance semiring.
 In this case, the determination semiring coincides with
 $\mathrm{PosBool}(B)$~\cite{green2007provenance}, where $B$ is the set of
@@ -1866,7 +1865,7 @@ A resolving determination for the stratified fragment is
 where each $S_i$ is the set of atoms whose truth is fixed at stratum~$i$.
 These sealing predicates do \emph{not} commute: sealing $S_i$ is a prerequisite
 for applying negation commitments in $S_{i+1}$.
-Accordingly, the determination depth is exactly $k$, as recorded in
+Accordingly, the tower height is exactly $k$, as recorded in
 the stratified case.
 
 \paragraph{Provenance.}
@@ -1910,7 +1909,7 @@ A resolving determination under WFS can be written schematically as
 where each $U_i$ is an unfounded set eliminated at alternation~$i$.
 These commitments are non-commuting and may require an unbounded number of
 alternations.
-Hence WFS has no fixed finite determination depth in general, as indicated in
+Hence WFS has no fixed finite tower height in general, as indicated in
 the well-founded case.
 
 For the running example, the limit of this process yields the unique partial
@@ -1972,7 +1971,7 @@ After this prefix, the negation cycle admits two incompatible resolutions:
 
 Within either determination, the remaining commitments are logically simultaneous
 and commute.
-Thus the determination depth is $k{+}1$: the $k$ stratification stages plus one
+Thus the tower height is $k{+}1$: the $k$ stratification stages plus one
 additional, non-commuting branching stage.
 This is reflected in the stable case.
 
@@ -2210,7 +2209,7 @@ topological sort recovers exactly the serializable outcomes.
 Unlike serializability, which resolves ambiguity in a single commuting stage,
 snapshot isolation may require an independent snapshot commitment for each
 transaction.
-Thus SI has worst-case determination depth $O(|H|)$, as recorded in
+Thus SI has worst-case tower height $O(|H|)$, as recorded in
 Figure~\ref{fig:det-tables}.
 Once an SI determination is fixed, provenance again reduces to depth--0
 derivational provenance.
@@ -2290,7 +2289,7 @@ commitments---can refine systems lineage explanations by making explicit which
 assumptions are required to justify diagnostic conclusions.
 
 Unlike the previous appendices, this setting does not admit a fixed canonical
-determination depth.
+tower height.
 Semantic commitments may be staged or bundled depending on the diagnostic query,
 but determination provenance still cleanly separates observable evidence from
 the assumptions required to explain it.
@@ -2434,7 +2433,7 @@ assumptions required to justify those explanations.
 \section{Absence Under Semantic Ambiguity}
 \label{app:whynot}
 In settings with semantic ambiguity, absence admits distinctions that cannot be
-expressed at determination depth~0.
+expressed without a tower.
 
 Given a specification $\Spec$ and history $H$, a conclusion may be absent in
 several semantically distinct ways:

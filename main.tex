@@ -311,7 +311,7 @@ take effect at specific points in the history.
   (i.e., $e \to \varphi$ for every $e$ with no successor
   in~$H$), giving $H \sqsubseteq H \cdot \varphi$.
   The result may depend on the full set $\Spec(H)$, not only on
-  items in $\Spec(H)$ individually---as a result, commitments may be
+  individual outcomes---this is what allows commitments to be
   non-commutative.
   We require \emph{shrinkage}: $\Spec(H') \subseteq \Spec(H)$ for every
   $H' \sqsupseteq H \cdot \varphi$.
@@ -336,16 +336,11 @@ they are commit and abort decisions (Section~\ref{sec:transactions}),
 optionally enriched with scheduling constraints
 (Section~\ref{sec:scheduling-basis}).
 Different bases for the same specification yield different determination
-structures, different depths, and different provenance.
-A fine-grained basis (many simple predicates) may require more sequential
-layers because each predicate excludes little; a coarse basis (fewer,
-more powerful predicates) can reduce depth but each predicate is harder
-to evaluate.
-(A formal conservation law relating predicate complexity to determination
-depth appears in~\cite{hellerstein2026complexity}.)
-The transactional section illustrates this concretely: the commit/abort
-basis and the scheduling-enriched basis yield different determination structures
-for the same workload (Section~\ref{sec:scheduling-basis}).
+structures and different provenance.
+A fine-grained basis may require more layers; a coarse basis can reduce
+layers but each commitment is harder to evaluate
+(see~\cite{hellerstein2026complexity} for a formal conservation law).
+Section~\ref{sec:scheduling-basis} illustrates this concretely.
 
 We impose one restriction on bases throughout this paper:
 
@@ -560,26 +555,14 @@ computed over the determined specification $\Spec \mid D$
 (well-defined by Theorem~\ref{thm:resolution-implies-monotone}).
 
 Conditioned provenance explains a single determination.
-In many settings, a single determination is the natural object of study:
-when explaining what happened in a particular execution, one fixes the
-determination that corresponds to that execution and reads off the
-derivational provenance at the foundation.
-This is the descriptive use of determination provenance---it explains a
-specific history under a specific resolution---and it is sufficient for
-classical lineage questions.
+Conditioned provenance suffices for explaining a single execution.
+But some questions require reasoning \emph{across} determinations:
+Would this result have arisen under a weaker isolation level?
+Would this Datalog conclusion hold under a different negation semantics?
+Answering such questions requires comparing provenance across multiple
+determinations simultaneously.
 
-Some provenance questions, however, require reasoning \emph{across}
-determinations.
-Would this query result have arisen under a weaker transactional isolation
-level?
-Would this Datalog conclusion hold under a different semantics for negation?
-Is the system overconstrained---producing outcomes that depend on
-commitments that could have been relaxed?
-These are counterfactual questions about alternative resolutions of the same
-history, and answering them requires comparing the provenance of a tuple
-across multiple determinations simultaneously.
-
-The resulting algebraic structure is familiar.
+The resulting structure is a Boolean algebra on supports.
 Let $\mathcal{D}$ denote the set of minimal resolving determinations for
 $\Spec$ over a commitment basis $\Phi$; this set is finite.
 
@@ -823,7 +806,7 @@ No layer information is needed to make this distinction.
 
 \begin{example}[Query-relative depth in the transactional setting]
   \label{ex:qdepth-txn}
-  In Example~\ref{ex:example}, the determination has depth~$1$ (all commit
+  In Example~\ref{ex:example}, the determination has a single layer (all commit
   decisions commute when no cycles exist).
   Value $b$ has $\mathrm{qdepth}(b) = 0$: it holds under every
   determination (robust).
@@ -849,14 +832,6 @@ No layer information is needed to make this distinction.
   By Proposition~\ref{prop:filtration-semiring}, both remain in
   $\mathcal{F}_{\max(k_1, k_2)}$.
 \end{proof}
-
-\noindent
-The filtration shows that the layered structure of determinations is not
-merely a sequential artifact but has algebraic content: each
-$\mathcal{F}_k$ is a sub-semiring closed under query evaluation
-(Corollary~\ref{cor:propagation-filtration}), and the nesting
-$\mathcal{F}_0 \subset \cdots \subset \mathcal{F}_d = 2^{\mathcal{D}}$
-reflects the layers of the determination inside the semiring itself.
 
 
 % ================================================================

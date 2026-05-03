@@ -883,30 +883,14 @@ from contingent query results.
     \item $\mathsf{r}(T_i, x, v)$, $\mathsf{w}(T_i, x, v)$ --- read and write
           operations by $T_i$ on object $x$ with value $v$.
   \end{itemize}
-  We assume transactions arrive asynchronously, commit requests are handled
-  individually and immediately (not batched), and read/write operations are
-  subject to non-deterministic interleaving across concurrent transactions.
-  Aborted transactions and their operations remain visible in the history;
-  they are not erased.
-  Commit events are retained in the history: they finalize conflict edges
-  (an edge $T_i \to T_j$ is present only when both transactions' conflicting
-  operations have occurred and both have committed) and record the ordering
-  decisions that constitute the determination.
+  Commit and abort events are the commitment events of this setting;
+  all other events (transaction arrivals, reads, writes) are environment-driven
+  additions to the history.
+  (Scheduling decisions can also serve as commitments; see
+  Section~\ref{sec:scheduling-basis}.)
+  Aborted transactions remain visible in the history: an abort is a
+  commitment that resolved a conflict.
 \end{definition}
-
-\noindent
-The retention of aborted transactions in the history is essential: an abort is
-a commitment event that resolved a conflict, and determination provenance must
-record it.
-Commit events also serve as commitment events: committing $T_i$ irrevocably
-finalizes $T_i$'s position in the serial order and removes its edges from
-the active conflict graph.
-The ordering among conflicting operations is established by the interleaving
-of reads and writes during execution; the commit makes that ordering
-irrevocable by finalizing $T_i$'s effects.
-The conflict edge $T_i \to T_j$ (recording that $T_i$'s conflicting
-operation preceded $T_j$'s) becomes a permanent fact in the history once
-$T_i$ commits.
 
 \begin{definition}[Conflict]
   \label{def:conflict}
@@ -952,18 +936,10 @@ states) consistent with the isolation level's acyclicity constraint.
   permit more.
 \end{definition}
 
-\begin{remark}[Transactional histories as conflict-graph streams]
-  \label{rem:history-as-stream}
-  The transactional history in our framework is not a traditional transaction
-  schedule (a linear interleaving of operations).
-  It is a stream of conflict-graph states---or equivalently, deltas to the
-  active conflict graph---punctuated by commit and abort events that remove
-  vertices and their adjacent edges.
-  Each read or write event may add an edge; each commit or abort removes a
-  vertex.
-  The specification's acyclicity constraint is an invariant over this evolving
-  graph.
-\end{remark}
+\noindent
+Note that a transactional history is not a traditional schedule (a total
+order on operations); it is a stream of conflict-graph deltas punctuated by
+commit and abort events that remove vertices.
 
 \noindent
 We consider three levels:

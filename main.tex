@@ -654,21 +654,22 @@ support a tuple and how those supports compose through queries.
 Section~\ref{sec:robustness} applies this structure to formalize robustness
 and sensitivity across determinations.
 
-\paragraph{Relationship to Green et al.}
-The determination semiring is an instance of the provenance semiring
-framework of~\cite{green2007provenance}, with determinations playing the role
-of tuple annotations.
-Just as Green et al.\ annotate tuples with elements of a semiring $K$ to
-track how input tuples contribute to query results, we annotate tuples with
-subsets of $\mathcal{D}$ to track which semantic resolutions support them.
-The structure $(2^{\mathcal{D}}, \cup, \cap, \emptyset, \mathcal{D})$ is
-analogous to their $\mathrm{PosBool}(B)$ semiring for incomplete
-databases---positive Boolean formulas with $\vee$ as addition and $\wedge$ as
-multiplication---rather than to their why-provenance semiring (in which both
-operations coincide).
-The distinction matters: in our setting, joint use of two premises
-\emph{intersects} their supports (both must hold), while alternative
-derivation paths \emph{union} them (either suffices).
+\begin{example}[Determination provenance of $d$]
+  \label{ex:det-prov-d}
+  Returning to Example~\ref{ex:example}, the determination provenance of
+  $d$ is the function $P(d) : \mathcal{D} \to K$ with
+  \[
+    P(d)(D_{\mathsf{in}}) = x_2, \qquad P(d)(D_{\mathsf{out}}) = 0.
+  \]
+  Here $x_2$ is the semiring annotation of $T_2$'s insert (the base fact
+  that derives $d$), and $0$ records that $d$ is absent under
+  $D_{\mathsf{out}}$.
+  The support is $\mathrm{supp}(P(d)) = \{D_{\mathsf{in}}\}$: $d$ is
+  contingent on the first determination.
+  By contrast, $P(b)(D_{\mathsf{in}}) = P(b)(D_{\mathsf{out}}) = x_0$
+  (where $x_0$ annotates the initial tuple $S(0,b)$), giving
+  $\mathrm{supp}(P(b)) = \mathcal{D}$: $b$ is robust.
+\end{example}
 
 \paragraph{Computational cost.}
 $|\mathcal{D}|$ may be exponential in the size of the commitment basis.

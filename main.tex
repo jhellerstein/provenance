@@ -1281,10 +1281,38 @@ partial knowledge (access sets unknown until execution), and mixed control.
 \end{figure*}
 
 % ================================================================
-% Datalog with negation: moved to Appendix~\ref{sec:appendix-datalog}
-% as a second instantiation demonstrating generality.
+\section{Beyond Transactions: Datalog with Negation}
+\label{sec:negation-preview}
 % ================================================================
 
+The framework applies beyond transactional ambiguity.
+Datalog with negation provides a second, structurally different instantiation
+(developed fully in Appendix~\ref{sec:appendix-datalog}).
+Consider the program:
+$p(c) \leftarrow a(c)$;\;
+$q(c) \leftarrow \neg p(c)$;\;
+$r(c) \leftarrow \neg s(c)$;\;
+$s(c) \leftarrow \neg r(c)$,
+with EDB $\{a(c)\}$.
+The pair $(p,q)$ is stratified; the pair $(r,s)$ forms a cycle through
+negation.
+
+Under \emph{stratified semantics}, each stratum must be sealed (committed as
+complete) before negation in the next stratum is evaluated.
+Sealing commitments do not commute across strata, giving a determination
+with $k$ layers for a $k$-stratum program---a natural multi-layer example
+of the filtration (Section~\ref{sec:filtration}).
+Under \emph{well-founded semantics}, the negation cycle is left unresolved
+(atoms $r,s$ are assigned the value \emph{undefined}), corresponding to an
+incomplete determination that does not fully resolve the specification.
+Under \emph{stable model semantics}, the cycle is resolved by choosing one
+of two incompatible total models ($r$ true or $s$ true), corresponding to
+branching among determinations at depth $k{+}1$.
+
+Determination provenance distinguishes atoms that are robust across all
+three semantics (like $p(c)$, derived without negation) from those that are
+semantics-contingent (like $r(c)$, present only under a specific stable
+determination).
 
 % ================================================================
 \section{Related Work}

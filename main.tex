@@ -1311,86 +1311,6 @@ partial knowledge (access sets unknown until execution), and mixed control.
 
 
 % ================================================================
-\section{Change and Robustness Across Determinations}
-\label{sec:robustness}
-% ================================================================
-
-Determination provenance records not only how outcomes are derived, but the
-semantic commitments under which those derivations are valid.
-This section formalizes two such families of questions and grounds them in the
-examples developed earlier.
-
-% \subsection{Intra- vs.\ Inter-Specification Questions}
-
-We distinguish two classes of provenance questions.
-\emph{Intra-specification} questions fix a specification $\Spec$ and range over its
-resolving determinations, asking which outcomes hold under different
-admissible resolutions of the \emph{same} specification.
-\emph{Inter-specification} questions compare outcomes across distinct
-specifications $\Spec$ and $\Spec'$, asking which outcomes persist when the
-specification itself changes—for example, when a transactional system moves from
-serializability to snapshot isolation, or when a logic program adopts a different
-negation semantics.
-Both question families are expressed using determination provenance; they simply
-quantify over different spaces.
-
-\subsection{Intra-Specification Queries: Robustness}
-
-Robustness is an intra-specification property.
-Fix a specification $\Spec$ and the set $\mathcal{D}$ of resolving determinations.
-An outcome $o$ is \emph{robust} with respect to $\mathcal{D}$ iff
-$\mathrm{supp}(P(o)) = \mathcal{D}$---equivalently,
-$\forall D \in \mathcal{D}.\; o \in (\Spec \mid D)(H)$.
-In the determination semiring, robustness
-is the multiplicative identity: the tuple's support is the full set
-$\mathcal{D}$.
-In Example~\ref{ex:example}, $b$ is robust; $d$ is contingent.
-
-\subsection{Inter-Specification Queries: Preservation under Semantic Change}
-\label{sec:semantic-change}
-
-Semantic change is an inter-specification question: it compares which outcomes
-are admitted under different specifications for the same history.
-
-\paragraph{Preservation.}
-Given specifications $\Spec$ and $\Spec'$, outcome $o$, and
-sets $\mathcal{D}$ and $\mathcal{D}'$ of all resolving determinations
-for $\Spec$ and $\Spec'$ respectively,
-$o$ is \emph{preserved} from $\Spec$ to $\Spec'$ iff
-\[
-  \forall D \in \mathcal{D},\;
-  \bigl(o \in (\Spec \mid D)(H)\bigr)
-  \;\Rightarrow\;
-  \exists D' \in \mathcal{D}'.\;
-  \bigl(o \in (\Spec' \mid D')(H)\bigr).
-\]
-
-\paragraph{Serializable outcomes under snapshot isolation.}
-Snapshot isolation admits a larger space of determinations than serializability.
-Preservation therefore reduces to the following question:
-\emph{given an SI determination, does there exist a serializable determination
-  that admits the same outcome?}
-
-Determination provenance provides concrete syntax for this question.
-An SI determination records snapshot choices and commit-admissibility constraints.
-From these predicates, one can check whether the induced visibility and conflict
-relations admit a topological sort constituting a serial execution.
-If so, the outcome is preserved when strengthening from SI to serializability;
-otherwise it is inherently non-serializable.
-Appendix~\ref{sec:appendix-concurrency} works through a detailed example.
-
-This reframes preservation as a \emph{semantic validation problem} over
-determinations rather than as a comparison of executions.
-Mixed-consistency execution policies—e.g., allowing SI but ignoring
-any non-serializable outcome rows—can therefore be expressed and enforced directly in
-terms of determination provenance, without re-executing the workload.
-
-\paragraph{Summary.}
-Robustness identifies conclusions invariant across determinations;
-preservation compares conclusions across specifications.
-Determination provenance provides a common framework for both.
-
-% ================================================================
 \section{Related Work}
 \label{sec:related}
 % ================================================================
@@ -2007,7 +1927,7 @@ A \emph{provenance query} is a function
 \]
 where $A$ is an answer domain (e.g., Boolean, explanations, dependency sets),
 including classical why/why-not provenance and the semantic-change queries of
-Section~\ref{sec:robustness}.
+Section~\ref{sec:det-semiring}.
 Such queries depend only on the restrictions that a determination imposes on
 admissible outcomes, not on the full resolution process.
 
@@ -2489,7 +2409,7 @@ several semantically distinct ways:
     stable model but undefined under WFS) exhibits the same pattern when
     the two semantics are viewed as distinct specifications.
     This is an inter-specification absence, handled via the preservation
-    analysis of Section~\ref{sec:robustness} rather than by determination
+    analysis of Section~\ref{sec:det-semiring} rather than by determination
     provenance alone.
 \end{enumerate}
 

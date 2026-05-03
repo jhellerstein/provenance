@@ -629,11 +629,29 @@ $(2^{\mathcal{D}}, \cup, \cap, \emptyset, \mathcal{D})$---a commutative
 semiring with $\cup$ as addition and $\cap$ as multiplication.
 This is the \emph{determination semiring}: it captures which determinations
 support a tuple and how those supports compose through queries.
-For instance, in the transactional example of the introduction, values $b$
-and $c$ have full support
-($\mathrm{supp}(P(b)) = \mathrm{supp}(P(c)) = \mathcal{D}$),
-while $d$'s support is a proper subset---it holds only under determinations
-in which $T_Q$ commits before $T_3$.
+
+\begin{example}[Determination semiring for Example~\ref{ex:example}]
+  \label{ex:det-semiring}
+  The running example has two resolving determinations:
+  $D_{\mathsf{in}}$ (where $T_Q$ commits before $T_3$, making $d$ visible)
+  and $D_{\mathsf{out}}$ (where $T_3$ commits before $T_Q$, making $d$
+  absent).
+  So $\mathcal{D} = \{D_{\mathsf{in}}, D_{\mathsf{out}}\}$.
+  The supports are:
+  $\mathrm{supp}(P(b)) = \mathcal{D}$ (robust);
+  $\mathrm{supp}(P(d)) = \{D_{\mathsf{in}}\}$ (contingent).
+  Now consider a join query $R(y) \drule S(k,y),\, T(y)$ where $T$
+  contains only $b$.
+  Then $\mathrm{supp}(P_R(b)) = \mathrm{supp}(P(b)) \cap
+  \mathrm{supp}(P_T(b)) = \mathcal{D} \cap \mathcal{D} = \mathcal{D}$:
+  the join of two robust tuples is robust.
+  A union query returning both $b$ and $d$ has
+  $\mathrm{supp}(P(b) + P(d)) = \mathcal{D} \cup \{D_{\mathsf{in}}\}
+  = \mathcal{D}$: the result holds under every determination (since $b$
+  alone suffices).
+\end{example}
+
+\noindent
 Section~\ref{sec:robustness} applies this structure to formalize robustness
 and sensitivity across determinations.
 

@@ -458,11 +458,32 @@ persistent basis is both necessary and sufficient for provenance.
   If $H \in \Hist$ and $H' \sqsubseteq H$, then $H' \in \Hist$.
 \end{assumption}
 
+\begin{lemma}[History-invariance under persistence]
+  \label{lem:history-invariance}
+  Assume prefix-closure (Assumption~\ref{ass:prefix-closed}).
+  Let $\Phi$ be a persistent commitment basis and let $D$ be a determination
+  over $\Phi$ that resolves $\Spec$.
+  Then $(\Spec \mid D)(H_1) = (\Spec \mid D)(H_2)$
+  for all $H_1 \sqsubseteq H_2$.
+\end{lemma}
+
+\begin{proof}
+  Since $D$ resolves $\Spec$, both $(\Spec \mid D)(H_1)$ and
+  $(\Spec \mid D)(H_2)$ are singletons; call them $\{o_1\}$ and $\{o_2\}$.
+  Write $D = \varphi_1 \cdot \cdots \cdot \varphi_m$.
+  For every $o \neq o_1$, we have
+  $o \notin \Spec(H_1 \cdot \varphi_1 \cdots \varphi_m)$.
+  Applying persistence inductively
+  ($H_1 \cdot \varphi_1 \cdots \varphi_j \sqsubseteq
+  H_2 \cdot \varphi_1 \cdots \varphi_j$ for each $j$),
+  we obtain $o \notin \Spec(H_2 \cdot \varphi_1 \cdots \varphi_m)$.
+  Hence $o_2 = o_1$.
+\end{proof}
+
 \begin{theorem}[Resolution is necessary and sufficient for provenance]
   \label{thm:resolution-implies-monotone}
   \label{thm:necessity}
-  Assume prefix-closure (Assumption~\ref{ass:prefix-closed}) and a
-  persistent commitment basis $\Phi$.
+  Assume prefix-closure and a persistent commitment basis $\Phi$.
   Classical semiring provenance over $\Spec$ is well-defined if and only if
   $\Spec$ is determined:
   \begin{enumerate}[nosep,label=(\alph*)]
@@ -471,11 +492,10 @@ persistent basis is both necessary and sufficient for provenance.
           instances, no single semiring annotation can simultaneously
           explain both outcomes.
     \item \emph{(Sufficiency.)}
-          If $D$ resolves $\Spec$, then $(\Spec \mid D)$ yields a unique
-          outcome independent of $H$---i.e.,
-          $(\Spec \mid D)(H_1) = (\Spec \mid D)(H_2)$
-          for all $H_1 \sqsubseteq H_2$---providing the fixed instance
-          over which classical semiring provenance is computed.
+          If $D$ resolves $\Spec$, then by Lemma~\ref{lem:history-invariance}
+          $(\Spec \mid D)$ yields a unique, history-independent outcome,
+          providing the fixed instance over which classical semiring
+          provenance is computed.
   \end{enumerate}
 \end{theorem}
 
@@ -494,20 +514,11 @@ persistent basis is both necessary and sufficient for provenance.
   (See Appendix~\ref{sec:appendix-datalog} for the Datalog negation
   instantiation.)
 
-  (b)~Since $D$ resolves $\Spec$, both $(\Spec \mid D)(H_1)$ and
-  $(\Spec \mid D)(H_2)$ are singletons; call them $\{o_1\}$ and $\{o_2\}$.
-  Write $D = \varphi_1 \cdot \cdots \cdot \varphi_m$.
-  For every $o \neq o_1$, we have
-  $o \notin \Spec(H_1 \cdot \varphi_1 \cdots \varphi_m)$.
-  Applying persistence inductively
-  ($H_1 \cdot \varphi_1 \cdots \varphi_j \sqsubseteq
-  H_2 \cdot \varphi_1 \cdots \varphi_j$ for each $j$),
-  we obtain $o \notin \Spec(H_2 \cdot \varphi_1 \cdots \varphi_m)$.
-  Hence $o_2 = o_1$.
+  (b)~Immediate from Lemma~\ref{lem:history-invariance}.
 \end{proof}
 
 \noindent
-Sufficiency (b) means the determined outcome depends only on the
+By Lemma~\ref{lem:history-invariance}, the determined outcome depends only on the
 sequence of commitments, not on where in history they are applied.
 We may therefore write $(\Spec \mid D)$ without a history argument
 and abbreviate $D = \varphi_1 \cdot \cdots \cdot \varphi_m$, eliding

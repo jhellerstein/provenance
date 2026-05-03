@@ -1410,45 +1410,22 @@ Determination provenance makes those semantic commitments explicit and
 composable, recovering classical algebraic provenance once resolution is fixed
 while retaining visibility into the assumptions that made resolution possible.
 
-Our development shows that this perspective is not domain-specific.
+The algebraic development shows that determinations are not ad hoc:
+the space of resolving determinations forms a semiring whose filtration
+reflects the layered structure of individual determinations, and query
+evaluation respects this structure compositionally.
 In transactional systems, determination provenance explains how query
-observations depend on ordering and isolation commitments.
-In logic programming with negation, it exposes the semantic dependencies that
-govern resolution.
-Across domains, certificates provide a minimal interface for carrying forward
-exactly the information required to support further reasoning.
+observations depend on commit ordering and isolation commitments, with
+robustness checking shown to be coNP-complete.
+In logic programming with negation, it exposes preservation across
+semantics.
 
-Determination provenance also opens a broader research agenda.
-
-\paragraph{Robustness and semantic sensitivity.}
-Once observations are annotated with the determinations under which they hold, it
-becomes natural to ask which are robust across determinations and which are
-fragile.
-This enables provenance questions about semantic stability, policy change, and
-compatibility across regimes that lie beyond traditional why- and how-provenance.
-Developing principled robustness measures—qualitative or quantitative—remains an
-open direction.
-
-\paragraph{Beyond databases.}
-Semantic ambiguity and resolution arise in consistency models, coordination
-protocols, access-control systems, and machine learning pipelines.
-Determination provenance suggests a unifying foundation for provenance in
-ambiguous computational systems.
-
-\paragraph{Reversible commitments.}
-The main structural assumption of this paper is \emph{persistence}: once a
-commitment excludes an outcome, it remains excluded at all history extensions.
-This is what guarantees history-monotonicity of determined specifications
-(Theorem~\ref{thm:resolution-implies-monotone}) and enables classical
-provenance once all layers have been discharged.
-All examples in this paper satisfy persistence naturally.
-However, many practical settings involve commitments that can be
-reversed---transactional rollback, speculative execution, backtracking
-search---where persistence fails.
-Extending the framework to reversible commitments (a group rather than a
-monoid at each layer) and characterizing the resulting provenance structure
-is an open direction; a companion paper~\cite{hellerstein2026complexity}
-discusses related structural questions.
+\paragraph{Open directions.}
+Developing quantitative robustness measures beyond the binary
+robust/contingent distinction; extending the framework to reversible
+commitments (where persistence fails); and characterizing compact
+representations of the determination semiring for deep determinations
+all remain open.
 
 The success of algebraic provenance lay in identifying the right semantic object
 to explain.

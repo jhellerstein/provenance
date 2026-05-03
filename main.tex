@@ -628,8 +628,23 @@ $(2^{\mathcal{D}}, \cup, \cap, \emptyset, \mathcal{D})$---a commutative
 semiring with $\cup$ as addition and $\cap$ as multiplication.
 This is the \emph{determination semiring}: it captures which determinations
 support a tuple and how those supports compose through queries.
-Section~\ref{sec:robustness} applies this structure to formalize robustness
-and sensitivity across determinations.
+
+An outcome is \emph{robust} if its support is all of $\mathcal{D}$
+(it holds under every determination).
+An outcome is \emph{preserved} from specification $\Spec$ to $\Spec'$ if
+whenever it holds under some determination of $\Spec$, it also holds under
+some determination of $\Spec'$:
+$\forall D \in \mathcal{D},\;
+(o \in (\Spec \mid D)) \Rightarrow
+\exists D' \in \mathcal{D}'.\; (o \in (\Spec' \mid D'))$.
+Robustness asks whether an outcome survives all resolutions of a fixed
+specification; preservation asks whether it survives a change of
+specification---e.g., from snapshot isolation to serializability
+(Section~\ref{sec:transactions}).
+Vandevoort et al.~\cite{vandevoort2025mixed} study exactly this question
+for transaction programs: which transactions can run at a weaker isolation
+level while guaranteeing serializable behavior?
+Determination provenance provides a language for such analyses.
 
 \subsection{Notation and Example}
 

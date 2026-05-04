@@ -1322,7 +1322,7 @@ $\bot \Ord \mathbf{u} \Ord \{\mathbf{t}, \mathbf{f}\}$
 The \emph{commitment basis} has \emph{sealing predicates}
 $\varphi_{\seal}(S_i)$ (stratum $S_i$ is complete---excludes outcomes
 where additional atoms in $S_i$ are true) and \emph{choice predicates}
-$\varphi_{a=v}$ (cycle atom $a$ has value $v \in \{\mathbf{t},
+$\varphi_{a=v}$ ($\neg$-cycle atom $a$ has value $v \in \{\mathbf{t},
 \mathbf{f}\}$---excludes the alternative).
 Both are commitments: they operate on $2^O$, excluding outcomes.
 The specification $\Spec_P$ admits all assignments consistent with the
@@ -1366,7 +1366,7 @@ determination:
 \small
 \begin{tabular}{@{}lll@{}}
   \toprule
-  \textbf{Semantics} & \textbf{Determination prefix} & \textbf{Cycle atoms} \\
+  \textbf{Semantics} & \textbf{Determination prefix} & \textbf{$\neg$-cycle atoms} \\
   \midrule
   Stable & full ($k{+}1$ layers) & $\mathbf{t}$/$\mathbf{f}$ \\
   Well-founded & sealing only ($k$ layers) & $\mathbf{u}$ \\
@@ -1380,7 +1380,7 @@ layers and classifies the residual ambiguity as $\mathbf{u}$ (via the
 alternating fixpoint---an entailment, not a further commitment;
 see Appendix~\ref{sec:appendix-datalog});
 stratified semantics discharges the same sealing layers but is defined
-only when they resolve everything (cycle atoms remain $\bot$).
+only when they resolve everything ($\neg$-cycle atoms remain $\bot$).
 The filtration of the determination semiring makes this prefix structure
 explicit.
 
@@ -1920,7 +1920,7 @@ WFS accepts this and classifies the residual ambiguity.
 
 For the running example, the stratified prefix determines:
 $p(c)=\mathbf{t}$ (robust), $q(c)=\mathbf{f}$ (robustly absent),
-while the cycle atoms have partial support:
+while the $\neg$-cycle atoms have partial support:
 $r(c)$ and $s(c)$ each hold in exactly one of the two stable models.
 WFS reports this as $r(c)=\mathbf{u}$, $s(c)=\mathbf{u}$.
 
@@ -1938,7 +1938,7 @@ any commitment about which of $r(c)$ or $s(c)$ is true.
 \paragraph{Provenance.}
 For atoms determined by the stratified prefix, provenance is classical:
 $P_{D_{\mathrm{wfs}}}(p(c)) = P(a(c))$.
-For cycle atoms, determination provenance has partial support:
+For $\neg$-cycle atoms, determination provenance has partial support:
 $P(r(c)) = \{(D^{(r)}, 1)\}$, $P(s(c)) = \{(D^{(s)}, 1)\}$.
 WFS does not select a determination, so it reports these as $\mathbf{u}$
 rather than reading off the conditioned provenance.
@@ -1981,7 +1981,7 @@ stratified prefix used by stable and well-founded semantics:
 \]
 For stratifiable programs, this prefix is itself a resolving determination:
 $|\Spec \mid D_{\mathrm{strat}}| = 1$.
-For programs with cycles, it is not---the cycle atoms remain unresolved,
+For programs with cycles, it is not---the $\neg$-cycle atoms remain unresolved,
 and stratified semantics is simply undefined for them.
 
 \paragraph{Provenance.}

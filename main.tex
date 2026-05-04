@@ -67,31 +67,25 @@
 
 \begin{abstract}
   Algebraic provenance traces derivations under a fixed, resolved semantics.
-  Despite its theoretical elegance, this foundation has had limited impact on
-  the systems that most need explanation---transactional databases, distributed
-  services, concurrent pipelines---because these systems operate under
-  \emph{semantic ambiguity}: multiple consistent executions, orderings, or
-  isolation levels may be admissible for the same history.
+  We extend it to settings with \emph{semantic ambiguity}---where multiple
+  consistent outcomes are admissible for the same history---by introducing
+  \emph{determination provenance}: a $K$-relation that records, for each
+  way of resolving the ambiguity, how a query result is derived under that
+  resolution.
+  Its supports form a commutative semiring---the \emph{determination
+  semiring}---recovering Green et al.'s framework at a new level.
+  The layered structure of individual determinations is reflected as a
+  \emph{filtration} of sub-semirings that query evaluation respects.
 
-  We introduce two new algebraic objects that extend provenance to this
-  setting.
-  \emph{Conditioned provenance} explains a query result under a single
-  determination---a sequence of irrevocable commitments organized into
-  layers that discharge sequentially until a provenance semiring is exposed.
-  \emph{Determination provenance} collects conditioned provenance across all
-  determinations into a $K$-relation, whose supports form a
-  commutative semiring---recovering the semiring framework of Green et al.\
-  at a new level.
-  Classical provenance is the degenerate case where no commitments are needed.
-  We develop the framework in depth for transactional systems, where ambiguity
-  arises from concurrency and isolation choices: determination provenance
-  distinguishes outcomes that hold under every admissible commit ordering
-  from those contingent on a particular ordering, and identifies which
-  outcomes would persist if the isolation level were changed.
-  We further instantiate the framework for Datalog with negation---a
-  longstanding gap in provenance past the monotone fragment---and for
-  distributed systems observability, demonstrating the generality of the
-  approach.
+  We instantiate the framework for transactional systems, where ambiguity
+  arises from concurrency: determination provenance distinguishes robust
+  outcomes from contingent ones, and deciding robustness under
+  serializability is coNP-complete.
+  For Datalog with negation, an enriched outcome domain unifies stratified,
+  well-founded, and stable-model semantics as prefixes of a single
+  determination, with the filtration making the prefix structure explicit.
+  Classical provenance is the degenerate case where no commitments are
+  needed.
 \end{abstract}
 
 \maketitle
@@ -151,15 +145,11 @@ yields a semiring structure---the \emph{determination semiring}---that
 composes through queries in the same way that Green et al.'s provenance
 semiring composes through relational algebra~\cite{green2007provenance}.
 
-  We instantiate the framework in depth for transactional systems, where
-  ambiguity arises from concurrency and isolation choices.
-  Determination provenance distinguishes outcomes that hold under every
-  admissible commit ordering from those contingent on a particular one,
-  and identifies which outcomes persist across isolation levels.
-  We further demonstrate generality through two appendix instantiations:
-  Datalog with negation (addressing a longstanding gap in provenance past
-  the monotone fragment~\cite{green2007provenance}) and distributed systems
-  observability~\cite{sigelman2010dapper}.
+  We instantiate the framework in two settings.
+  In transactional systems, determination provenance distinguishes robust
+  outcomes from contingent ones, with robustness shown coNP-complete.
+  In Datalog with negation, an enriched outcome domain unifies three
+  classical semantics as prefixes of a single determination.
   We begin with a transactional example:
 
 \begin{example}[Provenance under transactional ambiguity]
@@ -192,20 +182,20 @@ semiring composes through relational algebra~\cite{green2007provenance}.
 
 \paragraph{Contributions.}
 \begin{enumerate}[label=(\roman*),nosep,leftmargin=*]
-  \item \emph{Conditioned provenance}: provenance under a single
-        determination, with commitments organized into layers that
-        discharge sequentially until classical semiring provenance applies
-        (Section~\ref{sec:conditional-semiring}).
-  \item \emph{Determination provenance} and the \emph{determination
-        semiring}: the algebraic structure across determinations, recovering
-        Green et al.'s semiring framework at a new level
-        (Section~\ref{sec:det-semiring}).
-  \item Instantiation in transactional systems, with number of layers
-        governed by conflict-graph topology
-        (Section~\ref{sec:transactions}); and in Datalog
-        with negation, addressing preservation across semantics and why-not
-        provenance under ambiguity
-        (Appendix~\ref{sec:appendix-datalog}).
+  \item The \emph{determination semiring} and its \emph{filtration}:
+        the space of resolving determinations forms a commutative semiring
+        whose layered structure is reflected as a chain of sub-semirings
+        that query evaluation respects
+        (Sections~\ref{sec:det-semiring}--\ref{sec:filtration}).
+  \item Instantiation for transactional systems: determination depth
+        governed by conflict-graph topology, robustness under
+        serializability shown coNP-complete
+        (Section~\ref{sec:transactions}).
+  \item Instantiation for Datalog with negation: an enriched outcome
+        domain unifies stratified, well-founded, and stable-model
+        semantics as prefixes of a single determination
+        (Section~\ref{sec:negation-preview},
+        Appendix~\ref{sec:appendix-datalog}).
 \end{enumerate}
 
 

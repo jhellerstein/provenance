@@ -77,11 +77,11 @@
   The layered structure of individual determinations is reflected as a
   \emph{filtration} of sub-semirings that query evaluation respects.
 
-  We instantiate the framework for transactional systems, where ambiguity
-  arises from concurrency: determination provenance distinguishes robust
-  outcomes from contingent ones, and deciding robustness under
-  serializability is coNP-complete.
-  For Datalog with negation, the classical negation semantics---stratified,
+  We instantiate the framework for transactional systems and for Datalog
+  with negation.
+  In both settings, deciding whether an outcome is robust (holds under
+  every resolution) is coNP-complete.
+  For Datalog, the classical negation semantics---stratified,
   well-founded, and stable-model---differ only in which filtration level
   they read; the underlying determination semiring is the same.
   Classical provenance is the degenerate case where no commitments are
@@ -149,11 +149,12 @@ yields a semiring structure---the \emph{determination semiring}---that
 composes through queries in the same way that Green et al.'s provenance
 semiring composes through relational algebra~\cite{green2007provenance}.
 
-  We instantiate the framework in two settings.
-  In transactional systems, determination provenance distinguishes robust
-  outcomes from contingent ones, with robustness shown coNP-complete.
-  In Datalog with negation, the classical negation semantics differ only
-  in which filtration level they read from a single determination semiring.
+  We instantiate the framework in two settings: transactional systems
+  (where ambiguity arises from concurrency) and Datalog with negation
+  (where it arises from multiple models).
+  In both, deciding robustness is coNP-complete.
+  For Datalog, the classical negation semantics differ only in which
+  filtration level they read from a single determination semiring.
   We begin with a transactional example:
 
 \begin{example}[Provenance under transactional ambiguity]
@@ -192,14 +193,17 @@ semiring composes through relational algebra~\cite{green2007provenance}.
         that query evaluation respects
         (Sections~\ref{sec:det-semiring}--\ref{sec:filtration}).
   \item Instantiation for transactional systems: determination depth
-        governed by conflict-graph topology, robustness under
-        serializability shown coNP-complete
+        governed by conflict-graph topology
         (Section~\ref{sec:transactions}).
   \item Instantiation for Datalog with negation: the classical negation
         semantics---stratified, well-founded, stable-model---are
         filtration levels of a single determination semiring
         (Section~\ref{sec:negation-preview},
         Appendix~\ref{sec:appendix-datalog}).
+  \item Robustness (does a tuple hold under every determination?) is
+        coNP-complete at the framework level, with hardness established
+        in both instantiations
+        (Section~\ref{sec:robustness-complexity}).
 \end{enumerate}
 
 

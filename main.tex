@@ -424,7 +424,7 @@ $\Spec(H \cdot \psi \cdot \varphi)$ may differ.
 Individual commitments typically express only partial semantic
 commitments.
 We therefore model semantic resolution using finite compositions of
-commitments, applied as \emph{sequential refinement}.
+commitments, applied sequentially.
 
 \begin{definition}[Determination]
   \label{def:determination}%
@@ -630,6 +630,10 @@ support a tuple and how those supports compose through queries.
 
 An outcome is \emph{robust} if its support is all of $\mathcal{D}$
 (it holds under every determination).
+An outcome is \emph{robustly absent} if its support is empty
+(it fails under every determination).
+An outcome with nonempty proper support is \emph{contingent}:
+it holds under some determinations but not others.
 An outcome is \emph{preserved} from specification $\Spec$ to $\Spec'$ if
 whenever it holds under some determination of $\Spec$, it also holds under
 some determination of $\Spec'$:
@@ -1407,14 +1411,14 @@ explanations
 \cite{buneman2001why,halpern2001causes,meliou2010causality,glavic2015survey}.
 
 From the perspective of this paper, these approaches operate at
-no determination is needed: semantic ambiguity has already been resolved, and
+depth~$0$: semantic ambiguity has already been resolved, and
 provenance explains derivations relative to a fixed semantics.
 This includes work on incremental view maintenance and \emph{homeostasis},
 which identifies queries whose answers are invariant under admissible input
 changes and therefore require no additional semantic commitments to maintain
 \cite{gehrke2002homeostasis}.
 In our framework, homeostasis corresponds precisely to robustness at
-no determination is needed: the query answer is invariant across all admissible
+depth~$0$: the query answer is invariant across all admissible
 outcomes of the specification, so no commitment is needed to justify it.
 Determination provenance generalizes this by explaining which commitments are
 required when invariance fails, and how classical provenance depends on those
@@ -1539,7 +1543,7 @@ Coordination Criterion's characterization of depth-$0$ specifications as
 those requiring no commitments at all.
 
 \paragraph{Query-relative number of layers.}
-A provenance provenance query $P$ may depend on only a subset of the determination's layers.
+A provenance query $P$ may depend on only a subset of the determination's layers.
 If $P$'s answer is determined after discharging $k < d$ layers (the remaining
 layers resolve ambiguity irrelevant to $P$), the effective determination for $P$ has
 height~$k$.

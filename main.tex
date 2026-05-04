@@ -201,8 +201,8 @@ semiring composes through relational algebra~\cite{green2007provenance}.
         (Section~\ref{sec:negation-preview},
         Appendix~\ref{sec:appendix-datalog}).
   \item Robustness (does a tuple hold under every determination?) is
-        coNP-complete at the framework level, with hardness established
-        in both instantiations
+        in coNP at the framework level, and coNP-complete in both
+        instantiations
         (Section~\ref{sec:robustness-complexity}).
 \end{enumerate}
 
@@ -1350,14 +1350,18 @@ The algebraic machinery composes supports cleanly through queries
 (Corollary~\ref{cor:propagation-filtration}), but deciding whether a
 support equals $\mathcal{D}$ is computationally hard.
 
-\begin{theorem}[Robustness is coNP-complete]
+\begin{theorem}[Complexity of robustness]
   \label{thm:robustness-conp}
   In any instantiation where (i) resolving determinations are
   polynomial-size, (ii) validity of a determination is checkable
   in polynomial time, and (iii) query evaluation under a fixed
   determination is in polynomial time, deciding robustness is in coNP.
-  It is coNP-hard in both the transactional and Datalog instantiations.
 \end{theorem}
+
+\begin{corollary}
+  Robustness is coNP-complete in both the transactional and Datalog
+  instantiations.
+\end{corollary}
 
 \begin{proof}
   \emph{Membership in coNP (framework-level).}

@@ -1114,66 +1114,6 @@ Prior to resolution, even the \emph{form} of the provenance question for $d$
 is ambiguous (why vs.\ why-not).
 $b$ is robust (nonzero under every determination); $d$ is contingent.
 
-\subsection{Complexity of Robustness}
-
-\begin{theorem}[Robustness under serializability is coNP-complete]
-  \label{thm:robustness-conp}
-  Given a transactional history $H$ with conflict graph $G$, a conjunctive
-  provenance query $P$, and a tuple $t$: deciding whether $t$ is robust (present in
-  $P$'s result under every resolving determination) is coNP-complete.
-\end{theorem}
-
-\begin{proof}
-  \emph{Membership in coNP.}
-  To refute robustness, guess a resolving determination $D$ (a set of
-  commit/abort decisions that makes $G$ acyclic): guess which transactions
-  to abort, verify acyclicity of the remaining conflict graph in polynomial
-  time, compute the resulting database state, evaluate $Q$, and check that
-  $t$ is absent.
-  This is a polynomial-time verifiable certificate for non-robustness.
-
-  \emph{coNP-hardness.}
-  We reduce from \textsc{Validity} (given a DNF formula $\psi$ over
-  variables $x_1, \ldots, x_n$, is $\psi$ true under every truth
-  assignment?), which is coNP-complete.
-  Given $\psi$, construct a transactional history as follows.
-  %
-  For each variable $x_i$, create two transactions:
-  $T_i^+$ writes value $\mathsf{true}$ to object $o_i$, and
-  $T_i^-$ writes value $\mathsf{false}$ to object $o_i$.
-  Both $T_i^+$ and $T_i^-$ have committed; their write-write conflict on
-  $o_i$ creates an edge in $G$.
-  Under last-writer-wins semantics, the commit order determines the final
-  value of $o_i$: if $T_i^+$ is ordered after $T_i^-$, then
-  $o_i = \mathsf{true}$ (representing $x_i = \mathsf{true}$), and vice
-  versa.
-  No cycles arise (each pair conflicts only on its own object), so no
-  aborts are needed; every ordering of each pair is a valid determination.
-  %
-  For each term $t_j = \ell_1 \wedge \cdots \wedge \ell_m$ in $\psi$,
-  define a conjunctive query clause that checks whether the corresponding
-  objects have the values matching the literals.
-  The overall provenance query $P$ returns a distinguished tuple $t^*$ iff at least
-  one term is satisfied (the disjunction of all term-queries).
-
-  Under any resolving determination, the commit ordering of each pair
-  $(T_i^+, T_i^-)$ induces a truth assignment to $x_i$.
-  The tuple $t^*$ is present iff the induced assignment satisfies $\psi$.
-  Hence $t^*$ is robust (present under every determination) iff $\psi$ is
-  valid (true under every assignment).
-\end{proof}
-
-\noindent
-The result complements the algebraic propagation (Corollary~\ref{cor:propagation-filtration}):
-supports compose cleanly through queries, but \emph{deciding} whether a
-support equals $\mathcal{D}$ (full robustness) is computationally hard.
-The same complexity arises in the Datalog setting: skeptical reasoning
-under stable models (does an atom hold in every stable model?) is
-coNP-complete~\cite{eiter1995complexity}.
-Robustness is coNP-complete in both instantiations, for the same
-structural reason: it requires quantifying over an exponential space of
-resolving determinations.
-
 \subsection{Snapshot Isolation}
 
 Snapshot isolation (SI) is multiversion: each transaction reads from a
@@ -1396,6 +1336,58 @@ $r(c)$ is not (support in $\mathcal{F}_{k+1} \setminus \mathcal{F}_k$,
 invisible until the cycle layer is discharged).
 
 % ================================================================
+\section{Complexity of Robustness}
+\label{sec:robustness-complexity}
+% ================================================================
+
+Robustness---whether a tuple holds under \emph{every} resolving
+determination---is a natural question in the framework.
+The algebraic machinery composes supports cleanly through queries
+(Corollary~\ref{cor:propagation-filtration}), but deciding whether a
+support equals $\mathcal{D}$ is computationally hard.
+
+\begin{theorem}[Robustness is coNP-complete]
+  \label{thm:robustness-conp}
+  In any instantiation where (i) membership in $\mathcal{D}$ is checkable
+  in polynomial time and (ii) query evaluation under a fixed determination
+  is in polynomial time, deciding robustness is in coNP.
+  It is coNP-hard in both the transactional and Datalog instantiations.
+\end{theorem}
+
+\begin{proof}
+  \emph{Membership in coNP (framework-level).}
+  To refute robustness, guess a resolving determination
+  $D \in \mathcal{D}$, verify that $D$ is valid (condition~(i)),
+  evaluate the query under $\Spec \mid D$ (condition~(ii)), and check
+  that $t$ is absent.
+  This is a polynomial-time certificate for non-robustness.
+
+  \emph{coNP-hardness (transactional).}
+  We reduce from \textsc{Validity} (is a DNF formula $\psi$ true under
+  every truth assignment?).
+  For each variable $x_i$, create two transactions $T_i^+$ and $T_i^-$
+  that write $\mathsf{true}$ and $\mathsf{false}$ to object $o_i$.
+  Their write-write conflict creates an edge; the commit order determines
+  the final value.
+  No cycles arise, so every ordering is a valid determination.
+  A conjunctive query checks whether the induced assignment satisfies
+  each term of $\psi$.
+  The distinguished tuple is robust iff $\psi$ is valid.
+
+  \emph{coNP-hardness (Datalog).}
+  Skeptical reasoning under stable models---does an atom hold in every
+  stable model?---is coNP-complete~\cite{eiter1995complexity}.
+  In our framework, this is exactly the robustness question for the
+  stable-model specification.
+\end{proof}
+
+\noindent
+The coNP-completeness is a property of the framework, not an artifact of
+either instantiation: robustness requires quantifying over an exponential
+space of resolving determinations, and this quantification is inherently
+hard whenever the commitment basis admits exponentially many resolutions.
+
+% ================================================================
 \section{Related Work}
 \label{sec:related}
 % ================================================================
@@ -1572,17 +1564,6 @@ A formal propagation theorem---stating that determination provenance is
 computed by evaluating the query over the determination semiring---would
 precisely parallel Green et al.'s foundational result at the new level.
 
-\paragraph{Complexity of robustness.}
-Deciding whether a tuple is robust under serializability (present under
-\emph{every} resolving determination) appears to be coNP-complete.
-The upper bound is clear: to refute robustness, guess an abort set (a
-feedback vertex set of the conflict graph), verify acyclicity, evaluate the
-query, and check that the tuple is absent---an NP certificate for
-non-robustness.
-A hardness reduction (likely from tautology or a variant of ``is this tuple
-in every minimal model?'') would establish that robustness checking is
-inherently intractable, complementing the algebraic propagation result:
-propagation is compositional, but deciding full support is hard.
 % ================================================================
 \section{Appendix: The Layered Determination---Algebraic Details}
 \label{app:algebra}

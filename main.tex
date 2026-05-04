@@ -81,9 +81,9 @@
   arises from concurrency: determination provenance distinguishes robust
   outcomes from contingent ones, and deciding robustness under
   serializability is coNP-complete.
-  For Datalog with negation, an enriched outcome domain unifies stratified,
-  well-founded, and stable-model semantics as prefixes of a single
-  determination, with the filtration making the prefix structure explicit.
+  For Datalog with negation, the classical negation semantics---stratified,
+  well-founded, and stable-model---differ only in which filtration level
+  they read; the underlying determination semiring is the same.
   Classical provenance is the degenerate case where no commitments are
   needed.
 \end{abstract}
@@ -148,8 +148,8 @@ semiring composes through relational algebra~\cite{green2007provenance}.
   We instantiate the framework in two settings.
   In transactional systems, determination provenance distinguishes robust
   outcomes from contingent ones, with robustness shown coNP-complete.
-  In Datalog with negation, an enriched outcome domain unifies three
-  classical semantics as prefixes of a single determination.
+  In Datalog with negation, the classical negation semantics differ only
+  in which filtration level they read from a single determination semiring.
   We begin with a transactional example:
 
 \begin{example}[Provenance under transactional ambiguity]
@@ -191,9 +191,9 @@ semiring composes through relational algebra~\cite{green2007provenance}.
         governed by conflict-graph topology, robustness under
         serializability shown coNP-complete
         (Section~\ref{sec:transactions}).
-  \item Instantiation for Datalog with negation: an enriched outcome
-        domain unifies stratified, well-founded, and stable-model
-        semantics as prefixes of a single determination
+  \item Instantiation for Datalog with negation: the classical negation
+        semantics---stratified, well-founded, stable-model---are
+        filtration levels of a single determination semiring
         (Section~\ref{sec:negation-preview},
         Appendix~\ref{sec:appendix-datalog}).
 \end{enumerate}

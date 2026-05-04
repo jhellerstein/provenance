@@ -1352,44 +1352,54 @@ support equals $\mathcal{D}$ is computationally hard.
 
 \begin{theorem}[Robustness is coNP-complete]
   \label{thm:robustness-conp}
-  In any instantiation where (i) membership in $\mathcal{D}$ is checkable
-  in polynomial time and (ii) query evaluation under a fixed determination
-  is in polynomial time, deciding robustness is in coNP.
+  In any instantiation where (i) resolving determinations are
+  polynomial-size, (ii) validity of a determination is checkable
+  in polynomial time, and (iii) query evaluation under a fixed
+  determination is in polynomial time, deciding robustness is in coNP.
   It is coNP-hard in both the transactional and Datalog instantiations.
 \end{theorem}
 
 \begin{proof}
   \emph{Membership in coNP (framework-level).}
   To refute robustness, guess a resolving determination
-  $D \in \mathcal{D}$, verify that $D$ is valid (condition~(i)),
-  evaluate the query under $\Spec \mid D$ (condition~(ii)), and check
+  $D \in \mathcal{D}$: by condition~(i), $D$ is polynomial-size.
+  Verify that $D$ is a valid resolving determination (condition~(ii)),
+  evaluate the query under $\Spec \mid D$ (condition~(iii)), and check
   that $t$ is absent.
-  This is a polynomial-time certificate for non-robustness.
+  This is a polynomial-time verifiable certificate for non-robustness.
 
   \emph{coNP-hardness (transactional).}
-  We reduce from \textsc{Validity} (is a DNF formula $\psi$ true under
-  every truth assignment?).
-  For each variable $x_i$, create two transactions $T_i^+$ and $T_i^-$
+  We reduce from \textsc{Validity} (is a DNF formula $\psi$ over
+  variables $x_1, \ldots, x_n$ true under every truth assignment?).
+  Using the enriched scheduling basis
+  (Section~\ref{sec:scheduling-basis}):
+  for each variable $x_i$, create two transactions $T_i^+$ and $T_i^-$
   that write $\mathsf{true}$ and $\mathsf{false}$ to object $o_i$.
-  Their write-write conflict creates an edge; the commit order determines
-  the final value.
+  Their write-write conflict creates an edge; the ordering commitment
+  $\varphi_{T_i^+ \prec T_i^-}$ or $\varphi_{T_i^- \prec T_i^+}$
+  determines the final value.
   No cycles arise, so every ordering is a valid determination.
-  A conjunctive query checks whether the induced assignment satisfies
-  each term of $\psi$.
+  For each term $t_j = \ell_1 \wedge \cdots \wedge \ell_m$ of $\psi$,
+  define a conjunctive query that checks whether the corresponding
+  objects have the matching values; the overall query is the union of
+  these conjunctive queries.
   The distinguished tuple is robust iff $\psi$ is valid.
 
   \emph{coNP-hardness (Datalog).}
-  Skeptical reasoning under stable models---does an atom hold in every
-  stable model?---is coNP-complete~\cite{eiter1995complexity}.
+  Skeptical reasoning under stable models of normal logic programs---does
+  a ground atom hold in every stable
+  model?---is coNP-complete~\cite{marek1991autoepistemic}.
   In our framework, this is exactly the robustness question for the
   stable-model specification.
+  (Full proof in Appendix~\ref{app:robustness-proofs}.)
 \end{proof}
 
 \noindent
-The coNP-completeness is a property of the framework, not an artifact of
-either instantiation: robustness requires quantifying over an exponential
-space of resolving determinations, and this quantification is inherently
-hard whenever the commitment basis admits exponentially many resolutions.
+The coNP upper bound is a property of the framework: it holds in any
+instantiation satisfying conditions (i)--(iii).
+Hardness is instantiation-specific but holds in both settings we study,
+for the same structural reason: the commitment basis admits exponentially
+many resolutions, and robustness requires quantifying over all of them.
 
 % ================================================================
 \section{Related Work}
@@ -1567,6 +1577,82 @@ their union (either suffices), and projection/selection preserve supports.
 A formal propagation theorem---stating that determination provenance is
 computed by evaluating the query over the determination semiring---would
 precisely parallel Green et al.'s foundational result at the new level.
+
+% ================================================================
+\section{Robustness Proofs}
+\label{app:robustness-proofs}
+% ================================================================
+
+\subsection{Transactional Hardness (Full Proof)}
+
+We reduce from \textsc{DNF-Validity}: given a DNF formula
+$\psi = t_1 \vee \cdots \vee t_\ell$ over variables $x_1, \ldots, x_n$,
+is $\psi$ true under every truth assignment?
+This problem is coNP-complete.
+
+\paragraph{Construction.}
+Using the enriched scheduling basis (Section~\ref{sec:scheduling-basis}):
+for each variable $x_i$, create two transactions $T_i^+$ and $T_i^-$,
+each writing to a distinct object $o_i$.
+$T_i^+$ writes $\mathsf{true}$; $T_i^-$ writes $\mathsf{false}$.
+Both are concurrent; their write-write conflict on $o_i$ creates an edge.
+The ordering commitment $\varphi_{T_i^+ \prec T_i^-}$ or
+$\varphi_{T_i^- \prec T_i^+}$ determines the final value of $o_i$
+(last-writer-wins).
+Since each pair conflicts only on its own object, no cycles arise and
+every combination of orderings is a valid resolving determination.
+The set $\mathcal{D}$ has $2^n$ elements, one per truth assignment.
+
+\paragraph{Query.}
+For each term $t_j = \ell_1 \wedge \cdots \wedge \ell_m$ of $\psi$,
+define a conjunctive query $Q_j$ that selects a distinguished tuple
+$t^*$ iff the objects corresponding to the literals of $t_j$ have the
+matching values.
+The overall query is $Q = Q_1 \cup \cdots \cup Q_\ell$ (a union of
+conjunctive queries).
+
+\paragraph{Correctness.}
+Under any resolving determination $D$, the ordering of each pair
+$(T_i^+, T_i^-)$ induces a truth assignment $\alpha_D$ to $x_i$.
+The tuple $t^*$ is present in $Q$'s result under $D$ iff $\alpha_D$
+satisfies at least one term of $\psi$---that is, iff
+$\alpha_D \models \psi$.
+Hence $t^*$ is robust (present under every $D \in \mathcal{D}$) iff
+$\psi$ is valid (true under every assignment).
+
+\paragraph{Polynomial conditions.}
+Condition~(i): each determination is a sequence of $n$ ordering
+commitments (polynomial-size).
+Condition~(ii): checking validity amounts to verifying that the conflict
+graph under the chosen ordering is acyclic (trivially true here, since
+no cycles exist).
+Condition~(iii): evaluating a UCQ over a polynomial-size database is in
+polynomial time.
+
+\subsection{Datalog Hardness}
+
+Skeptical reasoning for normal logic programs under stable-model
+semantics---given a program $P$, EDB $E$, and ground atom $a$, does $a$
+hold in every stable model of $(P, E)$?---is
+coNP-complete~\cite{marek1991autoepistemic}.
+
+In our framework, the stable-model specification $\Spec_P$ maps each
+history (EDB + commitments) to the set of stable models consistent with
+the commitments applied so far.
+A resolving determination selects one stable model.
+The robustness question ``is $\mathrm{supp}(P(a)) = \mathcal{D}$?'' is
+exactly the skeptical reasoning question ``does $a$ hold in every stable
+model?''
+
+\paragraph{Polynomial conditions.}
+Condition~(i): a determination is a sequence of sealing and choice
+commitments, one per stratum plus one per $\neg$-cycle atom
+(polynomial-size).
+Condition~(ii): checking that a determination produces a valid stable
+model requires computing the Gelfond--Lifschitz reduct and verifying
+that the proposed model is its minimal model (polynomial time).
+Condition~(iii): evaluating a Datalog query over a fixed model is in
+polynomial time.
 
 % ================================================================
 \section{Appendix: The Layered Determination---Algebraic Details}

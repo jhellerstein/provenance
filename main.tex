@@ -1167,6 +1167,12 @@ $b$ is robust (nonzero under every determination); $d$ is contingent.
 The result complements the algebraic propagation (Corollary~\ref{cor:propagation-filtration}):
 supports compose cleanly through queries, but \emph{deciding} whether a
 support equals $\mathcal{D}$ (full robustness) is computationally hard.
+The same complexity arises in the Datalog setting: skeptical reasoning
+under stable models (does an atom hold in every stable model?) is
+coNP-complete~\cite{eiter1995complexity}.
+Robustness is coNP-complete in both instantiations, for the same
+structural reason: it requires quantifying over an exponential space of
+resolving determinations.
 
 \subsection{Snapshot Isolation}
 

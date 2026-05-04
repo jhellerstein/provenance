@@ -201,8 +201,7 @@ semiring composes through relational algebra~\cite{green2007provenance}.
         (Section~\ref{sec:negation-preview},
         Appendix~\ref{sec:appendix-datalog}).
   \item Robustness (does a tuple hold under every determination?) is
-        in coNP at the framework level, and coNP-complete in both
-        instantiations
+        coNP-complete in both instantiations
         (Section~\ref{sec:robustness-complexity}).
 \end{enumerate}
 
@@ -1350,29 +1349,20 @@ The algebraic machinery composes supports cleanly through queries
 (Corollary~\ref{cor:propagation-filtration}), but deciding whether a
 support equals $\mathcal{D}$ is computationally hard.
 
-\begin{theorem}[Complexity of robustness]
+\begin{theorem}[Robustness is coNP-complete]
   \label{thm:robustness-conp}
-  In any instantiation where (i) resolving determinations are
-  polynomial-size, (ii) validity of a determination is checkable
-  in polynomial time, and (iii) query evaluation under a fixed
-  determination is in polynomial time, deciding robustness is in coNP.
+  Deciding robustness is coNP-complete under both the transactional
+  (enriched scheduling basis) and Datalog (stable-model) instantiations.
 \end{theorem}
 
-\begin{corollary}
-  Robustness is coNP-complete in both the transactional and Datalog
-  instantiations.
-\end{corollary}
-
 \begin{proof}
-  \emph{Membership in coNP (framework-level).}
-  To refute robustness, guess a resolving determination
-  $D \in \mathcal{D}$: by condition~(i), $D$ is polynomial-size.
-  Verify that $D$ is a valid resolving determination (condition~(ii)),
-  evaluate the query under $\Spec \mid D$ (condition~(iii)), and check
-  that $t$ is absent.
-  This is a polynomial-time verifiable certificate for non-robustness.
+  \emph{Upper bound.}
+  Non-robustness has a short certificate: guess a resolving determination
+  $D$ (polynomial-size in both instantiations), verify its validity
+  (polynomial time), evaluate the query under $\Spec \mid D$
+  (polynomial time), and check that $t$ is absent.
 
-  \emph{coNP-hardness (transactional).}
+  \emph{Lower bound (transactional).}
   We reduce from \textsc{Validity} (is a DNF formula $\psi$ over
   variables $x_1, \ldots, x_n$ true under every truth assignment?).
   Using the enriched scheduling basis
@@ -1389,20 +1379,21 @@ support equals $\mathcal{D}$ is computationally hard.
   these conjunctive queries.
   The distinguished tuple is robust iff $\psi$ is valid.
 
-  \emph{coNP-hardness (Datalog).}
+  \emph{Lower bound (Datalog).}
   Skeptical reasoning under stable models of normal logic programs---does
   a ground atom hold in every stable
   model?---is coNP-complete~\cite{marek1991autoepistemic}.
   In our framework, this is exactly the robustness question for the
   stable-model specification.
-  (Full proof in Appendix~\ref{app:robustness-proofs}.)
+  (Full details in Appendix~\ref{app:robustness-proofs}.)
 \end{proof}
 
 \noindent
-The coNP upper bound is a property of the framework: it holds in any
-instantiation satisfying conditions (i)--(iii).
-Hardness is instantiation-specific but holds in both settings we study,
-for the same structural reason: the commitment basis admits exponentially
+The upper bound generalizes: in any instantiation where determinations
+are polynomial-size, validity is polynomial-time checkable, and query
+evaluation is polynomial, robustness is in coNP.
+Hardness holds in both settings we study, for the same structural reason:
+the commitment basis admits exponentially
 many resolutions, and robustness requires quantifying over all of them.
 
 % ================================================================

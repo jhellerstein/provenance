@@ -1001,27 +1001,10 @@ from contingent query results.
 
 Following Adya~\cite{adya1999weak}, each isolation level is characterized by
 which cycles in the conflict graph are forbidden.
-The specification maps a history to the set of outcomes (committed database
-states) consistent with the isolation level's acyclicity constraint.
-
-\begin{definition}[Isolation-level specification]
-  \label{def:isolation-spec}
-  For an isolation level $L$, the specification $\Spec_L$ is an invariant
-  on the active conflict graph: at every point in the history, the conflict
-  graph over running (uncommitted, non-aborted) transactions, restricted to
-  the edge types relevant to $L$, must satisfy $L$'s acyclicity
-  constraint~\cite{adya1999weak}.
-  An outcome (the sequence of commit and abort decisions) is admissible if
-  this invariant is maintained throughout the history.
-  Stronger isolation levels forbid more edge types in cycles; weaker levels
-  permit more.
-\end{definition}
-
-\noindent
-Note that a transactional history is not a traditional schedule (a total
-order on operations); it is a stream of conflict-graph deltas punctuated by
-commit and abort events that remove vertices.
-We consider three isolation levels~\cite{adya1999weak}:
+The specification $\Spec_L$ maps a history to the set of outcomes
+(committed database states) consistent with $L$'s acyclicity constraint:
+stronger levels forbid more edge types in cycles.
+We consider three levels:
 \emph{read committed} (RC; no constraint on committed conflict graphs),
 \emph{serializability} (SER; forbids all cycles in the full conflict graph),
 and \emph{snapshot isolation} (SI; multiversion with first-committer-wins
@@ -1085,55 +1068,20 @@ recorded in the history as conflict edges accumulate.
 
 \subsection{Determination Depth by Isolation Level}
 
-\begin{proposition}[Read committed: depth 0]
+\begin{proposition}[Depth by isolation level]
   \label{prop:rc-depth-zero}
-  Under read committed, $\Spec_{\mathit{RC}}$ requires no commitments:
-  extending a history with new operations and commit/abort events can only
-  add new visible values, never retract previously visible ones.
-  Hence the specification is already determined and number of layers is~$0$.
-\end{proposition}
-\begin{proof}
-  Under RC, a transaction $T_Q$ may read any value written by a
-  committed transaction.
-  New commit events can only add committed writes to the set of values
-  visible to future readers.
-  No previously visible value becomes invisible: committed writes persist.
-  Hence for every $o \in \Obs(H)$ and every extension $H' \sqsupseteq H$,
-  there exists $o' \in \Obs(H')$ with $o \Ord o'$.
-  No outcome is ever contradicted, so no commitment is needed.
-\end{proof}
-
-\begin{proposition}[Serializability: depth from conflict structure]
   \label{prop:ser-depth}
-  Under serializability with the commit/abort commitment basis:
-  \begin{enumerate}[nosep,label=(\alph*)]
-    \item When the active conflict graph is acyclic, every active transaction
-          can be committed independently.  All commit decisions commute
-          (Proposition~\ref{prop:commit-commute}, since no cycles exist),
-          giving depth~$1$.
-    \item When cycles exist and are pairwise disjoint (share no transactions),
-          each cycle can be broken independently by a single abort, giving
-          depth~$1$.
-    \item When cycles overlap (share transactions), commit/abort decisions
-          may not commute, and depth is at least~$2$.
-  \end{enumerate}
+  \label{prop:si-depth}
+  Under read committed, the specification is already determined
+  (depth~$0$).
+  Under serializability with the commit/abort basis: depth~$1$ when the
+  conflict graph is acyclic or has only disjoint cycles; depth~$\ge 2$
+  when cycles overlap.
+  Under snapshot isolation, the basis adds snapshot predicates
+  $\varphi_{\snap(T_i) = U}$ and first-committer-wins predicates
+  $\varphi_{\mathrm{fcw}(x, T_i)}$; worst-case depth is $O(n)$ from
+  chains of FCW-to-snapshot dependencies.
 \end{proposition}
-\begin{proof}[Proof sketch]
-  (a)~With no cycles, committing any transaction preserves acyclicity
-  (removing a vertex from an acyclic graph leaves it acyclic).
-  All commit decisions are independently valid and act on disjoint vertices,
-  so they commute.
-  (b)~Disjoint cycles share no transactions, so aborting one transaction per
-  cycle breaks all cycles independently.
-  The abort decisions act on disjoint vertices and therefore commute.
-  (c)~See Example~\ref{ex:overlapping-cycles}: aborting $T_1$ leaves Cycle~2
-  intact, requiring a second abort whose validity depends on the first
-  decision.
-  Committing $T_3$ (rather than aborting it) would leave both cycles intact;
-  aborting $T_3$ breaks both.
-  The choice for $T_3$ affects which subsequent decisions are valid, so the
-  decisions do not commute.
-\end{proof}
 
 \begin{example}[Overlapping cycles and depth]
   \label{ex:overlapping-cycles}
@@ -1146,20 +1094,6 @@ recorded in the history as conflict edges accumulate.
   Aborting $T_3$ instead breaks both cycles in one decision (depth~$1$).
   The determination records which resolution was chosen.
 \end{example}
-
-\begin{proposition}[Snapshot isolation: depth from snapshot dependencies]
-  \label{prop:si-depth}
-  Under snapshot isolation, the commitment basis adds snapshot predicates
-  $\varphi_{\snap(T_i) = U}$ (transaction $T_i$ reads from the effects of
-  transactions in $U$) and first-committer-wins predicates
-  $\varphi_{\mathrm{fcw}(x, T_i)}$ ($T_i$ is the first committer on
-  object $x$; concurrent writers on $x$ must abort).
-  Snapshot selections commute with each other, as do FCW decisions on
-  distinct objects; but a snapshot that depends on an FCW outcome cannot
-  commute with it.
-  Worst-case depth under SI is $O(n)$, arising from chains of
-  FCW-to-snapshot dependencies.
-\end{proposition}
 
 \subsection{Running Example Revisited}
 
@@ -1201,16 +1135,10 @@ ordering decisions are commitments:
 \noindent
 The enriched basis is
 $\Phi' = \Phi \cup \{\varphi_{T_i \prec T_j} \mid T_i, T_j \text{ conflict}\}$.
-Ordering commitments on distinct edges commute.
-The boundary between environment and commitment is a \emph{modeling choice}
-reflecting system architecture:
-under pure OCC, interleaving is environment;
-under an active scheduler, it is commitment;
-under partial control (e.g., hot keys serialized, cold keys uncontrolled),
-the determination records which orderings were chosen and which were observed.
-(Baccaert et al.~\cite{baccaert2026makespan} show that computing an
-optimal single-layer scheduling determination is NP-complete, illustrating
-a general tradeoff between depth and per-layer complexity.)
+Ordering commitments on distinct pairs commute.
+The boundary between environment and commitment is a modeling choice
+reflecting system architecture; the enriched basis is used in the
+robustness reduction of Section~\ref{sec:robustness-complexity}.
 
 
 

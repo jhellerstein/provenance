@@ -1035,17 +1035,20 @@ $\Phi = \{\varphi_{\mathsf{commit}(T_i)},\,
 \end{remark}
 
 \paragraph{Enriched basis: ordering commitments.}
-When a system actively schedules conflicting operations, those
-ordering decisions are also commitments:
-$\varphi_{T_i \prec T_j}$ records that $T_i$'s conflicting operation
-is serialized before $T_j$'s.
+The commit/abort basis suffices for optimistic concurrency control (OCC),
+where all semantic decisions occur at validation time.
+Eager protocols (2PL, MVTO) make ordering decisions incrementally;
+these are modeled by adding ordering commitments
+$\varphi_{T_i \prec T_j}$ (recording that $T_i$'s conflicting operation
+is serialized before $T_j$'s) to the basis.
 \label{def:ordering-commitment}%
 Ordering commitments on independent pairs commute.
-This enriched basis is used in the running example (where the conflict
-graph is acyclic and all transactions commit, so ordering alone
-determines the outcome) and in the robustness reduction
+The enriched basis is used in the running example (acyclic conflict
+graph, all transactions commit) and in the robustness reduction
 (Section~\ref{sec:responsibility},
 Appendix~\ref{app:robustness-proofs}).
+See Appendix~\ref{app:protocols} for protocol-specific determination
+structures.
 
 \subsection{Determination Depth by Isolation Level}
 

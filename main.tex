@@ -1370,17 +1370,18 @@ presence or absence?
 This section defines a quantitative responsibility measure over
 commitments, establishes its exact complexity, and identifies tractable
 cases.
-(The binary robustness question is coNP-complete in the width of
-independent commitments; see Appendix~\ref{app:robustness-proofs}.)
-
-\subsection{The Determination Game}
+The layered structure of determinations decomposes the problem: within
+a single layer, commitments commute and a standard cooperative game
+applies; across layers, responsibility is defined by sequential
+conditioning (Section~\ref{sec:multi-layer-resp}).
+The filtration provides a stopping criterion: layers beyond
+$\mathrm{qdepth}(t)$ contribute zero responsibility.
+(The binary robustness question is coNP-complete; see
+Appendix~\ref{app:robustness-proofs}.)
 
 Fix a single-layer determination with $n$ independent binary commitments
 $\varphi_1, \ldots, \varphi_n$, a realized determination $D^*$, and a
 tuple $t$ with support $S \subseteq \mathcal{D}$.
-We define a cooperative game whose players are the commitments and whose
-value function measures how much fixing a coalition of commitments to
-their $D^*$-values increases the probability that $t$ holds.
 
 \begin{definition}[Presence game]
   \label{def:presence-game}
@@ -1401,9 +1402,8 @@ their $D^*$-values increases the probability that $t$ holds.
 \end{definition}
 
 \noindent
-The game satisfies $v(\emptyset) = |S|/2^n$ (the unconditional
-probability that $t$ holds) and $v(N) = \mathbf{1}[D^* \in S]$
-(whether $t$ holds under the actual determination).
+The game satisfies $v(\emptyset) = |S|/2^n$ and
+$v(N) = \mathbf{1}[D^* \in S]$.
 
 \begin{definition}[Determination responsibility]
   \label{def:det-responsibility}
@@ -1419,128 +1419,86 @@ probability that $t$ holds) and $v(N) = \mathbf{1}[D^* \in S]$
 \end{definition}
 
 \noindent
-By the efficiency axiom of Shapley values,
-$\sum_{i=1}^n \rho(\varphi_i, t) = v(N) - v(\emptyset)$:
-the responsibilities sum to the difference between the actual outcome
-and the unconditional probability.
-For a robust tuple ($S = \mathcal{D}$), $v(C) = 1$ for all $C$, so
-$\rho(\varphi_i, t) = 0$ for all $i$---no commitment matters.
-For a singleton support ($S = \{D^*\}$), every commitment contributes
-equally: $\rho(\varphi_i, t) = (1 - 2^{-n})/n$.
+By efficiency, $\sum_i \rho(\varphi_i, t) = v(N) - v(\emptyset)$.
+For a robust tuple, $\rho = 0$ for all $i$ (no commitment matters).
+For a singleton support ($S = \{D^*\}$), $\rho = (1 - 2^{-n})/n$
+for all $i$ (all equally responsible).
 
-\subsection{Complexity of Exact Computation}
-
-Computing determination responsibility requires evaluating the marginal
-contribution of each commitment across all coalition sizes---a weighted
-model-counting problem over the support.
+\paragraph{Complexity.}
+Computing $\rho(\varphi_i, t)$ requires weighted model counting over
+the support---a marginal contribution for each coalition size.
 
 \begin{theorem}[Hardness of determination responsibility]
   \label{thm:responsibility-hard}
   Computing $\rho(\varphi_i, t)$ is $\mathrm{\#P}$-hard, even for
-  single-layer determinations with $n$ independent binary commitments
-  and a support given as a DNF formula.
+  single-layer determinations with a support given as a DNF formula.
 \end{theorem}
 \begin{proof}
-  The marginal contribution $v(C \cup \{i\}) - v(C)$ requires counting
-  the elements of $S$ that agree with $D^*$ on $C$ and differ on $i$.
-  When $S$ is encoded as a DNF, this is a \#DNF counting problem under
-  a random restriction---known to be \#P-hard by reduction from
+  The marginal $v(C \cup \{i\}) - v(C)$ requires counting support
+  elements agreeing with $D^*$ on $C$ and differing on $i$---a \#DNF
+  problem under random restriction, which is \#P-hard by reduction from
   \#SAT~\cite{valiant1979complexity}.
 \end{proof}
 
-\noindent
-The hardness validates the measure: determination responsibility is
-genuinely harder than robustness (coNP) because it requires counting,
-not just deciding.
-
-\subsection{Tractability via Conflict Structure}
-
-Despite general hardness, the structure of the commitment basis yields
-tractable cases.
-In the transactional setting, the independence structure of ordering
-commitments mirrors the conflict graph: commitments on distinct pairs
-are independent, while shared transactions create dependencies.
+\paragraph{Tractability via conflict structure.}
+The independence structure of the commitment basis determines when
+responsibility is tractable.
 
 \begin{definition}[Conflict treewidth]
   \label{def:conflict-tw}
   The \emph{conflict treewidth} of a single-layer determination is the
   treewidth of the graph whose vertices are the $n$ commitments and
-  whose edges connect commitments that share a transaction (i.e., are
-  not independent).
+  whose edges connect commitments that share a transaction.
 \end{definition}
 
 \begin{theorem}[Tractability at bounded conflict treewidth]
   \label{thm:responsibility-tw}
   For a single-layer determination with conflict treewidth $w$,
   determination responsibility is computable in time
-  $O(2^w \cdot n^2 \cdot p(n))$, where $p(n)$ is the cost of query
-  evaluation---fixed-parameter tractable in $w$.
+  $O(2^w \cdot n^2 \cdot p(n))$---FPT in $w$.
 \end{theorem}
 \begin{proof}[Proof sketch]
-  The support $S$ is definable as a positive Boolean formula whose
-  primal graph has treewidth $\le w$ (each commitment corresponds to a
-  variable; dependencies create edges).
-  The marginal contribution $v(C \cup \{i\}) - v(C)$ reduces to
-  weighted model counting under a partial assignment---computable in
-  $O(2^w \cdot \mathrm{poly}(n))$ on bounded-treewidth
-  formulas~\cite{samer2010algorithms}.
-  Summing over all $O(n)$ coalition sizes with the Shapley weighting
-  gives the stated bound.
+  The support is a positive Boolean formula with primal-graph treewidth
+  $\le w$.
+  Marginal contributions reduce to weighted model counting under partial
+  assignments---computable in $O(2^w \cdot \mathrm{poly}(n))$ on
+  bounded-treewidth formulas~\cite{samer2010algorithms}.
+  Summing over coalition sizes with Shapley weighting gives the bound.
 \end{proof}
 
 \noindent
-Bounded conflict treewidth arises naturally in systems settings:
-partitioned workloads (each partition's transactions conflict only
-internally), microservice DAGs (services interact along a tree-shaped
-dependency graph), and sharded databases (cross-shard conflicts are
-sparse).
+Bounded conflict treewidth arises in partitioned workloads, microservice
+DAGs, and sharded databases.
 In these settings, determination responsibility is efficiently
-computable and directly actionable: ``ordering commitment
-$\varphi_{T_i \prec T_j}$ has responsibility $0.73$ for the SLA
-violation'' tells the scheduler which interleaving to avoid.
+computable: ``$\varphi_{T_i \prec T_j}$ has responsibility $0.73$ for
+the SLA violation'' tells the scheduler which interleaving to avoid.
 
-\subsection{Approximation for General Supports}
-
-When conflict treewidth is unbounded, sampling provides an efficient
-approximation.
+\paragraph{Approximation.}
+When treewidth is unbounded, sampling provides an FPRAS.
 
 \begin{proposition}[FPRAS for determination responsibility]
   \label{prop:fpras}
-  There exists a fully polynomial randomized approximation scheme for
-  $\rho(\varphi_i, t)$: for any $\varepsilon, \delta > 0$, the
-  algorithm outputs $\hat{\rho}$ with
-  $|\hat{\rho} - \rho(\varphi_i, t)| \le \varepsilon$ with probability
-  $\ge 1 - \delta$, in time $O(n/\varepsilon^2 \cdot
-  \log(1/\delta) \cdot p(n))$.
+  For any $\varepsilon, \delta > 0$, $\rho(\varphi_i, t)$ can be
+  $\varepsilon$-approximated with probability $\ge 1 - \delta$ in time
+  $O(n/\varepsilon^2 \cdot \log(1/\delta) \cdot p(n))$.
 \end{proposition}
 \begin{proof}[Proof sketch]
-  Sample $m = O(n/\varepsilon^2 \cdot \log(1/\delta))$ random
-  permutations $\pi$.
-  For each $\pi$, compute the marginal contribution of $i$ given the
-  coalition preceding $i$: this requires evaluating the query under two
-  specific determinations (one with $\varphi_i$ set to each value,
-  remaining commitments sampled uniformly), each costing $p(n)$.
-  The average of marginal contributions converges to $\rho(\varphi_i, t)$
-  by the permutation characterization of Shapley values.
+  Sample random permutations; for each, compute the marginal
+  contribution of $i$ by evaluating the query under two determinations.
+  Convergence follows from the permutation characterization of Shapley
+  values.
 \end{proof}
 
-\noindent
-The FPRAS is practical for systems diagnosis: with $n = 100$ concurrent
-transactions and $\varepsilon = 0.05$, approximately $40{,}000$ query
-evaluations suffice---feasible for offline analysis of recorded traces.
-
-\subsection{Multi-Layer Responsibility}
-
-For determinations of depth $d > 1$, responsibility is defined
-\emph{per layer}: the responsibility of a commitment at layer $k$ is
-its Shapley value in the presence game conditioned on layers
-$1, \ldots, k{-}1$ being discharged.
-This respects non-commutativity: one does not ask ``what if layer-$2$
+\paragraph{Multi-layer responsibility.}
+\label{sec:multi-layer-resp}
+For depth $d > 1$, responsibility is defined per layer: the
+responsibility of a commitment at layer $k$ is its Shapley value in the
+presence game conditioned on layers $1, \ldots, k{-}1$ being discharged.
+This respects non-commutativity---one does not ask ``what if layer-$2$
 commitments were resolved before layer-$1$?'' because that is not a
 valid determination.
-The complexity per layer is the same as the single-layer case
-(\#P-hard in general, FPT in the layer's conflict treewidth).
-The filtration provides a natural stopping criterion: if
+Complexity per layer is the same as the single-layer case.
+The filtration provides the stopping criterion: if
 $\mathrm{qdepth}(t) = k$, only layers $1, \ldots, k$ contribute
 nonzero responsibility.
 

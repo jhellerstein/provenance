@@ -1491,9 +1491,16 @@ The algebraic development shows that determinations are not ad hoc:
 the space of resolving determinations forms a semiring whose filtration
 reflects the layered structure of individual determinations, and query
 evaluation respects this structure compositionally.
+As evidence that the determination semiring captures the right level of
+abstraction, it recovers several known results as special cases:
+classical semiring provenance at depth~$0$;
+$\mathrm{PosBool}(\Phi)$ for single-layer determinations;
+the three classical negation semantics as filtration levels of a single
+object;
+and the coNP-completeness of skeptical reasoning under stable models as
+an instance of the general width-based robustness theorem.
 In transactional systems, determination provenance explains how query
-observations depend on commit ordering and isolation commitments, with
-robustness checking shown to be coNP-complete.
+observations depend on commit ordering and isolation commitments.
 In logic programming with negation, it exposes preservation across
 semantics.
 

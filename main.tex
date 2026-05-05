@@ -130,6 +130,8 @@ check before the deposit.
 Would the denial survive a change from snapshot isolation to
 serializability?
 Would it persist if the bank switched schedulers?
+Under what fraction of admissible schedules does the SLA hold---and
+which scheduling commitment is responsible when it doesn't?
 These are questions about the \emph{assumptions} under which the outcome
 was produced, not about the derivation itself.
 The same phenomenon arises in database theory: a Datalog program with

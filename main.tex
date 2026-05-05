@@ -79,18 +79,18 @@
 
   We instantiate the framework for transactional systems and for Datalog
   with negation.
-  In both settings, deciding whether an outcome is robust (holds under
-  every resolution) is coNP-complete.
   For Datalog, the classical negation semantics---stratified,
   well-founded, and stable-model---differ only in which filtration level
   they read; the underlying determination semiring is the same.
   Classical provenance is the degenerate case where no commitments are
   needed.
+  In both settings, deciding whether an outcome is robust (holds under
+  every resolution) is coNP-complete.
   Determination provenance addresses longstanding gaps in provenance for
-  queries with negation and why-not explanations, and provides a compact
-  algebraic foundation for systems settings---transaction
-  scheduling, distributed tracing---that previously eluded formal
-  provenance treatment.
+  queries with negation and why-not explanations, and enables new
+  expressive power for systems settings---answering robustness,
+  counterfactual, and tail-bound queries over transaction schedules and
+  distributed traces that have no analog in classical provenance.
 \end{abstract}
 
 \maketitle

@@ -633,6 +633,10 @@ $(2^{\mathcal{D}}, \cup, \cap, \emptyset, \mathcal{D})$---a commutative
 semiring with $\cup$ as addition and $\cap$ as multiplication.
 This is the \emph{determination semiring}: it captures which determinations
 support a tuple and how those supports compose through queries.
+The Boolean algebra on supports is elementary; the non-trivial structure
+is the \emph{filtration} (Section~\ref{sec:filtration}), which reflects
+the layered commitment process and distinguishes determination provenance
+from mere set-membership tracking.
 
 An outcome is \emph{robust} if its support is all of $\mathcal{D}$
 (it holds under every determination).
@@ -869,7 +873,29 @@ No layer information is needed to make this distinction.
   $\mathcal{F}_{\max(k_1, k_2)}$.
 \end{proof}
 
+\begin{proposition}[Difference can increase depth]
+  \label{prop:difference-increases-depth}
+  Under relational difference, query-relative depth can strictly increase:
+  there exist tuples $t_1, t_2$ with $\mathrm{qdepth}(t_1) = 0$ and
+  $\mathrm{qdepth}(t_2) > 0$ such that
+  $\mathrm{qdepth}(t_1 \setminus t_2) > \mathrm{qdepth}(t_1)$.
+\end{proposition}
+\begin{proof}
+  Let $t_1$ be robust ($\mathrm{supp} = \mathcal{D}$, depth~$0$) and
+  $t_2$ contingent ($\mathrm{supp} = S \subsetneq \mathcal{D}$,
+  depth~$> 0$).
+  Then $t_1 \setminus t_2$ holds under exactly the determinations in
+  $\mathcal{D} \setminus S$---a proper nonempty subset of $\mathcal{D}$
+  (assuming $S \neq \emptyset$ and $S \neq \mathcal{D}$).
+  Hence $\mathrm{supp}(t_1 \setminus t_2) = \mathcal{D} \setminus S
+  \notin \mathcal{F}_0$, so $\mathrm{qdepth}(t_1 \setminus t_2) > 0$.
+\end{proof}
+
 \noindent
+Corollary~\ref{cor:propagation-filtration} and
+Proposition~\ref{prop:difference-increases-depth} together show that the
+filtration is tight: positive relational algebra preserves depth, while
+negation (difference) can increase it.
 The sequential structure that non-commutativity imposes is not a deficiency
 but a reflection of algebraic richness:
 Section~\ref{sec:negation-preview} gives a striking application where the
@@ -958,20 +984,11 @@ states) consistent with the isolation level's acyclicity constraint.
 Note that a transactional history is not a traditional schedule (a total
 order on operations); it is a stream of conflict-graph deltas punctuated by
 commit and abort events that remove vertices.
-
-\noindent
-We consider three levels:
-\begin{itemize}[nosep,leftmargin=*]
-  \item \textbf{Read committed (RC):} forbids only $\mathsf{wr}$ cycles
-        involving uncommitted writes (dirty reads).
-        No constraint on committed conflict graphs.
-  \item \textbf{Serializability (SER):} forbids all cycles in the full
-        conflict graph ($\mathsf{ww} + \mathsf{wr} + \mathsf{rw}$).
-  \item \textbf{Snapshot isolation (SI):} multiversion; each transaction reads
-        from a snapshot.  Forbids $\mathsf{ww}$ conflicts between concurrent
-        transactions (first-committer-wins) and certain $\mathsf{rw}$
-        cycles~\cite{adya1999weak}.
-\end{itemize}
+We consider three isolation levels~\cite{adya1999weak}:
+\emph{read committed} (RC; no constraint on committed conflict graphs),
+\emph{serializability} (SER; forbids all cycles in the full conflict graph),
+and \emph{snapshot isolation} (SI; multiversion with first-committer-wins
+on write-write conflicts).
 
 \subsection{Commitment Basis}
 
@@ -1328,6 +1345,11 @@ determination---is a natural question in the framework.
 Supports compose cleanly through queries
 (Corollary~\ref{cor:propagation-filtration}), but deciding whether a
 support equals $\mathcal{D}$ is computationally hard.
+The hardness is unsurprising in isolation---exponentially many
+determinations make universality expensive---but its value is as a
+validation: the same abstract theorem yields hardness in both
+instantiations via a uniform mechanism, confirming that width is the
+right complexity parameter.
 
 \begin{definition}[Determination width]
   \label{def:width}
@@ -1373,6 +1395,22 @@ models~\cite{marek1991autoepistemic}, validating that the determination
 semiring's width-based abstraction captures the right source of hardness.
 Full proofs in Appendix~\ref{app:robustness-proofs}.
 
+\begin{corollary}[Tractability at bounded width]
+  \label{cor:fpt-width}
+  For a single-layer determination of width $w$ (all commitments commute),
+  robustness is decidable in time $O(2^w \cdot p(n))$, where $p(n)$ is the
+  cost of validity checking and query evaluation---fixed-parameter
+  tractable in $w$.
+  More generally, for depth $d$ and width $w$, the brute-force bound is
+  $O(2^{wd} \cdot p(n))$.
+\end{corollary}
+
+\noindent
+The coNP-completeness result (Theorem~\ref{thm:robustness-conp}) and
+Corollary~\ref{cor:fpt-width} together show that width is the right
+complexity parameter: robustness is tractable when width is bounded and
+intractable when it grows with the input.
+
 % ================================================================
 \section{Related Work}
 \label{sec:related}
@@ -1396,8 +1434,12 @@ commitments that precede derivational provenance explicit and composable.
 Extending semiring provenance to negation is a recognized open problem.
 Dannert et al.~\cite{dannert2021semiring} extend semiring provenance to
 least-fixed-point logic, handling stratified negation within a single
-model; their framework does not address the multiplicity of models that
-unstratified negation introduces.
+model.
+For stratifiable programs, our within-determination provenance coincides
+with theirs once the layers of sealing commitments are discharged.
+Our contribution addresses programs with unstratified negation, where
+multiple stable models coexist and the determination semiring tracks
+which models support each tuple.
 Deutch et al.~\cite{deutch2014circuits} use Boolean circuits to represent
 provenance for non-monotone queries but likewise assume a single resolved
 model.
@@ -1443,6 +1485,11 @@ multiplicity differs: repairs resolve constraint violations in the data,
 while determinations resolve semantic ambiguity in the specification.
 Determination provenance additionally tracks \emph{which} completions
 support a tuple (the support set), not merely whether all do.
+Moreover, repairs are typically defined by minimal symmetric difference,
+yielding a flat (single-layer) structure with no inter-commitment
+dependencies.
+The layered, non-commutative structure that persistence enables---and
+the filtration it induces---has no direct analog in the CQA setting.
 
 % ================================================================
 \section{Conclusion}
@@ -1478,7 +1525,9 @@ semantics.
 \paragraph{Open directions.}
 Developing quantitative robustness measures beyond the binary
 robust/contingent distinction; extending the framework to reversible
-commitments (where persistence fails); and characterizing compact
+commitments (without persistence, history-invariance fails and the
+determination semiring is no longer a static object---characterizing
+which weaker conditions suffice is open); and characterizing compact
 representations of the determination semiring for deep determinations
 all remain open.
 
@@ -1487,6 +1536,7 @@ to explain.
 Determination provenance extends that insight: when meaning itself depends on
 resolution, provenance must explain the assumptions that made meaning possible.
 
+\pagebreak
 \appendix
 
 % ================================================================

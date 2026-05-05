@@ -122,16 +122,16 @@ presupposes the very resolution that these systems leave open.
 
 This mismatch gives rise to provenance questions that have no analog in the
 classical setting.
-Did a query result appear as an inevitable consequence of the data, or because
-of a particular scheduling choice?
-Would it survive a change from snapshot isolation to serializability?
 A bank account withdrawal is denied; classical provenance can explain
 \emph{how} the balance was computed, but not \emph{why} the deposit that
 would have prevented the denial arrived too late---that explanation
 requires identifying the scheduling commitment that ordered the balance
 check before the deposit.
-Two replicas of a database diverge; the explanation is not a blocked
-derivation but a difference in ordering commitments applied at each site.
+Would the denial survive a change from snapshot isolation to
+serializability?
+Would it persist if the bank switched schedulers?
+These are questions about the \emph{assumptions} under which the outcome
+was produced, not about the derivation itself.
 The same phenomenon arises in database theory: a Datalog program with
 negation may admit multiple models, and whether a derived tuple holds
 may depend on which model is chosen.

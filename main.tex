@@ -314,23 +314,23 @@ take effect at specific points in the history.
 
 \begin{definition}[Commitment]
   \label{def:commitment}%
-  A \emph{commitment} $\varphi$ is a function on outcome sets:
-  given a history $H$ with admissible set $\Spec(H)$, applying $\varphi$
-  produces a nonempty subset
+  A \emph{commitment} $\varphi$ is a filter on the admissible set:
+  given a history $H$, applying $\varphi$ produces a nonempty subset
   $\Spec(H \cdot \varphi) \subseteq \Spec(H)$.
-  We require \emph{shrinkage}: $\Spec(H') \subseteq \Spec(H \cdot \varphi)$
-  for every $H' \sqsupseteq H \cdot \varphi$.
 \end{definition}
 
 \noindent
 Here $H \cdot \varphi$ denotes the history obtained by appending $\varphi$
 after all maximal events of $H$ (giving $H \sqsubseteq H \cdot \varphi$).
-A commitment appended after all maximal events induces a \emph{cut} in
-the history poset: it separates past from future, ensuring that
-commitments form a total order within any history and that the
-admissible set can only shrink afterward (shrinkage).
-Crucially, the result may depend on the full set $\Spec(H)$, not only on
-individual outcomes---this is what allows commitments to be non-commutative.
+Because a commitment succeeds all maximal events, it induces a \emph{cut}
+in the history poset, ensuring that commitments form a total order within
+any history.
+Applied sequentially, commitments monotonically shrink the admissible set:
+$\Spec(H) \supseteq \Spec(H \cdot \varphi_1) \supseteq
+\Spec(H \cdot \varphi_1 \cdot \varphi_2) \supseteq \cdots$.
+The result of a commitment may depend on the full set $\Spec(H)$, not only
+on individual outcomes---this is what allows commitments to be
+non-commutative.
 We write $(\Spec \mid \varphi)(H) \triangleq \Spec(H \cdot \varphi)$.
 
 \paragraph{Commitment bases.}
@@ -356,17 +356,12 @@ We impose one restriction on bases throughout this paper:
 \end{definition}
 
 \noindent
-Persistence is distinct from shrinkage.
-Shrinkage is a property of a single commitment event applied at a fixed
-history: after applying $\varphi$ at $H_1$, the admissible set does not
-re-grow at extensions of $H_1 \cdot \varphi$.
-Persistence compares two events with the same predicate applied at
-different histories: applying $\varphi$ at a later
-$H_2 \sqsupseteq H_1$ must exclude at least the same outcomes as applying
-it at $H_1$.
-(A ``majority vote'' predicate satisfies shrinkage but not persistence:
+Persistence compares the \emph{same} commitment applied at different
+histories: applying $\varphi$ at a later $H_2 \sqsupseteq H_1$ must
+exclude at least the same outcomes as applying it at $H_1$.
+(A ``majority vote'' predicate is not persistent:
 at $H_1$ with votes $2{:}A, 1{:}B$ it excludes $B$; at $H_2$ with
-$2{:}A, 3{:}B$ it excludes $A$ instead.)
+$2{:}A, 3{:}B$ it excludes $A$ instead---the exclusion set changed.)
 
 Persistence is the paper's main structural assumption.
 It guarantees that determined specifications are history-invariant

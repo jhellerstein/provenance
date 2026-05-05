@@ -1379,6 +1379,32 @@ $\mathrm{qdepth}(t)$ contribute zero responsibility.
 (The binary robustness question is coNP-complete; see
 Appendix~\ref{app:robustness-proofs}.)
 
+\begin{example}[OLTP workload with an analytics query]
+  \label{ex:responsibility}
+  A bank processes four concurrent transfers $T_1, \ldots, T_4$, each
+  crediting a different account, while an analytics query $T_A$ computes
+  $\mathsf{sum}(\mathsf{balance})$.
+  Each $T_i$ conflicts with $T_A$ (read-write on the credited account);
+  the transfers do not conflict with each other.
+  The ordering basis has four independent binary commitments
+  $\varphi_{T_i \prec T_A}$ (transfer visible to the sum) vs.\
+  $\varphi_{T_A \prec T_i}$ (transfer not yet visible).
+  There are $2^4 = 16$ resolving determinations.
+
+  Suppose the realized determination $D^*$ orders all four transfers
+  before $T_A$, so the sum includes all credits.
+  An SLA predicate ``sum $\ge$ threshold $\tau$'' holds under $D^*$.
+  If any single transfer suffices to meet $\tau$, the predicate holds
+  under $15$ of $16$ determinations (only the all-invisible case
+  violates it), and each $\varphi_{T_i \prec T_A}$ has equal
+  responsibility $\approx 1/60$.
+  If \emph{all four} are needed to meet $\tau$, the predicate holds
+  under only $1$ of $16$ determinations, and each commitment has
+  responsibility $(1 - 2^{-4})/4 \approx 0.23$---the scheduler should
+  prioritize \emph{all} transfers before the scan.
+  Responsibility distinguishes these cases; robustness alone cannot.
+\end{example}
+
 Fix a single-layer determination with $n$ independent binary commitments
 $\varphi_1, \ldots, \varphi_n$, a realized determination $D^*$, and a
 tuple $t$ with support $S \subseteq \mathcal{D}$.

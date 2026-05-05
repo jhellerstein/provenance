@@ -125,6 +125,13 @@ classical setting.
 Did a query result appear as an inevitable consequence of the data, or because
 of a particular scheduling choice?
 Would it survive a change from snapshot isolation to serializability?
+A bank account withdrawal is denied; classical provenance can explain
+\emph{how} the balance was computed, but not \emph{why} the deposit that
+would have prevented the denial arrived too late---that explanation
+requires identifying the scheduling commitment that ordered the balance
+check before the deposit.
+Two replicas of a database diverge; the explanation is not a blocked
+derivation but a difference in ordering commitments applied at each site.
 The same phenomenon arises in database theory: a Datalog program with
 negation may admit multiple models, and whether a derived tuple holds
 may depend on which model is chosen.
@@ -373,8 +380,11 @@ It guarantees that determined specifications are history-invariant
 (Theorem~\ref{thm:resolution-implies-monotone}), enabling classical
 provenance once all commitments have been discharged.
 The sealing basis for Datalog with negation, the commit/abort basis for
-serializability, and snapshot predicates under snapshot isolation are all
-persistent.
+serializability, and the SI basis (snapshot selections and FCW predicates)
+are all persistent: applying any of these predicates at a later history
+$H_2 \sqsupseteq H_1$ excludes at least the same outcomes as applying it
+at $H_1$, because new events can add conflicts or atoms but cannot
+rehabilitate an outcome that was already ruled out.
 
 \paragraph{Three forces on a history.}
 \label{sec:three-forces}%
@@ -1326,7 +1336,10 @@ see Appendix~\ref{sec:appendix-datalog});
 stratified semantics discharges the same sealing layers but is defined
 only when they resolve everything ($\neg$-cycle atoms remain $\bot$).
 The filtration of the determination semiring makes this prefix structure
-explicit.
+explicit and compositional: supports at each filtration level compose
+through queries (Corollary~\ref{cor:propagation-filtration}), so
+preservation across semantics can be checked algebraically rather than
+by re-running the alternating fixpoint.
 
 \paragraph{Preservation.}
 Preservation across semantics follows directly:
@@ -1526,8 +1539,10 @@ semantics.
 Developing quantitative robustness measures beyond the binary
 robust/contingent distinction; extending the framework to reversible
 commitments (without persistence, history-invariance fails and the
-determination semiring is no longer a static object---characterizing
-which weaker conditions suffice is open); and characterizing compact
+determination semiring is no longer a static object---a natural
+candidate is \emph{eventual persistence}, where exclusions stabilize
+after a finite prefix, but characterizing the weakest sufficient
+conditions is open); and characterizing compact
 representations of the determination semiring for deep determinations
 all remain open.
 

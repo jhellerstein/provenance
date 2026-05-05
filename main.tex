@@ -908,6 +908,23 @@ Corollary~\ref{cor:propagation-filtration} and
 Proposition~\ref{prop:difference-increases-depth} together show that the
 filtration is tight: positive relational algebra preserves depth, while
 negation (difference) can increase it.
+Moreover, every filtration level is realized:
+
+\begin{proposition}[Reachability]
+  \label{prop:reachability}
+  For a determination of depth $d$ with non-trivial choices at each
+  layer, every level $0 \le k \le d$ is the query-relative depth of
+  some tuple.
+\end{proposition}
+\begin{proof}
+  Level~$0$: any base tuple present in all determinations (robust).
+  Level~$k$ for $1 \le k \le d$: a tuple whose presence depends on the
+  choice at layer~$k$ but not on layers $k{+}1, \ldots, d$ has support
+  that is a union of level-$k$ classes but not of level-$(k{-}1)$
+  classes.
+\end{proof}
+
+\noindent
 The sequential structure that non-commutativity imposes is not a deficiency
 but a reflection of algebraic richness:
 Section~\ref{sec:negation-preview} gives a striking application where the
@@ -1425,6 +1442,9 @@ The coNP-completeness result (Theorem~\ref{thm:robustness-conp}) and
 Corollary~\ref{cor:fpt-width} together show that width is the right
 complexity parameter: robustness is tractable when width is bounded and
 intractable when it grows with the input.
+Computing the full support $\mathrm{supp}(P(t))$ (not just checking
+whether it equals $\mathcal{D}$) has the same complexity profile:
+enumerate determinations and evaluate the query under each.
 
 % ================================================================
 \section{Related Work}

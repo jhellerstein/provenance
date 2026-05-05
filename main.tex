@@ -1350,11 +1350,11 @@ Supports compose cleanly through queries
 support equals $\mathcal{D}$ is computationally hard.
 
 \begin{definition}[Determination width]
-  A commitment is \emph{binary} if it selects between exactly two
-  alternatives (e.g., order $T_i$ before or after $T_j$; assign atom $a$
-  true or false).
-  The \emph{width} of a determination is the maximum number of
-  independent binary commitments in any single layer.
+  \label{def:width}
+  The \emph{width} of a layer $L$ is $\log_2$ of the number of distinct
+  outcomes the commitments in $L$ can jointly produce---the bits of
+  ambiguity that layer resolves.
+  The \emph{width} of a determination is the maximum width of any layer.
   A determination of width $n$ admits up to $2^n$ resolving
   determinations.
 \end{definition}
@@ -1368,13 +1368,14 @@ support equals $\mathcal{D}$ is computationally hard.
 
 \begin{proof}
   \emph{Upper bound.}
-  To refute robustness, guess a determination $D \in \{0,1\}^n$, verify
-  validity, evaluate the query, and check that $t$ is absent
-  (polynomial-time certificate).
+  To refute robustness, guess a determination $D$ (specifiable in $n$
+  bits), verify validity, evaluate the query, and check that $t$ is
+  absent (polynomial-time certificate).
 
   \emph{Lower bound.}
-  The $n$ binary commitments biject $\mathcal{D}$ with truth assignments
-  to $n$ variables.
+  Width $n$ means the widest layer resolves $n$ bits of ambiguity,
+  giving $2^n$ determinations that biject with truth assignments to $n$
+  variables.
   A UCQ encodes any DNF $\psi$: the distinguished tuple is present under
   $D$ iff the corresponding assignment satisfies $\psi$.
   Robustness reduces to \textsc{DNF-Validity} (coNP-complete).
@@ -1384,14 +1385,12 @@ support equals $\mathcal{D}$ is computationally hard.
 Both instantiations have width $n$:
 \begin{itemize}[nosep]
   \item \emph{Transactions} (enriched scheduling basis):
-        each pair of conflicting transactions on a distinct object
-        contributes one binary ordering commitment
-        ($\varphi_{T_i^+ \prec T_i^-}$ vs.\ its reverse).
+        $n$ pairs of conflicting transactions on distinct objects, each
+        resolved by one ordering commitment (2 alternatives per pair).
   \item \emph{Datalog} (stable models):
-        each disjoint $\neg$-cycle of length~2 contributes one binary
-        choice commitment ($\varphi_{r=\mathbf{t}}$ vs.\
-        $\varphi_{s=\mathbf{t}}$).
-        Skeptical reasoning under stable models is the robustness
+        $n$ disjoint $\neg$-cycles of length~2, each resolved by one
+        choice commitment (2 stable completions per cycle).
+        Skeptical reasoning is the robustness
         question~\cite{marek1991autoepistemic}.
 \end{itemize}
 Full proofs in Appendix~\ref{app:robustness-proofs}.

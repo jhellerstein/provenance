@@ -1365,19 +1365,15 @@ determination, or not?
 For contingent tuples---those with partial support---a finer question
 arises: \emph{which commitments are most responsible} for the tuple's
 presence or absence?
-This section defines a quantitative responsibility measure over
-commitments, establishes its exact complexity, and identifies tractable
-cases.
-The layered structure of determinations decomposes the problem: within
-a single layer, commitments commute and a standard cooperative game
-applies; across layers, responsibility is defined by sequential
-conditioning on discharged prefixes.
-The filtration provides a stopping criterion: layers beyond
-$\mathrm{qdepth}(t)$ contribute zero responsibility.
+Within a single layer commitments commute and a cooperative game applies;
+across layers, responsibility is conditioned on discharged prefixes, with
+the filtration providing a stopping criterion
+($\mathrm{qdepth}(t) = k$ means layers beyond $k$ contribute zero).
 (The binary robustness question is coNP-complete; see
 Appendix~\ref{app:robustness-proofs}.)
 
-Fix a single-layer determination with $n$ independent binary commitments
+We develop the single-layer case.
+Fix $n$ independent binary commitments
 $\varphi_1, \ldots, \varphi_n$, a realized determination $D^*$, and a
 tuple $t$ with support $S \subseteq \mathcal{D}$.
 
@@ -1560,8 +1556,10 @@ outcome.
 Determination provenance generalizes these by making the
 commitments that precede derivational provenance explicit and composable.
 Determination responsibility (Section~\ref{sec:responsibility}) lifts
-Meliou et al.'s responsibility from data tuples to semantic commitments,
-using Shapley values to quantify each commitment's contribution.
+responsibility from data tuples~\cite{meliou2010causality} to semantic
+commitments: where Meliou et al.\ ask ``which input tuple is most
+responsible for an output,'' we ask ``which semantic commitment is most
+responsible for the output holding under this resolution.''
 
 \medskip
 \noindent\textbf{Provenance beyond the monotone fragment.}
@@ -1644,7 +1642,7 @@ and the three classical negation semantics as filtration levels.
 Determination responsibility provides a quantitative refinement:
 Shapley values over the determination game measure each commitment's
 contribution, with exact computation tractable whenever concurrent
-contention is narrow.
+contention is narrow and an FPRAS available in the general case.
 
 \paragraph{Open directions.}
 Extending responsibility to weighted (non-uniform) distributions over

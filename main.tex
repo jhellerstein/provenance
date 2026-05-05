@@ -1395,6 +1395,9 @@ their $D^*$-values increases the probability that $t$ holds.
   That is, $v(C)$ is the probability that $t$ holds when the commitments
   in $C$ are fixed to their $D^*$-values and the remaining commitments
   are resolved uniformly at random.
+  (The uniform baseline isolates the structural contribution of each
+  commitment; the definition extends to an arbitrary product distribution
+  $\mu$ over commitments, with the same tractability boundary.)
 \end{definition}
 
 \noindent
@@ -1424,10 +1427,6 @@ For a robust tuple ($S = \mathcal{D}$), $v(C) = 1$ for all $C$, so
 $\rho(\varphi_i, t) = 0$ for all $i$---no commitment matters.
 For a singleton support ($S = \{D^*\}$), every commitment contributes
 equally: $\rho(\varphi_i, t) = (1 - 2^{-n})/n$.
-The definition assumes a uniform distribution over uncommitted
-resolutions; it extends directly to an arbitrary product distribution
-$\mu$ over commitments (replacing uniform sampling with $\mu$-weighted
-sampling in the value function), with the same tractability boundary.
 
 \subsection{Complexity of Exact Computation}
 

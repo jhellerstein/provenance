@@ -1498,11 +1498,14 @@ responsibility is tractable.
 \end{proof}
 
 \noindent
-Bounded conflict treewidth arises in partitioned workloads, microservice
-DAGs, and sharded databases.
-In these settings, determination responsibility is efficiently
-computable: ``$\varphi_{T_i \prec T_j}$ has responsibility $0.73$ for
-the SLA violation'' tells the scheduler which interleaving to avoid.
+Conflict treewidth is bounded whenever concurrent contention is narrow:
+a workload with $n$ transactions but at most $w$ mutually conflicting
+at any point has conflict treewidth $\le w$.
+This is the common case---high-contention hotspots involve few
+transactions simultaneously, even in large workloads.
+When treewidth is small, responsibility is efficiently computable:
+``$\varphi_{T_i \prec T_j}$ has responsibility $0.73$ for the SLA
+violation'' tells the scheduler which interleaving to avoid.
 
 \paragraph{Approximation.}
 When treewidth is unbounded, sampling provides an FPRAS.

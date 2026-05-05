@@ -148,7 +148,7 @@ provenance requires a \emph{function}.
 A \emph{determination} is a sequence of irrevocable commitments that
 narrows the relation to a function; once functional, classical provenance
 applies.
-The interesting structure lives \emph{within} a determination (commitments
+The interesting structure lives both \emph{within} a determination (commitments
 organize into non-commuting layers) and \emph{across} determinations.
 
 Across determinations, the space of resolutions forms a semiring that
@@ -294,12 +294,10 @@ consistent with prior information) and which exclude alternatives
 \end{definition}
 
 \noindent
-A specification is a \emph{relation}: a given input (history) may map to
-multiple admissible outcomes, reflecting unresolved semantic ambiguity.
-A specification that maps every history to exactly one outcome is a
-\emph{function}---no ambiguity remains.
-The goal of determination is to narrow a relational specification to a
-functional one.
+A specification is a \emph{relation}: a given input may map to
+multiple admissible outcomes.
+As noted in the introduction, the goal of determination is to narrow
+this relation to a function:
 
 \begin{definition}[Determined specification]
   \label{def:determined}

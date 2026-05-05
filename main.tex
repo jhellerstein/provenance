@@ -105,6 +105,10 @@ When a query has well-defined semantics---a single correct answer for each
 input---provenance traces derivations through a commutative semiring, supporting
 why- and how-provenance, uncertainty propagation, and
 optimization~\cite{green2007provenance,suciu2011probabilistic}.
+The algebraic structure provides more than tracing: it supports
+counterfactual reasoning (why-not), compositional explanation (provenance
+of joins and unions from provenance of inputs), and quantitative measures
+(confidence, multiplicity).
 Explanation reduces to arithmetic, and this reduction has been remarkably
 effective.
 
@@ -113,7 +117,9 @@ systems that most need explanation: transactional databases, distributed
 services, and concurrent pipelines.
 These systems record execution traces and lineage
 metadata~\cite{sigelman2010dapper,seltzer2005provenance,bates2015trustworthy},
-but lack the algebraic foundation that makes database provenance effective.
+but the expressive power that algebraic structure provides---counterfactuals,
+composition, quantitative reasoning---is entirely absent from their
+tracing infrastructure.
 The obstacle is a semantic mismatch: these systems operate under
 \emph{semantic ambiguity}---a transactional workload may admit multiple
 serializable executions; a distributed system may admit multiple orderings

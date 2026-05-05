@@ -672,23 +672,6 @@ across domains.
 
 \subsection{Notation and Example}
 
-In Green et al.'s framework, provenance is read off as a semiring
-expression: $P(t) = x_1 \cdot x_2 + x_3$ means ``derived from $x_1$ and
-$x_2$ together, or from $x_3$ alone.''
-Determination provenance is a function from determinations to provenance
-values, displayed as a set of pairs (omitting zero entries):
-\[
-  P(t) = \{\,(D,\; p) \mid D \in \mathcal{D},\; p = P_D(t) \neq 0\,\}.
-\]
-Entries with zero provenance (tuple absent under that determination) are
-omitted.
-The support $\mathrm{supp}(P(t))$ is the projection onto the first
-component.
-The two algebraic structures are independent: within each pair, the
-provenance value lives in the classical provenance semiring $K$; across pairs, the
-supports compose in the determination semiring
-$(2^{\mathcal{D}}, \cup, \cap)$.
-
 \begin{example}[Determination provenance for Example~\ref{ex:example}]
   \label{ex:det-semiring}
   With $\mathcal{D} = \{D_{\mathsf{in}}, D_{\mathsf{out}}\}$:
@@ -702,16 +685,9 @@ $(2^{\mathcal{D}}, \cup, \cap)$.
   $T_2$'s insert of $S(2,d)$.
   $P(b)$ has full support ($\mathcal{D}$): $b$ is robust.
   $P(d)$ has partial support ($\{D_{\mathsf{in}}\}$): $d$ is contingent.
-
-  Composition operates on both components.
-  A join multiplies provenance values pointwise (within each determination)
-  and intersects supports:
-  $P(b \bowtie T(b)) = \{(D_{\mathsf{in}},\, x_0 \cdot y),\;
-  (D_{\mathsf{out}},\, x_0 \cdot y)\}$---still robust.
-  A union adds provenance values pointwise and unions supports:
-  $P(b) \cup P(d) = \{(D_{\mathsf{in}},\, x_0 + x_2),\;
-  (D_{\mathsf{out}},\, x_0)\}$---nonzero under every determination,
-  since $b$ is present under both.
+  Composition operates on both components: a join intersects supports
+  (multiplies $K$-values pointwise); a union takes their union (adds
+  $K$-values pointwise).
 \end{example}
 
 \paragraph{Computational cost.}
@@ -882,51 +858,10 @@ No layer information is needed to make this distinction.
   $\mathcal{F}_{\max(k_1, k_2)}$.
 \end{proof}
 
-\begin{proposition}[Difference can increase depth]
-  \label{prop:difference-increases-depth}
-  Under relational difference, query-relative depth can strictly increase:
-  there exist tuples $t_1, t_2$ with $\mathrm{qdepth}(t_1) = 0$ and
-  $\mathrm{qdepth}(t_2) > 0$ such that
-  $\mathrm{qdepth}(t_1 \setminus t_2) > \mathrm{qdepth}(t_1)$.
-\end{proposition}
-\begin{proof}
-  Let $t_1$ be robust ($\mathrm{supp} = \mathcal{D}$, depth~$0$) and
-  $t_2$ contingent ($\mathrm{supp} = S \subsetneq \mathcal{D}$,
-  depth~$> 0$).
-  Then $t_1 \setminus t_2$ holds under exactly the determinations in
-  $\mathcal{D} \setminus S$---a proper nonempty subset of $\mathcal{D}$
-  (assuming $S \neq \emptyset$ and $S \neq \mathcal{D}$).
-  Hence $\mathrm{supp}(t_1 \setminus t_2) = \mathcal{D} \setminus S
-  \notin \mathcal{F}_0$, so $\mathrm{qdepth}(t_1 \setminus t_2) > 0$.
-\end{proof}
-
 \noindent
-Corollary~\ref{cor:propagation-filtration} and
-Proposition~\ref{prop:difference-increases-depth} together show that the
-filtration is tight: positive relational algebra preserves depth, while
-negation (difference) can increase it.
-Moreover, every filtration level is realized:
-
-\begin{proposition}[Reachability]
-  \label{prop:reachability}
-  For a determination of depth $d$ with non-trivial choices at each
-  layer, every level $0 \le k \le d$ is the query-relative depth of
-  some tuple.
-\end{proposition}
-\begin{proof}
-  Level~$0$: any base tuple present in all determinations (robust).
-  Level~$k$ for $1 \le k \le d$: a tuple whose presence depends on the
-  choice at layer~$k$ but not on layers $k{+}1, \ldots, d$ has support
-  that is a union of level-$k$ classes but not of level-$(k{-}1)$
-  classes.
-\end{proof}
-
-\noindent
-The sequential structure that non-commutativity imposes is not a deficiency
-but a reflection of algebraic richness:
-Section~\ref{sec:negation-preview} gives a striking application where the
-classical negation semantics for Datalog correspond to different levels of
-the same filtration.
+Conversely, relational difference can strictly increase depth
+(Proposition~\ref{prop:difference-increases-depth},
+Appendix~\ref{app:det-semiring-details}): the filtration is tight.
 
 
 % ================================================================
@@ -1205,23 +1140,18 @@ The pair $(p,q)$ is stratified; the pair $(r,s)$ forms a cycle through
 negation.
 
 \paragraph{The specification.}
-To model all common negation semantics in one spec, we use an enriched
-outcome domain.
-An \emph{outcome} assigns each atom a value in
-$\{\mathbf{t}, \mathbf{f}, \mathbf{u}, \bot\}$, where $\bot$ means
-``not yet evaluated'' and $\mathbf{u}$ means ``genuinely ambiguous.''
-The outcome order is
-$\bot \Ord \mathbf{u} \Ord \{\mathbf{t}, \mathbf{f}\}$
-($\mathbf{t}$ and $\mathbf{f}$ incomparable), applied pointwise.
-The \emph{commitment basis} has \emph{sealing predicates}
-$\varphi_{\seal}(S_i)$ (stratum $S_i$ is complete---excludes outcomes
-where additional atoms in $S_i$ are true) and \emph{choice predicates}
-$\varphi_{a=v}$ ($\neg$-cycle atom $a$ has value $v \in \{\mathbf{t},
-\mathbf{f}\}$---excludes the alternative).
-Both are commitments: they operate on $2^O$, excluding outcomes.
+Outcomes assign each atom a value in
+$\{\mathbf{t}, \mathbf{f}, \mathbf{u}, \bot\}$
+($\bot$ = not yet evaluated, $\mathbf{u}$ = genuinely ambiguous),
+ordered $\bot \Ord \mathbf{u} \Ord \{\mathbf{t}, \mathbf{f}\}$
+pointwise.
+The commitment basis has \emph{sealing predicates}
+$\varphi_{\seal}(S_i)$ (stratum $S_i$ is complete) and \emph{choice
+predicates} $\varphi_{a=v}$ ($\neg$-cycle atom $a$ is fixed to
+$v \in \{\mathbf{t}, \mathbf{f}\}$).
 The specification $\Spec_P$ admits all assignments consistent with the
-program rules and EDB~\cite{gelfond1988stable}.
-After all commitments are discharged, two fully resolved outcomes remain:
+program rules and EDB~\cite{gelfond1988stable};
+after all commitments are discharged, two resolved outcomes remain:
 $o_r = \{a(c), p(c), r(c)\}$ and $o_s = \{a(c), p(c), s(c)\}$.
 
 The resolving determinations are $\mathcal{D} = \{D^{(r)}, D^{(s)}\}$:
@@ -1530,23 +1460,15 @@ responsible for the output holding under this resolution.''
 
 \medskip
 \noindent\textbf{Provenance beyond the monotone fragment.}
-Extending semiring provenance to negation is a recognized open problem.
 Dannert et al.~\cite{dannert2021semiring} extend semiring provenance to
-least-fixed-point logic, handling stratified negation within a single
-model.
-For stratifiable programs, our within-determination provenance coincides
-with theirs once the layers of sealing commitments are discharged.
-Our contribution addresses programs with unstratified negation, where
-multiple stable models coexist and the determination semiring tracks
-which models support each tuple.
-Deutch et al.~\cite{deutch2014circuits} use Boolean circuits to represent
-provenance for non-monotone queries but likewise assume a single resolved
-model.
-Köhler et al.~\cite{kohler2012declarative} study why-not provenance for
-Datalog with negation under a fixed well-founded model.
-All three approaches assume a resolved semantics; our framework is
-complementary, explaining which commitments select the model under which
-their techniques then apply.
+stratified negation within a single model; for stratifiable programs,
+our within-determination provenance coincides with theirs.
+Deutch et al.~\cite{deutch2014circuits} and
+Köhler et al.~\cite{kohler2012declarative} likewise assume a resolved
+semantics.
+Our contribution addresses unstratified negation, where multiple stable
+models coexist and the determination semiring tracks which models
+support each tuple.
 
 \medskip
 \noindent\textbf{Provenance in systems settings.}
@@ -1564,21 +1486,15 @@ resolutions (Appendix~\ref{app:systems-lineage}).
 \medskip
 \noindent\textbf{Determination complexity.}
 Hellerstein~\cite{hellerstein2026complexity} develops a complexity
-theory for determinations, characterizing the cost and depth of semantic
-resolution.
-The present work focuses on explanation rather than complexity:
-determinations are assumed given, and determination provenance explains how
-observations depend on them.
+theory for determinations; the present work assumes determinations are
+given and explains how observations depend on them.
 
 \medskip
 \noindent\textbf{Consistent query answering.}
-Arenas et al.~\cite{arenas1999consistent} introduce consistent query
-answering: a tuple is a \emph{certain answer} if it holds in every
-repair of an inconsistent database.
-The structural analogy to robustness is direct---both universally
-quantify over admissible completions---but repairs resolve data
-inconsistency (flat, single-layer structure) while determinations resolve
-semantic ambiguity (layered, non-commutative structure with a filtration).
+Arenas et al.~\cite{arenas1999consistent} define certain answers as
+tuples holding in every repair---structurally analogous to robustness,
+but repairs resolve data inconsistency (flat structure) while
+determinations resolve semantic ambiguity (layered, with a filtration).
 Determination provenance additionally tracks \emph{which} completions
 support a tuple, not merely whether all do.
 
@@ -1587,40 +1503,23 @@ support a tuple, not merely whether all do.
 \label{sec:conclusion}
 % ================================================================
 
-This paper reframes provenance around a simple observation: many modern systems do
-not produce a single semantic outcome from a history, but a space of admissible
-ones.
-In such settings, explaining an observation requires accounting for how ambiguity
-was resolved—not merely how derivations proceeded after the fact.
-Determination provenance makes those semantic commitments explicit and
-composable, recovering classical algebraic provenance once resolution is fixed
-while retaining visibility into the assumptions that made resolution possible.
-The expressive power of algebraic provenance---compositional explanation,
-counterfactual reasoning, quantitative measures---is thereby lifted from
-the resolved setting to the ambiguous one.
-
-The algebraic development shows that determinations are not ad hoc:
+Determination provenance reframes provenance around a simple observation:
+many systems produce not a single outcome but a space of admissible ones,
+and explaining an observation requires accounting for how ambiguity was
+resolved.
+The framework makes semantic commitments explicit and composable:
 the space of resolving determinations forms a semiring whose filtration
-reflects the layered structure of individual determinations, and query
-evaluation respects this structure compositionally.
-The determination semiring recovers classical semiring provenance at
-depth~$0$, $\mathrm{PosBool}(\Phi)$ for single-layer determinations,
-and the three classical negation semantics as filtration levels.
-Determination responsibility provides a quantitative refinement:
-Shapley values over the determination game measure each commitment's
-contribution, with exact computation tractable whenever concurrent
-contention is narrow and an FPRAS available in the general case.
+reflects layered commitment structure, query evaluation respects this
+structure, and the three classical negation semantics emerge as
+filtration levels.
+Determination responsibility provides a quantitative refinement,
+with exact computation tractable whenever concurrent contention is narrow
+and an FPRAS available in the general case.
 
 \paragraph{Open directions.}
-Extending responsibility to weighted (non-uniform) distributions over
-determinations; reversible commitments (where sealing can be retracted);
-and compact representations of the determination semiring for deep
-determinations.
-
-The success of algebraic provenance lay in identifying the right semantic object
-to explain.
-Determination provenance extends that insight: when meaning itself depends on
-resolution, provenance must explain the assumptions that made meaning possible.
+Weighted (non-uniform) distributions over determinations; reversible
+commitments (where sealing can be retracted); and compact
+representations of the determination semiring for deep determinations.
 
 \pagebreak
 \appendix
@@ -1962,6 +1861,24 @@ and with query evaluation.
   Query evaluation cannot increase query-relative depth beyond the
   maximum depth of its inputs.
 \end{corollary}
+
+\begin{proposition}[Difference can increase depth]
+  \label{prop:difference-increases-depth}
+  Under relational difference, query-relative depth can strictly increase.
+\end{proposition}
+\begin{proof}
+  Let $t_1$ be robust ($\mathrm{supp} = \mathcal{D}$, depth~$0$) and
+  $t_2$ contingent ($\mathrm{supp} = S \subsetneq \mathcal{D}$,
+  depth~$> 0$).
+  Then $\mathrm{supp}(t_1 \setminus t_2) = \mathcal{D} \setminus S
+  \notin \mathcal{F}_0$, so $\mathrm{qdepth}(t_1 \setminus t_2) > 0$.
+\end{proof}
+
+\begin{proposition}[Reachability]
+  For a determination of depth $d$ with non-trivial choices at each
+  layer, every level $0 \le k \le d$ is realized as the query-relative
+  depth of some tuple.
+\end{proposition}
 
 % ===============================================================
 \section{Transactional Worked Determination Provenance}

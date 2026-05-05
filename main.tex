@@ -105,10 +105,12 @@ When a query has well-defined semantics---a single correct answer for each
 input---provenance traces derivations through a commutative
 semiring~\cite{green2007provenance,suciu2011probabilistic}.
 The algebraic structure provides far more than tracing: compositional
-explanation (provenance of a join from provenance of its inputs),
-counterfactual reasoning (why-not), and quantitative measures
-(confidence, multiplicity). Explanation reduces to arithmetic, and this
-reduction has been remarkably effective.
+explanation~\cite{green2007provenance},
+counterfactual reasoning
+(why-not)~\cite{buneman2001why,halpern2001causes}, and quantitative
+measures~\cite{suciu2011probabilistic}.
+Explanation reduces to arithmetic, and this reduction has been
+remarkably effective.
 
 Despite this success, formal data provenance has had limited impact on the
 systems that most need explanation: transactional databases, distributed
@@ -1523,6 +1525,9 @@ was resolved—not merely how derivations proceeded after the fact.
 Determination provenance makes those semantic commitments explicit and
 composable, recovering classical algebraic provenance once resolution is fixed
 while retaining visibility into the assumptions that made resolution possible.
+The expressive power of algebraic provenance---compositional explanation,
+counterfactual reasoning, quantitative measures---is thereby lifted from
+the resolved setting to the ambiguous one.
 
 The algebraic development shows that determinations are not ad hoc:
 the space of resolving determinations forms a semiring whose filtration

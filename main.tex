@@ -653,6 +653,12 @@ $(2^{\mathcal{D}}, \cup, \cap, \emptyset, \mathcal{D})$---a commutative
 semiring with $\cup$ as addition and $\cap$ as multiplication.
 This is the \emph{determination semiring}: it captures which determinations
 support a tuple and how those supports compose through queries.
+(The determination semiring operates on \emph{supports}---subsets of
+$\mathcal{D}$; the richer object \emph{determination provenance}
+(Definition~\ref{def:det-provenance}) pairs each determination with a
+$K$-valued derivational annotation.
+The two structures are independent: supports compose in the determination
+semiring; annotations compose in the provenance semiring $K$.)
 The Boolean algebra on supports is elementary; the non-trivial structure
 is the \emph{filtration} (Section~\ref{sec:filtration}), which reflects
 the layered commitment process and distinguishes determination provenance
@@ -762,9 +768,15 @@ evaluation respects.
 The layers are not merely an operational artifact of sequential commitment;
 they are reflected as algebraic strata in the semiring that compose cleanly
 with relational algebra.
-Throughout this subsection, we fix the canonical layering of each
-determination---its Foata normal form (commitments grouped into maximal
-commuting batches).
+Throughout this subsection, we fix the layering of each
+determination: commitments are grouped into maximal commuting batches
+given the semantic commutativity induced by the determination's prefix
+(analogous to Foata normal form in trace
+monoids~\cite{mazurkiewicz1977concurrent}).
+Since commutativity may depend on the prefix, different determinations
+may have different layerings; the filtration is well-defined because
+``agreement at level $k$'' compares only determinations sharing the same
+prefix through layer $k$.
 Different valid orderings within a layer do not affect the construction.
 
 Two determinations $D, D' \in \mathcal{D}$ \emph{agree at level $k$} if

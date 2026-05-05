@@ -368,17 +368,13 @@ The canonicalization decomposes each non-persistent commitment into a
 persistent seal of its dependency set followed by a deterministic
 entailment.
 For example, a ``majority vote'' commitment
-$\varphi_{\mathrm{maj}}$ (exclude outcomes where the majority loses)
-is non-persistent: its exclusions reverse when new voters arrive.
-But the decomposition
+$\varphi_{\mathrm{maj}}$ is non-persistent (its exclusions reverse when
+new voters arrive), but
 $\varphi_{\seal(\mathrm{voters})} \cdot f_{\mathrm{maj}}$---seal the
-voter pool, then compute the majority as a deterministic
-entailment---is persistent and produces the same effect at any history
-where the voter pool has stabilized.
-In the retrospective setting (completed histories), the seal is
-non-filtering (it excludes no outcome at the point of application)
-and the entailment reproduces the original commitment's exclusions
-exactly, leaving the remainder of the determination unchanged
+voter pool, then compute the majority---is persistent.
+In the retrospective setting, the seal is non-filtering and the
+entailment reproduces the original exclusions exactly, leaving the
+remainder of the determination unchanged
 (Proposition~\ref{prop:persistence-canon},
 Appendix~\ref{app:persistence-canonicalization}).
 
@@ -543,12 +539,8 @@ History-invariance means the resolved outcome does not depend on which
 prefix of the completed history we start from---only on the determination
 applied.
 We may therefore write $(\Spec \mid D)$ without a history argument.
-This is a retrospective guarantee: it holds over prefixes of a
-\emph{completed} history whose environment events are fixed.
-New environment events would extend the history beyond $H^*$ and
-potentially introduce ambiguity that $D$ does not cover, requiring
-additional commitments---analogous to how new messages disturb convergence
-in an eventually-consistent system.
+New environment events extending the history beyond $H^*$ may introduce
+ambiguity that $D$ does not cover, requiring additional commitments.
 
 \subsection{Three Levels of Structure}
 \label{sec:three-levels}
@@ -614,9 +606,8 @@ with no proper subsequence that also resolves $\Spec$.
 This set is finite: each commitment strictly shrinks the admissible set
 (Definition~\ref{def:commitment}), so a minimal resolving determination
 has length at most $|\Spec(H)| - 1$.
-Any resolving determination can be reduced to a minimal one by dropping
-redundant commitments (those whose removal leaves the specification still
-resolved); determination provenance is defined over minimal determinations.
+Any resolving determination reduces to a minimal one by dropping
+redundant commitments.
 
 \begin{definition}[Determination Provenance]
   \label{def:det-provenance}
@@ -663,9 +654,8 @@ $\mathcal{D}$; the richer object \emph{determination provenance}
 $K$-valued derivational annotation.
 The two structures are independent: supports compose in the determination
 semiring; annotations compose in the provenance semiring $K$.)
-The Boolean algebra on supports is elementary and idempotent
-($S \cup S = S$, $S \cap S = S$), which ensures that fixpoint
-computations over supports terminate; the non-trivial structure
+The Boolean algebra on supports is elementary (and idempotent, ensuring
+fixpoint termination); the non-trivial structure
 is the \emph{filtration} (Section~\ref{sec:filtration}), which reflects
 the layered commitment process and distinguishes determination provenance
 from mere set-membership tracking.
@@ -793,15 +783,12 @@ written $D \equiv_k D'$, defined inductively:
         prefix of $k$ layers, the next maximal commuting layer is the same
         multiset: $L_{k+1} = L'_{k+1}$.
 \end{itemize}
-Writing $D = L_1 \seq L_2 \seq \cdots \seq L_m$ and
-$D' = L'_1 \seq L'_2 \seq \cdots \seq L'_{m'}$,
-$D \equiv_k D'$ iff $L_i = L'_i$ for $i = 1, \ldots, k$.
 Each $\equiv_k$ is an equivalence relation (reflexivity, symmetry, and
-transitivity follow immediately from multiset equality at each layer).
+transitivity follow from multiset equality at each layer).
 Write $[D]_k$ for the equivalence class of $D$ at level $k$.
 These classes refine as $k$ increases:
 $[D]_0 = \mathcal{D}$ and $[D]_k = \{D\}$ when $k$ equals the
-number of layers (full agreement).
+number of layers.
 
 \begin{definition}[Level-$k$ support]
   A set $S \subseteq \mathcal{D}$ is a \emph{level-$k$ support} if it is a
@@ -1057,8 +1044,6 @@ formal development.
 The \emph{ordering basis} is
 $\Phi = \{\varphi_{T_i \prec T_j} \mid T_i, T_j \text{ conflict}\}$.
 Ordering commitments on distinct pairs (no shared transaction) commute.
-This basis is used in the running example and the robustness reduction
-(Section~\ref{sec:robustness-complexity}).
 
 \begin{proposition}[Commutativity of ordering commitments on independent pairs]
   \label{prop:commit-commute}
@@ -1088,12 +1073,8 @@ system architecture; both yield the same set of admissible outcomes.
   \label{rem:commit-noncommute}
   When two ordering commitments share a transaction
   ($\varphi_{T_i \prec T_j}$ and $\varphi_{T_j \prec T_k}$), the second
-  may be valid only after the first is applied (the transitive constraint
-  $T_i \prec T_k$ may be needed to avoid a cycle).
-  Under the commit/abort basis, the same phenomenon arises when $T_i$ and
-  $T_j$ share a cycle: committing one may make committing the other
-  invalid.
-  In both cases, the determination has depth $> 1$.
+  may be valid only after the first is applied (a cycle constraint).
+  The determination then has depth $> 1$.
 \end{remark}
 
 \subsection{Determination Depth by Isolation Level}
@@ -1160,9 +1141,8 @@ serialization have excluded it?
 (The support $\{D_{\mathsf{in}}\}$ answers directly.)
 \emph{Tail bounds}: under what fraction of admissible serializations
 does a latency-sensitive query meet its SLA?
-(Under a uniform distribution over $\mathcal{D}$, the support ratio
-$|\mathrm{supp}|/|\mathcal{D}|$ gives a structural bound without
-empirical sampling; other distributions yield weighted variants.)
+($|\mathrm{supp}|/|\mathcal{D}|$ under a uniform distribution; weighted
+variants for other distributions.)
 \emph{Diagnosis}: when the SLA is violated, which ordering commitment
 is shared by all violating determinations?
 (The complement of the support identifies the root cause.)
@@ -1444,13 +1424,10 @@ Corollary~\ref{cor:fpt-width} together validate width as a natural
 complexity parameter for explicit determination enumeration: robustness
 is tractable when width is bounded and intractable when it grows with
 the input.
-Computing the full support $\mathrm{supp}(P(t))$ (not just checking
-whether it equals $\mathcal{D}$) has the same complexity profile:
-enumerate determinations and evaluate the query under each.
-Note that the hardness resides in \emph{constructing} $\mathcal{D}$
-(enumerating resolving determinations); once $\mathcal{D}$ is given,
-reading supports and evaluating queries under each determination is
-polynomial.
+Computing the full support $\mathrm{supp}(P(t))$ has the same profile:
+the hardness resides in constructing $\mathcal{D}$ (enumerating resolving
+determinations); once $\mathcal{D}$ is given, evaluating queries under
+each determination is polynomial.
 
 % ================================================================
 \section{Related Work}
@@ -1495,16 +1472,13 @@ their techniques then apply.
 Database provenance systems (Perm~\cite{glavic2008perm},
 GProM~\cite{arab2018gpromprovenance},
 Smoke~\cite{psallidas2018smoke}) trace derivations under a fixed
-execution or isolation level.
+execution.
 Vandevoort et al.~\cite{vandevoort2025mixed} study which transactions can
 run at weaker isolation while preserving serializable behavior---a
 preservation question in our sense.
-Our framework is complementary: it separates the semantic commitments
-(which execution was chosen) from the derivational explanation (how the
-result was produced under that execution), enabling these systems'
-per-execution provenance to be composed across alternative resolutions.
-Appendix~\ref{app:systems-lineage} develops the connection to systems
-lineage in detail.
+Our framework separates semantic commitments from derivational explanation,
+enabling per-execution provenance to be composed across alternative
+resolutions (Appendix~\ref{app:systems-lineage}).
 
 \medskip
 \noindent\textbf{Determination complexity.}
@@ -1521,16 +1495,11 @@ Arenas et al.~\cite{arenas1999consistent} introduce consistent query
 answering: a tuple is a \emph{certain answer} if it holds in every
 repair of an inconsistent database.
 The structural analogy to robustness is direct---both universally
-quantify over a space of admissible completions---but the source of
-multiplicity differs: repairs resolve constraint violations in the data,
-while determinations resolve semantic ambiguity in the specification.
+quantify over admissible completions---but repairs resolve data
+inconsistency (flat, single-layer structure) while determinations resolve
+semantic ambiguity (layered, non-commutative structure with a filtration).
 Determination provenance additionally tracks \emph{which} completions
-support a tuple (the support set), not merely whether all do.
-Moreover, repairs are typically defined by minimal symmetric difference,
-yielding a flat (single-layer) structure with no inter-commitment
-dependencies.
-The layered, non-commutative structure that persistence enables---and
-the filtration it induces---has no direct analog in the CQA setting.
+support a tuple, not merely whether all do.
 
 % ================================================================
 \section{Conclusion}
@@ -1553,25 +1522,16 @@ The algebraic development shows that determinations are not ad hoc:
 the space of resolving determinations forms a semiring whose filtration
 reflects the layered structure of individual determinations, and query
 evaluation respects this structure compositionally.
-As evidence that the determination semiring captures the right level of
-abstraction, it recovers several known results as special cases:
-classical semiring provenance at depth~$0$;
-$\mathrm{PosBool}(\Phi)$ for single-layer determinations;
-the three classical negation semantics as filtration levels of a single
-object;
-and the coNP-completeness of skeptical reasoning under stable models as
-an instance of the general width-based robustness theorem.
-In transactional systems, determination provenance explains how query
-observations depend on commit ordering and isolation commitments.
-In logic programming with negation, it exposes preservation across
-semantics.
+The determination semiring recovers classical semiring provenance at
+depth~$0$, $\mathrm{PosBool}(\Phi)$ for single-layer determinations,
+the three classical negation semantics as filtration levels, and the
+coNP-completeness of skeptical reasoning as an instance of width-based
+robustness.
 
 \paragraph{Open directions.}
-Developing quantitative robustness measures beyond the binary
-robust/contingent distinction; extending the framework to reversible
-commitments (where sealing itself can be retracted); and characterizing
-compact representations of the determination semiring for deep
-determinations all remain open.
+Quantitative robustness measures beyond binary robust/contingent;
+reversible commitments (where sealing can be retracted); and compact
+representations of the determination semiring for deep determinations.
 
 The success of algebraic provenance lay in identifying the right semantic object
 to explain.

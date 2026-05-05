@@ -78,9 +78,9 @@
 
   We instantiate the framework for transactional systems and for Datalog
   with negation.
-  For Datalog, the classical negation semantics---stratified,
-  well-founded, and stable-model---differ only in which filtration level
-  they read.
+  For a natural class of Datalog programs, the classical negation
+  semantics---stratified, well-founded, and stable-model---differ only
+  in which filtration level they read.
   The semiring's independence structure yields a tractability frontier
   for quantitative diagnosis: \emph{determination responsibility}---a
   Shapley-value measure of each commitment's contribution---is
@@ -161,13 +161,9 @@ For Datalog, the classical negation semantics---stratified, well-founded,
 stable-model---correspond to different levels of the filtration.
 
 The semiring structure also yields a tractability frontier for
-quantitative diagnosis.
-We define \emph{determination responsibility}: a Shapley-value measure
-of each commitment's contribution to a tuple's presence.
-The independence structure of the commitment basis---reflected in the
-semiring's support formulas---determines when this measure is efficiently
-computable: \#P-hard in general, but polynomial when concurrent
-contention is narrow (bounded conflict treewidth).
+quantitative diagnosis: \emph{determination responsibility}---a
+Shapley-value measure of each commitment's contribution---is \#P-hard
+in general but polynomial when concurrent contention is narrow.
 
 \begin{example}[Provenance under transactional ambiguity]
   \label{ex:example}
@@ -212,7 +208,8 @@ contention is narrow (bounded conflict treewidth).
         Appendix~\ref{sec:appendix-datalog}).
   \item \emph{Determination responsibility}: a Shapley-value measure
         of each commitment's contribution, \#P-hard in general but
-        FPT in conflict treewidth, with an FPRAS for the general case
+        FPT in conflict treewidth, with an efficient additive
+        approximation for the general case
         (Section~\ref{sec:responsibility}).
         Robustness is coNP-complete
         (Appendix~\ref{app:robustness-proofs}).
@@ -338,8 +335,9 @@ determinations are formed.
 Different bases for the same specification yield different determination
 structures and different provenance.
 An important property we require of a commitment basis is
-\emph{persistence}---and every basis can be canonicalized to an
-equivalent persistent one without changing the determination structure
+\emph{persistence}---and in the retrospective setting (completed
+histories), every basis can be canonicalized to an equivalent persistent
+one without changing the determination structure
 (Proposition~\ref{prop:persistence-canon}).
 
 \begin{definition}[Persistent commitment basis]
@@ -494,8 +492,8 @@ property that we use freely in subsequent sections:
   Let $\Phi$ be a persistent basis, $H^*$ a completed history (no further
   environment events will occur), and $D$ a determination that resolves
   $\Spec$ at $H^*$.
-  Then for any prefix $H \sqsubseteq H^*$ containing the dependency set
-  of~$D$, $(\Spec \mid D)(H) = (\Spec \mid D)(H^*)$.
+  Then for any prefix $H \sqsubseteq H^*$ containing all events on
+  which $D$'s commitments depend, $(\Spec \mid D)(H) = (\Spec \mid D)(H^*)$.
 \end{lemma}
 
 \begin{proof}
@@ -1186,7 +1184,8 @@ semantic choice.
 
 \begin{theorem}[Negation semantics as filtration levels]
   \label{thm:negation-filtration}
-  For a finite normal Datalog program whose dependency graph has $k$
+  For a finite normal Datalog program (at most one negated body literal
+  per rule) whose dependency graph has $k$
   stratification layers and whose negative strongly connected components
   (after SCC condensation) are mutually independent and form a single
   final choice layer resolved by binary choice predicates, the
@@ -1357,9 +1356,9 @@ the support---a marginal contribution for each coalition size.
 \end{theorem}
 \begin{proof}
   The marginal $v(C \cup \{i\}) - v(C)$ requires counting support
-  elements agreeing with $D^*$ on $C$ and differing on $i$---a \#DNF
-  problem under random restriction, which is \#P-hard by reduction from
-  \#SAT~\cite{valiant1979complexity}.
+  elements agreeing with $D^*$ on $C$ and differing on $i$.
+  This is a weighted model-counting problem over a DNF formula under
+  partial assignment, which is \#P-hard~\cite{deng1994complexity}.
 \end{proof}
 
 \paragraph{Tractability via conflict structure.}
@@ -1375,13 +1374,18 @@ responsibility is tractable.
 
 \begin{theorem}[Tractability at bounded conflict treewidth]
   \label{thm:responsibility-tw}
-  For a single-layer determination with conflict treewidth $w$,
-  determination responsibility is computable in time
+  For a single-layer determination with conflict treewidth $w$ and a
+  support predicate definable as a monotone Boolean formula over the
+  commitment variables (as holds for SLA predicates over ordering
+  commitments), determination responsibility is computable in time
   $O(2^w \cdot n^2 \cdot p(n))$---FPT in $w$.
 \end{theorem}
 \begin{proof}[Proof sketch]
-  The support is a positive Boolean formula with primal-graph treewidth
-  $\le w$.
+  Under the ordering basis, each commitment corresponds to a Boolean
+  variable and the support is a monotone formula whose clauses involve
+  only commitments sharing a transaction (a conflict edge).
+  The primal graph of this formula is therefore a subgraph of the
+  conflict graph, so its treewidth is at most $w$.
   Marginal contributions reduce to weighted model counting under partial
   assignments---computable in $O(2^w \cdot \mathrm{poly}(n))$ on
   bounded-treewidth formulas~\cite{samer2010algorithms}.
@@ -1401,13 +1405,13 @@ When treewidth is small, responsibility is efficiently computable:
 violation'' tells the scheduler which interleaving to avoid.
 
 \paragraph{Approximation.}
-When treewidth is unbounded, sampling provides a fully polynomial
-randomized approximation scheme (FPRAS).
+When treewidth is unbounded, sampling provides an additive approximation.
 
-\begin{proposition}[FPRAS for determination responsibility]
+\begin{proposition}[Randomized approximation of determination responsibility]
   \label{prop:fpras}
   For any $\varepsilon, \delta > 0$, $\rho(\varphi_i, t)$ can be
-  $\varepsilon$-approximated with probability $\ge 1 - \delta$ in time
+  additively $\varepsilon$-approximated with probability
+  $\ge 1 - \delta$ in time
   $O(n/\varepsilon^2 \cdot \log(1/\delta) \cdot p(n))$.
 \end{proposition}
 \begin{proof}[Proof sketch]
@@ -1457,6 +1461,18 @@ responsibility from data tuples~\cite{meliou2010causality} to semantic
 commitments: where Meliou et al.\ ask ``which input tuple is most
 responsible for an output,'' we ask ``which semantic commitment is most
 responsible for the output holding under this resolution.''
+Livshits et al.~\cite{livshits2021shapley} compute Shapley values for
+data tuples in query answers; our game is over commitments, not tuples.
+
+\medskip
+\noindent\textbf{Possible-worlds and probabilistic provenance.}
+Probabilistic databases~\cite{suciu2011probabilistic} annotate tuples
+with possible-world membership, yielding support sets over worlds.
+Determination provenance shares the support-set structure but adds
+two layers absent from the probabilistic setting: the filtration
+(reflecting non-commutative commitment layers) and the independence
+structure of the commitment basis (yielding the treewidth-based
+tractability frontier for responsibility).
 
 \medskip
 \noindent\textbf{Provenance beyond the monotone fragment.}
@@ -1485,9 +1501,9 @@ resolutions (Appendix~\ref{app:systems-lineage}).
 
 \medskip
 \noindent\textbf{Determination complexity.}
-Hellerstein~\cite{hellerstein2026complexity} develops a complexity
-theory for determinations; the present work assumes determinations are
-given and explains how observations depend on them.
+Hellerstein~\cite{hellerstein2026complexity} characterizes the cost of
+semantic resolution; we assume determinations are given and explain how
+observations depend on them.
 
 \medskip
 \noindent\textbf{Consistent query answering.}
@@ -1521,7 +1537,8 @@ semantics for Datalog as different levels of the same filtration.
 Determination responsibility builds on this foundation, using the
 semiring's independence structure to define a Shapley-value measure of
 each commitment's contribution that is \#P-hard in general but
-tractable whenever concurrent contention is narrow.
+tractable whenever concurrent contention is narrow, with an efficient
+additive approximation available otherwise.
 
 For systems, the framework provides a query layer over existing traces.
 The determination---extracted as a semantic index over the

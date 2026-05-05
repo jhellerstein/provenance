@@ -2475,6 +2475,20 @@ Once reconstructed, classical semiring provenance applies, answering
 positive provenance queries (why-provenance, how-provenance) with full
 algebraic structure.
 
+More broadly, determination provenance serves as a \emph{query layer}
+on top of existing logs.
+Full traces are retained as today; the determination (the
+non-deterministic commitments and their structure) is extracted as a
+materialized index.
+Diagnostic queries---robustness, counterfactuals, root-cause
+identification---are evaluated against the determination structure
+($O(k)$ commitments) rather than by scanning raw events ($O(ne)$
+log records).
+The algebraic structure enables queries that log-scanning cannot answer
+at all (e.g., ``under what fraction of admissible schedules does the
+SLA hold?''), and answers those it can more efficiently by routing
+through the semiring rather than correlating events.
+
 \begin{example}[Distributed tracing {\`a} la Dapper~\cite{sigelman2010dapper}]
   \label{ex:dapper}
   A web-search request spawns a tree of spans: the frontend ($F$)

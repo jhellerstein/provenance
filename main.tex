@@ -325,8 +325,10 @@ take effect at specific points in the history.
 \noindent
 Here $H \cdot \varphi$ denotes the history obtained by appending $\varphi$
 after all maximal events of $H$ (giving $H \sqsubseteq H \cdot \varphi$).
-A commitment event appended after all maximal events marks a point
-after which the admissible set can only shrink (shrinkage).
+A commitment appended after all maximal events induces a \emph{cut} in
+the history poset: it separates past from future, ensuring that
+commitments form a total order within any history and that the
+admissible set can only shrink afterward (shrinkage).
 Crucially, the result may depend on the full set $\Spec(H)$, not only on
 individual outcomes---this is what allows commitments to be non-commutative.
 We write $(\Spec \mid \varphi)(H) \triangleq \Spec(H \cdot \varphi)$.

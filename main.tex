@@ -1152,9 +1152,10 @@ serialization have excluded it?
 does a latency-sensitive query meet its SLA?
 ($|\mathrm{supp}|/|\mathcal{D}|$ under a uniform distribution; weighted
 variants for other distributions.)
-\emph{Diagnosis}: when the SLA is violated, which ordering commitment
-is shared by all violating determinations?
-(The complement of the support identifies the root cause.)
+\emph{Diagnosis}: which ordering commitment is most responsible for an
+SLA violation?
+(Determination responsibility, Section~\ref{sec:responsibility},
+assigns each commitment a quantitative Shapley value.)
 These questions concern the \emph{space} of admissible executions, not
 any single execution---a capability absent from systems that record only
 one trace.
@@ -2655,21 +2656,28 @@ $|\mathrm{supp}(\ell < \tau)| / |\mathcal{D}|$ is the fraction of
 admissible schedules satisfying the SLA, without empirical sampling.
 If this fraction is $0.95$, the system has a structural p95 guarantee.
 
-\paragraph{Diagnosis.}
-When the tail is violated, the \emph{complement} of the support
-identifies the offending determinations.
-If all violating determinations share a common ordering commitment
-$\varphi_{T_i \prec T_j}$, that commitment is the root cause of the
-tail---a specific conflict whose resolution determines whether the SLA
-is met.
+\paragraph{Diagnosis via determination responsibility.}
+When the tail is violated, determination responsibility
+(Section~\ref{sec:responsibility}) quantifies each commitment's
+contribution to the violation.
+Rather than merely identifying which commitments are shared by all
+violating determinations (a set-intersection test), responsibility
+assigns each commitment a Shapley value measuring its marginal effect
+on the SLA predicate.
+A commitment with responsibility $0.73$ is the dominant root cause;
+one with responsibility $0.02$ is incidental.
+When the conflict structure has bounded treewidth---as in partitioned
+workloads or tree-shaped service dependencies---these values are
+efficiently computable (Theorem~\ref{thm:responsibility-tw}).
 
 \paragraph{Scheduler design.}
-A scheduler that avoids the offending commitment (e.g., never
+A scheduler that avoids high-responsibility commitments (e.g., never
 serializes $T_i$ before $T_j$ on the contested object) eliminates the
 tail without changing the isolation level or the workload.
 This is a new optimization objective: not ``minimize average latency''
-(a single-determination metric) but ``maximize the support of the SLA
-predicate'' (a distributional metric over the determination semiring).
+(a single-determination metric) but ``minimize the maximum
+determination responsibility for the SLA-violation predicate''
+(a distributional metric over the determination semiring).
 Baccaert et al.~\cite{baccaert2026makespan} optimize makespan within a
 single determination; the determination semiring enables optimization
 \emph{across} determinations.

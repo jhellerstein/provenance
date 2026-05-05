@@ -1538,6 +1538,11 @@ Complexity per layer is the same as the single-layer case.
 The filtration provides the stopping criterion: if
 $\mathrm{qdepth}(t) = k$, only layers $1, \ldots, k$ contribute
 nonzero responsibility.
+In Example~\ref{ex:overlapping-cycles}, aborting $T_3$ at layer~1
+breaks both cycles and zeroes out layer-2 responsibility entirely;
+aborting $T_1$ instead leaves Cycle~2 intact, giving layer-2
+commitments nonzero responsibility conditioned on that choice
+(Appendix~\ref{app:multi-layer-resp}).
 
 % ================================================================
 \section{Related Work}
@@ -1747,6 +1752,46 @@ model requires computing the Gelfond--Lifschitz reduct and verifying
 that the proposed model is its minimal model (polynomial time).
 Condition~(iii): evaluating a Datalog query over a fixed model is in
 polynomial time.
+
+% ================================================================
+\section{Multi-Layer Responsibility: Worked Example}
+\label{app:multi-layer-resp}
+% ================================================================
+
+We illustrate multi-layer responsibility using
+Example~\ref{ex:overlapping-cycles}: five transactions with two conflict
+cycles sharing $T_3$ ($T_1 \to T_2 \to T_3 \to T_1$ and
+$T_3 \to T_4 \to T_5 \to T_3$).
+The determination has depth~$2$.
+
+\paragraph{Layer 1.}
+The first layer resolves Cycle~1.
+Two commitments are available: $\varphi_{\mathsf{a}}(T_1)$ (abort $T_1$)
+and $\varphi_{\mathsf{a}}(T_3)$ (abort $T_3$).
+These do not commute: aborting $T_3$ also breaks Cycle~2, while aborting
+$T_1$ leaves Cycle~2 intact.
+The layer-1 game has two players with a single binary choice each.
+
+\paragraph{Layer 2 (conditioned on layer 1).}
+If layer~1 chose $\varphi_{\mathsf{a}}(T_3)$: both cycles are broken,
+no further commitments are needed, and layer-2 responsibility is zero
+for all commitments.
+If layer~1 chose $\varphi_{\mathsf{a}}(T_1)$: Cycle~2 remains, and
+layer~2 must resolve it (abort $T_4$ or $T_5$).
+The layer-2 game, conditioned on $\varphi_{\mathsf{a}}(T_1)$, has one
+binary commitment with responsibility equal to its marginal effect on
+the tuple of interest.
+
+\paragraph{Interpretation.}
+The layer-1 commitment $\varphi_{\mathsf{a}}(T_3)$ has higher
+responsibility than $\varphi_{\mathsf{a}}(T_1)$ for any tuple affected
+by both cycles: choosing $T_3$ resolves everything in one step, while
+choosing $T_1$ defers responsibility to layer~2.
+The filtration makes this visible: a tuple with
+$\mathrm{qdepth} = 1$ (affected only by Cycle~1) has zero layer-2
+responsibility regardless of the layer-1 choice; a tuple with
+$\mathrm{qdepth} = 2$ (affected by both cycles) has layer-2
+responsibility that depends on the layer-1 outcome.
 
 % ================================================================
 \section{Within a Determination: Algebraic Details}

@@ -2508,27 +2508,46 @@ algebraic structure.
   \end{itemize}
 \end{example}
 
-\subsection{Level 2: Counterfactuals and Robustness Across Determinations}
+\subsection{Level 2: Robustness, Tail Bounds, and Scheduler Design}
 
 Supports across the space of resolving determinations enable queries
-that systems lineage cannot express:
-\begin{itemize}[nosep,leftmargin=*]
-  \item \emph{Counterfactual queries}: ``Would this result hold under a
-        different commit ordering?''  The support
-        $\mathrm{supp}(P(t))$ answers directly.
-  \item \emph{Boolean robustness}: ``Does this result hold under
-        \emph{every} admissible execution?''  Equivalent to
-        $\mathrm{supp}(P(t)) = \mathcal{D}$.
-  \item \emph{Distributional robustness}: ``Under what fraction of
-        admissible executions does this result hold?''  The ratio
-        $|\mathrm{supp}(P(t))| / |\mathcal{D}|$ gives a natural
-        measure; under a uniform prior over determinations, this
-        yields tail-bound estimates (e.g., p99 guarantees on outcome
-        stability).
-\end{itemize}
-This is a functionality boost over traditional lineage: it speaks to
-the stability of observations across the space of admissible
-executions, not merely their derivation under one.
+that systems lineage cannot express.
+
+\paragraph{Robustness and fragility.}
+The ratio $|\mathrm{supp}(P(t))| / |\mathcal{D}|$ measures how
+\emph{fragile} an outcome is: a result with support ratio $0.99$ is
+nearly robust (almost any schedule produces it); one with ratio $0.01$
+depends on a very specific interleaving.
+Boolean robustness ($\mathrm{supp} = \mathcal{D}$) is the extreme case.
+
+\paragraph{Structural tail bounds.}
+Consider a database with $n$ concurrent transactions and a latency
+predicate $\ell(T_Q) < \tau$ (``query $T_Q$ completes within $\tau$
+ms'').
+The support of this predicate---the set of serializations under which
+the SLA is met---gives a \emph{structural} tail-bound estimate:
+$|\mathrm{supp}(\ell < \tau)| / |\mathcal{D}|$ is the fraction of
+admissible schedules satisfying the SLA, without empirical sampling.
+If this fraction is $0.95$, the system has a structural p95 guarantee.
+
+\paragraph{Diagnosis.}
+When the tail is violated, the \emph{complement} of the support
+identifies the offending determinations.
+If all violating determinations share a common ordering commitment
+$\varphi_{T_i \prec T_j}$, that commitment is the root cause of the
+tail---a specific conflict whose resolution determines whether the SLA
+is met.
+
+\paragraph{Scheduler design.}
+A scheduler that avoids the offending commitment (e.g., never
+serializes $T_i$ before $T_j$ on the contested object) eliminates the
+tail without changing the isolation level or the workload.
+This is a new optimization objective: not ``minimize average latency''
+(a single-determination metric) but ``maximize the support of the SLA
+predicate'' (a distributional metric over the determination semiring).
+Baccaert et al.~\cite{baccaert2026makespan} optimize makespan within a
+single determination; the determination semiring enables optimization
+\emph{across} determinations.
 
 \subsection{Level 3: Preservation Across Specifications}
 

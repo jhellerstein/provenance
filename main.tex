@@ -1394,12 +1394,16 @@ commitments that precede derivational provenance explicit and composable.
 \medskip
 \noindent\textbf{Provenance beyond the monotone fragment.}
 Extending semiring provenance to negation is a recognized open problem.
+Dannert et al.~\cite{dannert2021semiring} extend semiring provenance to
+least-fixed-point logic, handling stratified negation within a single
+model; their framework does not address the multiplicity of models that
+unstratified negation introduces.
 Deutch et al.~\cite{deutch2014circuits} use Boolean circuits to represent
-provenance for non-monotone queries but do not address the multiplicity of
-models that negation introduces.
+provenance for non-monotone queries but likewise assume a single resolved
+model.
 Köhler et al.~\cite{kohler2012declarative} study why-not provenance for
 Datalog with negation under a fixed well-founded model.
-Both approaches assume a resolved semantics; our framework is
+All three approaches assume a resolved semantics; our framework is
 complementary, explaining which commitments select the model under which
 their techniques then apply.
 
@@ -1427,6 +1431,18 @@ resolution.
 The present work focuses on explanation rather than complexity:
 determinations are assumed given, and determination provenance explains how
 observations depend on them.
+
+\medskip
+\noindent\textbf{Consistent query answering.}
+Arenas et al.~\cite{arenas1999consistent} introduce consistent query
+answering: a tuple is a \emph{certain answer} if it holds in every
+repair of an inconsistent database.
+The structural analogy to robustness is direct---both universally
+quantify over a space of admissible completions---but the source of
+multiplicity differs: repairs resolve constraint violations in the data,
+while determinations resolve semantic ambiguity in the specification.
+Determination provenance additionally tracks \emph{which} completions
+support a tuple (the support set), not merely whether all do.
 
 % ================================================================
 \section{Conclusion}
@@ -2356,7 +2372,8 @@ further in Appendix~\ref{app:systems-lineage}.
 Systems lineage---as practiced in distributed tracing~\cite{sigelman2010dapper},
 workflow provenance~\cite{seltzer2005provenance}, and pipeline
 auditing~\cite{bates2015trustworthy}---records \emph{which} services,
-operations, or data sources contributed to an observed result:
+operations, or data sources contributed to an observed result.
+This is lineage in the sense of Cui et al.~\cite{cui2000lineage}:
 set-valued input attribution without algebraic structure.
 It answers ``which inputs contributed?'' but not
 ``how did they combine?'' (no semiring), ``would the result

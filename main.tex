@@ -248,21 +248,13 @@ meaning is determinate.
 \end{definition}
 
 \noindent
-A history represents a snapshot of what has happened so far in one
-particular run of a system: which events have occurred and which
-preceded which.
+A history records which events have occurred and their precedence.
 The class $\Hist$ of all histories represents all possible states across
 all possible runs.
 When the partial order is total, a history is a sequence (e.g., a
 transaction schedule).
-A database instance for classical provenance would naturally be represented
-as a history of unordered tuple insertions: that history ``initializes''
-the instance.
 
-Ambiguity arises because histories are incomplete: new events may still
-occur, and which events arrive can change which outcomes are admissible.
-To model how a history evolves as new events are added, we define an
-extension relation.
+To model how a history evolves, we define an extension relation.
 
 \begin{definition}[History Extension]
   For histories $H_1=(E_1,\rightarrow_1)$ and $H_2=(E_2,\rightarrow_2)$, we write
@@ -387,26 +379,15 @@ Appendix~\ref{app:persistence-canonicalization}).
 
 \paragraph{Three forces on a history.}
 \label{sec:three-forces}%
-A history evolves under three distinct
-forces~\cite{hellerstein2026complexity}, organized into two categories.
-
-\emph{Environment events}---input arrivals, message deliveries, operation
-interleavings---are outside the system's control.
-They extend the history with new information but are not chosen.
-
-\emph{Decision events} are within the system's control.
-They come in two kinds, distinguished by whether they rule out futures.
-A \emph{commitment} operates on $2^O$: it replaces the current
-admissible set $\Spec(H)$ with a proper subset
-$\Spec(H \cdot \varphi) \subsetneq \Spec(H)$, irrevocably
-excluding some outcomes; under a persistent basis, excluded outcomes
-stay excluded.
-An \emph{entailment} operates on $O$ via $\Ord$: it replaces
-the current observed outcome $o$ with some $o'$ where
-$o \Ord o'$---an upward move that the specification recognizes
-as adding detail, not contradicting what came before.
-When $\Ord$ is flat (no nontrivial refinement), every decision is a
-commitment; when $\Ord$ is rich, some decisions are mere entailments.
+A history evolves under three forces~\cite{hellerstein2026complexity}.
+\emph{Environment events} (input arrivals, message deliveries, operation
+interleavings) extend the history but are not chosen.
+\emph{Commitments} operate on $2^O$: they replace the admissible set
+with a proper subset, irrevocably excluding outcomes.
+\emph{Entailments} operate on $O$ via $\Ord$: they refine the observed
+outcome upward ($o \Ord o'$) without excluding alternatives.
+When $\Ord$ is flat, every decision is a commitment; when $\Ord$ is
+rich, some decisions are mere entailments.
 
 \begin{example}[The three forces in two settings]
   In transactional systems: operation interleavings are environment;
@@ -414,15 +395,8 @@ commitment; when $\Ord$ is rich, some decisions are mere entailments.
   (e.g., deadlock detection) are entailments.
   In Datalog with negation: EDB facts are environment; sealing and
   choice predicates are commitments; the alternating fixpoint's
-  truth-value classifications are entailments---they discover what
-  the stratified commitments already determine, excluding nothing.
+  truth-value classifications are entailments.
 \end{example}
-
-Multiple commitments may be applied in sequence.
-Because a commitment's effect may depend on which outcomes are jointly
-present, the order of application can matter:
-$\Spec(H \cdot \varphi \cdot \psi)$ and
-$\Spec(H \cdot \psi \cdot \varphi)$ may differ.
 
 \subsection{Determinations}
 
@@ -441,12 +415,6 @@ commitments, applied sequentially.
   The \emph{determination of a history} $D(H)$ is the subsequence of
   commitment events in $H$, listed in the order induced by $\rightarrow$.
 \end{definition}
-
-\noindent
-Commitment events form a total order within any history (each succeeds all
-maximal events of its prefix), so $D(H)$ is always a well-defined sequence.
-Because each $\varphi_i$ acts on $\Spec(H_{i-1})$---which depends on all
-preceding commitments---the order of application can matter.
 
 \paragraph{Layer-sequencing notation.}
 Commitments that commute (can be applied in any order without changing the

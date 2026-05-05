@@ -131,12 +131,8 @@ transfer has not yet cleared; classical provenance can explain
 would have prevented the rejection arrived too late---that explanation
 requires identifying the scheduling commitment that ordered the balance
 check before the transfer posted.
-Was the rejection inevitable (would it occur under every admissible
-schedule), or was it an artifact of one particular interleaving?
-How likely is it to recur---under what fraction of schedules does the
-rejection arise?
-If the system prioritized incoming transfers over balance checks,
-would the rejection disappear?
+Was the rejection inevitable, how likely is it to recur, and would
+prioritizing incoming transfers prevent it?
 These are questions about the \emph{assumptions} under which the outcome
 was produced, not about the derivation itself.
 The same phenomenon arises in database theory: a Datalog program with
@@ -147,30 +143,20 @@ This paper extends provenance to settings with semantic ambiguity.
 The key idea is simple: before we can explain \emph{how} a result was
 derived, we must first account for \emph{which semantic commitments} made
 that derivation possible.
-A transactional system that committed $T_2$ before $T_3$ made a choice;
-a different commit order would have produced a different result with
-different provenance.
 We call such a sequence of irrevocable commitments a \emph{determination}.
-
-Once a determination is fixed, classical provenance applies---the ambiguity
-is gone and derivations can be traced through a semiring as usual.
-The interesting structure lives in two places.
-First, \emph{within} a single determination: commitments may depend on each
-other (later commitments may be valid only after earlier ones are
-discharged), organizing naturally into non-commuting layers.
-Second, \emph{across} determinations: different determinations may yield
-different outcomes, and tracking which determinations support a given outcome
-yields a semiring structure---the \emph{determination semiring}---that
-composes through queries just as Green et al.'s provenance semiring
-composes through relational algebra~\cite{green2007provenance}.
-
-  We instantiate the framework in two settings: transactional systems
-  (where ambiguity arises from concurrency) and Datalog with negation
-  (where it arises from multiple models).
-  In both, deciding robustness is coNP-complete.
-  For Datalog, the classical negation semantics---stratified,
-  well-founded, stable-model---emerge as different readings of a single
-  algebraic object.
+Once a determination is fixed, classical provenance applies; the
+interesting structure lives \emph{within} a determination (commitments
+organize into non-commuting layers) and \emph{across} determinations
+(tracking which determinations support a given outcome yields a semiring
+that composes through queries just as Green et al.'s provenance semiring
+composes through relational algebra~\cite{green2007provenance}).
+We instantiate the framework for transactional systems (where ambiguity
+arises from concurrency) and Datalog with negation (where it arises from
+multiple models).
+In both, deciding robustness is coNP-complete.
+For Datalog, the classical negation semantics---stratified,
+well-founded, stable-model---emerge as different readings of a single
+algebraic object.
 
 \begin{example}[Provenance under transactional ambiguity]
   \label{ex:example}
@@ -197,13 +183,6 @@ composes through relational algebra~\cite{green2007provenance}.
   Determination provenance makes this dependence explicit by recording the
   commitments under which the query result is determined, together with the
   derivational explanation that applies once those commitments are fixed.
-  The algebraic structure then enables reasoning that system traces alone
-  cannot support: the robustness of $b$ composes through joins (a join
-  with $b$ is still robust); the contingency of $d$ composes through
-  unions (a union containing $d$ is nonzero under every determination,
-  since $b$ contributes under all of them); and the \emph{support} of
-  $d$---the set of serializations that produce it---answers
-  counterfactual and distributional questions without re-executing.
   Section~\ref{sec:transactions} formalizes this example.
 \end{example}
 

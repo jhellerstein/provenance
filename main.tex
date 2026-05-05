@@ -87,8 +87,8 @@
   Classical provenance is the degenerate case where no commitments are
   needed.
   Determination provenance addresses longstanding gaps in provenance for
-  queries with negation and why-not explanations, and provides a
-  parsimonious algebraic foundation for systems settings---transaction
+  queries with negation and why-not explanations, and provides a compact
+  algebraic foundation for systems settings---transaction
   scheduling, distributed tracing---that previously eluded formal
   provenance treatment.
 \end{abstract}
@@ -386,18 +386,16 @@ interleavings---are outside the system's control.
 They extend the history with new information but are not chosen.
 
 \emph{Decision events} are within the system's control.
-They come in two kinds, distinguished by whether they rule out futures:
-\begin{itemize}[nosep]
-  \item A \emph{commitment} operates on $2^O$: it replaces the current
-        admissible set $\Spec(H)$ with a proper subset
-        $\Spec(H \cdot \varphi) \subsetneq \Spec(H)$, irrevocably
-        excluding some outcomes.
-        Under a persistent basis, excluded outcomes stay excluded.
-  \item An \emph{entailment} operates on $O$ via $\Ord$: it replaces
-        the current observed outcome $o$ with some $o'$ where
-        $o \Ord o'$---an upward move that the specification recognizes
-        as adding detail, not contradicting what came before.
-\end{itemize}
+They come in two kinds, distinguished by whether they rule out futures.
+A \emph{commitment} operates on $2^O$: it replaces the current
+admissible set $\Spec(H)$ with a proper subset
+$\Spec(H \cdot \varphi) \subsetneq \Spec(H)$, irrevocably
+excluding some outcomes; under a persistent basis, excluded outcomes
+stay excluded.
+An \emph{entailment} operates on $O$ via $\Ord$: it replaces
+the current observed outcome $o$ with some $o'$ where
+$o \Ord o'$---an upward move that the specification recognizes
+as adding detail, not contradicting what came before.
 When $\Ord$ is flat (no nontrivial refinement), every decision is a
 commitment; when $\Ord$ is rich, some decisions are mere entailments.
 
@@ -462,6 +460,10 @@ We use $\seq$ to denote a sequence of such layers:
   This notation is used only to expose layering; it imposes no additional algebraic
   structure beyond commutativity within each layer.
 \end{definition}
+
+\noindent
+The \emph{depth} of a determination $L_1 \seq \cdots \seq L_k$ is $k$
+(the number of layers).
 
 \begin{definition}[Resolving determination]
   A determination $D$ \emph{resolves} $\Spec$ if $\Spec \mid D$ is determined
@@ -530,6 +532,25 @@ property that we use freely in subsequent sections:
 History-invariance means the resolved outcome does not depend on which
 history prefix we start from---only on the determination applied.
 We may therefore write $(\Spec \mid D)$ without a history argument.
+
+\subsection{Three Levels of Structure}
+\label{sec:three-levels}
+
+The framework operates at three levels:
+\begin{enumerate}[nosep,label=(\arabic*),leftmargin=*]
+  \item \emph{Within a determination}: a resolving determination has
+        internal structure---layers of commitments that discharge
+        sequentially until classical provenance applies.
+  \item \emph{Across determinations (within a spec)}: the space of
+        resolving determinations forms a semiring; robustness,
+        contingency, and the coNP complexity of robustness live here.
+  \item \emph{Across specs}: preservation asks whether an outcome
+        survives a change of specification (e.g., SI to SER, stable
+        to well-founded).
+\end{enumerate}
+Sections~\ref{sec:conditional-semiring}--\ref{sec:robustness-complexity}
+develop levels (2) and (3); level (1) is detailed in
+Appendix~\ref{app:algebra}.
 
 %% ================================================================
 \section{The Algebra of Determinations}
@@ -610,16 +631,10 @@ is the set of determinations under which $t$ holds.
 
 These supports form a commutative semiring under the operations induced by
 query evaluation:
-\begin{itemize}[nosep,leftmargin=*]
-  \item When a tuple is derived from two premises jointly (semiring
-        multiplication in $K$), its support is contained in the
-        \emph{intersection} of the premises' supports: $t$ can hold only
-        under determinations that support both premises.
-  \item When a tuple has two alternative derivation paths (semiring addition
-        in $K$), its support contains the \emph{union} of the paths'
-        supports: $t$ holds under any determination that supports either
-        path.
-\end{itemize}
+joint use of facts (semiring multiplication) maps to \emph{intersection}
+of supports ($t$ holds only under determinations supporting both premises),
+while alternative derivations (semiring addition) map to \emph{union}
+($t$ holds under any determination supporting either path).
 The resulting structure on supports is the Boolean algebra
 $(2^{\mathcal{D}}, \cup, \cap, \emptyset, \mathcal{D})$---a commutative
 semiring with $\cup$ as addition and $\cap$ as multiplication.
@@ -650,6 +665,20 @@ a change from stable to well-founded semantics
 (Appendix~\ref{sec:appendix-datalog})?
 Determination provenance provides a uniform language for such analyses
 across domains.
+
+\begin{remark}[Symmetry of presence and absence]
+  \label{rem:absence-symmetry}
+  The determination semiring treats presence and absence symmetrically:
+  a contingent tuple has partial support (present under some
+  determinations, absent under the complement).
+  Classical why-not provenance explains absence derivationally under a
+  fixed semantics; determination provenance adds the semantic dimension,
+  recording which commitments made the absence (or presence) possible.
+  Under well-founded semantics, the value $\mathbf{u}$ is not
+  undefinedness but a determined classification of contingency---the
+  alternating fixpoint discovers that the atom has partial support
+  without committing to a branch.
+\end{remark}
 
 \subsection{Notation and Example}
 
@@ -950,7 +979,7 @@ commit and abort events that remove vertices.
 
 \noindent
 We consider three levels:
-\begin{itemize}[nosep]
+\begin{itemize}[nosep,leftmargin=*]
   \item \textbf{Read committed (RC):} forbids only $\mathsf{wr}$ cycles
         involving uncommitted writes (dirty reads).
         No constraint on committed conflict graphs.
@@ -1010,7 +1039,7 @@ recorded in the history as conflict edges accumulate.
 
 \begin{remark}[Non-commutativity under shared conflicts]
   \label{rem:commit-noncommute}
-  When $T_i$ and $T_j$ participate in a common cycle, committing one may
+  When $T_i$ and $T_j$ share a common cycle, committing one may
   make committing the other invalid (the remaining cycle would violate the
   acyclicity invariant), while aborting one may make committing the other
   valid (the cycle is broken).
@@ -1075,14 +1104,11 @@ recorded in the history as conflict edges accumulate.
   Consider five transactions with two conflict cycles sharing $T_3$:
   $T_1 \to T_2 \to T_3 \to T_1$ (Cycle~1) and
   $T_3 \to T_4 \to T_5 \to T_3$ (Cycle~2).
-  If the system broke Cycle~1 by aborting $T_1$,
-  $T_3$ survived and Cycle~2 remained---requiring a second abort.
-  The second abort depended on which transactions survived the first:
-  the two decisions could not be made simultaneously.
-  Hence the determination has depth~$\ge 2$.
-  Had the system instead aborted $T_3$, both cycles would have broken in a
-  single decision (depth~$1$).
-  The determination records which resolution occurred.
+  Aborting $T_1$ breaks Cycle~1 but leaves Cycle~2 intact, requiring a
+  second abort whose validity depends on the first---so the two decisions
+  do not commute and depth is~$\ge 2$.
+  Aborting $T_3$ instead breaks both cycles in one decision (depth~$1$).
+  The determination records which resolution was chosen.
 \end{example}
 
 \begin{proposition}[Snapshot isolation: depth from snapshot dependencies]
@@ -1189,7 +1215,7 @@ partial knowledge (access sets unknown until execution), and mixed control.
 
   \begin{tabular}{@{}lll@{}}
     \toprule
-    \textbf{Isolation / Case} & \textbf{Resolving determination} & \textbf{Depth} \\
+    \textbf{Isolation / Case} & \textbf{Resolving determination} & \textbf{\# Layers (depth)} \\
     \midrule
     Read committed &
     (none---no outcome contradicted) & $0$ \\
@@ -1218,8 +1244,8 @@ partial knowledge (access sets unknown until execution), and mixed control.
   {\footnotesize
   $\varphi_{\mathsf{c}}(T) = \varphi_{\mathsf{commit}(T)}$;\quad
   $\varphi_{\mathsf{a}}(T) = \varphi_{\mathsf{abort}(T)}$;\quad
-  $\{\cdots\}$ = commuting set (one layer);\quad
-  $\seq$ = non-commuting sequence (adds depth).}
+  $\{\cdots\}$ = commuting set (layer);\quad
+  $\seq$ = non-commuting sequence (adds a layer).}
 
   \caption{
     Determination structure across isolation levels (Example~\ref{ex:example}).
@@ -1293,10 +1319,10 @@ $\mathcal{F}_2 = 2^{\mathcal{D}}$.
 
 \paragraph{Determination provenance.}
 \[
-  \begin{array}{r@{\;=\;}l}
-    P(p(c)) & \mathcal{D} \times \{x_a\} \quad\text{(robust)} \\
-    P(q(c)) & \{\} \quad\text{(robustly absent)} \\
+  \begin{array}{r@{\;=\;}l@{\qquad}r@{\;=\;}l}
+    P(p(c)) & \mathcal{D} \times \{x_a\} \;\text{(robust)} &
     P(r(c)) & \{(D^{(r)},\, 1)\} \\
+    P(q(c)) & \{\} \;\text{(robustly absent)} &
     P(s(c)) & \{(D^{(s)},\, 1)\}
   \end{array}
 \]
@@ -1383,15 +1409,11 @@ support equals $\mathcal{D}$ is computationally hard.
 
 \noindent
 Both instantiations admit unbounded width:
-\begin{itemize}[nosep]
-  \item \emph{Transactions} (enriched scheduling basis):
-        $n$ pairs of conflicting transactions on distinct objects, each
-        resolved by one ordering commitment (2 alternatives per pair).
-  \item \emph{Datalog} (stable models):
-        $n$ disjoint $\neg$-cycles of length~2, each resolved by one
-        choice commitment (2 stable completions per cycle).
-\end{itemize}
-\noindent
+in the transactional setting (enriched scheduling basis), $n$ pairs of
+conflicting transactions on distinct objects give $n$ independent binary
+ordering commitments;
+in Datalog (stable models), $n$ disjoint $\neg$-cycles of length~2 give
+$n$ independent binary choice commitments.
 In the Datalog case, this recovers the known coNP-completeness of
 skeptical reasoning under stable
 models~\cite{marek1991autoepistemic}---suggesting that the determination
@@ -1441,8 +1463,8 @@ Our framework is complementary: it separates the semantic commitments
 (which execution was chosen) from the derivational explanation (how the
 result was produced under that execution), enabling these systems'
 per-execution provenance to be composed across alternative resolutions.
-Appendix~\ref{app:systems-lineage} illustrates the framework's
-applicability to distributed tracing.
+Appendix~\ref{app:systems-lineage} develops the connection to systems
+lineage in detail.
 
 \medskip
 \noindent\textbf{Determination complexity.}
@@ -1664,14 +1686,11 @@ discharged.
 
 \subsection{The Layered Determination as a Whole}
 
-A determination of height~$k$ over a provenance semiring $K$ consists of:
-\begin{enumerate}[nosep]
-  \item commutative monoids $M_k, M_{k-1}, \ldots, M_1$, where
-        each $M_i$ is conditioned on the specification prefix obtained by
-        discharging $M_k, \ldots, M_{i+1}$; and
-  \item a commutative semiring $K$ at the foundation, exposed once all
-        monoids have been discharged.
-\end{enumerate}
+A determination of height~$k$ over a provenance semiring $K$ consists of
+commutative monoids $M_k, M_{k-1}, \ldots, M_1$---where each $M_i$ is
+conditioned on the specification prefix obtained by discharging
+$M_k, \ldots, M_{i+1}$---followed by a commutative semiring $K$ at the
+foundation, exposed once all monoids have been discharged.
 Layers are numbered top-down: $M_k$ is the first layer discharged, $M_1$ the
 last.
 Classical provenance is the degenerate case $k = 0$: no commitment layers,
@@ -1786,334 +1805,11 @@ and with query evaluation.
   maximum depth of its inputs.
 \end{corollary}
 
-\subsection{Within vs.\ Across: A Summary}
-
-The two algebraic levels are complementary:
-\begin{itemize}[nosep]
-  \item \emph{Within} a determination (Appendix~\ref{app:algebra}):
-        layers of commutative monoids discharge sequentially until a
-        provenance semiring $K$ is exposed.
-        This explains how a single resolved outcome is derived.
-  \item \emph{Across} determinations (this appendix):
-        the determination semiring $(2^{\mathcal{D}}, \cup, \cap)$ and
-        its filtration track which determinations support a tuple and
-        how those supports compose through queries.
-        This explains which outcomes are robust, which are contingent,
-        and at what layer the contingency arises.
-\end{itemize}
-Robustness and preservation are across-determination questions
-(properties of supports).
-Conditioned provenance is a within-determination question (the $K$-value
-under a fixed $D$).
-Determination provenance combines both: it is a function
-$\mathcal{D} \to K$ whose support lives in the determination semiring
-and whose values live in the provenance semiring.
-
-% ================================================================
-\section{Layer Certificates}
-\label{app:certificates}
-% ================================================================
-
-This appendix gives the formal development of layer certificates, summarized
-in the body text.
-Fix a specification $\Spec$ and a determination
-$D=\varphi_1 \cdot \cdots \cdot \varphi_k$ with layering $L_1,\ldots,L_k$.
-
-A \emph{provenance query} is a function $q:(\Spec\mid D)\to A$,
-where $A$ is an answer domain (e.g., Boolean, explanations, dependency sets).
-
-\begin{definition}[Certificate]
-  Let $\varphi$ be a commitment.
-  A certificate for $\varphi$, written $\varphi\models C$, is a predicate
-  $C:O\to\{\mathsf{true},\mathsf{false}\}$ such that for all histories $H$,
-  $\Spec(H \cdot \varphi)\subseteq\{\,o\in \Spec(H)\mid C(o)\,\}$.
-\end{definition}
-
-\begin{definition}[Sufficient certificate]
-  Write $\Spec_i \triangleq \Spec \mid (\varphi_1 \cdot \cdots \cdot \varphi_i)$
-  and $J \triangleq \varphi_{i+1} \cdot \cdots \cdot \varphi_k$.
-  Let $\chi_{C_i}$ denote the commitment induced by certificate $C_i$:
-  appending $\chi_{C_i}$ restricts the admissible set to
-  $\{\,o \in \Spec(H) \mid C_i(o)\,\}$.
-  $C_i$ is \emph{sufficient for $(J,\mathcal{Q})$} if for all $H$ and all
-  $q\in\mathcal{Q}$,
-  $(\Spec_i\mid J)(H)=((\Spec\mid\chi_{C_i})\mid J)(H)$ and
-  $q((\Spec_i\mid J)(H)) = q(((\Spec\mid\chi_{C_i})\mid J)(H))$.
-\end{definition}
-
-\begin{definition}[Layer certificate]
-  A \emph{layer certificate} is a certificate $C_i$ for layer $L_i$ that is
-  sufficient for $(J,\mathcal{Q})$.
-\end{definition}
-
-\begin{theorem}[Query Monotonicity]
-  If $\mathcal{Q}_1\subseteq\mathcal{Q}_2$, then every certificate sufficient
-  for $(J,\mathcal{Q}_2)$ is sufficient for $(J,\mathcal{Q}_1)$.
-\end{theorem}
-\begin{proof}
-  Sufficiency for $(J,\mathcal{Q}_2)$ requires preserving resolution and all
-  queries in $\mathcal{Q}_2$.
-  Since $\mathcal{Q}_1 \subseteq \mathcal{Q}_2$, the same certificate
-  preserves all queries in $\mathcal{Q}_1$ a fortiori.
-\end{proof}
-
-
-\section[Datalog with Negation: Worked Determination Provenance]{Datalog$^{\neg}$ Worked Determination Provenance}
-\label{sec:appendix-datalog}
-
-This appendix instantiates determination provenance for the Datalog-with-negation
-sandbox.
-Following Section~\ref{sec:negation-preview}, we begin with the most resolved
-semantics---stable models---and then show how coarser semantics are recovered
-by reading less of the determination semiring.
-We work through the running example below, making explicit the commitments,
-their dependency structure, and the resulting provenance annotations.
-
-\begin{example}[Datalog with negation]
-  \label{ex:datalog-negation}
-  Consider the following program $P$ over EDB facts in a history $H$.
-  For notational economy we use a fixed constant $c$ and take all predicates unary, so the EDB fact is $a(c)$ and the derived atoms are $p(c),q(c),r(c),s(c)$.
-  \begin{align*}
-    p(c) & \leftarrow a(c).      & r(c) & \leftarrow \neg s(c). \\[1mm]
-    q(c) & \leftarrow \neg p(c). & s(c) & \leftarrow \neg r(c).
-  \end{align*}
-  Assume $H$ contains the single extensional fact $a(c)$.
-  The pair $(P,H)$ contains both a stratified fragment
-  ($q(c)$ depends negatively on $p(c)$, and $p(c)$ depends positively on $a(c)$)
-  and a cycle through negation ($r \leftrightarrow \neg s$).
-  We use this single instance to exhibit three distinct readings of the
-  determination semiring.
-\end{example}
-
-Throughout, we use \emph{sealing predicates}
-$\varphi_{\seal}(X)$, which commit that the set of atoms $X$ is complete:
-no additional atoms in $X$ will be derived in any admissible outcome.
-Such predicates rule out outcomes and therefore constitute genuine semantic
-commitments.
-
-\subsection{Stable Model Semantics}
-
-\paragraph{Determination structure.}
-Stable semantics insists on total two-valued models.
-The resolving determinations share a stratified prefix---sealing each
-stratum before negation in the next is evaluated---and then branch to
-resolve the cycle.
-
-\paragraph{Resolving determinations.}
-For the running example, resolution begins with the stratified-prefix sealing
-\[
-  \varphi_{\seal}(S_1)
-  \seq \cdots \seq
-  \varphi_{\seal}(S_k),
-\]
-where each $S_i$ is the set of atoms whose truth is fixed at stratum~$i$.
-These sealing predicates do \emph{not} commute across strata: sealing $S_i$
-is a prerequisite for applying negation commitments in $S_{i+1}$.
-After this prefix, the negation cycle admits two incompatible resolutions:
-\[
-  D^{(r)}
-  \;\triangleq\;
-  \bigl(
-  \varphi_{\seal}(S_1)
-  \seq \cdots \seq
-  \varphi_{\seal}(S_k)
-  \bigr)
-  \seq
-  \varphi_{r(c)=\mathbf{t}} \cdot \varphi_{s(c)=\mathbf{f}},
-\]
-\[
-  D^{(s)}
-  \;\triangleq\;
-  \bigl(
-  \varphi_{\seal}(S_1)
-  \seq \cdots \seq
-  \varphi_{\seal}(S_k)
-  \bigr)
-  \seq
-  \varphi_{s(c)=\mathbf{t}} \cdot \varphi_{r(c)=\mathbf{f}}.
-\]
-Within either determination, the cycle-resolution commitments are logically
-simultaneous and commute.
-The determination height is $k{+}1$: the $k$ stratification stages plus one
-additional non-commuting branching stage.
-
-\paragraph{Provenance.}
-Determination provenance records which stable determination is assumed:
-\[
-  P_{D^{(r)}}(r(c)) = 1,
-  \qquad
-  P_{D^{(s)}}(s(c)) = 1.
-\]
-Only after this choice does ordinary derivational provenance apply.
-For atoms determined by the stratified prefix:
-$P_{D^{(r)}}(p(c)) = P_{D^{(s)}}(p(c)) = P(a(c))$.
-
-\subsection{Relaxing to Well-Founded Semantics}
-
-\paragraph{Determination structure.}
-Well-founded semantics (WFS) makes the same $k$ stratified commitments as
-stable semantics but does not discharge the layer that resolves the cycle.
-It then performs a nontrivial computation---the alternating
-fixpoint~\cite{vanGelder1991wellFounded}---to classify which atoms are
-forced true or false by the existing commitments and which remain genuinely
-ambiguous.
-
-The alternating fixpoint operates on the knowledge ordering
-$\mathbf{u} \le_k \mathbf{t}$ and $\mathbf{u} \le_k \mathbf{f}$
-(with $\mathbf{t}$ and $\mathbf{f}$ incomparable), moving atoms upward
-from ``unknown'' to ``known true'' or ``known false'' by alternating
-between deriving positive consequences and eliminating unfounded sets.
-This ordering is an instance of the outcome order $\Ord$.
-The distinction between the alternating fixpoint and a commitment is
-precisely the distinction between these two operations:
-\begin{itemize}[nosep]
-  \item A \emph{commitment} operates on $2^O$: it replaces the admissible
-        set with a proper subset, excluding outcomes.
-  \item The \emph{alternating fixpoint} operates on $O$ via $\Ord$: it
-        replaces the observed outcome $o$ with some $o'$ where
-        $o \Ord o'$---an upward move that the specification recognizes
-        as adding detail, not contradicting what came before.
-        It is the specification's choice of $\Ord$ that makes the
-        alternating fixpoint an entailment rather than a commitment.
-\end{itemize}
-
-The correspondence to the determination semiring is exact (for programs
-with stable models): WFS assigns $\mathbf{t}$ to an atom iff it holds in
-every stable model (robust); $\mathbf{f}$ iff it fails in every stable
-model (robustly absent); and $\mathbf{u}$ iff it holds in some but not all
-(contingent).
-
-\paragraph{Determination.}
-The WFS determination for the running example is the same stratified prefix:
-\[
-  D_{\mathrm{wfs}}
-  \;\triangleq\;
-  \varphi_{\seal}(S_1)
-  \seq
-  \varphi_{\seal}(S_2)
-  \seq \cdots \seq
-  \varphi_{\seal}(S_k).
-\]
-This is \emph{not} a resolving determination in the sense of
-Definition~\ref{def:determined}: the specification $\Spec \mid D_{\mathrm{wfs}}$
-is not a function, because multiple two-valued completions of the cycle
-remain admissible.
-WFS accepts this and classifies the residual ambiguity.
-
-For the running example, the stratified prefix determines:
-$p(c)=\mathbf{t}$ (robust), $q(c)=\mathbf{f}$ (robustly absent),
-while the $\neg$-cycle atoms have partial support:
-$r(c)$ and $s(c)$ each hold in exactly one of the two stable models.
-WFS reports this as $r(c)=\mathbf{u}$, $s(c)=\mathbf{u}$.
-
-\paragraph{A nontrivial example.}
-The alternating fixpoint can discover robust atoms that depend on the cycle
-without resolving it.
-Consider adding the rule $d(c) \leftarrow r(c);\; d(c) \leftarrow s(c)$.
-Then $d(c)$ holds in every stable model (since exactly one of $r(c)$, $s(c)$
-is true in each), so $\mathrm{supp}(P(d(c))) = \mathcal{D}$ and WFS
-correctly assigns $d(c) = \mathbf{t}$.
-The alternating fixpoint discovers this in multiple rounds---deriving $d(c)$
-optimistically, confirming it survives skeptical revision---without making
-any commitment about which of $r(c)$ or $s(c)$ is true.
-
-\paragraph{Provenance.}
-For atoms determined by the stratified prefix, provenance is classical:
-$P_{D_{\mathrm{wfs}}}(p(c)) = P(a(c))$.
-For $\neg$-cycle atoms, determination provenance has partial support:
-$P(r(c)) = \{(D^{(r)}, 1)\}$, $P(s(c)) = \{(D^{(s)}, 1)\}$.
-WFS does not select a determination, so it reports these as $\mathbf{u}$
-rather than reading off the conditioned provenance.
-But the determination semiring retains the \emph{contingency structure}
-of these atoms: the support $\{D^{(r)}\}$ records exactly which
-determinations make $r(c)$ hold and which do not.
-This is not provenance---provenance requires resolution
-(Theorem~\ref{thm:resolution-implies-monotone})---but a property
-\emph{of} the determination provenance function, read at filtration
-level~$k$ without selecting a determination.
-
-\paragraph{Relationship to the filtration.}
-The filtration of the stable-model determination semiring
-(Section~\ref{sec:filtration}) \emph{encodes} the classification that
-WFS \emph{computes}.
-Robust, robustly absent, and contingent support in the semiring correspond
-to WFS's $\mathbf{t}$, $\mathbf{f}$, and $\mathbf{u}$ respectively.
-The filtration is a static algebraic structure; the alternating fixpoint
-is an algorithm that discovers, for each atom, exactly the support
-classification that the filtration carries.
-
-\subsection{Relaxing Further to Stratified Semantics}
-
-\paragraph{Determination structure.}
-Stratified semantics applies only to programs (or fragments of programs)
-whose dependency graph admits a stratification---no cycles through negation.
-For the running example, the stratified fragment consists of the predicates
-$p(c)$ and $q(c)$; the cycle $(r, s)$ is outside its scope.
-
-The resolving determination for the stratified fragment is the same
-stratified prefix used by stable and well-founded semantics:
-\[
-  D_{\mathrm{strat}}
-  \;\triangleq\;
-  \varphi_{\seal}(S_1)
-  \seq
-  \varphi_{\seal}(S_2)
-  \seq \cdots \seq
-  \varphi_{\seal}(S_k).
-\]
-For stratifiable programs, this prefix is itself a resolving determination:
-$|\Spec \mid D_{\mathrm{strat}}| = 1$.
-For programs with cycles, it is not---the $\neg$-cycle atoms remain unresolved,
-and stratified semantics is simply undefined for them.
-
-\paragraph{Provenance.}
-Once $D_{\mathrm{strat}}$ is fixed, derivational provenance applies for
-the stratifiable fragment:
-$P_{D_{\mathrm{strat}}}(p(c)) = P(a(c))$.
-Absences such as $\neg q(c)$ are derivational consequences of the sealed
-lower stratum and require no additional commitments.
-
-\subsubsection{Preservation Across Negation Semantics}
-
-Holding the program and EDB fixed, different negation semantics induce
-different readings of the determination semiring, and preservation
-(Section~\ref{sec:det-semiring}) can be checked directly.
-
-For the running example, $p(c)$ has full support
-($\mathrm{supp} = \mathcal{D}$): it holds under every stable model, is
-robust under WFS, and is derived by stratified evaluation.
-It is preserved across all three semantics.
-By contrast, $r(c)$ has partial support ($\{D^{(r)}\}$): it holds under
-one stable model, is $\mathbf{u}$ under WFS, and is undefined under
-stratified semantics.
-It is not preserved from stable to well-founded or stratified.
-
-\subsection{Certificates and Semantic-Change Queries}
-
-Fix a specification $\Spec$ and a resolving determination $D$.
-A \emph{provenance query} is a function $q : (\Spec \mid D) \to A$,
-where $A$ is an answer domain (e.g., Boolean, explanations, dependency
-sets), including classical why/why-not provenance and the preservation
-queries of Section~\ref{sec:det-semiring}.
-
-Commitments restrict admissible outcomes; a \emph{certificate} summarizes
-these restrictions as a sound over-approximation (it may admit outcomes
-that a full determination would exclude, but must exclude none that a
-determination admits).
-In the negation sandbox, a natural certificate for the stratified prefix
-is a \emph{sealed set} of atoms: a record of which strata have been
-committed as complete.
-
-The certificate required depends on the query.
-A minimal certificate sufficient for derivational provenance of $p(c)$
-need only preserve the sealing commitments for the stratified prefix.
-By contrast, answering a preservation query such as ``Would $q(c)$ become
-true under stable semantics?'' requires a strictly stronger certificate:
-it must preserve the unresolved negation structure itself, not merely one
-resolution.
-This illustrates the query-parametric nature of certificate sufficiency
-(Appendix~\ref{app:certificates}): richer provenance questions require
-retaining more semantic information.
+The two algebraic levels---within a determination and across
+determinations---are detailed in Appendices~\ref{app:algebra}
+and~\ref{app:det-semiring-details} respectively.
+Preservation (across specs) is discussed in
+Section~\ref{sec:det-semiring}.
 
 % ===============================================================
 \section{Transactional Worked Determination Provenance}
@@ -2122,7 +1818,7 @@ retaining more semantic information.
 
 This appendix instantiates determination provenance for the transactional sandbox
 used in Section~\ref{sec:transactions}.
-As in the Datalog appendix, we make explicit the commitments,
+We make explicit the commitments,
 their dependency structure, and the resulting provenance annotations.
 The goal is to justify the determination shapes and depths summarized in
 Figure~\ref{fig:det-tables}.
@@ -2287,22 +1983,18 @@ derivational provenance.
 \subsection{Certificates and Semantic-Change Queries}
 % ===============================================================
 
-As in the negation sandbox, provenance queries depend only on the restrictions that
-a determination imposes on admissible outcomes.
-A \emph{certificate} summarizes these restrictions and may safely over-approximate
-the determination.
-
-Under serializability, a certificate need only record a set of ordering predicates
+A \emph{certificate} over-approximates a commitment's effect: it
+summarizes which outcomes a commitment excludes, admitting possibly more
+but never fewer (formal definition in
+Appendix~\ref{app:systems-lineage}).
+Under serializability, a certificate need only record ordering predicates
 sufficient to justify the observation.
-Under snapshot isolation, however, answering semantic-change queries—such as
-whether an SI outcome admits a serial explanation—requires preserving the snapshot
-structure itself, not merely a particular resolved state.
-
-As in Section~\ref{sec:appendix-datalog}, certificates are therefore
-query-parametric.
-Richer provenance questions require retaining strictly more semantic information,
-reflecting the deeper and less-commutative structure of the underlying
-determination.
+Under snapshot isolation, answering semantic-change queries---such as
+whether an SI outcome admits a serial explanation---requires preserving
+the snapshot structure itself.
+Certificates are query-parametric: richer
+questions require retaining more semantic information
+(Appendix~\ref{app:systems-lineage}).
 
 % ===============================================================
 \section{Protocol-Specific Determination Structures}
@@ -2338,253 +2030,415 @@ predicates in addition to ordering and abort commitments. Formalize:
 version selection as commitment, interaction with write-visibility rules,
 depth characterization under MVCC. Compare with SI treatment in body.}
 
-% ================================================================
-\section{Appendix: Determination Provenance for Systems Lineage}
-\label{app:systems-lineage}
-% ================================================================
+\section[Datalog with Negation: Worked Determination Provenance]{Datalog$^{\neg}$ Worked Determination Provenance}
+\label{sec:appendix-datalog}
 
-This appendix illustrates determination provenance in a systems setting that
-lies outside traditional database semantics.
-The example is adapted from the distributed tracing model introduced by
-Sigelman et al.~\cite{sigelman2010dapper}, abstracting its trace semantics rather
-than its implementation details.
+This appendix instantiates determination provenance for the Datalog-with-negation
+sandbox.
+Following Section~\ref{sec:negation-preview}, we begin with the most resolved
+semantics---stable models---and then show how coarser semantics are recovered
+by reading less of the determination semiring.
+We work through the running example below, making explicit the commitments,
+their dependency structure, and the resulting provenance annotations.
 
-The example serves two purposes.
-First, it shows that determination provenance extends the database tradition of
-provenance to forms of \emph{systems lineage} that have historically resisted
-formal treatment.
-Second, it demonstrates how the parsimony of determinations---as minimal semantic
-commitments---can refine systems lineage explanations by making explicit which
-assumptions are required to justify diagnostic conclusions.
+\begin{example}[Datalog with negation]
+  \label{ex:datalog-negation}
+  Consider the following program $P$ over EDB facts in a history $H$.
+  For notational economy we use a fixed constant $c$ and take all predicates unary, so the EDB fact is $a(c)$ and the derived atoms are $p(c),q(c),r(c),s(c)$.
+  \begin{align*}
+    p(c) & \leftarrow a(c).      & r(c) & \leftarrow \neg s(c). \\[1mm]
+    q(c) & \leftarrow \neg p(c). & s(c) & \leftarrow \neg r(c).
+  \end{align*}
+  Assume $H$ contains the single extensional fact $a(c)$.
+  The pair $(P,H)$ contains both a stratified fragment
+  ($q(c)$ depends negatively on $p(c)$, and $p(c)$ depends positively on $a(c)$)
+  and a cycle through negation ($r \leftrightarrow \neg s$).
+  We use this single instance to exhibit three distinct readings of the
+  determination semiring.
+\end{example}
 
-Unlike the previous appendices, this setting does not admit a fixed canonical
-number of layers.
-Semantic commitments may be staged or bundled depending on the diagnostic query,
-but determination provenance still cleanly separates observable evidence from
-the assumptions required to explain it.
+Throughout, we use \emph{sealing predicates}
+$\varphi_{\seal}(X)$, which commit that the set of atoms $X$ is complete:
+no additional atoms in $X$ will be derived in any admissible outcome.
+Such predicates rule out outcomes and therefore constitute genuine semantic
+commitments.
 
-\paragraph{Scope.}
-The treatment below is deliberately illustrative rather than fully formal.
-The Datalog and transactional sandboxes admit precise commitment bases because
-their semantics are mathematically specified; distributed tracing, by contrast,
-involves physical clocks and operational assumptions that resist clean
-axiomatization.
-We therefore describe commitments semi-formally, showing how the determination
-provenance framework applies in principle while deferring a complete
-formalization to future work on specific tracing systems.
+\subsection{Stable Model Semantics}
 
-\subsection{Trace Specification and Semantic Ambiguity}
+\paragraph{Determination structure.}
+Stable semantics insists on total two-valued models.
+The resolving determinations share a stratified prefix---sealing each
+stratum before negation in the next is evaluated---and then branch to
+resolve the cycle.
 
-A distributed trace consists of a set of \emph{spans}, each representing an
-invocation of a service.
-Each span $X$ has a client-side send and receive event
-$(\mathsf{cs}_X,\mathsf{cr}_X)$ and a server-side receive and send event
-$(\mathsf{sr}_X,\mathsf{ss}_X)$.
-Client and server events occur on different hosts with unsynchronized clocks.
-
-The trace specification $\Spec$ maps a history $H$ of timestamped span events to a
-set of admissible executions $O$.
-An execution assigns each span a concrete placement on a global timeline and
-induces a partial order over spans.
-The specification enforces only causal constraints:
+\paragraph{Resolving determinations.}
+For the running example, resolution begins with the stratified-prefix sealing
 \[
-  \mathsf{cs}_X \prec \mathsf{sr}_X
-  \qquad\text{and}\qquad
-  \mathsf{ss}_X \prec \mathsf{cr}_X ,
+  \varphi_{\seal}(S_1)
+  \seq \cdots \seq
+  \varphi_{\seal}(S_k),
 \]
-together with parent--child relationships recorded in the trace metadata.
-
-Because clocks are unsynchronized, these constraints determine only \emph{bounds}
-on server-side timestamps.
-As a result, multiple executions---with different relative orderings and overlaps
-of spans---are admissible under the same observed history.
-Diagnostic conclusions such as critical-path analysis are therefore semantically
-ambiguous prior to determination.
-
-\subsection{Diagnostic Query: Critical Path}
-
-We consider the diagnostic query:
-\begin{quote}
-  \emph{Which span lies on the critical path of the request?}
-\end{quote}
-Formally, the query maps an execution to the span (or set of spans) whose duration
-determines the end-to-end latency of the root span.
-
-Under a fixed execution, this query is deterministic.
-Under the specification $\Spec$, however, different admissible executions may
-yield different critical paths.
-Without additional semantic commitments, the query is ill-posed.
-
-\subsection{Commitments}
-
-Determination resolves this ambiguity by committing to semantic assumptions that
-fix a particular execution.
-Relevant commitments include:
-\begin{itemize}
-  \item $\varphi_{\mathrm{align}(h_i,h_j)}$, committing to a concrete clock
-        alignment between hosts $h_i$ and $h_j$ within admissible bounds;
-  \item $\varphi_{\mathrm{order}(X,Y)}$, committing that span $X$ precedes span
-        $Y$ when their relative order is otherwise unconstrained;
-  \item $\varphi_{\mathrm{cp}=X}$, committing that $X$ is the critical-path
-        witness \emph{given the preceding alignment and ordering commitments}.
-\end{itemize}
-
-These predicates are ambiguity-sensitive and semantically dependent.
-For example, committing to a critical-path witness presupposes commitments that
-fix the relative placement of competing spans.
-
-\subsection{Resolving Determinations}
-
-Let $B$ and $C$ be sibling spans whose relative order is not determined by causal
-constraints.
-Two resolving determinations suffice to illustrate the provenance structure:
+where each $S_i$ is the set of atoms whose truth is fixed at stratum~$i$.
+These sealing predicates do \emph{not} commute across strata: sealing $S_i$
+is a prerequisite for applying negation commitments in $S_{i+1}$.
+After this prefix, the negation cycle admits two incompatible resolutions:
 \[
-  I_B \;\triangleq\;
-  \varphi_{\mathrm{align}} \cdot \varphi_{\mathrm{order}(B,C)} \cdot
-  \varphi_{\mathrm{cp}=B},
+  D^{(r)}
+  \;\triangleq\;
+  \bigl(
+  \varphi_{\seal}(S_1)
+  \seq \cdots \seq
+  \varphi_{\seal}(S_k)
+  \bigr)
+  \seq
+  \varphi_{r(c)=\mathbf{t}} \cdot \varphi_{s(c)=\mathbf{f}},
 \]
 \[
-  I_C \;\triangleq\;
-  \varphi_{\mathrm{align}} \cdot \varphi_{\mathrm{order}(C,B)} \cdot
-  \varphi_{\mathrm{cp}=C}.
+  D^{(s)}
+  \;\triangleq\;
+  \bigl(
+  \varphi_{\seal}(S_1)
+  \seq \cdots \seq
+  \varphi_{\seal}(S_k)
+  \bigr)
+  \seq
+  \varphi_{s(c)=\mathbf{t}} \cdot \varphi_{r(c)=\mathbf{f}}.
 \]
-Both determinations resolve $\Spec$, but they induce different critical-path
-outcomes.
+Within either determination, the cycle-resolution commitments are logically
+simultaneous and commute.
+The determination height is $k{+}1$: the $k$ stratification stages plus one
+additional non-commuting branching stage.
 
-\subsection{Determination Provenance}
-
-Once a determination is fixed, critical-path computation is ordinary.
-Let $k_B$ (resp.\ $k_C$) denote the derivational justification that $B$ (resp.\ $C$)
-is the longest-duration span in the resolved execution.
-Determination provenance records:
+\paragraph{Provenance.}
+Determination provenance records which stable determination is assumed:
 \[
-  P_{I_B}(\mathrm{cp}=B) = k_B,
+  P_{D^{(r)}}(r(c)) = 1,
   \qquad
-  P_{I_C}(\mathrm{cp}=C) = k_C .
+  P_{D^{(s)}}(s(c)) = 1.
 \]
+Only after this choice does ordinary derivational provenance apply.
+For atoms determined by the stratified prefix:
+$P_{D^{(r)}}(p(c)) = P_{D^{(s)}}(p(c)) = P(a(c))$.
 
-The provenance makes explicit that the diagnostic conclusion depends on semantic
-commitments about clock alignment and span ordering.
-Without fixing a determination, the question ``which span is on the critical
-path?'' has no determinate answer.
+\subsection{Relaxing to Well-Founded Semantics}
 
-\subsection{Certificates and Parsimony}
+\paragraph{Determination structure.}
+Well-founded semantics (WFS) makes the same $k$ stratified commitments as
+stable semantics but does not discharge the layer that resolves the cycle.
+It then performs a nontrivial computation---the alternating
+fixpoint~\cite{vanGelder1991wellFounded}---to classify which atoms are
+forced true or false by the existing commitments and which remain genuinely
+ambiguous.
 
-Notably, the full trace history is unnecessary to justify the diagnosis.
-A sufficient certificate consists of:
-\begin{itemize}
-  \item the parent--child span structure;
-  \item the inequality constraints induced by send/receive events;
-  \item the specific alignment and ordering commitments recorded in $I_B$ or
-        $I_C$.
+The alternating fixpoint operates on the knowledge ordering
+$\mathbf{u} \le_k \mathbf{t}$ and $\mathbf{u} \le_k \mathbf{f}$
+(with $\mathbf{t}$ and $\mathbf{f}$ incomparable), moving atoms upward
+from ``unknown'' to ``known true'' or ``known false'' by alternating
+between deriving positive consequences and eliminating unfounded sets.
+This ordering is an instance of the outcome order $\Ord$.
+The distinction between the alternating fixpoint and a commitment is
+precisely the distinction between these two operations:
+\begin{itemize}[nosep,leftmargin=*]
+  \item A \emph{commitment} operates on $2^O$: it replaces the admissible
+        set with a proper subset, excluding outcomes.
+  \item The \emph{alternating fixpoint} operates on $O$ via $\Ord$: it
+        replaces the observed outcome $o$ with some $o'$ where
+        $o \Ord o'$---an upward move that the specification recognizes
+        as adding detail, not contradicting what came before.
+        It is the specification's choice of $\Ord$ that makes the
+        alternating fixpoint an entailment rather than a commitment.
 \end{itemize}
 
-As in the previous appendices, the certificate acts as a \emph{semantic frontier}:
-it freezes exactly those commitments needed to justify the diagnostic observation,
-without reconstructing a total execution.
-In a totally ordered execution, a timestamp suffices to delimit the past; in a
-partially ordered trace, an antichain of events plays the same role, sealing the
-relevant downward closure without imposing an artificial linearization.
+The correspondence to the determination semiring is exact (for programs
+with stable models): WFS assigns $\mathbf{t}$ to an atom iff it holds in
+every stable model (robust); $\mathbf{f}$ iff it fails in every stable
+model (robustly absent); and $\mathbf{u}$ iff it holds in some but not all
+(contingent).
 
-Determination provenance therefore supports a compressed form of systems lineage:
-only the semantic commitments required for the diagnostic conclusion need be
-retained.
-This refines existing tracing practice by separating observable evidence from
-the semantic assumptions used to explain it.
+\paragraph{Determination.}
+The WFS determination for the running example is the same stratified prefix:
+\[
+  D_{\mathrm{wfs}}
+  \;\triangleq\;
+  \varphi_{\seal}(S_1)
+  \seq
+  \varphi_{\seal}(S_2)
+  \seq \cdots \seq
+  \varphi_{\seal}(S_k).
+\]
+This is \emph{not} a resolving determination in the sense of
+Definition~\ref{def:determined}: the specification $\Spec \mid D_{\mathrm{wfs}}$
+is not a function, because multiple two-valued completions of the cycle
+remain admissible.
+WFS accepts this and classifies the residual ambiguity.
 
-\paragraph{Summary.}
-This appendix demonstrates that determination provenance applies naturally to
-systems diagnostics.
-It extends provenance beyond data derivations to explanations of execution-level
-properties, while retaining a minimal, explicit account of the semantic
-assumptions required to justify those explanations.
+For the running example, the stratified prefix determines:
+$p(c)=\mathbf{t}$ (robust), $q(c)=\mathbf{f}$ (robustly absent),
+while the $\neg$-cycle atoms have partial support:
+$r(c)$ and $s(c)$ each hold in exactly one of the two stable models.
+WFS reports this as $r(c)=\mathbf{u}$, $s(c)=\mathbf{u}$.
 
-\section{Absence Under Semantic Ambiguity}
-\label{app:whynot}
-In settings with semantic ambiguity, absence admits distinctions that cannot be
-expressed without a determination.
+\paragraph{A nontrivial example.}
+The alternating fixpoint can discover robust atoms that depend on the cycle
+without resolving it.
+Consider adding the rule $d(c) \leftarrow r(c);\; d(c) \leftarrow s(c)$.
+Then $d(c)$ holds in every stable model (since exactly one of $r(c)$, $s(c)$
+is true in each), so $\mathrm{supp}(P(d(c))) = \mathcal{D}$ and WFS
+correctly assigns $d(c) = \mathbf{t}$.
+The alternating fixpoint discovers this in multiple rounds---deriving $d(c)$
+optimistically, confirming it survives skeptical revision---without making
+any commitment about which of $r(c)$ or $s(c)$ is true.
 
-Given a specification $\Spec$ and history $H$, a conclusion may be absent in
-several semantically distinct ways:
-\begin{enumerate}
-  \item \textbf{Contingent absence.}
-    The conclusion fails under a particular resolved determination but holds
-    under others.
-    In the transactional example, tuple $d$ is absent under
-    $D_{\mathsf{out}}$ (where $T_5 \prec T_Q$) but present under
-    $D_{\mathsf{in}}$ (where $T_Q \prec T_5$).
-    Classical why-not provenance under $D_{\mathsf{out}}$ explains the
-    derivational failure; determination provenance additionally records that
-    the absence is contingent on the ordering commitment.
+\paragraph{Provenance.}
+For atoms determined by the stratified prefix, provenance is classical:
+$P_{D_{\mathrm{wfs}}}(p(c)) = P(a(c))$.
+For $\neg$-cycle atoms, determination provenance has partial support:
+$P(r(c)) = \{(D^{(r)}, 1)\}$, $P(s(c)) = \{(D^{(s)}, 1)\}$.
+WFS does not select a determination, so it reports these as $\mathbf{u}$
+rather than reading off the conditioned provenance.
+But the determination semiring retains the \emph{contingency structure}
+of these atoms: the support $\{D^{(r)}\}$ records exactly which
+determinations make $r(c)$ hold and which do not.
+This is not provenance---provenance requires resolution
+(Theorem~\ref{thm:resolution-implies-monotone})---but a property
+\emph{of} the determination provenance function, read at filtration
+level~$k$ without selecting a determination.
 
-    In the negation example (Example~\ref{ex:datalog-negation}), atom $s(c)$
-    is absent under stable determination $D^{(r)}$ because $r(c)$ is true.
-    But $r(c)$ is true only because of the commitment to the $r$-model;
-    under $D^{(s)}$, $s(c)$ is true and $r(c)$ is absent.
-    The why-not explanation for $s(c)$ under $D^{(r)}$ is
-    $P_{D^{(r)}}(\neg s(c))$,
-    recording that the absence depends on a semantic commitment, not merely
-    on a blocked derivation.
+\paragraph{Relationship to the filtration.}
+The filtration of the stable-model determination semiring
+(Section~\ref{sec:filtration}) \emph{encodes} the classification that
+WFS \emph{computes}.
+Robust, robustly absent, and contingent support in the semiring correspond
+to WFS's $\mathbf{t}$, $\mathbf{f}$, and $\mathbf{u}$ respectively.
+The filtration is a static algebraic structure; the alternating fixpoint
+is an algorithm that discovers, for each atom, exactly the support
+classification that the filtration carries.
 
-  \item \textbf{Undefinedness (well-founded).}
-    Under well-founded semantics, a conclusion may be neither present nor
-    absent but \emph{undefined}: the determination does not resolve the
-    relevant cycle.
-    In the running example, both $r(c)$ and $s(c)$ receive the value
-    $\mathbf{u}$ under the well-founded determination.
-    Classical why-not provenance has no clean answer here---the atom is not
-    absent due to a derivational failure, but because the determination
-    is incomplete: the well-founded determination does not discharge the
-    layer needed to resolve the $r/s$ cycle.
-    This case has no transactional analog (serializable executions are
-    always total) and is specific to semantic regimes that admit partial
-    resolution.
+\subsection{Relaxing Further to Stratified Semantics}
 
-  \item \textbf{Robust absence.}
-    The conclusion fails under \emph{all} resolving determinations of the
-    fixed specification $\Spec$.
-    In the transactional example, a tuple $(e)$ that was never inserted fails
-    under every serialization.
-    This is a robust absence: no ordering commitment can make it appear.
-    Determination provenance certifies this by showing that the outcome
-    lies outside $(\Spec \mid D)(H)$ for every resolving $D$.
+\paragraph{Determination structure.}
+Stratified semantics applies only to programs (or fragments of programs)
+whose dependency graph admits a stratification---no cycles through negation.
+For the running example, the stratified fragment consists of the predicates
+$p(c)$ and $q(c)$; the cycle $(r, s)$ is outside its scope.
 
-    In the negation example, $q(c)$ is robustly absent: $p(c)$ holds under
-    every semantics (stratified, well-founded, and stable), so the rule
-    $q(c) \leftarrow \neg p(c)$ fails under every determination.
-    No semantic commitment can make $q(c)$ true.
+The resolving determination for the stratified fragment is the same
+stratified prefix used by stable and well-founded semantics:
+\[
+  D_{\mathrm{strat}}
+  \;\triangleq\;
+  \varphi_{\seal}(S_1)
+  \seq
+  \varphi_{\seal}(S_2)
+  \seq \cdots \seq
+  \varphi_{\seal}(S_k).
+\]
+For stratifiable programs, this prefix is itself a resolving determination:
+$|\Spec \mid D_{\mathrm{strat}}| = 1$.
+For programs with cycles, it is not---the $\neg$-cycle atoms remain unresolved,
+and stratified semantics is simply undefined for them.
 
-  \item \textbf{Inter-specification absence.}
-    The conclusion holds under some determinations of a \emph{different}
-    specification $\Spec'$ but under none of the determinations admitted by
-    $\Spec$ itself.
-    For instance, a write-skew outcome visible under snapshot isolation may be
-    absent under every serializable determination.
-    In the negation setting, an atom that holds under stable semantics but
-    not under well-founded semantics (e.g., $r(c)$, which is true in one
-    stable model but undefined under WFS) exhibits the same pattern when
-    the two semantics are viewed as distinct specifications.
-    This is an inter-specification absence, handled via the preservation
-    analysis of Section~\ref{sec:det-semiring} rather than by determination
-    provenance alone.
-\end{enumerate}
+\paragraph{Provenance.}
+Once $D_{\mathrm{strat}}$ is fixed, derivational provenance applies for
+the stratifiable fragment:
+$P_{D_{\mathrm{strat}}}(p(c)) = P(a(c))$.
+Absences such as $\neg q(c)$ are derivational consequences of the sealed
+lower stratum and require no additional commitments.
+
+\subsubsection{Preservation Across Negation Semantics}
+
+Holding the program and EDB fixed, different negation semantics induce
+different readings of the determination semiring, and preservation
+(Section~\ref{sec:det-semiring}) can be checked directly.
+
+For the running example, $p(c)$ has full support
+($\mathrm{supp} = \mathcal{D}$): it holds under every stable model, is
+robust under WFS, and is derived by stratified evaluation.
+It is preserved across all three semantics.
+By contrast, $r(c)$ has partial support ($\{D^{(r)}\}$): it holds under
+one stable model, is $\mathbf{u}$ under WFS, and is undefined under
+stratified semantics.
+It is not preserved from stable to well-founded or stratified.
+
+\subsection{Certificates and Semantic-Change Queries}
+
+The certificate required to justify a provenance answer depends on the
+query.
+A minimal certificate for derivational provenance of $p(c)$ need only
+preserve the sealing commitments for the stratified prefix.
+Answering a preservation query (``Would $q(c)$ become true under stable
+semantics?'') requires a strictly stronger certificate that preserves the
+unresolved negation structure itself.
+This query-parametric nature of certificate sufficiency is developed
+further in Appendix~\ref{app:systems-lineage}.
+
+% ================================================================
+\section{Determination Provenance for Systems Lineage}
+\label{app:systems-lineage}
+\label{app:certificates}
+% ================================================================
+
+Systems lineage---as practiced in distributed tracing~\cite{sigelman2010dapper},
+workflow provenance~\cite{seltzer2005provenance}, and pipeline
+auditing~\cite{bates2015trustworthy}---records \emph{which} services,
+operations, or data sources contributed to an observed result:
+set-valued input attribution without algebraic structure.
+It answers ``which inputs contributed?'' but not
+``how did they combine?'' (no semiring), ``would the result
+survive a different execution?'' (no counterfactuals), or ``which
+assumptions were necessary?'' (no determination).
+The result is verbose (full execution traces are retained) yet
+expressively limited (only positive, single-execution queries are
+supported).
+
+Determination provenance addresses both deficiencies.
+This appendix maps the three levels of structure
+(Section~\ref{sec:three-levels}) to concrete capabilities that the
+theory provides for systems lineage, then develops two orthogonal
+dimensions of parsimony that make the theory practical.
+
+\subsection{Level 1: Repeatability from a Single Determination}
+
+A resolving determination records the non-deterministic commitments
+that resolved the specification to a function.
+Once a determination is fixed, the remaining execution is deterministic:
+given the history and the commitments, the resolved outcome can be
+reconstructed by re-execution.
+(If entailment steps involve non-determinism---e.g., hash-based
+tie-breaking---the determination must be augmented with random seeds
+for those steps; we assume deterministic entailment throughout.)
+
+This is already a compression over full-trace lineage: rather than
+recording every intermediate state, the system retains only the
+commitment sequence.
+All derivational detail can be reconstructed on demand.
+Once reconstructed, classical semiring provenance applies, answering
+positive provenance queries (why-provenance, how-provenance) with full
+algebraic structure.
+
+\begin{example}[Distributed tracing]
+  A distributed trace consists of spans (service invocations) with
+  causal constraints ($\mathsf{cs}_X \prec \mathsf{sr}_X$,
+  $\mathsf{ss}_X \prec \mathsf{cr}_X$) but unsynchronized clocks.
+  Multiple executions---with different relative orderings of
+  spans---are admissible.
+  A resolving determination commits to clock alignments
+  ($\varphi_{\mathrm{align}(h_i,h_j)}$) and span orderings
+  ($\varphi_{\mathrm{order}(X,Y)}$), fixing a single execution.
+  Once fixed, critical-path analysis is deterministic.
+\end{example}
+
+\subsection{Level 2: Counterfactuals and Robustness Across Determinations}
+
+Supports across the space of resolving determinations enable queries
+that systems lineage cannot express:
+\begin{itemize}[nosep,leftmargin=*]
+  \item \emph{Counterfactual queries}: ``Would this result hold under a
+        different commit ordering?''  The support
+        $\mathrm{supp}(P(t))$ answers directly.
+  \item \emph{Boolean robustness}: ``Does this result hold under
+        \emph{every} admissible execution?''  Equivalent to
+        $\mathrm{supp}(P(t)) = \mathcal{D}$.
+  \item \emph{Distributional robustness}: ``Under what fraction of
+        admissible executions does this result hold?''  The ratio
+        $|\mathrm{supp}(P(t))| / |\mathcal{D}|$ gives a natural
+        measure; under a uniform prior over determinations, this
+        yields tail-bound estimates (e.g., p99 guarantees on outcome
+        stability).
+\end{itemize}
+This is a functionality boost over traditional lineage: it speaks to
+the stability of observations across the space of admissible
+executions, not merely their derivation under one.
+
+\subsection{Level 3: Preservation Across Specifications}
+
+Supports across variant specifications answer preservation questions:
+does an outcome that holds under one specification also hold under
+another?
+Examples include isolation-level migration (does a transaction's result
+survive a move from SI to
+serializability?~\cite{vandevoort2025mixed}), semantic-change queries
+(would a Datalog result survive a change from stable to well-founded
+semantics?), and specification tightening (which results are preserved
+when migrating to a stricter consistency model?).
+These are across-specification questions that require comparing
+determination semirings of different specs---a capability entirely
+absent from systems lineage.
+
+\subsection{Parsimony via Truncation (Filtration)}
+\label{sec:parsimony-truncation}
+
+The filtration (Section~\ref{sec:filtration}) provides a structural
+answer to ``which layers do I need?''
+If a query family $\mathcal{Q}$ depends only on tuples whose supports
+lie in $\mathcal{F}_k$, then layers $k{+}1, \ldots, d$ are irrelevant:
+the determination can be truncated at depth $k$ without affecting any
+answer in $\mathcal{Q}$.
+
+Query-relative depth (Definition~\ref{def:query-depth}) makes this
+precise: a tuple with $\mathrm{qdepth}(t) = k$ is fully explained by
+the first $k$ layers.
+A system that retains only the first $k$ layers of each determination
+can answer all queries whose inputs have depth $\le k$---and by
+Corollary~\ref{cor:propagation-filtration}, positive relational algebra
+cannot increase depth beyond its inputs.
+
+This is \emph{vertical} parsimony: discard layers that the query family
+does not need.
+
+\subsection{Parsimony via Compression (Certificates)}
+\label{sec:parsimony-compression}
+
+Within a layer that \emph{is} retained, the full commitment may carry
+more detail than the query requires.
+A \emph{certificate} is a sound over-approximation of a commitment's
+effect: it may admit outcomes that the actual commitment excludes, but
+excludes none that the commitment admits.
+
+\begin{definition}[Certificate]
+  A certificate for commitment $\varphi$ is a predicate
+  $C : O \to \{\mathsf{true}, \mathsf{false}\}$ such that for all $H$,
+  $\Spec(H \cdot \varphi) \subseteq \{o \in \Spec(H) \mid C(o)\}$.
+\end{definition}
+
+\begin{definition}[Sufficient certificate]
+  A certificate $C$ is \emph{sufficient for a query family
+  $\mathcal{Q}$} if for every $q \in \mathcal{Q}$ and every history $H$,
+  $q((\Spec \mid \varphi)(H)) = q((\Spec \mid C)(H))$---that is,
+  replacing $\varphi$ with $C$ yields the same answer.
+\end{definition}
+
+\begin{theorem}[Query monotonicity]
+  If $\mathcal{Q}_1 \subseteq \mathcal{Q}_2$, every certificate
+  sufficient for $\mathcal{Q}_2$ is sufficient for $\mathcal{Q}_1$.
+\end{theorem}
 
 \noindent
-Classical why-not provenance collapses these cases, because it conditions on a
-single resolved semantics and a fixed specification.
-Determination provenance makes the first three cases explicit by recording the
-semantic commitments under which outcomes hold, explaining absence in terms
-of the non-existence, incompleteness, or variability of supporting
-determinations rather than in terms of blocked derivations alone.
+This is \emph{horizontal} parsimony: within each retained layer,
+coarsen the representation to the minimum fidelity the query family
+demands.
 
-The taxonomy above classifies \emph{what kind} of absence holds.
-The layered structure provides a natural decomposition of the counterfactual
-reasoning needed to explain each case: contingent absence involves semantic
-counterfactuals (what if a different determination had been chosen?) composed
-with derivational counterfactuals (what if a missing premise had been
-present?); undefinedness reflects an incomplete determination; robust absence involves
-only derivational counterfactuals; and inter-specification absence requires
-changing the specification itself.
+\begin{example}[Certificates in practice]
+  Under serializability, a certificate for derivational provenance need
+  only record the ordering predicates relevant to the queried tuple's
+  conflict neighborhood.
+  Answering a preservation query (``would this result survive under a
+  different isolation level?'') requires a strictly stronger
+  certificate that preserves the full conflict-graph structure.
+  In distributed tracing, a certificate for critical-path analysis
+  retains only the clock-alignment and ordering commitments on the
+  path itself---not the full trace.
+\end{example}
+
+\paragraph{The two dimensions compose.}
+For a given query family: first truncate (filtration identifies the
+deepest relevant layer), then compress each retained layer (certificates
+identify the minimum per-layer fidelity).
+Together they define a well-parameterized design space for parsimonious
+systems lineage.
+Fixing the parameters---choosing the query family, computing minimal
+certificates, implementing adaptive retention---is the systems work
+that remains.
 
 % ================================================================
 \section{Open Questions}

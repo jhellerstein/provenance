@@ -2479,7 +2479,7 @@ More broadly, determination provenance serves as a \emph{query layer}
 on top of existing logs.
 Full traces are retained as today; the determination (the
 non-deterministic commitments and their structure) is extracted as a
-materialized index.
+\emph{semantic index} over the log.
 Diagnostic queries---robustness, counterfactuals, root-cause
 identification---are evaluated against the determination structure
 ($O(k)$ commitments) rather than by scanning raw events ($O(ne)$

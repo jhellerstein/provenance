@@ -2473,16 +2473,39 @@ Once reconstructed, classical semiring provenance applies, answering
 positive provenance queries (why-provenance, how-provenance) with full
 algebraic structure.
 
-\begin{example}[Distributed tracing]
-  A distributed trace consists of spans (service invocations) with
-  causal constraints ($\mathsf{cs}_X \prec \mathsf{sr}_X$,
-  $\mathsf{ss}_X \prec \mathsf{cr}_X$) but unsynchronized clocks.
-  Multiple executions---with different relative orderings of
-  spans---are admissible.
+\begin{example}[Distributed tracing {\`a} la Dapper~\cite{sigelman2010dapper}]
+  \label{ex:dapper}
+  A web-search request spawns a tree of spans: the frontend ($F$)
+  calls a cache ($C$) and an ad server ($A$) in parallel; the cache
+  misses and calls a database ($D$).
+  Each span has client-send/server-receive events on different hosts
+  with unsynchronized clocks.
+  Causal constraints ($\mathsf{cs}_X \prec \mathsf{sr}_X$,
+  $\mathsf{ss}_X \prec \mathsf{cr}_X$) are known, but the relative
+  wall-clock durations of $C$ and $A$ are not---multiple orderings are
+  admissible.
+
   A resolving determination commits to clock alignments
-  ($\varphi_{\mathrm{align}(h_i,h_j)}$) and span orderings
-  ($\varphi_{\mathrm{order}(X,Y)}$), fixing a single execution.
-  Once fixed, critical-path analysis is deterministic.
+  ($\varphi_{\mathrm{align}(h_i,h_j)}$) between hosts, fixing a single
+  execution timeline.
+  Once fixed, critical-path analysis is deterministic: either $C$
+  (cache miss + DB) or $A$ (ad auction) is on the critical path.
+
+  Determination provenance enables queries that Dapper cannot answer:
+  \begin{itemize}[nosep]
+    \item \emph{Is span $D$ robustly on the critical path?}
+          If $\mathrm{supp}(P(\mathrm{cp}=D)) = \mathcal{D}$, the
+          database is the bottleneck under every admissible clock
+          alignment.
+    \item \emph{Under which clock assumptions does the ad server
+          dominate latency?}
+          The support $\mathrm{supp}(P(\mathrm{cp}=A))$ identifies
+          exactly the determinations where $A$ is critical.
+    \item \emph{Would migrating the cache to a closer datacenter
+          change the critical path?}
+          A preservation question: compare supports under the current
+          spec vs.\ a spec with tighter latency bounds on $C$.
+  \end{itemize}
 \end{example}
 
 \subsection{Level 2: Counterfactuals and Robustness Across Determinations}

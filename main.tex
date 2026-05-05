@@ -166,9 +166,8 @@ We define \emph{determination responsibility}: a Shapley-value measure
 of each commitment's contribution to a tuple's presence.
 The independence structure of the commitment basis---reflected in the
 semiring's support formulas---determines when this measure is efficiently
-computable: \#P-hard in general, but polynomial when the conflict
-structure has bounded treewidth (a condition satisfied by partitioned
-workloads and tree-shaped service dependencies).
+computable: \#P-hard in general, but polynomial when concurrent
+contention is narrow (bounded conflict treewidth).
 
 \begin{example}[Provenance under transactional ambiguity]
   \label{ex:example}
@@ -211,13 +210,12 @@ workloads and tree-shaped service dependencies).
         filtration levels of a single determination semiring
         (Section~\ref{sec:negation-preview},
         Appendix~\ref{sec:appendix-datalog}).
-  \item Robustness (does a tuple hold under every determination?) is
-        coNP-complete in both instantiations
-        (Appendix~\ref{app:robustness-proofs});
-        \emph{determination responsibility}---a Shapley-value measure
-        of each commitment's contribution---is \#P-hard in general but
-        FPT in conflict treewidth
+  \item \emph{Determination responsibility}: a Shapley-value measure
+        of each commitment's contribution, \#P-hard in general but
+        FPT in conflict treewidth, with an FPRAS for the general case
         (Section~\ref{sec:responsibility}).
+        Robustness is coNP-complete
+        (Appendix~\ref{app:robustness-proofs}).
 \end{enumerate}
 
 
@@ -1645,8 +1643,8 @@ depth~$0$, $\mathrm{PosBool}(\Phi)$ for single-layer determinations,
 and the three classical negation semantics as filtration levels.
 Determination responsibility provides a quantitative refinement:
 Shapley values over the determination game measure each commitment's
-contribution, with exact computation tractable when the conflict
-structure has bounded treewidth.
+contribution, with exact computation tractable whenever concurrent
+contention is narrow.
 
 \paragraph{Open directions.}
 Extending responsibility to weighted (non-uniform) distributions over

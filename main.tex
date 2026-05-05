@@ -197,6 +197,13 @@ composes through relational algebra~\cite{green2007provenance}.
   Determination provenance makes this dependence explicit by recording the
   commitments under which the query result is determined, together with the
   derivational explanation that applies once those commitments are fixed.
+  The algebraic structure then enables reasoning that system traces alone
+  cannot support: the robustness of $b$ composes through joins (a join
+  with $b$ is still robust); the contingency of $d$ composes through
+  unions (a union containing $d$ is nonzero under every determination,
+  since $b$ contributes under all of them); and the \emph{support} of
+  $d$---the set of serializations that produce it---answers
+  counterfactual and distributional questions without re-executing.
   Section~\ref{sec:transactions} formalizes this example.
 \end{example}
 

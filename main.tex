@@ -208,7 +208,11 @@ stable-model---correspond to different levels of the filtration.
         Appendix~\ref{sec:appendix-datalog}).
   \item Robustness (does a tuple hold under every determination?) is
         coNP-complete in both instantiations
-        (Section~\ref{sec:robustness-complexity}).
+        (Appendix~\ref{app:robustness-proofs});
+        \emph{determination responsibility}---a Shapley-value measure
+        of each commitment's contribution---is \#P-hard in general but
+        FPT in conflict treewidth
+        (Section~\ref{sec:responsibility}).
 \end{enumerate}
 
 
@@ -557,7 +561,7 @@ The framework operates at three levels:
         survives a change of specification (e.g., SI to SER, stable
         to well-founded).
 \end{enumerate}
-Sections~\ref{sec:conditional-semiring}--\ref{sec:robustness-complexity}
+Sections~\ref{sec:conditional-semiring}--\ref{sec:responsibility}
 develop levels (2) and (3); level (1) is detailed in
 Appendix~\ref{app:algebra}.
 
@@ -1348,86 +1352,188 @@ $r(c)$ is not (support in $\mathcal{F}_{k+1} \setminus \mathcal{F}_k$,
 invisible until the cycle layer is discharged).
 
 % ================================================================
-\section{Complexity of Robustness}
-\label{sec:robustness-complexity}
+\section{Determination Responsibility}
+\label{sec:responsibility}
 % ================================================================
 
-Robustness---whether a tuple holds under \emph{every} resolving
-determination---is a natural question in the framework.
-Supports compose cleanly through queries
-(Corollary~\ref{cor:propagation-filtration}), but deciding whether a
-support equals $\mathcal{D}$ is computationally hard.
-The hardness is unsurprising in isolation---exponentially many
-determinations make universality expensive---but its value is as a
-validation: the same abstract theorem yields hardness in both
-instantiations via a uniform mechanism, confirming that width is a
-natural complexity parameter.
+Robustness is a binary question: does a tuple hold under every
+determination, or not?
+For contingent tuples---those with partial support---a finer question
+arises: \emph{which commitments are most responsible} for the tuple's
+presence or absence?
+This section defines a quantitative responsibility measure over
+commitments, establishes its exact complexity, and identifies tractable
+cases.
+(The binary robustness question is coNP-complete in the width of
+independent commitments; see Appendix~\ref{app:robustness-proofs}.)
 
-\begin{definition}[Determination width]
-  \label{def:width}
-  The \emph{width} of a layer is the number of independent commitments
-  it contains.
-  The \emph{width} of a determination is the maximum width of any layer.
-  A layer of width $n$ with each commitment selecting among $k_i \ge 2$
-  alternatives admits $\prod_{i=1}^n k_i$ resolving determinations
-  (exponential in $n$ when all $k_i \ge 2$).
+\subsection{The Determination Game}
+
+Fix a single-layer determination with $n$ independent binary commitments
+$\varphi_1, \ldots, \varphi_n$, a realized determination $D^*$, and a
+tuple $t$ with support $S \subseteq \mathcal{D}$.
+We define a cooperative game whose players are the commitments and whose
+value function measures how much fixing a coalition of commitments to
+their $D^*$-values increases the probability that $t$ holds.
+
+\begin{definition}[Presence game]
+  \label{def:presence-game}
+  The \emph{presence game} for tuple $t$ under determination $D^*$ is
+  the cooperative game $(N, v)$ where $N = \{1, \ldots, n\}$ and for
+  $C \subseteq N$:
+  \[
+    v(C) \;\triangleq\;
+    \frac{|\{D \in S \mid D \text{ agrees with } D^* \text{ on } C\}|}
+         {2^{n - |C|}}.
+  \]
+  That is, $v(C)$ is the probability that $t$ holds when the commitments
+  in $C$ are fixed to their $D^*$-values and the remaining commitments
+  are resolved uniformly at random.
 \end{definition}
 
-\begin{theorem}[Robustness is coNP-complete in width]
-  \label{thm:robustness-conp}
-  For any instantiation where the widest layer has $n$ independent
-  binary commitments, validity checking is polynomial, and query
-  evaluation is polynomial, deciding robustness is coNP-complete.
+\noindent
+The game satisfies $v(\emptyset) = |S|/2^n$ (the unconditional
+probability that $t$ holds) and $v(N) = \mathbf{1}[D^* \in S]$
+(whether $t$ holds under the actual determination).
+
+\begin{definition}[Determination responsibility]
+  \label{def:det-responsibility}
+  The \emph{determination responsibility} of commitment $\varphi_i$ for
+  tuple $t$ under $D^*$ is the Shapley value of player $i$ in the
+  presence game:
+  \[
+    \rho(\varphi_i, t) \;\triangleq\;
+    \sum_{C \subseteq N \setminus \{i\}}
+    \frac{|C|!\,(n{-}|C|{-}1)!}{n!}
+    \bigl[v(C \cup \{i\}) - v(C)\bigr].
+  \]
+\end{definition}
+
+\noindent
+By the efficiency axiom of Shapley values,
+$\sum_{i=1}^n \rho(\varphi_i, t) = v(N) - v(\emptyset)$:
+the responsibilities sum to the difference between the actual outcome
+and the unconditional probability.
+For a robust tuple ($S = \mathcal{D}$), $v(C) = 1$ for all $C$, so
+$\rho(\varphi_i, t) = 0$ for all $i$---no commitment matters.
+For a singleton support ($S = \{D^*\}$), every commitment contributes
+equally: $\rho(\varphi_i, t) = (1 - 2^{-n})/n$.
+
+\subsection{Complexity of Exact Computation}
+
+Computing determination responsibility requires evaluating the marginal
+contribution of each commitment across all coalition sizes---a weighted
+model-counting problem over the support.
+
+\begin{theorem}[Hardness of determination responsibility]
+  \label{thm:responsibility-hard}
+  Computing $\rho(\varphi_i, t)$ is $\mathrm{\#P}$-hard, even for
+  single-layer determinations with $n$ independent binary commitments
+  and a support given as a DNF formula.
 \end{theorem}
-
 \begin{proof}
-  \emph{Upper bound.}
-  To refute robustness, guess a determination $D$ ($n$ binary choices,
-  polynomial-size), verify validity, evaluate the query, and check that
-  $t$ is absent (polynomial-time certificate).
-
-  \emph{Lower bound.}
-  $n$ independent binary commitments give $|\mathcal{D}| = 2^n$,
-  bijecting with truth assignments to $n$ variables.
-  A UCQ encodes any DNF $\psi$: the distinguished tuple is present under
-  $D$ iff the corresponding assignment satisfies $\psi$.
-  Robustness reduces to \textsc{DNF-Validity} (coNP-complete).
+  The marginal contribution $v(C \cup \{i\}) - v(C)$ requires counting
+  the elements of $S$ that agree with $D^*$ on $C$ and differ on $i$.
+  When $S$ is encoded as a DNF, this is a \#DNF counting problem under
+  a random restriction---known to be \#P-hard by reduction from
+  \#SAT~\cite{valiant1979complexity}.
 \end{proof}
 
 \noindent
-Both instantiations admit unbounded width:
-in the transactional setting, $n$ pairs of
-conflicting transactions on distinct objects give $n$ independent binary
-ordering commitments;
-in Datalog (stable models), $n$ disjoint $\neg$-cycles of length~2 give
-$n$ independent binary choice commitments.
-In the Datalog case, the same reduction independently proves
-coNP-hardness of skeptical reasoning under stable
-models~\cite{marek1991autoepistemic}, validating that the determination
-semiring's width-based abstraction captures the source of hardness in
-both settings.
-Full proofs in Appendix~\ref{app:robustness-proofs}.
+The hardness validates the measure: determination responsibility is
+genuinely harder than robustness (coNP) because it requires counting,
+not just deciding.
 
-\begin{corollary}[Tractability at bounded width]
-  \label{cor:fpt-width}
-  For a single-layer determination of width $w$ (all commitments commute),
-  robustness is decidable in time $O(2^w \cdot p(n))$, where $p(n)$ is the
-  cost of validity checking and query evaluation---fixed-parameter
-  tractable in $w$.
-  More generally, for depth $d$ and width $w$, the brute-force bound is
-  $O(2^{wd} \cdot p(n))$.
-\end{corollary}
+\subsection{Tractability via Conflict Structure}
+
+Despite general hardness, the structure of the commitment basis yields
+tractable cases.
+In the transactional setting, the independence structure of ordering
+commitments mirrors the conflict graph: commitments on distinct pairs
+are independent, while shared transactions create dependencies.
+
+\begin{definition}[Conflict treewidth]
+  \label{def:conflict-tw}
+  The \emph{conflict treewidth} of a single-layer determination is the
+  treewidth of the graph whose vertices are the $n$ commitments and
+  whose edges connect commitments that share a transaction (i.e., are
+  not independent).
+\end{definition}
+
+\begin{theorem}[Tractability at bounded conflict treewidth]
+  \label{thm:responsibility-tw}
+  For a single-layer determination with conflict treewidth $w$,
+  determination responsibility is computable in time
+  $O(2^w \cdot n^2 \cdot p(n))$, where $p(n)$ is the cost of query
+  evaluation---fixed-parameter tractable in $w$.
+\end{theorem}
+\begin{proof}[Proof sketch]
+  The support $S$ is definable as a positive Boolean formula whose
+  primal graph has treewidth $\le w$ (each commitment corresponds to a
+  variable; dependencies create edges).
+  The marginal contribution $v(C \cup \{i\}) - v(C)$ reduces to
+  weighted model counting under a partial assignment---computable in
+  $O(2^w \cdot \mathrm{poly}(n))$ on bounded-treewidth
+  formulas~\cite{samer2010algorithms}.
+  Summing over all $O(n)$ coalition sizes with the Shapley weighting
+  gives the stated bound.
+\end{proof}
 
 \noindent
-The coNP-completeness result (Theorem~\ref{thm:robustness-conp}) and
-Corollary~\ref{cor:fpt-width} together validate width as a natural
-complexity parameter for explicit determination enumeration: robustness
-is tractable when width is bounded and intractable when it grows with
-the input.
-Computing the full support $\mathrm{supp}(P(t))$ has the same profile:
-the hardness resides in constructing $\mathcal{D}$ (enumerating resolving
-determinations); once $\mathcal{D}$ is given, evaluating queries under
-each determination is polynomial.
+Bounded conflict treewidth arises naturally in systems settings:
+partitioned workloads (each partition's transactions conflict only
+internally), microservice DAGs (services interact along a tree-shaped
+dependency graph), and sharded databases (cross-shard conflicts are
+sparse).
+In these settings, determination responsibility is efficiently
+computable and directly actionable: ``ordering commitment
+$\varphi_{T_i \prec T_j}$ has responsibility $0.73$ for the SLA
+violation'' tells the scheduler which interleaving to avoid.
+
+\subsection{Approximation for General Supports}
+
+When conflict treewidth is unbounded, sampling provides an efficient
+approximation.
+
+\begin{proposition}[FPRAS for determination responsibility]
+  \label{prop:fpras}
+  There exists a fully polynomial randomized approximation scheme for
+  $\rho(\varphi_i, t)$: for any $\varepsilon, \delta > 0$, the
+  algorithm outputs $\hat{\rho}$ with
+  $|\hat{\rho} - \rho(\varphi_i, t)| \le \varepsilon$ with probability
+  $\ge 1 - \delta$, in time $O(n/\varepsilon^2 \cdot
+  \log(1/\delta) \cdot p(n))$.
+\end{proposition}
+\begin{proof}[Proof sketch]
+  Sample $m = O(n/\varepsilon^2 \cdot \log(1/\delta))$ random
+  permutations $\pi$.
+  For each $\pi$, compute the marginal contribution of $i$ given the
+  coalition preceding $i$: this requires evaluating the query under two
+  specific determinations (one with $\varphi_i$ set to each value,
+  remaining commitments sampled uniformly), each costing $p(n)$.
+  The average of marginal contributions converges to $\rho(\varphi_i, t)$
+  by the permutation characterization of Shapley values.
+\end{proof}
+
+\noindent
+The FPRAS is practical for systems diagnosis: with $n = 100$ concurrent
+transactions and $\varepsilon = 0.05$, approximately $40{,}000$ query
+evaluations suffice---feasible for offline analysis of recorded traces.
+
+\subsection{Multi-Layer Responsibility}
+
+For determinations of depth $d > 1$, responsibility is defined
+\emph{per layer}: the responsibility of a commitment at layer $k$ is
+its Shapley value in the presence game conditioned on layers
+$1, \ldots, k{-}1$ being discharged.
+This respects non-commutativity: one does not ask ``what if layer-$2$
+commitments were resolved before layer-$1$?'' because that is not a
+valid determination.
+The complexity per layer is the same as the single-layer case
+(\#P-hard in general, FPT in the layer's conflict treewidth).
+The filtration provides a natural stopping criterion: if
+$\mathrm{qdepth}(t) = k$, only layers $1, \ldots, k$ contribute
+nonzero responsibility.
 
 % ================================================================
 \section{Related Work}
@@ -1446,6 +1552,9 @@ explanations~\cite{halpern2001causes} likewise condition on a single
 outcome.
 Determination provenance generalizes these by making the
 commitments that precede derivational provenance explicit and composable.
+Determination responsibility (Section~\ref{sec:responsibility}) lifts
+Meliou et al.'s responsibility from data tuples to semantic commitments,
+using Shapley values to quantify each commitment's contribution.
 
 \medskip
 \noindent\textbf{Provenance beyond the monotone fragment.}
@@ -1524,14 +1633,17 @@ reflects the layered structure of individual determinations, and query
 evaluation respects this structure compositionally.
 The determination semiring recovers classical semiring provenance at
 depth~$0$, $\mathrm{PosBool}(\Phi)$ for single-layer determinations,
-the three classical negation semantics as filtration levels, and the
-coNP-completeness of skeptical reasoning as an instance of width-based
-robustness.
+and the three classical negation semantics as filtration levels.
+Determination responsibility provides a quantitative refinement:
+Shapley values over the determination game measure each commitment's
+contribution, with exact computation tractable when the conflict
+structure has bounded treewidth.
 
 \paragraph{Open directions.}
-Quantitative robustness measures beyond binary robust/contingent;
-reversible commitments (where sealing can be retracted); and compact
-representations of the determination semiring for deep determinations.
+Extending responsibility to weighted (non-uniform) distributions over
+determinations; reversible commitments (where sealing can be retracted);
+and compact representations of the determination semiring for deep
+determinations.
 
 The success of algebraic provenance lay in identifying the right semantic object
 to explain.
@@ -1546,6 +1658,13 @@ resolution, provenance must explain the assumptions that made meaning possible.
 \section{Robustness Proofs}
 \label{app:robustness-proofs}
 % ================================================================
+
+\begin{theorem}[Robustness is coNP-complete in width]
+  \label{thm:robustness-conp}
+  For any instantiation where the widest layer has $n$ independent
+  binary commitments, validity checking is polynomial, and query
+  evaluation is polynomial, deciding robustness is coNP-complete.
+\end{theorem}
 
 \subsection{Transactional Hardness (Full Proof)}
 

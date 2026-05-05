@@ -1503,23 +1503,37 @@ support a tuple, not merely whether all do.
 \label{sec:conclusion}
 % ================================================================
 
-Determination provenance reframes provenance around a simple observation:
-many systems produce not a single outcome but a space of admissible ones,
-and explaining an observation requires accounting for how ambiguity was
-resolved.
-The framework makes semantic commitments explicit and composable:
-the space of resolving determinations forms a semiring whose filtration
-reflects layered commitment structure, query evaluation respects this
-structure, and the three classical negation semantics emerge as
-filtration levels.
-Determination responsibility provides a quantitative refinement,
-with exact computation tractable whenever concurrent contention is narrow
-and an FPRAS available in the general case.
+Classical provenance explains derivations under a fixed semantics.
+Many systems---transactional databases, distributed services, logic
+programs with negation---operate under semantic ambiguity, where
+multiple outcomes are admissible for the same history.
+Determination provenance extends algebraic provenance to these settings
+by making the commitments that resolve ambiguity explicit and
+composable.
+
+The algebraic development shows that the space of resolving
+determinations forms a commutative semiring equipped with a filtration
+that query evaluation respects.
+This structure is not merely bookkeeping: it recovers classical
+provenance at depth~$0$, positive Boolean provenance for single-layer
+determinations, and---most strikingly---the three classical negation
+semantics for Datalog as different levels of the same filtration.
+Determination responsibility builds on this foundation, using the
+semiring's independence structure to define a Shapley-value measure of
+each commitment's contribution that is \#P-hard in general but
+tractable whenever concurrent contention is narrow.
+
+The success of algebraic provenance lay in identifying the right
+semantic object to explain.
+Determination provenance extends that insight: when meaning itself
+depends on resolution, provenance must explain the assumptions that
+made meaning possible.
 
 \paragraph{Open directions.}
-Weighted (non-uniform) distributions over determinations; reversible
-commitments (where sealing can be retracted); and compact
-representations of the determination semiring for deep determinations.
+Extending responsibility to weighted (non-uniform) distributions over
+determinations; reversible commitments (where sealing can be retracted);
+and compact representations of the determination semiring for deep
+determinations.
 
 \pagebreak
 \appendix

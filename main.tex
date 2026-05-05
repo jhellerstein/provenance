@@ -107,7 +107,7 @@ semiring~\cite{green2007provenance,suciu2011probabilistic}.
 The algebraic structure provides far more than tracing: compositional
 explanation (provenance of a join from provenance of its inputs),
 counterfactual reasoning (why-not), and quantitative measures
-(confidence, multiplicity)---explanation reduces to arithmetic, and this
+(confidence, multiplicity). Explanation reduces to arithmetic, and this
 reduction has been remarkably effective.
 
 Despite this success, formal data provenance has had limited impact on the
@@ -130,11 +130,11 @@ A bank account withdrawal is denied; classical provenance can explain
 would have prevented the denial arrived too late---that explanation
 requires identifying the scheduling commitment that ordered the balance
 check before the deposit.
-Would the denial survive a change from snapshot isolation to
-serializability?
-Would it persist if the bank switched schedulers?
-Under what fraction of admissible schedules does the SLA hold---and
-which scheduling commitment is responsible when it doesn't?
+Was the denial inevitable (would it occur under every admissible
+schedule), or was it an artifact of one particular interleaving?
+How likely is it to recur---under what fraction of schedules does the
+denial arise?
+If the system changed its scheduling policy, would the denial disappear?
 These are questions about the \emph{assumptions} under which the outcome
 was produced, not about the derivation itself.
 The same phenomenon arises in database theory: a Datalog program with

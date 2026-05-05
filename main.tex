@@ -1351,9 +1351,10 @@ support equals $\mathcal{D}$ is computationally hard.
 
 \begin{definition}[Determination width]
   \label{def:width}
-  The \emph{width} of a layer $L$ is $\log_2$ of the number of distinct
-  outcomes the commitments in $L$ can jointly produce---the bits of
-  ambiguity that layer resolves.
+  The \emph{width} of a layer is the number of independent binary
+  commitments it contains after converting each $k$-ary commitment to
+  $\lceil \log_2 k \rceil$ independent binary commitments
+  (Appendix~\ref{app:robustness-proofs}).
   The \emph{width} of a determination is the maximum width of any layer.
   A determination of width $n$ admits up to $2^n$ resolving
   determinations.
@@ -1576,6 +1577,20 @@ precisely parallel Green et al.'s foundational result at the new level.
 \section{Robustness Proofs}
 \label{app:robustness-proofs}
 % ================================================================
+
+\subsection{Binary Basis Construction}
+
+A $k$-ary commitment (selecting among $k$ alternatives) is converted to
+$\lceil \log_2 k \rceil$ binary commitments by encoding the alternative
+index in binary: commitment $\varphi^{(j)}$ selects the $j$-th bit.
+These binary commitments commute (each acts on a different bit) and
+belong to the same layer as the original.
+The construction preserves the set of resolving determinations and does
+not change the number of layers.
+The width of a layer after binarization is
+$\sum_{\varphi \in L} \lceil \log_2 k_\varphi \rceil$,
+where $k_\varphi$ is the number of alternatives for each commitment in
+layer $L$.
 
 \subsection{Transactional Hardness (Full Proof)}
 

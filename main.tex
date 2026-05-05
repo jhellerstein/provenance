@@ -1352,32 +1352,30 @@ support equals $\mathcal{D}$ is computationally hard.
 
 \begin{definition}[Determination width]
   \label{def:width}
-  The \emph{width} of a layer is the number of independent binary
-  commitments it contains after converting each $k$-ary commitment to
-  $\lceil \log_2 k \rceil$ independent binary commitments
-  (Appendix~\ref{app:robustness-proofs}).
+  The \emph{width} of a layer is the number of independent commitments
+  it contains.
   The \emph{width} of a determination is the maximum width of any layer.
-  A determination of width $n$ admits up to $2^n$ resolving
-  determinations.
+  A layer of width $n$ with each commitment selecting among $k_i \ge 2$
+  alternatives admits $\prod_{i=1}^n k_i$ resolving determinations
+  (exponential in $n$ when all $k_i \ge 2$).
 \end{definition}
 
 \begin{theorem}[Robustness is coNP-complete in width]
   \label{thm:robustness-conp}
-  For any instantiation of width $n$ where validity checking and query
-  evaluation are polynomial, deciding robustness of a UCQ is
-  coNP-complete.
+  For any instantiation where the widest layer has $n$ independent
+  binary commitments, validity checking is polynomial, and query
+  evaluation is polynomial, deciding robustness is coNP-complete.
 \end{theorem}
 
 \begin{proof}
   \emph{Upper bound.}
-  To refute robustness, guess a determination $D$ (specifiable in $n$
-  bits), verify validity, evaluate the query, and check that $t$ is
-  absent (polynomial-time certificate).
+  To refute robustness, guess a determination $D$ ($n$ binary choices,
+  polynomial-size), verify validity, evaluate the query, and check that
+  $t$ is absent (polynomial-time certificate).
 
   \emph{Lower bound.}
-  Width $n$ means the widest layer resolves $n$ bits of ambiguity,
-  giving $2^n$ determinations that biject with truth assignments to $n$
-  variables.
+  $n$ independent binary commitments give $|\mathcal{D}| = 2^n$,
+  bijecting with truth assignments to $n$ variables.
   A UCQ encodes any DNF $\psi$: the distinguished tuple is present under
   $D$ iff the corresponding assignment satisfies $\psi$.
   Robustness reduces to \textsc{DNF-Validity} (coNP-complete).
@@ -1505,20 +1503,6 @@ resolution, provenance must explain the assumptions that made meaning possible.
 \section{Robustness Proofs}
 \label{app:robustness-proofs}
 % ================================================================
-
-\subsection{Binary Basis Construction}
-
-A $k$-ary commitment (selecting among $k$ alternatives) is converted to
-$\lceil \log_2 k \rceil$ binary commitments by encoding the alternative
-index in binary: commitment $\varphi^{(j)}$ selects the $j$-th bit.
-These binary commitments commute (each acts on a different bit) and
-belong to the same layer as the original.
-The construction preserves the set of resolving determinations and does
-not change the number of layers.
-The width of a layer after binarization is
-$\sum_{\varphi \in L} \lceil \log_2 k_\varphi \rceil$,
-where $k_\varphi$ is the number of alternatives for each commitment in
-layer $L$.
 
 \subsection{Transactional Hardness (Full Proof)}
 

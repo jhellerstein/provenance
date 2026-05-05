@@ -1340,9 +1340,36 @@ $\varphi_{r(c)=\mathbf{t}}$ itself---not a blocked derivation but a
 semantic choice.
 
 \paragraph{The filtration recovers three semantics.}
-Under the enriched outcome domain, the classical semantics are
-determination prefixes---different stopping points of the same
-determination:
+
+\begin{theorem}[Negation semantics as filtration levels]
+  \label{thm:negation-filtration}
+  For a finite normal Datalog program with $k$ stratification layers and
+  $\neg$-cycles resolved by choice predicates, the determination semiring
+  has depth $k{+}1$.
+  The classical negation semantics correspond to filtration levels:
+  stable-model semantics reads the full filtration ($\mathcal{F}_{k+1}$);
+  well-founded semantics reads $\mathcal{F}_k$ (the sealing prefix) and
+  classifies residual ambiguity as $\mathbf{u}$;
+  stratified semantics reads $\mathcal{F}_k$ and is defined only when
+  the sealing prefix resolves all atoms.
+\end{theorem}
+\begin{proof}[Proof sketch]
+  The sealing prefix $\varphi_{\seal}(S_1) \seq \cdots \seq
+  \varphi_{\seal}(S_k)$ is shared by all resolving determinations
+  (it is the unique stratified evaluation).
+  Hence all determinations agree at level $k$:
+  $\mathcal{F}_k = \{\emptyset, \mathcal{D}\}$.
+  The choice layer (layer $k{+}1$) distinguishes stable models:
+  $\mathcal{F}_{k+1} = 2^{\mathcal{D}}$.
+  WFS computes the same sealing prefix and classifies atoms by their
+  support at level $k$: robust ($\mathbf{t}$), robustly absent
+  ($\mathbf{f}$), or contingent ($\mathbf{u}$)---without discharging
+  layer $k{+}1$.
+  Full proof in Appendix~\ref{sec:appendix-datalog}.
+\end{proof}
+
+\noindent
+Under the enriched outcome domain, the correspondence is summarized as:
 \begin{center}
 \small
 \begin{tabular}{@{}lll@{}}

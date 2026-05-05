@@ -1501,70 +1501,6 @@ resolution, provenance must explain the assumptions that made meaning possible.
 \appendix
 
 % ================================================================
-\section{Open Questions: Determination Structure}
-\label{app:open-questions}
-% ================================================================
-
-A determination is organized into its layered normal form: a resolving
-determination: commitments grouped into maximal commuting batches, discharged
-sequentially.
-Several structural questions about this object remain open.
-
-\paragraph{The determination as Foata normal form.}
-In classical trace theory~\cite{mazurkiewicz1977concurrent}, the Foata normal
-form canonically represents a word in a partially commutative monoid as a
-sequence of maximal independent layers.
-The layered normal form is the analog for determinations---but with a crucial
-difference: commutation is \emph{dynamic} (history-contingent) rather than
-static.
-Whether $\varphi$ and $\psi$ commute depends on the current admissible set,
-which changes as earlier layers are discharged.
-A formal characterization of the determination as a dynamic Foata normal form---and
-conditions under which two determinations are equivalent (produce the same
-determined specification)---would give the determination a precise algebraic identity
-beyond its definition.
-
-\paragraph{Layers under history extension.}
-Under a persistent basis, the admissible set can only shrink as history grows.
-Fewer admissible outcomes means fewer commitments are needed and fewer
-opportunities for non-commutativity.
-\emph{Conjecture:} for a persistent basis, the determination height (determination
-depth) is monotonically non-increasing under history extension.
-If true, this would mean that as more information arrives, resolution becomes
-easier (or at least no harder)---a natural property that connects to the
-Coordination Criterion's characterization of depth-$0$ specifications as
-those requiring no commitments at all.
-
-\paragraph{Query-relative number of layers.}
-A provenance query $P$ may depend on only a subset of the determination's layers.
-If $P$'s answer is determined after discharging $k < d$ layers (the remaining
-layers resolve ambiguity irrelevant to $P$), the effective determination for $P$ has
-height~$k$.
-This connects to layer certificates (Appendix~\ref{app:certificates}):
-a certificate for layer~$i$ is sufficient for $P$ precisely when $P$ does not
-depend on finer distinctions within that layer.
-Characterizing query-relative number of layers---which queries require which
-layers---would provide a formal basis for adaptive log retention.
-
-\paragraph{Reversible commitments.}
-The persistent-basis assumption guarantees that the determination discharges
-irreversibly.
-In settings with rollback (transactional abort-and-retry, speculative
-execution, backtracking search), commitments can be undone.
-Extending the determination to reversible commitments---replacing monoids with
-groups at each layer---and characterizing the resulting provenance structure
-is open.
-
-\paragraph{Propagation of determination provenance through queries.}
-Green et al.\ showed that semiring provenance propagates through positive
-relational algebra: annotations compose via $+$ (union) and $\times$ (join).
-The determination semiring $(2^{\mathcal{D}}, \cup, \cap)$ should propagate
-analogously: join intersects supports (both premises must hold), union takes
-their union (either suffices), and projection/selection preserve supports.
-A formal propagation theorem---stating that determination provenance is
-computed by evaluating the query over the determination semiring---would
-precisely parallel Green et al.'s foundational result at the new level.
-
 % ================================================================
 \section{Robustness Proofs}
 \label{app:robustness-proofs}
@@ -2579,6 +2515,42 @@ with derivational counterfactuals (what if a missing premise had been
 present?); undefinedness reflects an incomplete determination; robust absence involves
 only derivational counterfactuals; and inter-specification absence requires
 changing the specification itself.
+
+% ================================================================
+\section{Open Questions}
+\label{app:open-questions}
+% ================================================================
+
+Several structural questions about determinations remain open.
+
+\paragraph{Dynamic Foata normal form.}
+In classical trace theory~\cite{mazurkiewicz1977concurrent}, the Foata normal
+form canonically represents a word in a partially commutative monoid as a
+sequence of maximal independent layers.
+The layered structure of a determination is the analog---but commutation is
+\emph{dynamic}: whether $\varphi$ and $\psi$ commute depends on the current
+admissible set, which changes as earlier layers are discharged.
+Characterizing when two determinations are equivalent (produce the same
+resolved specification) would give determinations a precise algebraic
+identity beyond their definition.
+
+\paragraph{Depth under history extension.}
+Under a persistent basis, the admissible set can only shrink as history grows.
+\emph{Conjecture:} determination depth is monotonically non-increasing under
+history extension---as more information arrives, resolution becomes easier
+(or at least no harder).
+
+\paragraph{Query-relative depth.}
+A provenance query may depend on only a subset of the determination's layers.
+Characterizing which queries require which layers would provide a formal
+basis for adaptive log retention, connecting to layer certificates
+(Appendix~\ref{app:certificates}).
+
+\paragraph{Reversible commitments.}
+In settings with rollback (transactional abort-and-retry, speculative
+execution, backtracking search), commitments can be undone.
+Extending the framework to reversible commitments---replacing monoids with
+groups at each layer---is open.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{references}

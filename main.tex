@@ -80,16 +80,12 @@
   with negation.
   For Datalog, the classical negation semantics---stratified,
   well-founded, and stable-model---differ only in which filtration level
-  they read; the underlying determination semiring is the same.
-  Classical provenance is the degenerate case where no commitments are
-  needed.
-  In both settings, deciding whether an outcome is robust (holds under
-  every resolution) is coNP-complete.
-  Determination provenance enables robustness, counterfactual, and
-  tail-bound queries (under a uniform distribution over admissible
-  resolutions) over transaction schedules and distributed traces---queries
-  that classical provenance cannot express because they concern the space
-  of admissible executions rather than any single execution.
+  they read.
+  The semiring's independence structure yields a tractability frontier
+  for quantitative diagnosis: \emph{determination responsibility}---a
+  Shapley-value measure of each commitment's contribution---is
+  \#P-hard in general but efficiently computable when the conflict
+  structure has bounded treewidth.
 \end{abstract}
 
 \maketitle
@@ -161,9 +157,18 @@ evaluation respects---giving the framework genuine algebraic depth beyond
 the support structure alone.
 We instantiate the framework for transactional systems (ambiguity from
 concurrency) and Datalog with negation (ambiguity from multiple models).
-In both, deciding robustness is coNP-complete.
 For Datalog, the classical negation semantics---stratified, well-founded,
 stable-model---correspond to different levels of the filtration.
+
+The semiring structure also yields a tractability frontier for
+quantitative diagnosis.
+We define \emph{determination responsibility}: a Shapley-value measure
+of each commitment's contribution to a tuple's presence.
+The independence structure of the commitment basis---reflected in the
+semiring's support formulas---determines when this measure is efficiently
+computable: \#P-hard in general, but polynomial when the conflict
+structure has bounded treewidth (a condition satisfied by partitioned
+workloads and tree-shaped service dependencies).
 
 \begin{example}[Provenance under transactional ambiguity]
   \label{ex:example}

@@ -1431,19 +1431,17 @@ complementary, explaining which commitments select the model under which
 their techniques then apply.
 
 \medskip
-\noindent\textbf{Provenance in transactional and systems settings.}
+\noindent\textbf{Provenance in transactional settings.}
 Database provenance systems (Perm~\cite{glavic2008perm},
 GProM~\cite{arab2018gpromprovenance}) trace derivations under a fixed
-execution.
+execution or isolation level.
 Vandevoort et al.~\cite{vandevoort2025mixed} study which transactions can
 run at weaker isolation while preserving serializable behavior---a
 preservation question in our sense.
-Systems lineage work~\cite{sigelman2010dapper,seltzer2005provenance}
-captures entire execution histories without algebraic structure.
-Determination provenance provides the missing algebraic foundation:
-it separates the semantic commitments (which execution was chosen) from
-the derivational explanation (how the result was produced under that
-execution).
+Our framework is complementary: it separates the semantic commitments
+(which execution was chosen) from the derivational explanation (how the
+result was produced under that execution), enabling these systems'
+per-execution provenance to be composed across alternative resolutions.
 
 \medskip
 \noindent\textbf{Determination complexity.}

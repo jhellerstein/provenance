@@ -1501,8 +1501,11 @@ responsibility is tractable.
 Conflict treewidth is bounded whenever concurrent contention is narrow:
 a workload with $n$ transactions but at most $w$ mutually conflicting
 at any point has conflict treewidth $\le w$.
-This is the common case---high-contention hotspots involve few
-transactions simultaneously, even in large workloads.
+High treewidth is largely self-disqualifying in practice: deeply
+intertwined conflicts cause poor transactional performance, so
+practitioners separate contending workloads (e.g., running analytics
+and OLTP on independent systems without strong cross-system
+consistency).
 When treewidth is small, responsibility is efficiently computable:
 ``$\varphi_{T_i \prec T_j}$ has responsibility $0.73$ for the SLA
 violation'' tells the scheduler which interleaving to avoid.

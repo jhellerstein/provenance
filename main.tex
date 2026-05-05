@@ -1142,7 +1142,8 @@ The resolving determinations are $\mathcal{D} = \{D^{(r)}, D^{(s)}\}$:
 sharing the stratified prefix (layers~1--2) and branching at layer~3.
 The filtration is
 $\mathcal{F}_0 = \mathcal{F}_1 = \mathcal{F}_2 = \{\emptyset, \mathcal{D}\}$
-and $\mathcal{F}_3 = 2^{\mathcal{D}}$.
+and $\mathcal{F}_3 = 2^{\mathcal{D}}$ (trivial until the choice layer;
+the theorem's value is the correspondence, not intermediate richness).
 
 \paragraph{Determination provenance.}
 \[
@@ -1187,12 +1188,14 @@ semantic choice.
   The choice layer (layer $k{+}1$) distinguishes stable models:
   $\mathcal{F}_{k+1} = 2^{\mathcal{D}}$.
   WFS computes the same sealing prefix and then applies the alternating
-  fixpoint---an entailment that classifies each atom by whether it holds
-  in all stable models (robust, $\mathbf{t}$), none (robustly absent,
-  $\mathbf{f}$), or some but not all (contingent, $\mathbf{u}$).
-  This classification is exactly the support structure at filtration
-  level~$k$: the alternating fixpoint discovers which atoms have full,
-  empty, or partial support without discharging layer $k{+}1$.
+  fixpoint~\cite{vanGelder1991wellFounded}---an entailment that
+  classifies each atom by whether it holds in all stable models (robust,
+  $\mathbf{t}$), none (robustly absent, $\mathbf{f}$), or some but not
+  all (contingent, $\mathbf{u}$).
+  For the restricted class (independent final negative SCCs), this
+  classification coincides exactly with the support structure at
+  filtration level~$k$: the alternating fixpoint discovers which atoms
+  have full, empty, or partial support without discharging layer $k{+}1$.
   Full proof in Appendix~\ref{sec:appendix-datalog}.
 \end{proof}
 
@@ -1334,10 +1337,11 @@ the support---a marginal contribution for each coalition size.
   single-layer determinations with a support given as a DNF formula.
 \end{theorem}
 \begin{proof}
-  The marginal $v(C \cup \{i\}) - v(C)$ requires counting support
-  elements agreeing with $D^*$ on $C$ and differing on $i$.
-  This is a weighted model-counting problem over a DNF formula under
-  partial assignment, which is \#P-hard~\cite{deng1994complexity}.
+  Weighted voting games embed as presence games: $n$ binary commitments
+  with weights $w_i$ and threshold $q$ give support
+  $S = \{D \mid \sum_{i: D_i = D^*_i} w_i \ge q\}$.
+  Computing Shapley values for weighted voting games is
+  \#P-complete~\cite{deng1994complexity}.
 \end{proof}
 
 \paragraph{Tractability via conflict structure.}
@@ -1354,11 +1358,17 @@ responsibility is tractable.
 \begin{theorem}[Tractability at bounded conflict treewidth]
   \label{thm:responsibility-tw}
   For a single-layer determination with conflict treewidth $w$ and a
-  support predicate definable as a monotone Boolean formula over the
-  commitment variables (as holds for SLA predicates over ordering
-  commitments), determination responsibility is computable in time
+  monotone support predicate over the commitment variables,
+  determination responsibility is computable in time
   $O(2^w \cdot n^2 \cdot p(n))$---FPT in $w$.
 \end{theorem}
+
+\noindent
+Monotonicity holds for threshold predicates (``at most $k$ aborts''),
+upward-closed SLA conditions (``latency $\le \tau$'' when earlier
+serialization implies lower latency), and any positive Boolean
+combination of such conditions.
+
 \begin{proof}[Proof sketch]
   Under the ordering basis, each commitment corresponds to a Boolean
   variable and the support is a monotone formula whose clauses involve
@@ -1386,7 +1396,7 @@ violation'' tells the scheduler which interleaving to avoid.
 \paragraph{Approximation.}
 When treewidth is unbounded, sampling provides an additive approximation.
 
-\begin{proposition}[Randomized approximation of determination responsibility]
+\begin{proposition}[Additive approximation]
   \label{prop:fpras}
   For any $\varepsilon, \delta > 0$, $\rho(\varphi_i, t)$ can be
   additively $\varepsilon$-approximated with probability
@@ -1394,10 +1404,12 @@ When treewidth is unbounded, sampling provides an additive approximation.
   $O(n/\varepsilon^2 \cdot \log(1/\delta) \cdot p(n))$.
 \end{proposition}
 \begin{proof}[Proof sketch]
-  Sample random permutations; for each, compute the marginal
-  contribution of $i$ by evaluating the query under two determinations.
-  Convergence follows from the permutation characterization of Shapley
-  values.
+  Sample a random permutation $\pi$; let $C$ precede $i$.
+  Estimate the marginal by sampling a random completion of uncommitted
+  variables and evaluating the query (cost $p(n)$)---no exact counting
+  needed.
+  Each sample is an unbiased estimate bounded in $[-1,1]$; Hoeffding's
+  inequality gives the stated guarantee.
 \end{proof}
 
 \paragraph{Multi-layer responsibility.}
@@ -1441,7 +1453,8 @@ commitments: where Meliou et al.\ ask ``which input tuple is most
 responsible for an output,'' we ask ``which semantic commitment is most
 responsible for the output holding under this resolution.''
 Livshits et al.~\cite{livshits2021shapley} compute Shapley values for
-data tuples in query answers; our game is over commitments, not tuples.
+data tuples in query answers under a fixed semantics; determination
+responsibility uses the same axioms but over semantic commitments.
 
 \medskip
 \noindent\textbf{Possible-worlds and probabilistic provenance.}
@@ -1503,8 +1516,7 @@ Many systems---transactional databases, distributed services, logic
 programs with negation---operate under semantic ambiguity, where
 multiple outcomes are admissible for the same history.
 Determination provenance extends algebraic provenance to these settings
-by making the commitments that resolve ambiguity explicit and
-composable.
+by making the commitments that resolve ambiguity explicit and composable.
 
 The algebraic development shows that the space of resolving
 determinations forms a commutative semiring equipped with a filtration
@@ -1519,26 +1531,18 @@ each commitment's contribution that is \#P-hard in general but
 tractable whenever concurrent contention is narrow, with an efficient
 additive approximation available otherwise.
 
-For systems, the framework provides a query layer over existing traces.
-The determination---extracted as a semantic index over the
-log---enables diagnostic queries that log-scanning cannot answer:
-which scheduling commitment is most responsible for an SLA violation
-(Example~\ref{ex:responsibility}), whether an outcome is robust across
-all admissible serializations, and whether it survives a change of
-isolation level.
-Appendix~\ref{app:systems-lineage} develops the connection to systems
-lineage in detail.
+For systems, the determination serves as a semantic index over existing
+traces, enabling diagnostic queries---responsibility attribution,
+robustness, preservation across isolation levels---that log-scanning
+cannot answer (Appendix~\ref{app:systems-lineage}).
 
 The success of algebraic provenance lay in identifying the right
 semantic object to explain.
 Determination provenance extends that insight: when meaning itself
 depends on resolution, provenance must explain the assumptions that
 made meaning possible.
-
-Open directions include
-extending responsibility to weighted (non-uniform) distributions over
-determinations; reversible commitments (where sealing can be retracted);
-and compact representations of the determination semiring for deep
+Open directions include weighted distributions over determinations,
+reversible commitments, and compact representations for deep
 determinations.
 
 \pagebreak

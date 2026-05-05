@@ -4,27 +4,27 @@
 
 | # | Issue | Source | Status | Notes |
 |---|-------|--------|--------|-------|
-| 1 | Datalog theorem must be in body (before page 15) | All three | **TODO** | Need named theorem + proof sketch for filtration/negation-semantics correspondence |
-| 2 | Page budget: rebalance transactions vs. Datalog | All three | **TODO** | Currently 15.5pp. Compress transactions, move SI details to appendix |
+| 1 | Datalog theorem must be in body (before page 15) | All three | **Done** | Theorem 5.1 (negation semantics as filtration levels) + proof sketch |
+| 2 | Page budget: rebalance transactions vs. Datalog | All three | **Done** | Section 4 compressed from 327 to 255 lines; Datalog theorem added |
 
 ## P1: Formal (fix to avoid rejection)
 
 | # | Issue | Source | Status | Notes |
 |---|-------|--------|--------|-------|
-| 3 | Theorem 2.1 too strong / underspecified | ChatGPT, Claude | **TODO** | Add clarifying sentence: "classical provenance" = single K-relation over one resolved instance |
-| 4 | History-invariance scope unclear | ChatGPT, Claude | **TODO** | Add quiescent-history interpretation: holds when all environment events have occurred |
-| 5 | Semiring framing: filtration should be headline | All three | **Partial** | Added "filtration is the content" sentence. Reviews say go further — consider restructuring Section 3 |
-| 6 | "Minimal resolving determination" undefined | ChatGPT | **TODO** | Add definition: minimal = no proper subsequence resolves |
-| 7 | Foata normal form / canonical layering unjustified | ChatGPT | **TODO** | Either prove uniqueness or weaken to "given a chosen valid layering" |
-| 8 | Transaction model non-standard / vulnerable | ChatGPT, Claude | **Deferred** | Will compress transactions; Datalog becomes primary. Transactions as motivating instantiation |
+| 3 | Theorem 2.1 too strong / underspecified | ChatGPT, Claude | **Done** | Added "a single K-relation consistent with all admissible outcomes" |
+| 4 | History-invariance scope unclear | ChatGPT, Claude | **Done** | Added quiescent-history interpretation |
+| 5 | Semiring framing: filtration should be headline | All three | **Done** | Added filtration-is-content sentence + distinguished two objects |
+| 6 | "Minimal resolving determination" undefined | ChatGPT | **Done** | Defined: no proper subsequence resolves |
+| 7 | Foata normal form / canonical layering unjustified | ChatGPT | **Done** | Clarified: canonical per-determination given prefix commutativity; filtration well-defined via shared-prefix comparison |
+| 8 | Transaction model non-standard / vulnerable | ChatGPT, Claude | **Acceptable** | Compressed transactions; Datalog has the theorem. Transactions are motivating instantiation |
 
 ## P2: Presentation (fix to strengthen)
 
 | # | Issue | Source | Status | Notes |
 |---|-------|--------|--------|-------|
 | 9 | Complexity result is validation, not headline | All three | **Done** | Reframed in Section 6 opening |
-| 10 | Two algebraic objects conflated (D→K vs 2^D) | Claude | **TODO** | Clarify which is "determination provenance" vs "support semiring" |
-| 11 | Notation clash: ▷ for layers and join | Claude | **TODO** | Check — may be a false alarm (▷ is only for layers; ⋈ for join) |
+| 10 | Two algebraic objects conflated (D→K vs 2^D) | Claude | **Done** | Added parenthetical distinguishing determination semiring (supports) from determination provenance (D→K) |
+| 11 | Notation clash: ▷ for layers and join | Claude | **False alarm** | ▷ = \seq (layers); ⋈ = \bowtie (join). Different symbols. |
 | 12 | "Three forces" taxonomy formally underused | Claude | **Acceptable** | Conceptual scaffolding; not every concept needs a theorem |
 | 13 | Why-not claim needs more formal development | Claude | **Acceptable** | Remark 3.1 (symmetry) + Datalog appendix cover this adequately |
 | 14 | Figure 1 appears before all cases developed | Claude | **Acceptable** | Standard for summary figures; forward pointers are fine |

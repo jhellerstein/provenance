@@ -142,12 +142,13 @@ negation may admit multiple models, and whether a derived tuple holds
 may depend on which model is chosen.
 
 This paper extends provenance to settings with semantic ambiguity.
-The key idea is simple: before we can explain \emph{how} a result was
-derived, we must first account for \emph{which semantic commitments} made
-that derivation possible.
-We call such a sequence of irrevocable commitments a \emph{determination}.
-Once a determination is fixed, classical provenance applies; the
-interesting structure lives \emph{within} a determination (commitments
+The key observation is that a specification under ambiguity is a
+\emph{relation}---multiple admissible outcomes per input---and classical
+provenance requires a \emph{function}.
+A \emph{determination} is a sequence of irrevocable commitments that
+narrows the relation to a function; once functional, classical provenance
+applies.
+The interesting structure lives \emph{within} a determination (commitments
 organize into non-commuting layers) and \emph{across} determinations.
 
 Across determinations, the space of resolutions forms a semiring that

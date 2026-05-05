@@ -559,17 +559,11 @@ Appendix~\ref{app:algebra}.
 Classical provenance owes its power to algebraic structure: derivations
 compose through a commutative semiring, and query evaluation preserves
 that structure~\cite{green2007provenance}.
-This enables compositional reasoning---annotate base tuples once, and the
-semiring propagates through any query automatically.
 One might expect that layered determinations---sequences of non-commuting
 commitments---resist such clean algebraic treatment.
 In fact, the space of all resolving determinations forms a commutative
 semiring, and the layering within each determination is reflected as a
 filtration of sub-semirings that query evaluation respects.
-The result is the same compositional power for contingency that classical
-provenance provides for derivation: the support of a join is the
-intersection of its inputs' supports; the support of a union is their
-union.
 
 Throughout, we fix a specification $\Spec$ over a history class $\Hist$ and
 a persistent commitment basis $\Phi$; the set of minimal resolving
@@ -589,7 +583,6 @@ provenance} $P_D(t) \in K$ is the classical semiring provenance of tuple $t$
 computed over the determined specification $\Spec \mid D$
 (well-defined by Theorem~\ref{thm:resolution-implies-monotone}).
 
-Conditioned provenance explains a single determination.
 Conditioned provenance suffices for explaining a single execution.
 But some questions require reasoning \emph{across} determinations:
 Does this result hold under every admissible commit ordering, or is it
@@ -674,10 +667,6 @@ across domains.
   Classical why-not provenance explains absence derivationally under a
   fixed semantics; determination provenance adds the semantic dimension,
   recording which commitments made the absence (or presence) possible.
-  Under well-founded semantics, the value $\mathbf{u}$ is not
-  undefinedness but a determined classification of contingency---the
-  alternating fixpoint discovers that the atom has partial support
-  without committing to a branch.
 \end{remark}
 
 \subsection{Notation and Example}
@@ -881,16 +870,9 @@ No layer information is needed to make this distinction.
 \end{proof}
 
 \noindent
-Conversely, a layered determination can be characterized algebraically as
-an instantiation of a filtered semiring: a partition-refinement chain on
-$\mathcal{D}$ whose equivalence classes at each level correspond to
-commitments that commute within a layer.
-We can now see the algebraic identity of a layered determination: it is
-an instance of a filtered semiring, with each layer corresponding to a
-level of the filtration.
 The sequential structure that non-commutativity imposes is not a deficiency
-but a reflection of algebraic richness.
-Section~\ref{sec:negation-preview} gives a striking application: the
+but a reflection of algebraic richness:
+Section~\ref{sec:negation-preview} gives a striking application where the
 classical negation semantics for Datalog correspond to different levels of
 the same filtration.
 
@@ -1113,14 +1095,16 @@ recorded in the history as conflict edges accumulate.
 
 \begin{proposition}[Snapshot isolation: depth from snapshot dependencies]
   \label{prop:si-depth}
-  Under snapshot isolation, the commitment basis includes snapshot
-  commitments $\varphi_{\snap(T_i) = U}$ in addition to ordering and abort
-  commitments.
-  Snapshot commitments do not commute in general: the first-committer-wins
-  (FCW) rule can render a snapshot choice for $T_j$ infeasible once a
-  conflicting assignment for $T_i$ is fixed.
-  Worst-case number of layers under SI is $O(n)$ where $n$ is the number
-  of transactions, arising from chains of FCW dependencies.
+  Under snapshot isolation, the commitment basis adds snapshot predicates
+  $\varphi_{\snap(T_i) = U}$ (transaction $T_i$ reads from the effects of
+  transactions in $U$) and first-committer-wins predicates
+  $\varphi_{\mathrm{fcw}(x, T_i)}$ ($T_i$ is the first committer on
+  object $x$; concurrent writers on $x$ must abort).
+  Snapshot selections commute with each other, as do FCW decisions on
+  distinct objects; but a snapshot that depends on an FCW outcome cannot
+  commute with it.
+  Worst-case depth under SI is $O(n)$, arising from chains of
+  FCW-to-snapshot dependencies.
 \end{proposition}
 
 \subsection{Running Example Revisited}
@@ -1143,27 +1127,8 @@ The determination provenance is:
 Prior to resolution, even the \emph{form} of the provenance question for $d$
 is ambiguous (why vs.\ why-not).
 $b$ is robust (nonzero under every determination); $d$ is contingent.
-
-\subsection{Snapshot Isolation}
-
-Snapshot isolation (SI) is multiversion: each transaction reads from a
-snapshot.
-The commitment basis adds snapshot predicates:
-
-\begin{definition}[Snapshot commitment (SI only)]
-  \label{def:snapshot-commitment}
-  $\varphi_{\snap(T_i) = U}$ records that $T_i$
-  read from a snapshot containing exactly the effects of transactions in $U$.
-\end{definition}
-
-\noindent
-The first-committer-wins (FCW) rule constrains which snapshot
-assignments are jointly admissible.
-Snapshot commitments do not commute in general (FCW can render
-a choice for $T_j$ infeasible once $T_i$'s is fixed),
-introducing non-commutativity beyond serializability and
-potentially deepening the determination even for acyclic conflict graphs.
-Worst-case depth under SI is $O(n)$ (Proposition~\ref{prop:si-depth}).
+Figure~\ref{fig:det-tables} summarizes the determination structure across
+isolation levels for this example.
 
 \subsection{Enriching the Basis: Scheduling as Commitment}
 \label{sec:scheduling-basis}
@@ -1189,21 +1154,9 @@ under pure OCC, interleaving is environment;
 under an active scheduler, it is commitment;
 under partial control (e.g., hot keys serialized, cold keys uncontrolled),
 the determination records which orderings were chosen and which were observed.
-
-\paragraph{Connection to batch-optimal scheduling.}
-Baccaert et al.~\cite{baccaert2026makespan} show that finding a
-conflict-serializable schedule of minimal makespan is NP-complete.
-In our framework, a batch-optimal scheduler produces a single-layer
-determination
-$D_{\mathsf{sched}} = \{\varphi_{T_i \prec T_j} \mid
-(T_i, T_j) \in \text{chosen ordering}\}$
-of commuting ordering commitments (depth~$1$).
-The NP-completeness of computing this layer illustrates a general
-tradeoff: number of layers can be traded for computational complexity
-within a single layer.
-The enriched basis extends beyond batch scheduling to online arrival
-(ordering decisions made incrementally, potentially non-commuting),
-partial knowledge (access sets unknown until execution), and mixed control.
+(Baccaert et al.~\cite{baccaert2026makespan} show that computing an
+optimal single-layer scheduling determination is NP-complete, illustrating
+a general tradeoff between depth and per-layer complexity.)
 
 
 
@@ -1215,7 +1168,7 @@ partial knowledge (access sets unknown until execution), and mixed control.
 
   \begin{tabular}{@{}lll@{}}
     \toprule
-    \textbf{Isolation / Case} & \textbf{Resolving determination} & \textbf{\# Layers (depth)} \\
+    \textbf{Isolation / Case} & \textbf{Resolving determination} & \textbf{Depth} \\
     \midrule
     Read committed &
     (none---no outcome contradicted) & $0$ \\
@@ -1234,9 +1187,9 @@ partial knowledge (access sets unknown until execution), and mixed control.
     \;\emph{(Ex.~\ref{ex:overlapping-cycles})} & $\ge 2$ \\
     %
     Snapshot isolation &
-    $\varphi_{\snap(T_6){=}\emptyset} \seq \varphi_{\snap(T_7){=}\emptyset}
-      \seq \varphi_{\mathsf{c}}(T_6) \seq \varphi_{\mathsf{c}}(T_7)
-      \seq \varphi_{\snap(T_Q){=}\{T_1..T_7\}}$ & $O(n)$ \\
+    $\{\varphi_{\snap(T_6){=}\emptyset},\, \varphi_{\snap(T_7){=}\emptyset}\}
+      \seq \varphi_{\mathrm{fcw}(S(5),T_6)}
+      \seq \varphi_{\snap(T_Q){=}\{..\}}$ & $O(n)$ \\
     \bottomrule
   \end{tabular}
 
@@ -1251,7 +1204,7 @@ partial knowledge (access sets unknown until execution), and mixed control.
     Determination structure across isolation levels (Example~\ref{ex:example}).
     Read committed requires no commitments.
     Serializability has depth~$1$ without cycles, $\ge 2$ with overlapping cycles.
-    Snapshot isolation adds depth from snapshot-choice dependencies.
+    Snapshot isolation adds depth from FCW-to-snapshot dependencies.
     See Appendix~\ref{sec:appendix-datalog} for Datalog negation.
   }
   \Description{Table showing resolving determinations and their depth for
@@ -1306,16 +1259,16 @@ $o_r = \{a(c), p(c), r(c)\}$ and $o_s = \{a(c), p(c), s(c)\}$.
 
 The resolving determinations are $\mathcal{D} = \{D^{(r)}, D^{(s)}\}$:
 \[
-  D^{(r)} = \varphi_{\seal}(S_1) \seq
+  D^{(r)} = \varphi_{\seal}(S_1) \seq \varphi_{\seal}(S_2) \seq
     \varphi_{r(c)=\mathbf{t}} \cdot \varphi_{s(c)=\mathbf{f}},
   \qquad
-  D^{(s)} = \varphi_{\seal}(S_1) \seq
+  D^{(s)} = \varphi_{\seal}(S_1) \seq \varphi_{\seal}(S_2) \seq
     \varphi_{s(c)=\mathbf{t}} \cdot \varphi_{r(c)=\mathbf{f}},
 \]
-sharing the stratified prefix (layer~1) and branching at layer~2.
+sharing the stratified prefix (layers~1--2) and branching at layer~3.
 The filtration is
-$\mathcal{F}_0 = \mathcal{F}_1 = \{\emptyset, \mathcal{D}\}$ and
-$\mathcal{F}_2 = 2^{\mathcal{D}}$.
+$\mathcal{F}_0 = \mathcal{F}_1 = \mathcal{F}_2 = \{\emptyset, \mathcal{D}\}$
+and $\mathcal{F}_3 = 2^{\mathcal{D}}$.
 
 \paragraph{Determination provenance.}
 \[
@@ -1414,10 +1367,10 @@ conflicting transactions on distinct objects give $n$ independent binary
 ordering commitments;
 in Datalog (stable models), $n$ disjoint $\neg$-cycles of length~2 give
 $n$ independent binary choice commitments.
-In the Datalog case, this recovers the known coNP-completeness of
-skeptical reasoning under stable
-models~\cite{marek1991autoepistemic}---suggesting that the determination
-semiring captures the right level of abstraction.
+In the Datalog case, the same reduction independently proves
+coNP-hardness of skeptical reasoning under stable
+models~\cite{marek1991autoepistemic}, validating that the determination
+semiring's width-based abstraction captures the right source of hardness.
 Full proofs in Appendix~\ref{app:robustness-proofs}.
 
 % ================================================================
@@ -1574,18 +1527,25 @@ polynomial time.
 
 \subsection{Datalog Hardness}
 
-Skeptical reasoning for normal logic programs under stable-model
-semantics---given a program $P$, EDB $E$, and ground atom $a$, does $a$
-hold in every stable model of $(P, E)$?---is
-coNP-complete~\cite{marek1991autoepistemic}.
+The general theorem (Theorem~\ref{thm:robustness-conp}) applies directly
+to the Datalog instantiation, providing an independent proof of
+coNP-hardness via the DNF-Validity reduction.
 
-In our framework, the stable-model specification $\Spec_P$ maps each
-history (EDB + commitments) to the set of stable models consistent with
-the commitments applied so far.
-A resolving determination selects one stable model.
-The robustness question ``is $\mathrm{supp}(P(a)) = \mathcal{D}$?'' is
-exactly the skeptical reasoning question ``does $a$ hold in every stable
-model?''
+\paragraph{Instantiation.}
+Given $n$ disjoint $\neg$-cycles of length~2, the choice layer has $n$
+independent binary commitments (one per cycle).
+The DNF-Validity gadget of the transactional proof applies verbatim:
+encode a DNF $\psi$ as a UCQ over the choice-induced truth values, so
+that the distinguished tuple is robust iff $\psi$ is valid.
+This yields coNP-hardness for the Datalog instantiation.
+
+The result coincides with the known coNP-completeness of skeptical
+reasoning under stable-model
+semantics~\cite{marek1991autoepistemic}---the robustness question
+``is $\mathrm{supp}(P(a)) = \mathcal{D}$?'' is exactly the skeptical
+reasoning question ``does $a$ hold in every stable model?''
+The match validates that the determination semiring's width-based
+abstraction captures the right source of hardness.
 
 \paragraph{Polynomial conditions.}
 Condition~(i): a determination is a sequence of sealing and choice
@@ -1644,8 +1604,8 @@ For $\varphi,\psi \in L$,
   \;=\;
   \Spec^{\ell}(H \cdot \psi \cdot \varphi).
 \]
-Thus commitments in $L$ form a commutative monoid under conjunction, with the
-trivial commitment (no restriction) as identity.
+Thus multisets of commitments drawn from $L$ form a commutative monoid
+under composition, with the empty multiset (no restriction) as identity.
 
 This monoid is \emph{conditional}: its carrier---which commitments are valid
 and what effect they have---depends on the determination prefix.
@@ -1670,29 +1630,25 @@ discharged.
   Because it is also single-valued (determined), $(\Spec \mid D)(H)$ is a singleton
   for every history $H$; no further commitments can eliminate outcomes, so semantic
   conditioning has ceased.
-  Because it is monotone, the unique outcome grows monotonically with
-  the history: $H_1 \sqsubseteq H_2$ implies that every fact derivable at $H_1$
-  remains derivable at $H_2$.
-  Under these two conditions, derivations compose exactly as in monotone query
-  evaluation over a fixed instance: alternative derivations of the same fact
+  History-invariance gives constancy: the unique outcome is the same
+  regardless of which history prefix we start from.
+  This yields a fixed instance over which derivations compose exactly as in
+  monotone query evaluation: alternative derivations of the same fact
   combine by semiring addition, and joint use of multiple facts combines by
   semiring multiplication.
   This is precisely the algebraic regime established
   by Green et al.~\cite{green2007provenance} for positive relational queries.
-  Although $\Spec \mid D$ need not syntactically be a Datalog program, it is
-  algebraically equivalent, for provenance purposes, to monotone evaluation over
-  a fixed instance, which suffices.
 \end{proof}
 
 \subsection{The Layered Determination as a Whole}
 
-A determination of height~$k$ over a provenance semiring $K$ consists of
-commutative monoids $M_k, M_{k-1}, \ldots, M_1$---where each $M_i$ is
+A determination of depth~$k$ over a provenance semiring $K$ consists of
+commutative monoids $M_1, M_2, \ldots, M_k$---where each $M_i$ is
 conditioned on the specification prefix obtained by discharging
-$M_k, \ldots, M_{i+1}$---followed by a commutative semiring $K$ at the
+$M_1, \ldots, M_{i-1}$---followed by a commutative semiring $K$ at the
 foundation, exposed once all monoids have been discharged.
-Layers are numbered top-down: $M_k$ is the first layer discharged, $M_1$ the
-last.
+Layers are numbered bottom-up: $M_1$ is the first layer discharged, $M_k$
+the last.
 Classical provenance is the degenerate case $k = 0$: no commitment layers,
 just the semiring.
 
@@ -1743,7 +1699,9 @@ full arguments.
 
 \begin{proposition}
   The supports $\mathrm{supp}(P(t)) \subseteq \mathcal{D}$ compose
-  through positive relational algebra as follows:
+  through positive relational algebra as follows
+  (assuming $K$ is zero-divisor-free, as holds for $\mathbb{N}[X]$
+  and all standard provenance semirings):
   \begin{enumerate}[nosep,label=(\alph*)]
     \item \emph{Join:}
           $\mathrm{supp}(P(t_1 \bowtie t_2))
@@ -1804,12 +1762,6 @@ and with query evaluation.
   Query evaluation cannot increase query-relative depth beyond the
   maximum depth of its inputs.
 \end{corollary}
-
-The two algebraic levels---within a determination and across
-determinations---are detailed in Appendices~\ref{app:algebra}
-and~\ref{app:det-semiring-details} respectively.
-Preservation (across specs) is discussed in
-Section~\ref{sec:det-semiring}.
 
 % ===============================================================
 \section{Transactional Worked Determination Provenance}
@@ -1914,68 +1866,84 @@ same basic enforcement pattern (orient conflict edges, abort to break forbidden
 cycles), but differ in their commitment bases.
 Snapshot isolation (SI) is multiversion: each transaction reads from a specific
 committed state, so the determination must additionally record \emph{which
-snapshot each transaction observed}.
+snapshot each transaction observed} and \emph{which concurrent writer wins}
+on each contested object.
 
-The SI commitment basis thus includes:
-(i) ordering and abort commitments (as in serializability), plus
-(ii) snapshot predicates $\snap(T)=U$, committing that $T$ reads from the
-effects of exactly the transactions in $U$, and
-(iii) a global \emph{first-committer-wins} predicate $\varphi_{\FCW}$ that
-constrains which snapshot assignments are jointly admissible.
-
-Snapshot commitments do not commute in general: the FCW rule can render a
-snapshot choice for $T_j$ infeasible once a conflicting assignment for $T_i$
-is fixed.
-This introduces non-commutativity beyond what serializability requires.
+The SI commitment basis includes two kinds of commitments beyond
+serializability's commit/abort:
+\begin{itemize}[nosep]
+  \item \emph{Snapshot predicates} $\varphi_{\snap(T)=U}$: transaction $T$
+        reads from a snapshot containing exactly the effects of
+        transactions in $U$.
+  \item \emph{First-committer-wins (FCW) predicates}
+        $\varphi_{\mathrm{fcw}(x,T_i)}$: on object $x$, transaction $T_i$
+        is the first committer among concurrent writers---all other
+        concurrent writers on $x$ must abort.
+\end{itemize}
+Non-commutativity arises from FCW-to-snapshot dependencies: an FCW
+decision on object $x$ determines which version of $x$ is visible in
+subsequent snapshots.
+Snapshot selections commute with each other (they are independent
+observations); FCW decisions on distinct objects likewise commute.
+But a snapshot selection that depends on an FCW outcome cannot commute
+with that FCW decision.
+Depth arises from chains of such dependencies: an FCW decision enables a
+snapshot, which enables a write, which triggers another FCW decision.
 
 \paragraph{Extended history.}
-In addition to $T_1$–$T_5$, assume the database initially contains $S(5,e)$ and
-$S(6,f)$, and the following transactions execute concurrently:
+To illustrate FCW-induced depth, add two transactions that write the
+\emph{same} object concurrently.
+Assume the database initially contains $S(5,e)$, and two transactions
+execute concurrently:
 \[
   \begin{array}{ll}
-    T_6: \textsf{read } S(5,e);\ \textsf{delete } S(6,f) \qquad &
-    T_7: \textsf{read } S(6,f);\ \textsf{delete } S(5,e).
+    T_6: \textsf{write } S(5,e') \qquad &
+    T_7: \textsf{write } S(5,e'').
   \end{array}
 \]
-A query transaction $T_Q$ again evaluates $Q$.
+A query transaction $T_Q$ reads $S(5,\_)$ after both have committed.
+Under SI, only one of $T_6$ or $T_7$ can commit (FCW on object $S(5,\_)$);
+the other must abort.
 
 \paragraph{Resolving determination.}
 One admissible SI determination is:
 \[
   \begin{aligned}
     D_{\mathrm{SI}} \triangleq {} &
-    \snap(T_1)=\snap(T_2)=\snap(T_3)=\snap(T_4)=\snap(T_6)=\snap(T_7)=\emptyset \\
-                                  & \seq\; \snap(T_5)=\{T_4\}                   \\
-                                  & \seq\; \snap(T_Q)=\{T_1,\dots,T_7\}         \\
-                                  & \seq\; \varphi_{\FCW}.
+    \{\snap(T_6){=}\emptyset,\; \snap(T_7){=}\emptyset\} \\
+                                  & \seq\; \varphi_{\mathrm{fcw}(S(5),\,T_6)} \\
+                                  & \seq\; \snap(T_Q){=}\{T_1,\dots,T_6\}.
   \end{aligned}
 \]
-% [added \seq]
+Layer~1 assigns initial snapshots (commute).
+Layer~2 resolves the write conflict: $T_6$ wins on $S(5)$, so $T_7$ aborts.
+Layer~3 assigns $T_Q$'s snapshot, which depends on knowing that $T_6$
+committed and $T_7$ did not.
 
 \paragraph{Outcome and provenance.}
-Under $D_{\mathrm{SI}}$, the final state contains $b$ and $c$, but not $d,e,f$.
-The query result is $\{b,c\}$ with derivational provenance:
-\[
-  P_{D_{\mathrm{SI}}}(b)=x_1+x_2,\qquad
-  P_{D_{\mathrm{SI}}}(c)=x_3.
-\]
+Under $D_{\mathrm{SI}}$, $T_Q$ reads $S(5,e')$ (written by $T_6$).
+The derivational provenance is $P_{D_{\mathrm{SI}}}(e') = x_6$.
+Under the alternative determination with
+$\varphi_{\mathrm{fcw}(S(5),T_7)}$, $T_Q$ would read $S(5,e'')$
+instead---a contingent outcome.
 
-\paragraph{Semantic change and serializability.}
-Although $D_{\mathrm{SI}}$ is admissible under snapshot isolation, it does not admit
-any serial execution.
-The concurrent writes of $T_6$ and $T_7$ produce the classical write-skew anomaly:
-a dependency cycle that cannot be linearized into a total order.
-
-Determination provenance makes this explicit.
-Restricting attention to SI determinations whose snapshot predicates admit a
+\paragraph{Write-skew and serializability.}
+To additionally illustrate write-skew (an SI anomaly that requires no FCW),
+consider the classic pattern: $T_A$ reads $x$, writes $y$; $T_B$ reads $y$,
+writes $x$.
+Under SI with snapshots preceding both commits, both transactions commit
+(no write-write conflict, so FCW does not apply).
+The resulting rw-rw cycle is not serializable.
+Determination provenance records the snapshot assignments under which this
+anomaly arises; restricting to SI determinations whose snapshots admit a
 topological sort recovers exactly the serializable outcomes.
 
 \paragraph{Determination depth.}
 Unlike serializability, which resolves ambiguity in a single commuting stage,
-snapshot isolation may require an independent snapshot commitment for each
-transaction.
-Thus SI has worst-case number of layers $O(|H|)$, as recorded in
-Figure~\ref{fig:det-tables}.
+snapshot isolation interleaves FCW decisions with snapshot selections that
+depend on them.
+Worst-case depth is $O(n)$ (chains of FCW $\to$ snapshot dependencies),
+as recorded in Figure~\ref{fig:det-tables}.
 Once an SI determination is fixed, provenance again reduces to depth--0
 derivational provenance.
 

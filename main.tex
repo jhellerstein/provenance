@@ -1576,16 +1576,15 @@ Condition~(iii): evaluating a Datalog query over a fixed model is in
 polynomial time.
 
 % ================================================================
-\section{Appendix: The Layered Determination---Algebraic Details}
+\section{Within a Determination: Algebraic Details}
 \label{app:algebra}
 % ================================================================
 
-This appendix gives precise structural content to the layered determination structure
-introduced in Section~\ref{sec:algebra}.
-The goal is to situate
-determination provenance precisely relative to existing algebraic frameworks
-and to justify the claim that classical semiring provenance applies once the
-determination has been fully discharged.
+This appendix gives precise structural content to the layered structure
+within a single determination, as introduced in Section~\ref{sec:algebra}.
+For the algebraic structure \emph{across} determinations (the
+determination semiring and its filtration), see
+Appendix~\ref{app:det-semiring-details}.
 
 \subsection{Sequential Discharge Versus Algebraic Combination}
 
@@ -1722,6 +1721,105 @@ restriction, and substitution of commitment layers---would enable compositional
 reasoning about determination provenance across sub-specifications.
 
 These directions are left for future work.
+
+% ================================================================
+\section{Across Determinations: The Determination Semiring}
+\label{app:det-semiring-details}
+% ================================================================
+
+This appendix expands on the determination semiring and filtration
+introduced in Section~\ref{sec:det-semiring}.
+Where the body states results compactly, this appendix provides the
+full arguments.
+
+\subsection{Supports Form a Semiring}
+
+\begin{proposition}
+  The supports $\mathrm{supp}(P(t)) \subseteq \mathcal{D}$ compose
+  through positive relational algebra as follows:
+  \begin{enumerate}[nosep,label=(\alph*)]
+    \item \emph{Join:}
+          $\mathrm{supp}(P(t_1 \bowtie t_2))
+          = \mathrm{supp}(P(t_1)) \cap \mathrm{supp}(P(t_2))$.
+    \item \emph{Union:}
+          $\mathrm{supp}(P(t_1) \cup P(t_2))
+          = \mathrm{supp}(P(t_1)) \cup \mathrm{supp}(P(t_2))$.
+    \item \emph{Projection/Selection:}
+          $\mathrm{supp}(P(\pi(t))) \supseteq \mathrm{supp}(P(t))$
+          and
+          $\mathrm{supp}(P(\sigma(t))) \subseteq \mathrm{supp}(P(t))$.
+  \end{enumerate}
+\end{proposition}
+\begin{proof}
+  (a)~A join requires both premises to hold simultaneously.
+  Under determination $D$, $t_1 \bowtie t_2$ is nonempty iff both
+  $P_D(t_1) \neq 0$ and $P_D(t_2) \neq 0$ (semiring multiplication
+  has no zero divisors in $\mathbb{N}[X]$).
+  Hence $D \in \mathrm{supp}(P(t_1 \bowtie t_2))$ iff
+  $D \in \mathrm{supp}(P(t_1)) \cap \mathrm{supp}(P(t_2))$.
+
+  (b)~A union provides alternative derivation paths.
+  $P_D(t_1 \cup t_2) = P_D(t_1) + P_D(t_2)$; this is nonzero iff at
+  least one summand is nonzero.
+
+  (c)~Projection can only add derivation paths (combining tuples that
+  agree on projected attributes); selection can only remove them.
+\end{proof}
+
+\subsection{The Filtration in Detail}
+
+The filtration $\mathcal{F}_0 \subseteq \mathcal{F}_1 \subseteq \cdots
+\subseteq \mathcal{F}_d = 2^{\mathcal{D}}$ is defined in
+Section~\ref{sec:filtration}.
+Here we verify that it interacts correctly with the semiring operations
+and with query evaluation.
+
+\begin{proposition}[Filtration closure under semiring operations]
+  For any $k$, if $S_1, S_2 \in \mathcal{F}_k$, then
+  $S_1 \cup S_2 \in \mathcal{F}_k$ and
+  $S_1 \cap S_2 \in \mathcal{F}_k$.
+\end{proposition}
+\begin{proof}
+  A set is in $\mathcal{F}_k$ iff it is a union of level-$k$ equivalence
+  classes.
+  The union of two such sets is again a union of level-$k$ classes.
+  For intersection: if $D \in S_1 \cap S_2$ and $D'$ agrees with $D$ at
+  level $k$, then $D' \in S_1$ (since $S_1 \in \mathcal{F}_k$) and
+  $D' \in S_2$ (since $S_2 \in \mathcal{F}_k$), so
+  $D' \in S_1 \cap S_2$.
+\end{proof}
+
+\begin{corollary}[Query evaluation preserves filtration level]
+  If $\mathrm{supp}(P(t_1)) \in \mathcal{F}_k$ and
+  $\mathrm{supp}(P(t_2)) \in \mathcal{F}_k$, then
+  $\mathrm{supp}(P(t_1 \bowtie t_2)) \in \mathcal{F}_k$ and
+  $\mathrm{supp}(P(t_1 \cup t_2)) \in \mathcal{F}_k$.
+  Query evaluation cannot increase query-relative depth beyond the
+  maximum depth of its inputs.
+\end{corollary}
+
+\subsection{Within vs.\ Across: A Summary}
+
+The two algebraic levels are complementary:
+\begin{itemize}[nosep]
+  \item \emph{Within} a determination (Appendix~\ref{app:algebra}):
+        layers of commutative monoids discharge sequentially until a
+        provenance semiring $K$ is exposed.
+        This explains how a single resolved outcome is derived.
+  \item \emph{Across} determinations (this appendix):
+        the determination semiring $(2^{\mathcal{D}}, \cup, \cap)$ and
+        its filtration track which determinations support a tuple and
+        how those supports compose through queries.
+        This explains which outcomes are robust, which are contingent,
+        and at what layer the contingency arises.
+\end{itemize}
+Robustness and preservation are across-determination questions
+(properties of supports).
+Conditioned provenance is a within-determination question (the $K$-value
+under a fixed $D$).
+Determination provenance combines both: it is a function
+$\mathcal{D} \to K$ whose support lives in the determination semiring
+and whose values live in the provenance semiring.
 
 % ================================================================
 \section{Layer Certificates}

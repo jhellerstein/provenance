@@ -1349,52 +1349,60 @@ The algebraic machinery composes supports cleanly through queries
 (Corollary~\ref{cor:propagation-filtration}), but deciding whether a
 support equals $\mathcal{D}$ is computationally hard.
 
-\begin{theorem}[Robustness is coNP-complete]
+\begin{theorem}[Robustness is coNP-complete in determination width]
   \label{thm:robustness-conp}
-  Deciding robustness is coNP-complete under both the transactional
-  (enriched scheduling basis) and Datalog (stable-model) instantiations.
+  The \emph{width} of a determination layer is the number of independent
+  binary commitments it contains.
+  When a single-layer determination has width $n$, the determination space
+  is $|\mathcal{D}| = 2^n$.
+  Deciding robustness of a UCQ over such a basis is coNP-complete.
+  Both the transactional (enriched scheduling) and Datalog (stable-model)
+  instantiations admit width-$n$ single-layer determinations.
 \end{theorem}
 
 \begin{proof}
   \emph{Upper bound.}
   Non-robustness has a short certificate: guess a resolving determination
-  $D$ (polynomial-size in both instantiations), verify its validity
-  (polynomial time), evaluate the query under $\Spec \mid D$
-  (polynomial time), and check that $t$ is absent.
+  $D$ (a binary string of length $n$), verify its validity
+  (polynomial time for both instantiations), evaluate the query under
+  $\Spec \mid D$ (polynomial time), and check that $t$ is absent.
 
-  \emph{Lower bound (transactional).}
-  We reduce from \textsc{Validity} (is a DNF formula $\psi$ over
-  variables $x_1, \ldots, x_n$ true under every truth assignment?).
-  Using the enriched scheduling basis
-  (Section~\ref{sec:scheduling-basis}):
-  for each variable $x_i$, create two transactions $T_i^+$ and $T_i^-$
-  that write $\mathsf{true}$ and $\mathsf{false}$ to object $o_i$.
-  Their write-write conflict creates an edge; the ordering commitment
-  $\varphi_{T_i^+ \prec T_i^-}$ or $\varphi_{T_i^- \prec T_i^+}$
+  \emph{Lower bound (common structure).}
+  In both instantiations, the $n$ binary commitments induce a bijection
+  between $\mathcal{D}$ and truth assignments to $n$ Boolean variables.
+  A UCQ can encode any DNF formula $\psi$ such that the distinguished
+  tuple is present under determination $D$ iff the corresponding
+  assignment satisfies $\psi$.
+  Robustness then reduces to \textsc{DNF-Validity} (coNP-complete).
+
+  \emph{Transactional instantiation.}
+  For each variable $x_i$, create two conflicting transactions $T_i^+$
+  and $T_i^-$ writing to object $o_i$.
+  The ordering commitment $\varphi_{T_i^+ \prec T_i^-}$ or its reverse
   determines the final value.
-  No cycles arise, so every ordering is a valid determination.
-  For each term $t_j = \ell_1 \wedge \cdots \wedge \ell_m$ of $\psi$,
-  define a conjunctive query that checks whether the corresponding
-  objects have the matching values; the overall query is the union of
-  these conjunctive queries.
-  The distinguished tuple is robust iff $\psi$ is valid.
+  No cycles arise; all orderings commute.
+  Each term of $\psi$ becomes a conjunctive query over the resulting
+  object values.
 
-  \emph{Lower bound (Datalog).}
-  Skeptical reasoning under stable models of normal logic programs---does
-  a ground atom hold in every stable
-  model?---is coNP-complete~\cite{marek1991autoepistemic}.
-  In our framework, this is exactly the robustness question for the
-  stable-model specification.
+  \emph{Datalog instantiation.}
+  For normal logic programs, each $\neg$-cycle of length~2 contributes
+  one independent binary choice (which atom is true).
+  With $n$ disjoint $\neg$-cycles, the stable models biject with
+  $\{0,1\}^n$.
+  Skeptical reasoning (does an atom hold in every stable model?) is
+  coNP-complete~\cite{marek1991autoepistemic}, and is exactly the
+  robustness question in our framework.
   (Full details in Appendix~\ref{app:robustness-proofs}.)
 \end{proof}
 
 \noindent
-The upper bound generalizes: in any instantiation where determinations
-are polynomial-size, validity is polynomial-time checkable, and query
+The common source of hardness is determination width: $n$ independent
+binary commitments yield $|\mathcal{D}| = 2^n$, and robustness reduces
+to universal quantification over $\{0,1\}^n$---coNP-hard for any query
+language that can encode DNF.
+The upper bound generalizes: in any setting where determinations are
+polynomial-size, validity is polynomial-time checkable, and query
 evaluation is polynomial, robustness is in coNP.
-Hardness holds in both settings we study, for the same structural reason:
-the commitment basis admits exponentially
-many resolutions, and robustness requires quantifying over all of them.
 
 % ================================================================
 \section{Related Work}

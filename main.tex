@@ -175,10 +175,10 @@ semiring composes through relational algebra~\cite{green2007provenance}.
     T_3\!: \textsf{del } S(2,d);\qquad
     T_Q\!: Q(y) \drule S(k,y).
   \]
-  All four are concurrent; any interleaving of their operations is possible.
+  All four are concurrent; any serialization is possible.
 
-  Value $b$ appears in $Q$'s result regardless of how the operations are
-  ordered: the initial tuple $S(0,b)$ is never deleted.
+  Value $b$ appears in $Q$'s result regardless of ordering:
+  the initial tuple $S(0,b)$ is never deleted.
   Thus $b$ is \emph{robust}.
   Value $d$ is \emph{contingent}: it appears if $T_2$'s insert takes effect
   before $T_Q$'s read and $T_3$'s delete takes effect after, but is absent

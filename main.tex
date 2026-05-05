@@ -1523,20 +1523,15 @@ semiring's independence structure to define a Shapley-value measure of
 each commitment's contribution that is \#P-hard in general but
 tractable whenever concurrent contention is narrow.
 
-\paragraph{Systems relevance.}
-Beyond the formal contributions, determination provenance enables a
-class of queries that existing systems lineage cannot express:
-robustness (is this outcome inevitable or scheduling-dependent?),
-distributional tail bounds (under what fraction of admissible schedules
-does the SLA hold?), root-cause diagnosis (which commitment is
-responsible for a violation?), and counterfactual what-if analysis
-(would a different scheduling policy eliminate the problem?).
-These capabilities apply to transaction scheduling, distributed tracing,
-and any system whose observable behavior depends on non-deterministic
-resolution of semantic ambiguity.
-Appendix~\ref{app:systems-lineage} develops this connection in detail,
-including a Dapper-style worked example and a discussion of parsimony
-via filtration-based truncation and certificate-based compression.
+For systems, the framework provides a query layer over existing traces.
+The determination---extracted as a semantic index over the
+log---enables diagnostic queries that log-scanning cannot answer:
+which scheduling commitment is most responsible for an SLA violation
+(Example~\ref{ex:responsibility}), whether an outcome is robust across
+all admissible serializations, and whether it survives a change of
+isolation level.
+Appendix~\ref{app:systems-lineage} develops the connection to systems
+lineage in detail.
 
 The success of algebraic provenance lay in identifying the right
 semantic object to explain.

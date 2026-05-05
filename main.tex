@@ -1130,6 +1130,24 @@ $b$ is robust (nonzero under every determination); $d$ is contingent.
 Figure~\ref{fig:det-tables} summarizes the determination structure across
 isolation levels for this example.
 
+\paragraph{Expressive power beyond classical provenance.}
+The determination semiring enables queries that classical provenance
+cannot express.
+\emph{Robustness}: is $b$'s presence inevitable, or could a different
+serialization have excluded it?
+(Full support confirms inevitability.)
+\emph{Counterfactuals}: under which commit orderings does $d$ appear?
+(The support $\{D_{\mathsf{in}}\}$ answers directly.)
+\emph{Tail bounds}: under what fraction of admissible serializations
+does a latency-sensitive query meet its SLA?
+(The support ratio gives a structural bound without empirical sampling.)
+\emph{Diagnosis}: when the SLA is violated, which ordering commitment
+is shared by all violating determinations?
+(The complement of the support identifies the root cause.)
+These questions concern the \emph{space} of admissible executions, not
+any single execution---a capability absent from systems that record only
+one trace.
+
 \subsection{Enriching the Basis: Scheduling as Commitment}
 \label{sec:scheduling-basis}
 

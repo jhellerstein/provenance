@@ -318,24 +318,18 @@ take effect at specific points in the history.
   given a history $H$ with admissible set $\Spec(H)$, applying $\varphi$
   produces a nonempty subset
   $\Spec(H \cdot \varphi) \subseteq \Spec(H)$.
-  We write $H \cdot \varphi$ for the history obtained by
-  adding a commitment event $\varphi$ after all maximal
-  events of~$H$
-  (i.e., $e \to \varphi$ for every $e$ with no successor
-  in~$H$), giving $H \sqsubseteq H \cdot \varphi$.
-  The result may depend on the full set $\Spec(H)$, not only on
-  individual outcomes---this is what allows commitments to be
-  non-commutative.
-  We require \emph{shrinkage}: $\Spec(H') \subseteq \Spec(H)$ for every
-  $H' \sqsupseteq H \cdot \varphi$.
+  We require \emph{shrinkage}: $\Spec(H') \subseteq \Spec(H \cdot \varphi)$
+  for every $H' \sqsupseteq H \cdot \varphi$.
 \end{definition}
 
 \noindent
-A commitment event succeeds all maximal events of~$H$, inducing a cut in the
-history: everything before the commitment is fixed, and the admissible set
-after the commitment can only be smaller.
-We write \mbox{$(\Spec \mid \varphi)(H) \triangleq \Spec(H \cdot \varphi)$}:
-the admissible outcomes after appending $\varphi$ to $H$.
+Here $H \cdot \varphi$ denotes the history obtained by appending $\varphi$
+after all maximal events of $H$ (giving $H \sqsubseteq H \cdot \varphi$).
+A commitment event induces a cut: everything before it is fixed, and the
+admissible set after it can only shrink.
+Crucially, the result may depend on the full set $\Spec(H)$, not only on
+individual outcomes---this is what allows commitments to be non-commutative.
+We write $(\Spec \mid \varphi)(H) \triangleq \Spec(H \cdot \varphi)$.
 
 \paragraph{Commitment bases.}
 A \emph{commitment basis} $\Phi$ is the vocabulary of constraints available

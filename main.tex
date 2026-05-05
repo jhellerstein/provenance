@@ -1395,14 +1395,17 @@ Appendix~\ref{app:robustness-proofs}.)
   $T_i$ aborts).
   This predicate holds under $D$ iff at most one commitment orders
   $T_A \prec T_i$---i.e., $11$ of $16$ determinations satisfy the SLA.
-  Under the realized $D^*$ (all $T_i$ before $T_A$, zero aborts), each
-  $\varphi_{T_i \prec T_A}$ has equal responsibility $\approx 0.07$:
-  flipping any single commitment still satisfies the SLA (one abort is
-  allowed).
+  Under the realized $D^*$ (all $T_i$ before $T_A$, zero aborts), the
+  total responsibility budget is $v(N) - v(\emptyset) = 1 - 11/16
+  \approx 0.31$, split equally: each $\varphi_{T_i \prec T_A}$ has
+  responsibility $\approx 0.08$.
+  Flipping any single commitment still satisfies the SLA (one abort is
+  allowed), so individual contributions are small.
   If the SLA is tightened to zero aborts, only $1$ of $16$
-  determinations satisfies it, and each commitment's responsibility
-  rises to $(1 - 2^{-4})/4 \approx 0.23$---the scheduler must
-  prioritize \emph{all} OLTP transactions before the scan.
+  determinations satisfies it; the budget rises to
+  $1 - 1/16 \approx 0.94$, and each commitment's responsibility is
+  $\approx 0.23$---the scheduler must prioritize \emph{all} OLTP
+  transactions before the scan.
   Responsibility quantifies this sensitivity; robustness alone sees
   only ``contingent'' in both cases.
 \end{example}

@@ -102,14 +102,13 @@
 Algebraic provenance has given database theory a powerful and durable language for
 explaining query results.
 When a query has well-defined semantics---a single correct answer for each
-input---provenance traces derivations through a commutative semiring, supporting
-why- and how-provenance, uncertainty propagation, and
-optimization~\cite{green2007provenance,suciu2011probabilistic}.
-The algebraic structure provides more than tracing: it supports
-counterfactual reasoning (why-not), compositional explanation, and
-quantitative measures.
-Explanation reduces to arithmetic, and this reduction has been
-remarkably effective.
+input---provenance traces derivations through a commutative
+semiring~\cite{green2007provenance,suciu2011probabilistic}.
+The algebraic structure provides far more than tracing: compositional
+explanation (provenance of a join from provenance of its inputs),
+counterfactual reasoning (why-not), and quantitative measures
+(confidence, multiplicity)---explanation reduces to arithmetic, and this
+reduction has been remarkably effective.
 
 Despite this success, formal data provenance has had limited impact on the
 systems that most need explanation: transactional databases, distributed

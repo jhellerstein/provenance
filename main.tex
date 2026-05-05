@@ -1003,10 +1003,7 @@ on write-write conflicts).
 
 A transactional history records which operations occurred and which
 conflict edges resulted---these are environment events.
-The system's irrevocable decisions determine the serialization order
-on conflicting operations.
-We present two commitment bases; the first is used throughout the
-formal development.
+The system's irrevocable decisions are of two kinds:
 
 \begin{definition}[Ordering commitment]
   \label{def:ordering-commitment}
@@ -1015,41 +1012,39 @@ formal development.
   with the reverse order.
 \end{definition}
 
-\noindent
-The \emph{ordering basis} is
-$\Phi = \{\varphi_{T_i \prec T_j} \mid T_i, T_j \text{ conflict}\}$.
-Ordering commitments on distinct pairs (no shared transaction) commute.
+\begin{definition}[Commit/abort commitment]
+  $\varphi_{\mathsf{commit}(T_i)}$ irrevocably finalizes $T_i$'s
+  operations (valid only if no forbidden cycle results).
+  $\varphi_{\mathsf{abort}(T_i)}$ irrevocably discards $T_i$'s
+  operations, voiding all ordering commitments involving $T_i$.
+\end{definition}
 
-\begin{proposition}[Commutativity of ordering commitments on independent pairs]
+\noindent
+The full basis is
+$\Phi = \{\varphi_{T_i \prec T_j}\} \cup
+\{\varphi_{\mathsf{commit}(T_i)},\, \varphi_{\mathsf{abort}(T_i)}\}$.
+Ordering commitments on independent pairs (no shared transaction)
+commute; commit/abort on non-conflicting transactions commute.
+In the running example and the robustness reduction, the conflict graph
+is acyclic and all transactions commit, so the ordering commitments
+alone determine the outcome.
+
+\begin{proposition}[Commutativity of independent commitments]
   \label{prop:commit-commute}
-  Ordering commitments on pairs of transactions that share no common
-  transaction commute: their joint effect on the admissible set is
-  independent of application order.
+  Ordering commitments on pairs sharing no transaction, and commit/abort
+  on transactions sharing no conflict edge, commute.
 \end{proposition}
 \begin{proof}
-  If $(T_i, T_j)$ and $(T_k, T_l)$ share no transaction, fixing the
-  order of one pair does not constrain the other.
-  The resulting admissible set is the same regardless of order.
+  Independent pairs do not constrain each other; the resulting admissible
+  set is the same regardless of order.
 \end{proof}
-
-\paragraph{Operational basis: commit/abort.}
-An alternative basis models the system's commit and abort decisions
-directly.
-The commitment $\varphi_{\mathsf{commit}(T_i)}$ irrevocably finalizes
-$T_i$'s operations (valid only if no forbidden cycle results);
-$\varphi_{\mathsf{abort}(T_i)}$ irrevocably discards them (always valid).
-Commit/abort on transactions sharing no conflict edges commute.
-The ordering basis is finer-grained: each commit implicitly fixes
-multiple ordering relationships simultaneously.
-The boundary between the two bases is a modeling choice reflecting
-system architecture; both yield the same set of admissible outcomes.
 
 \begin{remark}[Non-commutativity under shared conflicts]
   \label{rem:commit-noncommute}
-  When two ordering commitments share a transaction
-  ($\varphi_{T_i \prec T_j}$ and $\varphi_{T_j \prec T_k}$), the second
-  may be valid only after the first is applied (a cycle constraint).
-  The determination then has depth $> 1$.
+  When ordering commitments share a transaction, or when aborting one
+  transaction affects the validity of committing another (overlapping
+  cycles), the commitments do not commute and the determination has
+  depth $> 1$.
 \end{remark}
 
 \subsection{Determination Depth by Isolation Level}

@@ -1345,64 +1345,54 @@ invisible until the cycle layer is discharged).
 
 Robustness---whether a tuple holds under \emph{every} resolving
 determination---is a natural question in the framework.
-The algebraic machinery composes supports cleanly through queries
+Supports compose cleanly through queries
 (Corollary~\ref{cor:propagation-filtration}), but deciding whether a
 support equals $\mathcal{D}$ is computationally hard.
 
-\begin{theorem}[Robustness is coNP-complete in determination width]
+\begin{definition}[Determination width]
+  The \emph{width} of a determination is the maximum number of
+  independent binary commitments in any single layer.
+  A determination of width $n$ admits up to $2^n$ resolving
+  determinations (one per combination of binary choices in the widest
+  layer).
+\end{definition}
+
+\begin{theorem}[Robustness is coNP-complete in width]
   \label{thm:robustness-conp}
-  The \emph{width} of a determination layer is the number of independent
-  binary commitments it contains.
-  When a single-layer determination has width $n$, the determination space
-  is $|\mathcal{D}| = 2^n$.
-  Deciding robustness of a UCQ over such a basis is coNP-complete.
-  Both the transactional (enriched scheduling) and Datalog (stable-model)
-  instantiations admit width-$n$ single-layer determinations.
+  For any instantiation of width $n$ where validity checking and query
+  evaluation are polynomial, deciding robustness of a UCQ is
+  coNP-complete.
 \end{theorem}
 
 \begin{proof}
   \emph{Upper bound.}
-  Non-robustness has a short certificate: guess a resolving determination
-  $D$ (a binary string of length $n$), verify its validity
-  (polynomial time for both instantiations), evaluate the query under
-  $\Spec \mid D$ (polynomial time), and check that $t$ is absent.
+  To refute robustness, guess a determination $D \in \{0,1\}^n$, verify
+  validity, evaluate the query, and check that $t$ is absent
+  (polynomial-time certificate).
 
-  \emph{Lower bound (common structure).}
-  In both instantiations, the $n$ binary commitments induce a bijection
-  between $\mathcal{D}$ and truth assignments to $n$ Boolean variables.
-  A UCQ can encode any DNF formula $\psi$ such that the distinguished
-  tuple is present under determination $D$ iff the corresponding
-  assignment satisfies $\psi$.
-  Robustness then reduces to \textsc{DNF-Validity} (coNP-complete).
-
-  \emph{Transactional instantiation.}
-  For each variable $x_i$, create two conflicting transactions $T_i^+$
-  and $T_i^-$ writing to object $o_i$.
-  The ordering commitment $\varphi_{T_i^+ \prec T_i^-}$ or its reverse
-  determines the final value.
-  No cycles arise; all orderings commute.
-  Each term of $\psi$ becomes a conjunctive query over the resulting
-  object values.
-
-  \emph{Datalog instantiation.}
-  For normal logic programs, each $\neg$-cycle of length~2 contributes
-  one independent binary choice (which atom is true).
-  With $n$ disjoint $\neg$-cycles, the stable models biject with
-  $\{0,1\}^n$.
-  Skeptical reasoning (does an atom hold in every stable model?) is
-  coNP-complete~\cite{marek1991autoepistemic}, and is exactly the
-  robustness question in our framework.
-  (Full details in Appendix~\ref{app:robustness-proofs}.)
+  \emph{Lower bound.}
+  The $n$ binary commitments biject $\mathcal{D}$ with truth assignments
+  to $n$ variables.
+  A UCQ encodes any DNF $\psi$: the distinguished tuple is present under
+  $D$ iff the corresponding assignment satisfies $\psi$.
+  Robustness reduces to \textsc{DNF-Validity} (coNP-complete).
 \end{proof}
 
 \noindent
-The common source of hardness is determination width: $n$ independent
-binary commitments yield $|\mathcal{D}| = 2^n$, and robustness reduces
-to universal quantification over $\{0,1\}^n$---coNP-hard for any query
-language that can encode DNF.
-The upper bound generalizes: in any setting where determinations are
-polynomial-size, validity is polynomial-time checkable, and query
-evaluation is polynomial, robustness is in coNP.
+Both instantiations have width $n$:
+\begin{itemize}[nosep]
+  \item \emph{Transactions} (enriched scheduling basis):
+        each pair of conflicting transactions on a distinct object
+        contributes one binary ordering commitment
+        ($\varphi_{T_i^+ \prec T_i^-}$ vs.\ its reverse).
+  \item \emph{Datalog} (stable models):
+        each disjoint $\neg$-cycle of length~2 contributes one binary
+        choice commitment ($\varphi_{r=\mathbf{t}}$ vs.\
+        $\varphi_{s=\mathbf{t}}$).
+        Skeptical reasoning under stable models is the robustness
+        question~\cite{marek1991autoepistemic}.
+\end{itemize}
+Full proofs in Appendix~\ref{app:robustness-proofs}.
 
 % ================================================================
 \section{Related Work}

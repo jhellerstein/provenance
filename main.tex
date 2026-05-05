@@ -500,8 +500,9 @@ admissible outcomes simultaneously.
   \label{thm:resolution-implies-monotone}
   \label{thm:necessity}
   Assume prefix-closure and a persistent commitment basis $\Phi$.
-  Classical semiring provenance over $\Spec$ is well-defined if and only if
-  $\Spec$ is determined.
+  Classical semiring provenance over $\Spec$---a single $K$-relation
+  assigning each tuple a provenance value consistent with all admissible
+  outcomes---is well-defined if and only if $\Spec$ is determined.
 \end{theorem}
 
 \begin{proof}
@@ -544,6 +545,11 @@ property that we use freely in subsequent sections:
 History-invariance means the resolved outcome does not depend on which
 history prefix we start from---only on the determination applied.
 We may therefore write $(\Spec \mid D)$ without a history argument.
+Note that this is a retrospective guarantee: it holds over prefixes of a
+\emph{completed} history (all environment events have occurred).
+New environment events would extend the history and potentially introduce
+ambiguity that $D$ does not cover, requiring additional commitments---analogous
+to how new messages disturb convergence in an eventually-consistent system.
 
 \subsection{Three Levels of Structure}
 \label{sec:three-levels}
@@ -604,7 +610,9 @@ determinations.
 
 The resulting structure is a Boolean algebra on supports.
 Let $\mathcal{D}$ denote the set of minimal resolving determinations for
-$\Spec$ over a commitment basis $\Phi$; this set is finite.
+$\Spec$ over a commitment basis $\Phi$: those resolving determinations
+with no proper subsequence that also resolves $\Spec$.
+This set is finite (finitely many commitments, each applied at most once).
 
 \begin{definition}[Determination Provenance]
   \label{def:det-provenance}

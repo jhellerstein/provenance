@@ -369,8 +369,8 @@ The canonicalization replaces unstable commitments with commitments to
 stabilize their inputs.
 For example, a ``majority vote'' predicate whose exclusions reverse when
 new votes arrive is non-persistent; but sealing the voter pool (committing
-that no more votes will arrive) is persistent, and the majority then
-follows as a deterministic entailment.
+that votes from additional voters will be ignored) is persistent, and the
+majority then follows as a deterministic entailment.
 The general construction is in
 Appendix~\ref{app:persistence-canonicalization}.
 

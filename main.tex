@@ -339,7 +339,10 @@ for narrowing a specification---the set of conditions from which
 determinations are formed.
 Different bases for the same specification yield different determination
 structures and different provenance.
-We impose one restriction on bases throughout this paper:
+An important property we require of a commitment basis is
+\emph{persistence}---and every basis can be canonicalized to an
+equivalent persistent one
+(Proposition~\ref{prop:persistence-canon}).
 
 \begin{definition}[Persistent commitment basis]
   \label{def:persistent}
@@ -358,23 +361,21 @@ We impose one restriction on bases throughout this paper:
 \noindent
 In plain terms: once a commitment excludes an outcome, no amount of
 additional history can rehabilitate it.
-Persistence is the paper's main structural assumption; it guarantees
-that resolved outcomes are history-invariant
+Persistence guarantees that resolved outcomes are history-invariant
 (Lemma~\ref{lem:history-invariance}), enabling classical provenance once
 all commitments have been discharged.
-It holds for all commitment bases in this paper
-(Sections~\ref{sec:transactions}--\ref{sec:scheduling-basis},
-\ref{sec:negation-preview}; Appendix~\ref{app:systems-lineage}).
 
-A non-persistent commitment would be one whose exclusions can be undone
-by later events---for example, a ``majority vote'' predicate that
-excludes the minority outcome at $H_1$ (votes $2{:}A, 1{:}B$ excludes
-$B$) but reverses at $H_2$ (votes $2{:}A, 3{:}B$ excludes $A$).
-Such predicates are non-monotone in the history: their effect depends on
-information that has not yet stabilized.
-Persistent commitments, by contrast, are monotone in the sense that
-their exclusions only accumulate---a natural property for irrevocable
-decisions.
+A non-persistent commitment---such as a ``majority vote'' predicate
+whose exclusions reverse when new votes arrive---is one whose effect
+depends on information that has not yet stabilized.
+The fix is always the same: seal the unstable input (commit that no more
+votes will arrive), then compute the result as a deterministic
+entailment over the sealed state.
+The seal is persistent; the computation follows without further
+commitment.
+Any non-persistent basis can be transformed this way into a persistent
+one that resolves the same specifications
+(Appendix~\ref{app:persistence-canonicalization}).
 
 \paragraph{Three forces on a history.}
 \label{sec:three-forces}%
@@ -1544,13 +1545,9 @@ semantics.
 \paragraph{Open directions.}
 Developing quantitative robustness measures beyond the binary
 robust/contingent distinction; extending the framework to reversible
-commitments (without persistence, history-invariance fails and the
-determination semiring is no longer a static object---a natural
-candidate is \emph{eventual persistence}, where exclusions stabilize
-after a finite prefix, but characterizing the weakest sufficient
-conditions is open); and characterizing compact
-representations of the determination semiring for deep determinations
-all remain open.
+commitments (where sealing itself can be retracted); and characterizing
+compact representations of the determination semiring for deep
+determinations all remain open.
 
 The success of algebraic provenance lay in identifying the right semantic object
 to explain.
@@ -2658,6 +2655,74 @@ systems lineage.
 Fixing the parameters---choosing the query family, computing minimal
 certificates, implementing adaptive retention---is the systems work
 that remains.
+
+% ================================================================
+\section{Persistence Canonicalization}
+\label{app:persistence-canonicalization}
+% ================================================================
+
+We show that persistence is without loss of generality: any
+non-persistent commitment basis can be transformed into a persistent one
+that resolves the same specifications.
+
+\begin{definition}[Dependency set]
+  The \emph{dependency set} of a commitment $\varphi$ at history $H$ is
+  the set of events $S \subseteq E(H)$ whose presence or absence affects
+  which outcomes $\varphi$ excludes.
+  Formally, $S$ is minimal such that $\varphi$'s exclusion set is
+  determined by $S \cap E(H)$ for all $H$.
+\end{definition}
+
+\begin{definition}[Sealing commitment]
+  For a set of events $S$, the \emph{sealing commitment}
+  $\varphi_{\seal(S)}$ declares that $S$ is complete: it excludes
+  outcomes that are admissible only if additional events of the types in
+  $S$ occur.
+\end{definition}
+
+\begin{proposition}[Persistence canonicalization]
+  \label{prop:persistence-canon}
+  Let $\varphi$ be a non-persistent commitment with dependency set $S$.
+  Define the persistent basis replacement:
+  $\varphi_{\seal(S)}$ (seal the dependency set), followed by the
+  deterministic function $f_\varphi$ that computes $\varphi$'s effect
+  over the sealed state (an entailment, not a commitment).
+  Then:
+  \begin{enumerate}[nosep,label=(\alph*)]
+    \item $\varphi_{\seal(S)}$ is persistent: once $S$ is declared
+          complete, that declaration holds at all extensions.
+    \item After sealing, $\varphi$'s effect is uniquely determined by
+          $S \cap E(H)$---it is a deterministic entailment.
+    \item For any history $H$ at which $S$ has stabilized (no further
+          events of types in $S$ will arrive), the sealed basis produces
+          the same resolved outcome as the original.
+  \end{enumerate}
+\end{proposition}
+\begin{proof}
+  (a)~The seal event is in the history at all extensions; it cannot be
+  retracted.
+  Any outcome excluded by sealing (one requiring additional events in
+  $S$) remains excluded at extensions, since extensions cannot remove the
+  seal event.
+
+  (b)~Non-persistence of $\varphi$ arose because its exclusion set
+  depended on which events in $S$ had occurred.
+  After sealing, the set of events in $S$ is fixed; $\varphi$'s effect
+  is a function of this fixed set---deterministic, hence an entailment.
+
+  (c)~At any history where $S$ has stabilized, the seal is vacuous
+  (it declares complete a set that is already complete).
+  The entailment then computes the same exclusion set that $\varphi$
+  would have computed, yielding the same resolved outcome.
+\end{proof}
+
+\noindent
+The transformation replaces each non-persistent commitment with a
+persistent seal of its dependency set.
+The resulting basis is persistent by construction, and resolves the same
+specifications whenever the original basis's dependencies have
+stabilized---which is always the case in the retrospective
+(quiescent-history) setting of this paper.
 
 % ================================================================
 \section{Open Questions}

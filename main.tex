@@ -1669,7 +1669,7 @@ structure remain open.
 When all commitments commute (a single layer), the determination reduces to a
 single commutative monoid tensored with the provenance semiring, and the
 determination semiring coincides with
-$\mathrm{PosBool}(B)$~\cite{green2007provenance}.
+$\mathrm{PosBool}(\Phi)$~\cite{green2007provenance}.
 
 \paragraph{Universality.}
 Green et al.\ showed that $\mathbb{N}[X]$ is the most general provenance
@@ -1970,33 +1970,140 @@ questions require retaining more semantic information
 % ===============================================================
 
 The body (Section~\ref{sec:transactions}) presents determination provenance
-for transactions in a protocol-agnostic manner: commitments are ordering and
-abort decisions, and depth depends on the isolation level's acyclicity
-constraint and the conflict-graph topology.
-This appendix instantiates the framework under two specific concurrency
-control protocols---two-phase locking (2PL) and multiversion concurrency
-control (MVCC)---to verify that the semantic characterization is consistent
-with operational behavior and to expose protocol-specific structure.
+using a commit/abort basis where operation interleaving is environment and
+the system's only irrevocable decisions are transaction commit and abort at
+validation time.
+This is essentially optimistic concurrency control
+(OCC)~\cite{kung1981optimistic}: transactions execute speculatively, and
+the semantic resolution occurs at validation.
+The depth characterization of Section~\ref{sec:transactions}---depth~$1$
+without cycles, $\ge 2$ with overlapping cycles---applies directly to OCC.
+
+This appendix instantiates the framework under two other canonical
+protocols---two-phase locking (2PL) and multiversion timestamp ordering
+(MVTO)---to show how protocol mechanisms map to commitment structure and
+to expose the resulting differences in determination depth.
 
 \subsection{Two-Phase Locking (2PL)}
 
-\jmh{TODO: Under 2PL, ordering commitments are made incrementally as locks
-are acquired (each lock acquisition implicitly commits to an ordering on the
-locked object). Abort commitments arise from deadlock detection and
-resolution. The determination structure differs from the body's
-protocol-agnostic treatment in that ordering commitments are distributed
-throughout execution rather than concentrated at commit time. Formalize:
-lock acquisition as ordering commitment, deadlock cycle as forcing abort
-commitment, depth characterization under 2PL.}
+Under 2PL, a transaction acquires locks before accessing objects and
+releases them only after its last access (the ``two phases'': growing and
+shrinking).
+The determination structure differs from the protocol-agnostic treatment
+in two ways.
 
-\subsection{Multiversion Concurrency Control (MVCC)}
+\paragraph{Lock acquisition as ordering commitment.}
+Each lock acquisition implicitly fixes an ordering on the locked
+object: if $T_i$ holds a write lock on $x$ and $T_j$ requests a
+conflicting lock, the system has irrevocably decided $T_i \prec T_j$ on $x$.
+Under the enriched scheduling basis
+(Section~\ref{sec:scheduling-basis}), this is exactly the ordering
+commitment $\varphi_{T_i \prec T_j}$.
+The key difference from the protocol-agnostic view is \emph{timing}:
+ordering commitments are made incrementally as locks are acquired
+(distributed throughout execution), rather than concentrated at commit
+time.
 
-\jmh{TODO: Under MVCC, each transaction reads from a specific version,
-introducing version-selection commitments analogous to the snapshot
-predicates discussed for SI. The commitment basis includes version-read
-predicates in addition to ordering and abort commitments. Formalize:
-version selection as commitment, interaction with write-visibility rules,
-depth characterization under MVCC. Compare with SI treatment in body.}
+\paragraph{Deadlock as forced abort.}
+A deadlock cycle $T_1 \to T_2 \to \cdots \to T_m \to T_1$ in the
+wait-for graph means the lock-acquisition commitments already made are
+jointly inconsistent with all transactions committing.
+The system resolves this by aborting one transaction (the ``victim''),
+which is an abort commitment $\varphi_{\mathsf{abort}(T_v)}$.
+The choice of victim is itself a commitment: different victims yield
+different determinations.
+
+\paragraph{Determination structure.}
+Under strict 2PL (locks held until commit), the ordering commitments
+made during the growing phase commute on distinct objects
+(Proposition~\ref{prop:commit-commute}).
+Non-commutativity arises only when deadlock forces a victim choice that
+affects subsequent lock availability.
+Hence:
+depth~$1$ when no deadlocks occur (all lock-acquisition commitments
+commute);
+depth~$\ge 2$ when deadlock resolution enables or blocks subsequent
+lock acquisitions.
+This matches the body's characterization
+(Proposition~\ref{prop:ser-depth}): overlapping cycles in the conflict
+graph correspond to deadlock cycles in the wait-for graph.
+
+\paragraph{Provenance implications.}
+Under 2PL, the determination records not just \emph{which} transactions
+committed but \emph{when} each ordering was fixed (at lock acquisition
+time).
+Two executions that produce the same serial order but acquire locks in
+different sequences yield the same resolved outcome but different
+determination provenance---the commitments were made at different points
+in the history.
+This finer-grained structure is invisible in the protocol-agnostic
+treatment but may matter for diagnostic queries about lock contention.
+
+\subsection{Multiversion Timestamp Ordering (MVTO)}
+
+Under MVTO~\cite{reed1978naming}, each transaction $T_i$ receives a
+unique timestamp $ts_i$ at start.
+Reads and writes are governed by the timestamp order: $T_i$ reads the
+latest version of $x$ written by a transaction with timestamp
+$\le ts_i$, and $T_i$'s write of $x$ creates a new version tagged
+$ts_i$.
+A write by $T_i$ is rejected (and $T_i$ aborted) if some transaction
+$T_j$ with $ts_j > ts_i$ has already read the previous version of $x$
+--- the ordering $T_i \prec T_j$ is already committed, and $T_i$'s
+write would retroactively invalidate $T_j$'s read.
+
+\paragraph{Timestamp assignment as semantic commitment.}
+The primary semantic commitment in MVTO is the timestamp assignment itself.
+Assigning $ts_i < ts_j$ irrevocably fixes $T_i \prec T_j$ in the serial
+order on every object they both access.
+This is an ordering commitment
+$\varphi_{T_i \prec T_j}$ in the enriched scheduling basis
+(Section~\ref{sec:scheduling-basis}), but with a crucial structural
+property: a single timestamp assignment simultaneously fixes the
+ordering of $T_i$ relative to \emph{all} other active transactions.
+Version reads are not separate commitments---they are consequences of
+the timestamp order.
+
+\paragraph{Forced aborts.}
+Unlike 2PL, MVTO never blocks: conflicting operations are either
+served from an appropriate version (reads) or rejected immediately
+(writes that violate timestamp order).
+Rejection forces an abort commitment
+$\varphi_{\mathsf{abort}(T_i)}$, but this is not a free choice---it
+is determined by the timestamp assignments already made.
+MVTO is therefore deadlock-free.
+
+\paragraph{Determination structure.}
+Because timestamp assignments on non-conflicting transactions commute
+(the relative order is irrelevant if they access disjoint objects),
+and because aborts are forced (not chosen), the determination under
+MVTO has a particularly simple structure:
+\begin{itemize}[nosep]
+  \item All timestamp assignments commute on non-conflicting pairs,
+        forming a single layer of width equal to the number of
+        conflicting pairs.
+  \item Forced aborts are entailed by the timestamp layer---they add
+        no independent commitments and no additional depth.
+\end{itemize}
+Hence MVTO determinations have depth~$1$ in all cases: the timestamp
+layer resolves all ambiguity in a single commuting stage.
+This contrasts with 2PL, which may require depth~$\ge 2$ under
+deadlock.
+
+\paragraph{Comparison across protocols.}
+All three protocols implement serializability but differ in
+determination structure.
+OCC (the body's default) defers all semantic decisions to validation time:
+depth~$1$ without cycles, $\ge 2$ with overlapping cycles.
+2PL makes ordering commitments incrementally at lock acquisition:
+same depth characterization, but deadlock introduces forced aborts
+whose resolution can add layers.
+MVTO fixes the full ordering in a single timestamp assignment:
+depth~$1$ unconditionally, at the cost of more aborts (fewer valid
+resolving determinations for a given workload).
+The three protocols thus trace a spectrum from late resolution
+(OCC) through incremental resolution (2PL) to eager resolution
+(MVTO), with determination depth decreasing along this axis.
 
 \section[Datalog with Negation: Worked Determination Provenance]{Datalog$^{\neg}$ Worked Determination Provenance}
 \label{sec:appendix-datalog}

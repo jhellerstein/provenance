@@ -107,8 +107,7 @@ why- and how-provenance, uncertainty propagation, and
 optimization~\cite{green2007provenance,suciu2011probabilistic}.
 The algebraic structure provides more than tracing: it supports
 counterfactual reasoning (why-not), compositional explanation, and
-quantitative measures---capabilities we collectively term
-\emph{algebraic expressiveness}.
+quantitative measures.
 Explanation reduces to arithmetic, and this reduction has been remarkably
 effective.
 
@@ -117,8 +116,8 @@ systems that most need explanation: transactional databases, distributed
 services, and concurrent pipelines.
 These systems record execution traces and lineage
 metadata~\cite{sigelman2010dapper,seltzer2005provenance,bates2015trustworthy},
-but algebraic expressiveness is entirely absent from their tracing
-infrastructure.
+but none of this expressive power---counterfactuals, composition,
+quantification---reaches their tracing infrastructure.
 The obstacle is a semantic mismatch: these systems operate under
 \emph{semantic ambiguity}---a transactional workload may admit multiple
 serializable executions; a distributed system may admit multiple orderings

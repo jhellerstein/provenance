@@ -1684,43 +1684,31 @@ Seen this way, a layered determination is a semantic prelude to algebraic
 provenance: it explains \emph{when} and \emph{why} classical provenance
 applies, rather than assuming a fixed monotone semantics from the outset.
 
-% ================================================================
-\section{Toward an Algebraic Theory of Layered Determinations}
+\subsection{Open Questions}
 \label{app:algebra-future}
-% ================================================================
 
-The layered structure of determinations as presented in this paper is a structural decomposition:
-it identifies the phases of provenance computation (commitment discharge
-followed by derivational evaluation) without claiming a new algebraic object
-with universal properties.
-Several directions for algebraic development remain open.
+Several directions for algebraic development of the within-determination
+structure remain open.
 
 \paragraph{Collapse at depth 1.}
-When all commitments commute (number of layers~$1$), the determination reduces to a
-single commutative monoid tensored with the provenance semiring.
-In this case, the determination semiring coincides with
-$\mathrm{PosBool}(B)$~\cite{green2007provenance}, where $B$ is the set of
-commitment variables.
-A formal proof of this collapse and characterization of the resulting structure
-is straightforward but deferred.
+When all commitments commute (a single layer), the determination reduces to a
+single commutative monoid tensored with the provenance semiring, and the
+determination semiring coincides with
+$\mathrm{PosBool}(B)$~\cite{green2007provenance}.
 
 \paragraph{Universality.}
 Green et al.\ showed that $\mathbb{N}[X]$ is the most general provenance
-semiring for positive relational algebra: every other semiring annotation is a
-homomorphic image.
-An analogous question for layered determinations would ask: is there a ``most
-general'' determination from which all others are homomorphic images?
+semiring for positive relational algebra.
+An analogous question: is there a ``most general'' layered determination
+from which all others are homomorphic images?
 The conditioning between layers (each monoid depends on the discharge of the
-previous) makes this question non-trivial, as the determination is not a fixed algebraic
-structure but a \emph{dependent} one.
+previous) makes this non-trivial.
 
 \paragraph{Composition laws.}
-When two determinations share a common prefix, their determinations share initial layers.
-A formal treatment of determination morphisms---how determinations relate under prefix extension,
-restriction, and substitution of commitment layers---would enable compositional
-reasoning about determination provenance across sub-specifications.
-
-These directions are left for future work.
+When two determinations share a common prefix, they share initial layers.
+A formal treatment of determination morphisms---how determinations relate
+under prefix extension, restriction, and substitution---would enable
+compositional reasoning across sub-specifications.
 
 % ================================================================
 \section{Across Determinations: The Determination Semiring}

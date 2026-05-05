@@ -155,11 +155,9 @@ The layered structure within each determination is reflected as a
 \emph{filtration} of this semiring---a chain of sub-semirings that query
 evaluation respects---giving the framework genuine algebraic depth beyond
 the support structure alone.
-We instantiate the framework for transactional systems (ambiguity from
-concurrency) and Datalog with negation (ambiguity from multiple models).
-For Datalog, the classical negation semantics---stratified, well-founded,
-stable-model---correspond to different levels of the filtration.
-
+We instantiate the framework for transactional systems and Datalog with
+negation; for the latter, the classical negation semantics correspond to
+different filtration levels.
 The semiring structure also yields a tractability frontier for
 quantitative diagnosis: \emph{determination responsibility}---a
 Shapley-value measure of each commitment's contribution---is \#P-hard
@@ -514,25 +512,6 @@ applied.
 We may therefore write $(\Spec \mid D)$ without a history argument.
 New environment events extending the history beyond $H^*$ may introduce
 ambiguity that $D$ does not cover, requiring additional commitments.
-
-\subsection{Three Levels of Structure}
-\label{sec:three-levels}
-
-The framework operates at three levels:
-\begin{enumerate}[nosep,label=(\arabic*),leftmargin=*]
-  \item \emph{Within a determination}: a resolving determination has
-        internal structure---layers of commitments that discharge
-        sequentially until classical provenance applies.
-  \item \emph{Across determinations (within a spec)}: the space of
-        resolving determinations forms a semiring; robustness,
-        contingency, and the coNP complexity of robustness live here.
-  \item \emph{Across specs}: preservation asks whether an outcome
-        survives a change of specification (e.g., SI to SER, stable
-        to well-founded).
-\end{enumerate}
-Sections~\ref{sec:conditional-semiring}--\ref{sec:responsibility}
-develop levels (2) and (3); level (1) is detailed in
-Appendix~\ref{app:algebra}.
 
 %% ================================================================
 \section{The Algebra of Determinations}
@@ -2526,8 +2505,9 @@ expressively limited (only positive, single-execution queries are
 supported).
 
 Determination provenance addresses both deficiencies.
-This appendix maps the three levels of structure
-(Section~\ref{sec:three-levels}) to concrete capabilities that the
+This appendix maps the framework's three levels of structure
+(within a determination, across determinations, across specifications)
+to concrete capabilities that the
 theory provides for systems lineage, then develops two orthogonal
 dimensions of parsimony that make the theory practical.
 

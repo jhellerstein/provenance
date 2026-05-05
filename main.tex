@@ -1350,11 +1350,13 @@ Supports compose cleanly through queries
 support equals $\mathcal{D}$ is computationally hard.
 
 \begin{definition}[Determination width]
+  A commitment is \emph{binary} if it selects between exactly two
+  alternatives (e.g., order $T_i$ before or after $T_j$; assign atom $a$
+  true or false).
   The \emph{width} of a determination is the maximum number of
   independent binary commitments in any single layer.
   A determination of width $n$ admits up to $2^n$ resolving
-  determinations (one per combination of binary choices in the widest
-  layer).
+  determinations.
 \end{definition}
 
 \begin{theorem}[Robustness is coNP-complete in width]

@@ -125,16 +125,18 @@ presupposes the very resolution that these systems leave open.
 
 This mismatch gives rise to provenance questions that have no analog in the
 classical setting.
-A bank account withdrawal is denied; classical provenance can explain
-\emph{how} the balance was computed, but not \emph{why} the deposit that
-would have prevented the denial arrived too late---that explanation
+An interbank settlement is rejected because a counterparty's funds
+transfer has not yet cleared; classical provenance can explain
+\emph{how} the balance was computed, but not \emph{why} the transfer that
+would have prevented the rejection arrived too late---that explanation
 requires identifying the scheduling commitment that ordered the balance
-check before the deposit.
-Was the denial inevitable (would it occur under every admissible
+check before the transfer posted.
+Was the rejection inevitable (would it occur under every admissible
 schedule), or was it an artifact of one particular interleaving?
 How likely is it to recur---under what fraction of schedules does the
-denial arise?
-If the system changed its scheduling policy, would the denial disappear?
+rejection arise?
+If the system changed its scheduling policy---say, deferring account
+reconciliation to end-of-day---would the rejection disappear?
 These are questions about the \emph{assumptions} under which the outcome
 was produced, not about the derivation itself.
 The same phenomenon arises in database theory: a Datalog program with

@@ -1404,65 +1404,48 @@ Full proofs in Appendix~\ref{app:robustness-proofs}.
 \label{sec:related}
 % ================================================================
 
-\noindent\textbf{Data provenance and explanations.}
-Algebraic provenance provides a uniform framework for explaining query
-conclusions under fixed, resolved semantics by annotating derivations with
-elements of a commutative semiring
-\cite{green2007provenance,suciu2011probabilistic,dalvi2012probabilistic,olteanu2015factorized,senellart2018provenance}.
-A related body of work studies explanations and causality for query answers,
-including why-not provenance, causal responsibility, and counterfactual
-explanations
-\cite{buneman2001why,halpern2001causes,meliou2010causality,glavic2015survey}.
-
-From the perspective of this paper, these approaches operate at
-depth~$0$: semantic ambiguity has already been resolved, and
-provenance explains derivations relative to a fixed semantics.
-This includes work on incremental view maintenance and \emph{homeostasis},
-which identifies queries whose answers are invariant under admissible input
-changes and therefore require no additional semantic commitments to maintain
-\cite{gehrke2002homeostasis}.
-In our framework, homeostasis corresponds precisely to robustness at
-depth~$0$: the query answer is invariant across all admissible
-outcomes of the specification, so no commitment is needed to justify it.
-Determination provenance generalizes this by explaining which commitments are
-required when invariance fails, and how classical provenance depends on those
-commitments once resolution has occurred.
+\noindent\textbf{Algebraic provenance.}
+Semiring provenance~\cite{green2007provenance} and its extensions to
+probabilistic~\cite{suciu2011probabilistic},
+factorized~\cite{olteanu2015factorized}, and
+aggregate~\cite{senellart2018provenance} settings all operate at
+depth~$0$: a fixed, resolved semantics.
+Why-not provenance~\cite{buneman2001why}, causal
+responsibility~\cite{meliou2010causality}, and counterfactual
+explanations~\cite{halpern2001causes} likewise condition on a single
+outcome.
+Homeostasis~\cite{gehrke2002homeostasis}---identifying queries whose
+answers are invariant under admissible input changes---corresponds to
+robustness at depth~$0$ in our framework.
+Determination provenance generalizes all of these by making the
+commitments that precede derivational provenance explicit and composable.
 
 \medskip
-\noindent\textbf{Negation and non-monotonic semantics.}
-Classical semantics for Datalog with negation provide well-understood mechanisms
-for resolving semantic ambiguity, with established relationships under syntactic
-restrictions.
-We do not propose new semantics.
-Instead, Appendix~\ref{sec:appendix-datalog} uses Datalog with negation as a controlled
-setting in which resolution strategies are explicit and formal, making it
-possible to study how different semantic commitments induce distinct
-determination structures and provenance behavior.
+\noindent\textbf{Provenance beyond the monotone fragment.}
+Extending semiring provenance to negation is a recognized open problem.
+Deutch et al.~\cite{deutch2014circuits} use Boolean circuits to represent
+provenance for non-monotone queries but do not address the multiplicity of
+models that negation introduces.
+Köhler et al.~\cite{kohler2012declarative} study why-not provenance for
+Datalog with negation under a fixed well-founded model.
+Our framework addresses the prior step: which semantic commitments
+determine \emph{which} model holds, and how provenance depends on that
+choice.
 
 \medskip
-\noindent\textbf{Transactional and systems provenance.}
-Provenance has been studied in transactional, workflow, and database
-settings under an assumed execution or isolation level
-\cite{bernstein1987concurrency,adya1999weak,cerone2015consistency,cheney2009provenance,freire2008provenance}.
-In these settings, semantic resolution is implicit: provenance explains results
-relative to a chosen execution, snapshot, or schedule.
-From our perspective, such approaches again require no determination.
-
-A distinct body of systems work studies execution provenance or systems lineage,
-recording causal dependencies among processes, messages, and events to explain
-observed behavior
-\cite{seltzer2005provenance,bates2015trustworthy,sigelman2010dapper}.
-These approaches take a maximalist view of provenance, capturing entire execution
-histories to account for ambiguity in scheduling and message interleaving.
-Determination provenance provides a semantic foundation for structuring such
-systems provenance: rather than committing to a single reconstructed execution,
-it makes explicit the semantic commitments required for a diagnostic conclusion
-to hold across admissible executions, supporting principled notions of parsimony
-and robustness.
-Recent systems work on mixed isolation regimes, such as Milano et al.'s MixT
-\cite{milano2020mixt}, addresses related concerns operationally; our contribution
-is a semantic and explanatory account that makes such mixtures explicit and
-checkable.
+\noindent\textbf{Provenance in transactional and systems settings.}
+Database provenance systems (Perm~\cite{glavic2008perm},
+GProM~\cite{arab2018gpromprovenance}) trace derivations under a fixed
+execution.
+Vandevoort et al.~\cite{vandevoort2025mixed} study which transactions can
+run at weaker isolation while preserving serializable behavior---a
+preservation question in our sense.
+Systems lineage work~\cite{sigelman2010dapper,seltzer2005provenance}
+captures entire execution histories without algebraic structure.
+Determination provenance provides the missing algebraic foundation:
+it separates the semantic commitments (which execution was chosen) from
+the derivational explanation (how the result was produced under that
+execution).
 
 \medskip
 \noindent\textbf{Determination complexity.}

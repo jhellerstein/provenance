@@ -1230,12 +1230,20 @@ through queries (Corollary~\ref{cor:propagation-filtration}), so
 preservation across semantics can be checked algebraically rather than
 by re-running the alternating fixpoint.
 
-\paragraph{Preservation.}
-Preservation across semantics follows directly:
-$p(c)$ is preserved from stable to well-founded to stratified (support in
-$\mathcal{F}_0$, visible at every level);
-$r(c)$ is not (support in $\mathcal{F}_{k+1} \setminus \mathcal{F}_k$,
-invisible until the cycle layer is discharged).
+\begin{proposition}[Subsumption of stratified LFP provenance]
+  \label{prop:subsumption}
+  For a stratifiable program, the conditioned provenance
+  $P_{D_{\mathrm{strat}}}(a)$ under the unique resolving determination
+  coincides with the LFP provenance of~\cite{dannert2021semiring}.
+  For programs with unstratified negation, Dannert et al.'s framework is
+  undefined (no unique model), while determination provenance remains
+  well-defined across stable models.
+\end{proposition}
+
+\noindent
+Preservation across semantics is read from supports: $p(c)$ is preserved
+from stable to well-founded to stratified (full support); $r(c)$ is not
+(partial support, invisible until the choice layer).
 
 % ================================================================
 \section{Determination Responsibility}
@@ -1527,19 +1535,16 @@ determinations forms a commutative semiring equipped with a filtration
 that query evaluation respects.
 This structure is not merely bookkeeping: it recovers classical
 provenance at depth~$0$, positive Boolean provenance for single-layer
-determinations, and the three classical negation semantics as different
+determinations, and the three classical negation semantics as
 filtration levels.
 Determination responsibility builds on this foundation, using the
 semiring's independence structure to define a Shapley-value measure
 that is \#P-hard in general but tractable when contention is narrow.
-
-For systems, the determination serves as a semantic index over traces,
-enabling responsibility, robustness, and preservation queries
+For systems, the determination serves as a semantic index over traces
 (Appendix~\ref{app:systems-lineage}).
 When meaning depends on resolution, provenance must explain the
-assumptions that made meaning possible; open directions include
-weighted distributions, reversible commitments, and compact
-representations.
+assumptions that made meaning possible; open directions include weighted
+distributions, reversible commitments, and compact representations.
 
 \pagebreak
 \appendix

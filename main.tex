@@ -668,12 +668,9 @@ across domains.
 \end{example}
 
 \paragraph{Computational cost.}
-$|\mathcal{D}|$ may be exponential in the size of the commitment basis.
-When all commitments commute (a single-layer determination), supports admit compact
-representation as positive Boolean formulas over commitment
-variables (Proposition~\ref{prop:collapse-depth-1}).
-For deeper determinations, compact representation requires respecting inter-layer
-validity constraints; this remains open.
+$|\mathcal{D}|$ may be exponential; for single-layer determinations,
+supports admit compact representation as positive Boolean formulas
+(Proposition~\ref{prop:collapse-depth-1}).
 
 \subsection{Filtration of the Determination Semiring}
 \label{sec:filtration}
@@ -839,6 +836,19 @@ No layer information is needed to make this distinction.
 Conversely, relational difference can strictly increase depth
 (Proposition~\ref{prop:difference-increases-depth},
 Appendix~\ref{app:det-semiring-details}): the filtration is tight.
+
+\paragraph{Non-monotonicity as commitment.}
+Classical approaches to provenance for non-monotone operations---monus
+for negation~\cite{dannert2021semiring}, circuits for
+complement~\cite{deutch2014circuits}---enrich the semiring with
+operations that require completeness of information (all derivations
+must be known before the complement can be evaluated).
+Determination provenance externalizes this requirement: the
+completeness guarantee is a sealing commitment, and the non-monotone
+operation becomes a deterministic entailment over the sealed state.
+The filtration records which non-monotone operations were needed and in
+what order; Sections~\ref{sec:transactions}--\ref{sec:negation-preview}
+instantiate this decomposition for transactions and Datalog negation.
 
 
 % ================================================================
@@ -1523,27 +1533,18 @@ support a tuple, not merely whether all do.
 \label{sec:conclusion}
 % ================================================================
 
-Classical provenance explains derivations under a fixed semantics.
-Many systems---transactional databases, distributed services, logic
-programs with negation---operate under semantic ambiguity, where
-multiple outcomes are admissible for the same history.
-Determination provenance extends algebraic provenance to these settings
-by making the commitments that resolve ambiguity explicit and composable.
+Classical provenance explains derivations under a fixed semantics;
+determination provenance extends it to settings with semantic
+ambiguity by making the commitments that resolve ambiguity explicit
+and composable.
 
 The algebraic development shows that the space of resolving
-determinations forms a commutative semiring equipped with a filtration
-that query evaluation respects.
-This structure is not merely bookkeeping: it recovers classical
-provenance at depth~$0$, positive Boolean provenance for single-layer
-determinations, and the three classical negation semantics as
-filtration levels.
-Determination responsibility builds on this foundation, using the
-semiring's independence structure to define a Shapley-value measure
-that is \#P-hard in general but tractable when contention is narrow.
-For systems, the determination serves as a semantic index over traces
-(Appendix~\ref{app:systems-lineage}).
-When meaning depends on resolution, provenance must explain the
-assumptions that made meaning possible; open directions include weighted
+determinations forms a semiring with a filtration that query evaluation
+respects---recovering classical provenance at depth~$0$ and the three
+negation semantics as filtration levels.
+Determination responsibility uses the semiring's independence structure
+to define a Shapley-value measure that is \#P-hard in general but
+tractable when contention is narrow; open directions include weighted
 distributions, reversible commitments, and compact representations.
 
 \pagebreak

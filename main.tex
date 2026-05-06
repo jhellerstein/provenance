@@ -153,17 +153,15 @@ A determination is the layered sequence of such commitments---recording
 which non-monotone operations were needed and in what order.
 
 Across determinations, the space of resolutions forms a semiring whose
-layered structure is reflected as a \emph{filtration} of sub-semirings
-that query evaluation respects.
-We instantiate the framework for transactional systems (where the
-non-monotone operation is conflict resolution) and Datalog with negation
-(where it is negation-as-failure); for the latter, the classical
-negation semantics correspond to different filtration levels.
-The semiring's independence structure also yields a tractability
-frontier for quantitative diagnosis: \emph{determination
-responsibility}---a Shapley-value measure of each commitment's
-contribution---is \#P-hard in general but tractable under narrow
-concurrent contention.
+layered structure is reflected as a \emph{filtration} that query
+evaluation respects.
+We instantiate the framework for transactional conflict resolution and
+Datalog negation; for the latter, the classical negation semantics
+correspond to different filtration levels.
+The semiring's independence structure yields a tractability frontier:
+\emph{determination responsibility}---a Shapley-value measure of each
+commitment's contribution---is \#P-hard in general but tractable when
+contention is narrow.
 
 \begin{example}[Provenance under transactional ambiguity]
   \label{ex:example}

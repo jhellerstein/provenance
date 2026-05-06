@@ -149,8 +149,8 @@ enrichments (monus, complement operators).
 Determination provenance externalizes them: each completeness guarantee
 is a \emph{sealing commitment}, and the non-monotone operation becomes
 a monotone entailment over the sealed state.
-The layered structure of commitments---which non-monotone operations
-were needed, in what order---is the determination.
+A determination is the layered sequence of such commitments---recording
+which non-monotone operations were needed and in what order.
 
 Across determinations, the space of resolutions forms a semiring whose
 layered structure is reflected as a \emph{filtration} of sub-semirings
@@ -162,8 +162,8 @@ negation semantics correspond to different filtration levels.
 The semiring's independence structure also yields a tractability
 frontier for quantitative diagnosis: \emph{determination
 responsibility}---a Shapley-value measure of each commitment's
-contribution---is \#P-hard in general but polynomial when concurrent
-contention is narrow.
+contribution---is \#P-hard in general but tractable under narrow
+concurrent contention.
 
 \begin{example}[Provenance under transactional ambiguity]
   \label{ex:example}

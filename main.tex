@@ -147,7 +147,8 @@ Classical provenance explains derivations once semantics is fixed.
 But non-monotone operations---negation, conflict resolution, and
 aggregation---require \emph{completeness guarantees} before they can be
 evaluated: all derivations must be known before a complement is
-meaningful, all conflicts resolved before a serialization is fixed.
+meaningful, all conflicts resolved before a serialization is fixed,
+all contributing tuples accumulated before an aggregate is computed.
 Classical approaches internalize these guarantees as algebraic
 enrichments (monus, complement operators).
 Determination provenance externalizes them: each completeness guarantee
@@ -1281,8 +1282,10 @@ by re-running the alternating fixpoint.
   ($1_K \dot{-} v = 0_K$ when $v > 0_K$, $= 1_K$ when $v = 0_K$).
   The provenance polynomial for stratum $k{+}1$ is then a positive
   polynomial over $K$ with these Boolean annotations as base facts.
-  Supports (which determinations yield $v > 0_K$) are identical under
-  both computations.
+  In any zero-divisor-free semiring (including $\mathbb{N}[X]$ and all
+  standard provenance semirings), a positive polynomial is nonzero iff
+  at least one monomial has all-nonzero factors; hence supports (which
+  determinations yield $v > 0_K$) are identical under both computations.
 \end{proof}
 
 \noindent
@@ -2598,9 +2601,9 @@ longest dependency chain).
     \item \emph{Stratified semantics} reads $\mathcal{F}_k$: defined
           only when no negative cycles exist ($d = 0$).
     \item \emph{Well-founded semantics} reads $\mathcal{F}_{k+d^*}$
-          where $d^* \le d$ is the number of choice layers whose
-          resolution is \emph{forced} (uniquely determined by the
-          preceding prefix).
+          where $d^* \le d$ is the number of \emph{consecutive} choice
+          layers (starting from $k{+}1$) whose resolution is forced
+          (uniquely determined by the preceding prefix).
   \end{enumerate}
 \end{theorem}
 

@@ -1034,25 +1034,10 @@ $b$ is robust (nonzero under every determination); $d$ is contingent.
 Figure~\ref{fig:det-tables} summarizes the determination structure across
 isolation levels for this example.
 
-\paragraph{Enriched expressive power.}
-The determination semiring enables queries that classical provenance
-cannot express.
-\emph{Robustness}: is $b$'s presence inevitable, or could a different
-serialization have excluded it?
-(Full support confirms inevitability.)
-\emph{Counterfactuals}: under which commit orderings does $d$ appear?
-(The support $\{D_{\mathsf{in}}\}$ answers directly.)
-\emph{Tail bounds}: under what fraction of admissible serializations
-does a latency-sensitive query meet its SLA?
-($|\mathrm{supp}|/|\mathcal{D}|$ under a uniform distribution; weighted
-variants for other distributions.)
-\emph{Diagnosis}: which ordering commitment is most responsible for an
-SLA violation?
-(Determination responsibility, Section~\ref{sec:responsibility},
-assigns each commitment a quantitative Shapley value.)
-These questions concern the \emph{space} of admissible executions, not
-any single execution---a capability absent from systems that record only
-one trace.
+The determination semiring enables robustness, counterfactual, and
+quantitative diagnosis queries over the space of admissible
+executions---capabilities absent from systems that record only one
+trace (Section~\ref{sec:responsibility}).
 
 
 
@@ -1225,6 +1210,9 @@ the correspondence generalizes to nested cycles with depth $k + d$
 (Appendix~\ref{app:datalog-general}).
 
 Under the enriched outcome domain, the correspondence is summarized in the table below:
+Stable semantics discharges all commitments; WFS discharges the sealing
+layers and classifies the residual ambiguity as $\mathbf{u}$ (via the
+alternating fixpoint---an entailment, not a further commitment;
 \begin{wraptable}{r}{0.48\textwidth}
 \vspace{-1em}
 \small
@@ -1240,9 +1228,6 @@ Under the enriched outcome domain, the correspondence is summarized in the table
 \end{tabular}
 \vspace{-1em}
 \end{wraptable}
-Stable semantics discharges all commitments; WFS discharges the sealing
-layers and classifies the residual ambiguity as $\mathbf{u}$ (via the
-alternating fixpoint---an entailment, not a further commitment;
 see Appendix~\ref{sec:appendix-datalog});
 stratified semantics discharges the same sealing layers but is defined
 only when they resolve everything ($\neg$-cycle atoms remain $\bot$).

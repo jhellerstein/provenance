@@ -1575,10 +1575,11 @@ tractable when contention is narrow.
 More broadly, the filtration provides a depth-based complexity measure
 for any derived fact: how deep into the non-monotone nesting does its
 truth depend?
-This measure is compositional (positive queries cannot increase it),
-gives granular invalidation boundaries for incremental maintenance,
-enables early termination when only shallow facts are needed, and bounds
-the cost of quantitative attribution.
+This measure is compositional (positive queries cannot increase it) and
+bounds the cost of quantitative attribution.
+Its applications to incremental maintenance (invalidate only tuples
+whose depth reaches the changed layer) and early termination (stop when
+only shallow facts are needed) remain to be developed.
 
 \pagebreak
 \appendix

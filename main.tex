@@ -201,7 +201,9 @@ contention is narrow.
         (Section~\ref{sec:transactions}).
   \item Instantiation for Datalog with negation: the classical negation
         semantics---stratified, well-founded, stable-model---are
-        filtration levels of a single determination semiring
+        filtration levels of a single determination semiring;
+        \emph{monus elimination} shows that layered monotone semirings
+        subsume semirings-with-monus for provenance under negation
         (Section~\ref{sec:negation-preview},
         Appendix~\ref{sec:appendix-datalog}).
   \item \emph{Determination responsibility}: a Shapley-value measure
@@ -1244,15 +1246,32 @@ through queries (Corollary~\ref{cor:propagation-filtration}), so
 preservation across semantics can be checked algebraically rather than
 by re-running the alternating fixpoint.
 
-\begin{proposition}[Subsumption of stratified LFP provenance]
-  \label{prop:subsumption}
-  For a stratifiable program, the conditioned provenance
-  $P_{D_{\mathrm{strat}}}(a)$ under the unique resolving determination
-  coincides with the LFP provenance of~\cite{dannert2021semiring}.
-  For programs with unstratified negation, Dannert et al.'s framework is
-  undefined (no unique model), while determination provenance remains
+\begin{theorem}[Monus elimination]
+  \label{thm:monus-elimination}
+  For any naturally ordered semiring $K$ with monus and any finite normal
+  Datalog program $P$: the LFP provenance of an atom $a$ computed over
+  $(K, \dot{-})$~\cite{dannert2021semiring} equals the conditioned
+  provenance $P_{D_{\mathrm{strat}}}(a)$ computed over $(K, +, \cdot)$
+  with sealing commitments at each stratum.
+  The monus is replaced by a sealing commitment (fixing the stratum's
+  derivations) followed by a monotone $K$-computation that reads sealed
+  absence as a base annotation.
+  For programs with unstratified negation, monus is undefined (no unique
+  model to complement against), while determination provenance remains
   well-defined across stable models.
-\end{proposition}
+\end{theorem}
+\begin{proof}[Proof sketch]
+  After sealing stratum $k$, truth values of stratum-$k$ atoms are
+  fixed.
+  Negation of a sealed atom is a deterministic function
+  ($\mathbf{t} \mapsto 0_K$, $\mathbf{f} \mapsto 1_K$)---a monotone
+  lookup, not a monus.
+  The provenance polynomial for stratum $k{+}1$ is a positive polynomial
+  over $K$ with sealed-negation atoms as base annotations.
+  This equals the monus computation because $1_K \dot{-} v = 0_K$ when
+  $v > 0_K$ and $1_K \dot{-} 0_K = 1_K$ in any naturally ordered
+  semiring---exactly the sealed-absence annotation.
+\end{proof}
 
 \noindent
 Preservation across semantics is read from supports: $p(c)$ is preserved

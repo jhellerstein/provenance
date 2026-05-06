@@ -1459,6 +1459,34 @@ When treewidth is unbounded, sampling provides an additive approximation.
   inequality gives the stated guarantee.
 \end{proof}
 
+\paragraph{Compositionality through queries.}
+Responsibility interacts predictably with relational algebra.
+
+\begin{proposition}[Responsibility under join and union]
+  \label{prop:resp-compose}
+  For tuples $t_1, t_2$ both present under $D^*$:
+  \begin{enumerate}[nosep,label=(\alph*)]
+    \item \emph{Join concentrates:}
+          $\rho(\varphi_i,\, t_1 \bowtie t_2) \ge
+          \max(\rho(\varphi_i, t_1),\; \rho(\varphi_i, t_2))$.
+    \item \emph{Union dilutes:}
+          $\rho(\varphi_i,\, t_1 \cup t_2) \le
+          \min(\rho(\varphi_i, t_1),\; \rho(\varphi_i, t_2))$.
+  \end{enumerate}
+\end{proposition}
+\begin{proof}[Proof sketch]
+  (a)~The join's support is $S_1 \cap S_2 \subseteq S_j$; removing
+  $\varphi_i$ from the coalition can only make membership in the smaller
+  set less likely, so marginal contributions are at least as large.
+  (b)~The union's support is $S_1 \cup S_2 \supseteq S_j$; the larger
+  set is easier to hit, so marginal contributions are at most as large.
+\end{proof}
+
+\noindent
+Joins concentrate responsibility on the bottleneck commitment (the one
+most needed by the more fragile input); unions dilute it (alternative
+derivation paths reduce dependence on any single commitment).
+
 \paragraph{Multi-layer responsibility.}
 \label{sec:multi-layer-resp}
 For depth $d > 1$, responsibility is defined per layer: the
@@ -1508,10 +1536,12 @@ responsibility uses the same axioms but over semantic commitments.
 Probabilistic databases~\cite{suciu2011probabilistic} annotate tuples
 with possible-world membership, yielding support sets over worlds.
 Determination provenance shares the support-set structure but adds
-two layers absent from the probabilistic setting: the filtration
-(reflecting non-commutative commitment layers) and the independence
-structure of the commitment basis (yielding the treewidth-based
-tractability frontier for responsibility).
+the filtration (reflecting non-commutative commitment layers) and the
+independence structure of the commitment basis.
+These carry strictly more information: tuples with identical supports
+can have different query-relative depth and different responsibility
+profiles---a distinction invisible to any framework that sees only
+world-membership.
 
 \medskip
 \noindent\textbf{Provenance beyond the monotone fragment.}
@@ -1580,6 +1610,10 @@ bounds the cost of quantitative attribution.
 Its applications to incremental maintenance (invalidate only tuples
 whose depth reaches the changed layer) and early termination (stop when
 only shallow facts are needed) remain to be developed.
+The deepest open question is universality: is there a ``most general''
+determination semiring---analogous to $\mathbb{N}[X]$ for positive
+relational algebra~\cite{green2007provenance}---from which all others
+are homomorphic images?
 
 \pagebreak
 \appendix

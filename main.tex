@@ -140,14 +140,14 @@ may depend on which model is chosen.
 
 This paper identifies a missing dimension of provenance.
 Classical provenance explains derivations once semantics is fixed.
-% NOTE: Aggregation is mentioned as a motivating example of non-monotone ops
-% requiring completeness. Not instantiated in this paper; future work.
+% NOTE: Aggregation fits the framework via stratified aggregation (Ross &
+% Sagiv 1992): seal the input group, then compute the aggregate as entailment.
+% Same mechanism as stratified negation. Not separately instantiated but
+% follows directly.
 But non-monotone operations---negation, conflict resolution, and
 aggregation---require \emph{completeness guarantees} before they can be
 evaluated: all derivations must be known before a complement is
-meaningful, all conflicts resolved before a serialization is fixed
-(this paper develops negation and conflict resolution; aggregation is
-analogous but not instantiated here).
+meaningful, all conflicts resolved before a serialization is fixed.
 Classical approaches internalize these guarantees as algebraic
 enrichments (monus, complement operators).
 Determination provenance externalizes them: each completeness guarantee

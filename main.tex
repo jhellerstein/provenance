@@ -8,6 +8,7 @@
 \usepackage{booktabs}
 \usepackage{tikz}
 \usepackage{xcolor}
+\usepackage{wrapfig}
 
 % Tighten paragraph heading spacing
 \makeatletter
@@ -598,7 +599,6 @@ $\mathrm{supp}(P(t))
   \triangleq
   \{\, D \in \mathcal{D} \mid P(t)(D) \neq 0 \,\}$
 is the set of determinations under which $t$ holds.
-
 These supports form a commutative semiring under the operations induced by
 query evaluation:
 joint use of facts (semiring multiplication) maps to \emph{intersection}
@@ -1225,19 +1225,22 @@ the correspondence generalizes to nested cycles with depth $k + d$
 (Appendix~\ref{app:datalog-general}).
 
 Under the enriched outcome domain, the correspondence is summarized as:
-\begin{center}
+
+\begin{wraptable}{r}{0.48\textwidth}
+\vspace{-1.5em}
 \small
 \begin{tabular}{@{}lll@{}}
   \toprule
-  \textbf{Semantics} & \textbf{Determination prefix} & \textbf{$\neg$-cycle atoms} \\
+  \textbf{Semantics} & \textbf{Prefix} & \textbf{$\neg$-cycle atoms} \\
   \midrule
   Stable & full ($k{+}1$ layers) & $\mathbf{t}$/$\mathbf{f}$ \\
-  Well-founded & sealing only ($k$ layers) & $\mathbf{u}$ \\
-  Stratified & sealing only ($k$ layers) & $\bot$ \\
+  Well-founded & sealing ($k$ layers) & $\mathbf{u}$ \\
+  Stratified & sealing ($k$ layers) & $\bot$ \\
   Monotone & none & $\bot$ \\
   \bottomrule
 \end{tabular}
-\end{center}
+\vspace{-1em}
+\end{wraptable}
 Stable semantics discharges all commitments; WFS discharges the sealing
 layers and classifies the residual ambiguity as $\mathbf{u}$ (via the
 alternating fixpoint---an entailment, not a further commitment;

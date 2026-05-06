@@ -1034,10 +1034,18 @@ $b$ is robust (nonzero under every determination); $d$ is contingent.
 Figure~\ref{fig:det-tables} summarizes the determination structure across
 isolation levels for this example.
 
-The determination semiring enables robustness, counterfactual, and
-quantitative diagnosis queries over the space of admissible
-executions---capabilities absent from systems that record only one
-trace (Section~\ref{sec:responsibility}).
+\paragraph{Expressive power beyond classical provenance.}
+The determination semiring enables queries that classical provenance
+cannot express.
+\emph{Robustness}: is $b$'s presence inevitable, or could a different
+serialization have excluded it?
+\emph{Counterfactuals}: under which orderings does $d$ appear?
+\emph{Tail bounds}: under what fraction of admissible serializations
+does an SLA hold?
+\emph{Diagnosis}: which ordering commitment is most responsible for a
+violation? (Section~\ref{sec:responsibility}.)
+These questions concern the \emph{space} of admissible executions, not
+any single execution.
 
 
 

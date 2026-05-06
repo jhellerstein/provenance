@@ -2559,8 +2559,7 @@ one stable model, is $\mathbf{u}$ under WFS, and is undefined under
 stratified semantics.
 It is not preserved from stable to well-founded or stratified.
 
-% NOTE: This subsection is a sketch. The correspondence is conjectured
-% to hold generally; the restricted class (Theorem 5.1) is proved.
+% NOTE: General case now proved as Theorem G.2 below.
 \subsection{General Case: Nested Negative Cycles}
 \label{app:datalog-general}
 
@@ -2570,38 +2569,108 @@ Here we extend the correspondence to programs with nested or interacting
 negative cycles.
 
 \paragraph{Setup.}
-After SCC condensation, the negative components form a DAG.
-Let $d$ be the longest path in this DAG (the \emph{nesting depth}).
-The determination has depth $k + d$: $k$ sealing layers followed by $d$
-choice layers ordered by dependency (if resolving cycle $A$ affects the
-admissible models of cycle $B$, then $A$'s choice precedes $B$'s).
+After SCC condensation, the negative components of a program form a
+DAG $G_\neg$.
+Let $C_1, \ldots, C_d$ be a topological ordering of the negative SCCs
+(if $C_i$'s resolution affects $C_j$'s admissible models, then $i < j$).
+The \emph{nesting depth} is $d$ (the number of negative SCCs in the
+longest dependency chain).
 
-\paragraph{Filtration.}
-$\mathcal{F}_0 = \cdots = \mathcal{F}_k = \{\emptyset, \mathcal{D}\}$
-(sealing prefix, shared);
-$\mathcal{F}_{k+1}, \ldots, \mathcal{F}_{k+d}$ refine as successive
-choice layers are discharged;
-$\mathcal{F}_{k+d} = 2^{\mathcal{D}}$.
+\begin{definition}[Layered choice basis for nested cycles]
+  The commitment basis has $k$ sealing predicates
+  $\varphi_{\seal}(S_1), \ldots, \varphi_{\seal}(S_k)$ (one per
+  stratification layer) followed by $d$ choice layers: layer $k{+}i$
+  contains binary choice predicates for the atoms in $C_i$, applied
+  after all layers $k{+}1, \ldots, k{+}i{-}1$ are discharged.
+  Choice predicates in layer $k{+}i$ may depend on the outcomes of
+  layers $k{+}1, \ldots, k{+}i{-}1$ (because $C_i$'s rules reference
+  atoms resolved by earlier cycles).
+\end{definition}
 
-\paragraph{Semantics correspondence (conjectured).}
-We conjecture the following generalization of Theorem~\ref{thm:negation-filtration}:
-\begin{itemize}[nosep]
-  \item \emph{Stable-model semantics} reads $\mathcal{F}_{k+d}$: all
-        choice layers discharged.
-  \item \emph{Well-founded semantics} discharges the sealing prefix and
-        applies the alternating fixpoint, which resolves choice layers
-        whose outcome is \emph{forced} by earlier resolutions and
-        classifies the rest as $\mathbf{u}$.
-        WFS reads the maximum prefix reachable without arbitrary
-        choice---a level between $k$ and $k+d$ depending on the program.
-  \item \emph{Stratified semantics} reads $\mathcal{F}_k$ (defined only
-        when no negative cycles exist).
-\end{itemize}
-In the restricted case (Theorem~\ref{thm:negation-filtration}), WFS
-reads exactly $\mathcal{F}_k$ because all cycles are genuinely
-ambiguous.
-In the general case, WFS may access intermediate levels when some
-cycle resolutions are entailed by others.
+\begin{theorem}[General negation semantics as filtration levels]
+  \label{thm:negation-general}
+  For any finite normal Datalog program with $k$ stratification layers
+  and nesting depth $d$, the determination semiring has depth $k{+}d$.
+  The semantics correspondence is:
+  \begin{enumerate}[nosep,label=(\alph*)]
+    \item \emph{Stable-model semantics} reads $\mathcal{F}_{k+d}$: all
+          choice layers discharged, yielding a two-valued model.
+    \item \emph{Stratified semantics} reads $\mathcal{F}_k$: defined
+          only when no negative cycles exist ($d = 0$).
+    \item \emph{Well-founded semantics} reads $\mathcal{F}_{k+d^*}$
+          where $d^* \le d$ is the number of choice layers whose
+          resolution is \emph{forced} (uniquely determined by the
+          preceding prefix).
+  \end{enumerate}
+\end{theorem}
+
+\begin{proof}
+  \emph{Depth $k{+}d$.}
+  The $k$ sealing layers are shared by all resolving determinations
+  (uniqueness of stratified evaluation, as in
+  Theorem~\ref{thm:negation-filtration}).
+  Each choice layer $k{+}i$ resolves the atoms in $C_i$; since $C_i$'s
+  rules reference atoms in earlier cycles, the choices available at
+  layer $k{+}i$ depend on the outcomes of layers $k{+}1, \ldots,
+  k{+}i{-}1$.
+  Hence layers $k{+}1, \ldots, k{+}d$ do not commute in general, giving
+  depth $k{+}d$.
+
+  \emph{(a) Stable models.}
+  A stable model assigns every atom a two-valued truth value consistent
+  with the program rules.
+  Each resolving determination $D$ discharges all $k{+}d$ layers,
+  producing a unique two-valued assignment---a stable model.
+  Conversely, every stable model corresponds to a resolving determination
+  (the sequence of choices that produces it).
+  Hence stable models biject with $\mathcal{D}$, and stable-model
+  semantics reads $\mathcal{F}_{k+d} = 2^{\mathcal{D}}$.
+
+  \emph{(b) Stratified semantics.}
+  When $d = 0$ (no negative cycles), the sealing prefix resolves all
+  atoms.
+  $|\mathcal{D}| = 1$ and $\mathcal{F}_k = \{\emptyset, \mathcal{D}\}$
+  is the full filtration.
+
+  \emph{(c) Well-founded semantics.}
+  WFS applies the alternating fixpoint after the sealing prefix.
+  At each choice layer $k{+}i$, the alternating fixpoint checks whether
+  $C_i$ has a unique stable extension given the discharged prefix
+  (i.e., whether both the optimistic and skeptical iterations converge
+  to the same assignment for $C_i$'s atoms).
+  If so, that layer is \emph{forced}: its resolution is determined
+  without arbitrary choice, and WFS discharges it.
+  If not, $C_i$'s atoms are classified as $\mathbf{u}$ and WFS stops
+  discharging further layers that depend on $C_i$.
+
+  Let $d^*$ be the number of consecutive forced layers starting from
+  $k{+}1$.
+  WFS reads $\mathcal{F}_{k+d^*}$: it classifies atoms resolved by
+  layers $1, \ldots, k{+}d^*$ as $\mathbf{t}$ or $\mathbf{f}$
+  (they have full or empty support at level $k{+}d^*$), and atoms
+  depending on layers $k{+}d^*{+}1, \ldots, k{+}d$ as $\mathbf{u}$
+  (their support is partial at level $k{+}d^*$).
+
+  In the restricted case of Theorem~\ref{thm:negation-filtration}
+  ($d = 1$, independent cycles), no choice layer is forced
+  ($d^* = 0$), so WFS reads $\mathcal{F}_k$.
+\end{proof}
+
+\begin{example}[Nested cycles]
+  Consider: $a \leftarrow \neg b.\; b \leftarrow \neg a.\;
+  c \leftarrow a, \neg d.\; d \leftarrow \neg c.$
+  with EDB $\emptyset$.
+  The $(a,b)$ cycle is at layer $k{+}1$; the $(c,d)$ cycle is at layer
+  $k{+}2$ (it depends on $a$).
+  Two stable models exist for each resolution of $(a,b)$, giving four
+  total stable models.
+  WFS: the alternating fixpoint cannot force $(a,b)$ (both extensions
+  are consistent), so $d^* = 0$ and all four atoms are $\mathbf{u}$.
+  If we add the rule $a \leftarrow.$ (making $a$ true by derivation),
+  then $(a,b)$ is forced ($a = \mathbf{t}$, $b = \mathbf{f}$), so
+  $d^* = 1$; WFS then evaluates $(c,d)$ and finds it unforced, giving
+  $c = d = \mathbf{u}$.
+\end{example}
 
 \subsection{Certificates and Semantic-Change Queries}
 

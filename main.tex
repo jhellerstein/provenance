@@ -1059,7 +1059,7 @@ one trace.
   \centering
   \footnotesize
   \setlength{\tabcolsep}{4pt}
-  \renewcommand{\arraystretch}{1.3}
+  \renewcommand{\arraystretch}{1.15}
 
   \begin{tabular}{@{}lll@{}}
     \toprule
@@ -1088,7 +1088,7 @@ one trace.
     \bottomrule
   \end{tabular}
 
-  \medskip
+  \smallskip
   {\footnotesize
   $\varphi_{T_i \prec T_j}$ = ordering;\;
   $\varphi_{\mathsf{a}}(T)$ = abort;\;
@@ -1484,7 +1484,7 @@ The two games are sequential, not competing: determination
 responsibility attributes the resolution; tuple-level responsibility
 attributes the derivation under that resolution.
 
-\medskip
+\smallskip
 \noindent\textbf{Possible-worlds and probabilistic provenance.}
 Probabilistic databases~\cite{suciu2011probabilistic} annotate tuples
 with possible-world membership, yielding support sets over worlds.
@@ -1496,7 +1496,7 @@ can have different query-relative depth and different responsibility
 profiles---a distinction invisible to any framework that sees only
 world-membership.
 
-\medskip
+\smallskip
 \noindent\textbf{Provenance beyond the monotone fragment.}
 Dannert et al.~\cite{dannert2021semiring} extend semiring provenance to
 stratified negation within a single model; for stratifiable programs,
@@ -1508,7 +1508,7 @@ Our contribution addresses unstratified negation, where multiple stable
 models coexist and the determination semiring tracks which models
 support each tuple.
 
-\medskip
+\smallskip
 \noindent\textbf{Provenance in systems settings.}
 Database provenance systems (Perm~\cite{glavic2008perm},
 GProM~\cite{arab2018gpromprovenance},
@@ -1521,13 +1521,13 @@ Our framework separates semantic commitments from derivational explanation,
 enabling per-execution provenance to be composed across alternative
 resolutions (Appendix~\ref{app:systems-lineage}).
 
-\medskip
+\smallskip
 \noindent\textbf{Determination complexity.}
 Hellerstein~\cite{hellerstein2026complexity} characterizes the cost of
 semantic resolution; we assume determinations are given and explain how
 observations depend on them.
 
-\medskip
+\smallskip
 \noindent\textbf{Consistent query answering.}
 Arenas et al.~\cite{arenas1999consistent} define certain answers as
 tuples holding in every repair---structurally analogous to robustness,

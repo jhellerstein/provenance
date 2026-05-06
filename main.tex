@@ -1200,6 +1200,10 @@ semantic choice.
 \end{proof}
 
 \noindent
+The theorem covers programs with independent final negative SCCs;
+the correspondence generalizes to nested cycles with depth $k + d$
+(Appendix~\ref{app:datalog-general}).
+
 Under the enriched outcome domain, the correspondence is summarized as:
 \begin{center}
 \small
@@ -1523,27 +1527,19 @@ determinations forms a commutative semiring equipped with a filtration
 that query evaluation respects.
 This structure is not merely bookkeeping: it recovers classical
 provenance at depth~$0$, positive Boolean provenance for single-layer
-determinations, and---most strikingly---the three classical negation
-semantics for Datalog as different levels of the same filtration.
+determinations, and the three classical negation semantics as different
+filtration levels.
 Determination responsibility builds on this foundation, using the
-semiring's independence structure to define a Shapley-value measure of
-each commitment's contribution that is \#P-hard in general but
-tractable whenever concurrent contention is narrow, with an efficient
-additive approximation available otherwise.
+semiring's independence structure to define a Shapley-value measure
+that is \#P-hard in general but tractable when contention is narrow.
 
-For systems, the determination serves as a semantic index over existing
-traces, enabling diagnostic queries---responsibility attribution,
-robustness, preservation across isolation levels---that log-scanning
-cannot answer (Appendix~\ref{app:systems-lineage}).
-
-The success of algebraic provenance lay in identifying the right
-semantic object to explain.
-Determination provenance extends that insight: when meaning itself
-depends on resolution, provenance must explain the assumptions that
-made meaning possible.
-Open directions include weighted distributions over determinations,
-reversible commitments, and compact representations for deep
-determinations.
+For systems, the determination serves as a semantic index over traces,
+enabling responsibility, robustness, and preservation queries
+(Appendix~\ref{app:systems-lineage}).
+When meaning depends on resolution, provenance must explain the
+assumptions that made meaning possible; open directions include
+weighted distributions, reversible commitments, and compact
+representations.
 
 \pagebreak
 \appendix
@@ -2475,6 +2471,47 @@ By contrast, $r(c)$ has partial support ($\{D^{(r)}\}$): it holds under
 one stable model, is $\mathbf{u}$ under WFS, and is undefined under
 stratified semantics.
 It is not preserved from stable to well-founded or stratified.
+
+\subsection{General Case: Nested Negative Cycles}
+\label{app:datalog-general}
+
+Theorem~\ref{thm:negation-filtration} covers programs whose negative
+SCCs are mutually independent and form a single final choice layer.
+Here we extend the correspondence to programs with nested or interacting
+negative cycles.
+
+\paragraph{Setup.}
+After SCC condensation, the negative components form a DAG.
+Let $d$ be the longest path in this DAG (the \emph{nesting depth}).
+The determination has depth $k + d$: $k$ sealing layers followed by $d$
+choice layers ordered by dependency (if resolving cycle $A$ affects the
+admissible models of cycle $B$, then $A$'s choice precedes $B$'s).
+
+\paragraph{Filtration.}
+$\mathcal{F}_0 = \cdots = \mathcal{F}_k = \{\emptyset, \mathcal{D}\}$
+(sealing prefix, shared);
+$\mathcal{F}_{k+1}, \ldots, \mathcal{F}_{k+d}$ refine as successive
+choice layers are discharged;
+$\mathcal{F}_{k+d} = 2^{\mathcal{D}}$.
+
+\paragraph{Semantics correspondence.}
+\begin{itemize}[nosep]
+  \item \emph{Stable-model semantics} reads $\mathcal{F}_{k+d}$: all
+        choice layers discharged.
+  \item \emph{Well-founded semantics} discharges the sealing prefix and
+        applies the alternating fixpoint, which resolves choice layers
+        whose outcome is \emph{forced} by earlier resolutions and
+        classifies the rest as $\mathbf{u}$.
+        WFS reads the maximum prefix reachable without arbitrary
+        choice---a level between $k$ and $k+d$ depending on the program.
+  \item \emph{Stratified semantics} reads $\mathcal{F}_k$ (defined only
+        when no negative cycles exist).
+\end{itemize}
+In the restricted case (Theorem~\ref{thm:negation-filtration}), WFS
+reads exactly $\mathcal{F}_k$ because all cycles are genuinely
+ambiguous.
+In the general case, WFS may access intermediate levels when some
+cycle resolutions are entailed by others.
 
 \subsection{Certificates and Semantic-Change Queries}
 

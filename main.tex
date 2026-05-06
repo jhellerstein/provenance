@@ -66,9 +66,9 @@
 \begin{document}
 
 \begin{abstract}
-  A tuple's provenance has two dimensions: \emph{how} it is derived once
-  semantics is fixed, and \emph{which semantic resolutions} make that
-  derivation possible.
+  A tuple's provenance has two dimensions: the \emph{derivation} that
+  produces it under a fixed semantics, and the \emph{semantic
+  resolutions} that make that semantics possible.
   Classical algebraic provenance captures the first; we introduce
   \emph{determination provenance} to capture both.
   A determination is a sequence of irrevocable commitments that resolves
@@ -137,10 +137,9 @@ negation may admit multiple models, and whether a derived tuple holds
 may depend on which model is chosen.
 
 This paper identifies a missing dimension of provenance.
-Classical provenance explains \emph{how} a tuple is derived once
-semantics is fixed.
-Determination provenance additionally explains \emph{which semantic
-commitments} made that derivation possible---or blocked it.
+Classical provenance explains derivations once semantics is fixed.
+Determination provenance additionally explains which semantic
+commitments made that derivation possible---or blocked it.
 The key observation is that a specification under ambiguity is a
 \emph{relation}---multiple admissible outcomes per input---and classical
 provenance requires a \emph{function}.

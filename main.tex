@@ -71,12 +71,14 @@
   resolutions} that make that semantics possible.
   Classical algebraic provenance captures the first; we introduce
   \emph{determination provenance} to capture the second.
-  A determination is a sequence of irrevocable commitments that resolves
-  semantic ambiguity; determination provenance is a $K$-relation indexed
-  by resolutions, recording derivational provenance under each.
-  Its supports form a commutative semiring whose layered structure is
-  reflected as a \emph{filtration} of sub-semirings that query evaluation
-  respects.
+  Non-monotone operations---negation, conflict resolution,
+  aggregation---require completeness guarantees before evaluation;
+  determination provenance externalizes each such guarantee as a
+  \emph{sealing commitment}, decomposing non-monotone provenance into
+  layers of monotone computation.
+  The supports of determination provenance form a commutative semiring
+  whose layered structure is reflected as a \emph{filtration} of
+  sub-semirings that query evaluation respects.
 
   For a natural class of Datalog programs, the classical negation
   semantics---stratified, well-founded, and stable-model---differ only
@@ -138,26 +140,25 @@ may depend on which model is chosen.
 
 This paper identifies a missing dimension of provenance.
 Classical provenance explains derivations once semantics is fixed.
-Determination provenance additionally explains which semantic
-commitments made that derivation possible---or blocked it.
-The key observation is that a specification under ambiguity is a
-\emph{relation}---multiple admissible outcomes per input---and classical
-provenance requires a \emph{function}.
-A \emph{determination} is a sequence of irrevocable commitments that
-narrows the relation to a function; once functional, classical provenance
-applies.
+But non-monotone operations---negation, conflict resolution,
+aggregation---require \emph{completeness guarantees} before they can be
+evaluated: all derivations must be known before a complement is
+meaningful, all conflicts resolved before a serialization is fixed.
+Classical approaches internalize these guarantees as algebraic
+enrichments (monus, complement operators).
+Determination provenance externalizes them: each completeness guarantee
+is a \emph{sealing commitment}, and the non-monotone operation becomes a
+monotone entailment over the sealed state.
+The layered structure of commitments---which non-monotone operations were
+needed, in what order---is the determination.
 
-Across determinations, the space of resolutions forms a semiring that
-lifts the compositional, counterfactual, and quantitative power of
-algebraic
-provenance~\cite{green2007provenance,buneman2001why,suciu2011probabilistic}
-to the ambiguous setting.
-The layered structure within each determination is reflected as a
-\emph{filtration} of this semiring---a chain of sub-semirings that query
-evaluation respects.
-We instantiate the framework for transactional systems and Datalog with
-negation; for the latter, the classical negation semantics correspond to
-different filtration levels.
+Across determinations, the space of resolutions forms a semiring whose
+layered structure is reflected as a \emph{filtration} of sub-semirings
+that query evaluation respects.
+We instantiate the framework for transactional systems (where the
+non-monotone operation is conflict resolution) and Datalog with negation
+(where it is negation-as-failure); for the latter, the classical
+negation semantics correspond to different filtration levels.
 The semiring's independence structure also yields a tractability frontier
 for quantitative diagnosis: \emph{determination responsibility}---a
 Shapley-value measure of each commitment's contribution---is \#P-hard
@@ -838,17 +839,11 @@ Conversely, relational difference can strictly increase depth
 Appendix~\ref{app:det-semiring-details}): the filtration is tight.
 
 \paragraph{Non-monotonicity as commitment.}
-Classical approaches to provenance for non-monotone operations---monus
-for negation~\cite{dannert2021semiring}, circuits for
-complement~\cite{deutch2014circuits}---enrich the semiring with
-operations that require completeness of information (all derivations
-must be known before the complement can be evaluated).
-Determination provenance externalizes this requirement: the
-completeness guarantee is a sealing commitment, and the non-monotone
-operation becomes a deterministic entailment over the sealed state.
 The filtration records which non-monotone operations were needed and in
-what order; Sections~\ref{sec:transactions}--\ref{sec:negation-preview}
-instantiate this decomposition for transactions and Datalog negation.
+what order.
+Sections~\ref{sec:transactions}--\ref{sec:negation-preview} instantiate
+this decomposition: conflict resolution for transactions, stratum
+sealing for Datalog negation.
 
 
 % ================================================================
@@ -856,12 +851,14 @@ instantiate this decomposition for transactions and Datalog negation.
 \label{sec:transactions}
 % ================================================================
 
-We now instantiate the framework in transactional systems, where ambiguity
-arises from concurrency: multiple consistent executions may be admissible for
-the same observed history.
-We formalize the commitment basis, characterize number of layers across
-isolation levels, and show how determination provenance distinguishes robust
-from contingent query results.
+In transactional systems, the non-monotone operation is \emph{conflict
+resolution}: deciding which transaction's effects persist when two
+conflict.
+This decision requires knowing the full conflict structure (completeness)
+before it can be finalized---exactly the pattern of a sealing commitment.
+We formalize the commitment basis, characterize determination depth
+across isolation levels, and show how determination provenance
+distinguishes robust from contingent query results.
 
 \subsection{Transactional Histories}
 
@@ -1107,13 +1104,17 @@ one trace.
 \label{sec:negation-preview}
 % ================================================================
 
-Datalog with negation provides a second instantiation that demonstrates
-two capabilities beyond the transactional setting.
-First, the filtration recovers the classical negation semantics---stratified,
-well-founded, and stable---as prefixes of a single determination.
-Second, determination provenance explains why-not under ambiguity: an atom
-can be absent not because of a blocked derivation but because of a semantic
-commitment.
+In Datalog with negation, the non-monotone operation is
+\emph{negation-as-failure}: concluding $\neg p$ requires knowing that
+all derivations of $p$ have been exhausted---a completeness guarantee
+that classical approaches handle via monus~\cite{dannert2021semiring}.
+Determination provenance decomposes this into stratum sealing (the
+commitment) followed by monotone evaluation (the entailment).
+The filtration then recovers the classical negation
+semantics---stratified, well-founded, and stable---as prefixes of a
+single determination; and determination provenance explains why-not
+under ambiguity: an atom can be absent because of a semantic commitment,
+not a blocked derivation.
 (Full details in Appendix~\ref{sec:appendix-datalog}.)
 
 \paragraph{Setup.}
@@ -1533,19 +1534,15 @@ support a tuple, not merely whether all do.
 \label{sec:conclusion}
 % ================================================================
 
-Classical provenance explains derivations under a fixed semantics;
-determination provenance extends it to settings with semantic
-ambiguity by making the commitments that resolve ambiguity explicit
-and composable.
-
-The algebraic development shows that the space of resolving
-determinations forms a semiring with a filtration that query evaluation
-respects---recovering classical provenance at depth~$0$ and the three
-negation semantics as filtration levels.
+Determination provenance makes the commitments that resolve semantic
+ambiguity explicit and composable, extending classical provenance from
+fixed semantics to ambiguous ones.
+Resolving determinations form a semiring with a filtration respected by
+query evaluation---recovering classical provenance at depth~$0$ and the
+three negation semantics as filtration levels.
 Determination responsibility uses the semiring's independence structure
 to define a Shapley-value measure that is \#P-hard in general but
-tractable when contention is narrow; open directions include weighted
-distributions, reversible commitments, and compact representations.
+tractable when contention is narrow.
 
 \pagebreak
 \appendix

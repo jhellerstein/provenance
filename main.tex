@@ -140,7 +140,6 @@ may depend on which model is chosen.
 
 This paper identifies a missing dimension of provenance.
 Classical provenance explains derivations once semantics is fixed.
-% NOTE: Aggregation fits the framework via stratified aggregation (Ross &
 % Sagiv 1992): seal the input group, then compute the aggregate as entailment.
 % Same mechanism as stratified negation. Not separately instantiated but
 % follows directly.
@@ -148,7 +147,8 @@ But non-monotone operations---negation, conflict resolution, and
 aggregation---require \emph{completeness guarantees} before they can be
 evaluated: all derivations must be known before a complement is
 meaningful, all conflicts resolved before a serialization is fixed,
-all contributing tuples accumulated before an aggregate is computed.
+all contributing tuples accumulated before an aggregate is computed
+(e.g., a \textsf{SUM} query seals its input group before evaluation).
 Classical approaches internalize these guarantees as algebraic
 enrichments (monus, complement operators).
 Determination provenance externalizes them: each completeness guarantee
@@ -208,13 +208,12 @@ contention is narrow.
         semantics---stratified, well-founded, stable-model---are
         filtration levels of a single determination semiring;
         \emph{monus elimination} shows that layered monotone semirings
-        subsume semirings-with-monus for provenance under negation
+        are support-equivalent to semirings-with-monus for negation
         (Section~\ref{sec:negation-preview},
         Appendix~\ref{sec:appendix-datalog}).
   \item \emph{Determination responsibility}: a Shapley-value measure
         of each commitment's contribution, \#P-hard in general but
-        FPT in conflict treewidth, with an efficient additive
-        approximation for the general case
+        FPT in support-formula treewidth
         (Section~\ref{sec:responsibility}).
         Robustness is coNP-complete
         (Appendix~\ref{app:robustness-proofs}).
@@ -315,8 +314,8 @@ take effect at specific points in the history.
 \begin{definition}[Commitment]
   \label{def:commitment}%
   A \emph{commitment} $\varphi$ is a filter on the admissible set:
-  given a history $H$, applying $\varphi$ produces a nonempty subset
-  $\Spec(H \cdot \varphi) \subseteq \Spec(H)$.
+  given a history $H$, applying $\varphi$ produces a nonempty proper subset
+  $\Spec(H \cdot \varphi) \subsetneq \Spec(H)$.
 \end{definition}
 
 \noindent
@@ -1253,7 +1252,6 @@ through queries (Corollary~\ref{cor:propagation-filtration}), so
 preservation across semantics can be checked algebraically rather than
 by re-running the alternating fixpoint.
 
-% NOTE: Theorem stated at support level (which determinations yield v > 0_K).
 % This is correct: sealed absence → 1_K, sealed presence → 0_K matches
 % monus (1_K ∸ v) for any naturally ordered K. Downstream derivability
 % depends only on whether annotations are zero or nonzero, so supports agree.
@@ -1430,7 +1428,6 @@ on a single ordering commitment), the support formula's primal graph is
 a subgraph of the conflict graph.
 
 \begin{proof}[Proof sketch]
-% NOTE: Theorem now stated in terms of support-formula treewidth directly.
 % Conflict treewidth is a sufficient condition for local predicates.
 % Transitive predicates may have higher formula treewidth than conflict tw.
   Each commitment corresponds to a Boolean variable.
@@ -1543,10 +1540,10 @@ fixed semantics to ambiguous ones.
 Resolving determinations form a semiring with a filtration respected by
 query evaluation---recovering classical provenance at depth~$0$ and the
 three negation semantics as filtration levels.
-Monus elimination shows that layered monotone semirings subsume
-algebraic enrichments for non-monotone provenance: the completeness
-guarantee that monus internalizes is exactly the sealing commitment that
-determination provenance makes explicit.
+Monus elimination shows that layered monotone semirings are
+support-equivalent to semirings-with-monus for provenance under
+negation: the completeness guarantee that monus internalizes is exactly
+the sealing commitment that determination provenance makes explicit.
 Determination responsibility uses the semiring's independence structure
 to define a Shapley-value measure that is \#P-hard in general but
 tractable when contention is narrow.
@@ -1979,6 +1976,12 @@ and with query evaluation.
   layer, every level $0 \le k \le d$ is realized as the query-relative
   depth of some tuple.
 \end{proposition}
+\begin{proof}
+  Level~$0$: any base tuple present in all determinations.
+  Level~$k$: a base tuple present in exactly the determinations that
+  choose a specific value at layer~$k$ has support that is a union of
+  level-$k$ classes but not of level-$(k{-}1)$ classes.
+\end{proof}
 
 % ===============================================================
 \section{Transactional Worked Determination Provenance}
@@ -2552,7 +2555,6 @@ one stable model, is $\mathbf{u}$ under WFS, and is undefined under
 stratified semantics.
 It is not preserved from stable to well-founded or stratified.
 
-% NOTE: General case now proved as Theorem G.2 below.
 \subsection{General Case: Nested Negative Cycles}
 \label{app:datalog-general}
 
@@ -2655,8 +2657,10 @@ longest dependency chain).
   with EDB $\emptyset$.
   The $(a,b)$ cycle is at layer $k{+}1$; the $(c,d)$ cycle is at layer
   $k{+}2$ (it depends on $a$).
-  Two stable models exist for each resolution of $(a,b)$, giving four
-  total stable models.
+  When $a = \mathbf{t}$, the $(c,d)$ cycle has two stable extensions
+  ($\{a,c\}$ and $\{a,d\}$); when $b = \mathbf{t}$, $c$ cannot be
+  derived so $d = \mathbf{t}$ is forced---giving three stable models
+  total.
   WFS: the alternating fixpoint cannot force $(a,b)$ (both extensions
   are consistent), so $d^* = 0$ and all four atoms are $\mathbf{u}$.
   If we add the rule $a \leftarrow.$ (making $a$ true by derivation),

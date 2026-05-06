@@ -386,6 +386,10 @@ with a proper subset, irrevocably excluding outcomes.
 outcome upward ($o \Ord o'$) without excluding alternatives.
 When $\Ord$ is flat, every decision is a commitment; when $\Ord$ is
 rich, some decisions are mere entailments.
+An operation is \emph{monotone} in this paper if its output can only
+refine upward under $\Ord$ as the history grows (future-monotonicity);
+non-monotone operations are those whose output may retract, requiring a
+sealing commitment to stabilize.
 
 \begin{example}[The three forces in two settings]
   In transactional systems: operation interleavings are environment;

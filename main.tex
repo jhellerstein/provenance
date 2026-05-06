@@ -1564,9 +1564,21 @@ fixed semantics to ambiguous ones.
 Resolving determinations form a semiring with a filtration respected by
 query evaluation---recovering classical provenance at depth~$0$ and the
 three negation semantics as filtration levels.
+Monus elimination shows that layered monotone semirings subsume
+algebraic enrichments for non-monotone provenance: the completeness
+guarantee that monus internalizes is exactly the sealing commitment that
+determination provenance makes explicit.
 Determination responsibility uses the semiring's independence structure
 to define a Shapley-value measure that is \#P-hard in general but
 tractable when contention is narrow.
+
+More broadly, the filtration provides a depth-based complexity measure
+for any derived fact: how deep into the non-monotone nesting does its
+truth depend?
+This measure is compositional (positive queries cannot increase it),
+gives granular invalidation boundaries for incremental maintenance,
+enables early termination when only shallow facts are needed, and bounds
+the cost of quantitative attribution.
 
 \pagebreak
 \appendix

@@ -1431,13 +1431,10 @@ on a single ordering commitment), the support formula's primal graph is
 a subgraph of the conflict graph.
 
 \begin{proof}[Proof sketch]
-% Conflict treewidth is a sufficient condition for local predicates.
-% Transitive predicates may have higher formula treewidth than conflict tw.
-  Each commitment corresponds to a Boolean variable.
-  Marginal contributions reduce to weighted model counting under partial
-  assignments---computable in $O(2^w \cdot \mathrm{poly}(n))$ on
-  bounded-treewidth formulas~\cite{samer2010algorithms}---and summing
-  over coalition sizes with Shapley weighting gives the stated bound.
+  Each commitment is a Boolean variable; marginal contributions reduce
+  to weighted model counting under partial assignments, computable in
+  $O(2^w \cdot \mathrm{poly}(n))$ on bounded-treewidth
+  formulas~\cite{samer2010algorithms}.
 \end{proof}
 
 \noindent

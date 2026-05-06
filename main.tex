@@ -140,6 +140,10 @@ may depend on which model is chosen.
 
 This paper identifies a missing dimension of provenance.
 Classical provenance explains derivations once semantics is fixed.
+% TODO: "aggregation" is mentioned here but never instantiated in the paper.
+% Either remove it or add a parenthetical: "(aggregation seals the input
+% relation before computing the aggregate; we do not develop this
+% instantiation here)."
 But non-monotone operations---negation, conflict resolution,
 aggregation---require \emph{completeness guarantees} before they can be
 evaluated: all derivations must be known before a complement is
@@ -1248,31 +1252,39 @@ through queries (Corollary~\ref{cor:propagation-filtration}), so
 preservation across semantics can be checked algebraically rather than
 by re-running the alternating fixpoint.
 
+% TODO: Theorem 5.2 is now stated at the support level (which determinations
+% yield v > 0_K). This avoids the N[X] issue (monus not defined there).
+% Verify: does the proof correctly establish support equivalence for all
+% naturally ordered semirings, or only for those where negation annotations
+% are Boolean (0_K/1_K)? The key step is that sealed absence → 1_K and
+% sealed presence → 0_K matches monus behavior. This IS correct for any
+% naturally ordered K where the natural order gives 0_K < v for all v≠0.
 \begin{theorem}[Monus elimination]
   \label{thm:monus-elimination}
-  For any naturally ordered semiring $K$ with monus and any finite normal
-  Datalog program $P$: the LFP provenance of an atom $a$ computed over
-  $(K, \dot{-})$~\cite{dannert2021semiring} equals the conditioned
-  provenance $P_{D_{\mathrm{strat}}}(a)$ computed over $(K, +, \cdot)$
-  with sealing commitments at each stratum.
-  The monus is replaced by a sealing commitment (fixing the stratum's
-  derivations) followed by a monotone $K$-computation that reads sealed
-  absence as a base annotation.
+  For any finite normal Datalog program $P$ and any naturally ordered
+  semiring $K$: the \emph{support} of an atom $a$ (the set of
+  determinations under which $a$ holds) computed via sealing commitments
+  over $(K, +, \cdot)$ equals the support computed via LFP with
+  monus over $(K, \dot{-})$~\cite{dannert2021semiring}.
+  Within each resolving determination, derivational provenance is
+  computed by ordinary positive $K$-evaluation (no monus needed).
+  The monus is replaced by: a sealing commitment (fixing the stratum's
+  derivations) followed by a monotone annotation of sealed absence as
+  $0_K$ or $1_K$.
   For programs with unstratified negation, monus is undefined (no unique
   model to complement against), while determination provenance remains
   well-defined across stable models.
 \end{theorem}
 \begin{proof}[Proof sketch]
-  After sealing stratum $k$, truth values of stratum-$k$ atoms are
-  fixed.
-  Negation of a sealed atom is a deterministic function
-  ($\mathbf{t} \mapsto 0_K$, $\mathbf{f} \mapsto 1_K$)---a monotone
-  lookup, not a monus.
-  The provenance polynomial for stratum $k{+}1$ is a positive polynomial
-  over $K$ with sealed-negation atoms as base annotations.
-  This equals the monus computation because $1_K \dot{-} v = 0_K$ when
-  $v > 0_K$ and $1_K \dot{-} 0_K = 1_K$ in any naturally ordered
-  semiring---exactly the sealed-absence annotation.
+  After sealing stratum $k$, each atom is either derived (annotation
+  $v > 0_K$) or absent (annotation $0_K$).
+  Negation of a sealed atom produces a Boolean annotation:
+  $1_K$ if absent, $0_K$ if present---matching the monus
+  ($1_K \dot{-} v = 0_K$ when $v > 0_K$, $= 1_K$ when $v = 0_K$).
+  The provenance polynomial for stratum $k{+}1$ is then a positive
+  polynomial over $K$ with these Boolean annotations as base facts.
+  Supports (which determinations yield $v > 0_K$) are identical under
+  both computations.
 \end{proof}
 
 \noindent
@@ -1417,6 +1429,12 @@ serialization implies lower latency), and any positive Boolean
 combination of such conditions.
 
 \begin{proof}[Proof sketch]
+% TODO: The claim that the primal graph is a subgraph of the conflict graph
+% needs a locality lemma. Transitive ordering constraints (T_i ≺ T_Q and
+% T_j ≺ T_Q where T_i,T_j don't directly conflict) can create formula edges
+% not in the conflict graph. Options: (a) prove locality for the specific
+% SLA predicates we consider, (b) state theorem in terms of support-formula
+% treewidth with conflict treewidth as a sufficient condition for local predicates.
   Under the ordering basis, each commitment corresponds to a Boolean
   variable and the support is a monotone formula whose clauses involve
   only commitments sharing a transaction (a conflict edge).
@@ -1459,6 +1477,11 @@ When treewidth is unbounded, sampling provides an additive approximation.
   inequality gives the stated guarantee.
 \end{proof}
 
+% TODO: Proposition 6.4 is likely FALSE as stated. Counterexample: if φ_i is
+% irrelevant to t_1 (ρ=0) but critical to t_2 (ρ=0.5), and S_1 ⊂ S_2,
+% then join support = S_1, and ρ(φ_i, join) = ρ(φ_i, t_1) = 0 < max.
+% Options: (a) find correct compositional bound, (b) retract, (c) weaken
+% to a statement about the *budget* v(N)-v(∅) rather than individual ρ.
 \paragraph{Compositionality through queries.}
 Responsibility interacts predictably with relational algebra.
 
@@ -2546,6 +2569,8 @@ one stable model, is $\mathbf{u}$ under WFS, and is undefined under
 stratified semantics.
 It is not preserved from stable to well-founded or stratified.
 
+% TODO: This subsection is a sketch (bullet points, no theorems).
+% Either prove the general correspondence formally or label as conjecture.
 \subsection{General Case: Nested Negative Cycles}
 \label{app:datalog-general}
 

@@ -1284,6 +1284,9 @@ by re-running the alternating fixpoint.
   standard provenance semirings), a positive polynomial is nonzero iff
   at least one monomial has all-nonzero factors; hence supports (which
   determinations yield $v > 0_K$) are identical under both computations.
+  For the Boolean and why-provenance semirings, annotations are in
+  $\{0_K, 1_K\}$, so support equivalence implies full provenance
+  equivalence.
 \end{proof}
 
 \noindent
@@ -1438,18 +1441,20 @@ a subgraph of the conflict graph.
 \end{proof}
 
 \noindent
-Conflict treewidth is bounded whenever concurrent contention is narrow:
-a system with $n$ commitments but at most $w$ mutually dependent at any
-point has conflict treewidth $\le w$.
+Conflict treewidth is bounded whenever concurrent contention is narrow.
 High treewidth is largely self-disqualifying: deeply intertwined
-dependencies cause poor performance in any concurrent system, so
-practitioners separate contending workloads (e.g., isolating analytics
-from OLTP, or relaxing cross-service consistency).
+dependencies cause poor performance, so practitioners separate
+contending workloads.
 
 An additive approximation scheme, compositionality of responsibility
 budgets under join and union, and the extension to multi-layer
 determinations are developed in
 Appendix~\ref{app:responsibility-details}.
+Determination responsibility and tuple-level
+responsibility~\cite{livshits2021shapley} are sequential: the first
+attributes the resolution, the second attributes the derivation under
+that resolution, providing complementary explanations at different
+levels of abstraction.
 
 % ================================================================
 \section{Related Work}
@@ -1474,8 +1479,10 @@ commitments: where Meliou et al.\ ask ``which input tuple is most
 responsible for an output,'' we ask ``which semantic commitment is most
 responsible for the output holding under this resolution.''
 Livshits et al.~\cite{livshits2021shapley} compute Shapley values for
-data tuples in query answers under a fixed semantics; determination
-responsibility uses the same axioms but over semantic commitments.
+data tuples in query answers under a fixed semantics.
+The two games are sequential, not competing: determination
+responsibility attributes the resolution; tuple-level responsibility
+attributes the derivation under that resolution.
 
 \medskip
 \noindent\textbf{Possible-worlds and probabilistic provenance.}
@@ -1535,22 +1542,16 @@ support a tuple, not merely whether all do.
 % ================================================================
 
 Determination provenance makes the commitments that resolve semantic
-ambiguity explicit and composable, extending classical provenance from
-fixed semantics to ambiguous ones.
+ambiguity explicit and composable, extending classical provenance to
+ambiguous settings.
 Resolving determinations form a semiring with a filtration respected by
 query evaluation---recovering classical provenance at depth~$0$ and the
 three negation semantics as filtration levels.
 Monus elimination shows that layered monotone semirings are
-support-equivalent to semirings-with-monus for provenance under
-negation: the completeness guarantee that monus internalizes is exactly
-the sealing commitment that determination provenance makes explicit.
-Determination responsibility uses the semiring's independence structure
-to define a Shapley-value measure that is \#P-hard in general but
-tractable when contention is narrow.
-More broadly, the filtration measures how deep into the non-monotone
-nesting a fact's truth depends---a compositional measure that bounds
-attribution cost, with applications to incremental maintenance and
-early termination.
+support-equivalent to semirings-with-monus.
+Determination responsibility defines a Shapley-value measure over
+commitments that is \#P-hard in general but tractable when contention
+is narrow.
 
 \pagebreak
 \appendix
@@ -1705,12 +1706,15 @@ additive approximation.
   $O(n/\varepsilon^2 \cdot \log(1/\delta) \cdot p(n))$.
 \end{proposition}
 \begin{proof}
-  Sample a random permutation $\pi$; let $C$ precede $i$.
-  Estimate the marginal by sampling a random completion of uncommitted
-  variables and evaluating the query (cost $p(n)$)---no exact counting
-  needed.
-  Each sample is an unbiased estimate bounded in $[-1,1]$; Hoeffding's
-  inequality gives the stated guarantee.
+  Each sample is a (permutation, random-completion) pair: draw a random
+  permutation $\pi$, let $C$ be the players preceding $i$, fix $C$ to
+  $D^*$-values, sample a uniform completion of the remaining variables,
+  and evaluate the query with $\varphi_i$ set to each of its two values.
+  The difference ($\pm 1$ or $0$) is an unbiased estimate of
+  $\rho(\varphi_i, t)$ (by the permutation characterization of Shapley
+  values, with the inner expectation over completions giving $v(C)$).
+  Each sample is bounded in $[-1,1]$; Hoeffding's inequality over
+  $O(n/\varepsilon^2 \cdot \log(1/\delta))$ samples gives the bound.
 \end{proof}
 
 \subsection{Budget Compositionality}

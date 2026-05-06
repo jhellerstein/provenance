@@ -140,14 +140,14 @@ may depend on which model is chosen.
 
 This paper identifies a missing dimension of provenance.
 Classical provenance explains derivations once semantics is fixed.
-% TODO: "aggregation" is mentioned here but never instantiated in the paper.
-% Either remove it or add a parenthetical: "(aggregation seals the input
-% relation before computing the aggregate; we do not develop this
-% instantiation here)."
-But non-monotone operations---negation, conflict resolution,
+% NOTE: Aggregation is mentioned as a motivating example of non-monotone ops
+% requiring completeness. Not instantiated in this paper; future work.
+But non-monotone operations---negation, conflict resolution, and
 aggregation---require \emph{completeness guarantees} before they can be
 evaluated: all derivations must be known before a complement is
-meaningful, all conflicts resolved before a serialization is fixed.
+meaningful, all conflicts resolved before a serialization is fixed
+(this paper develops negation and conflict resolution; aggregation is
+analogous but not instantiated here).
 Classical approaches internalize these guarantees as algebraic
 enrichments (monus, complement operators).
 Determination provenance externalizes them: each completeness guarantee
@@ -1252,13 +1252,11 @@ through queries (Corollary~\ref{cor:propagation-filtration}), so
 preservation across semantics can be checked algebraically rather than
 by re-running the alternating fixpoint.
 
-% TODO: Theorem 5.2 is now stated at the support level (which determinations
-% yield v > 0_K). This avoids the N[X] issue (monus not defined there).
-% Verify: does the proof correctly establish support equivalence for all
-% naturally ordered semirings, or only for those where negation annotations
-% are Boolean (0_K/1_K)? The key step is that sealed absence → 1_K and
-% sealed presence → 0_K matches monus behavior. This IS correct for any
-% naturally ordered K where the natural order gives 0_K < v for all v≠0.
+% NOTE: Theorem stated at support level (which determinations yield v > 0_K).
+% This is correct: sealed absence → 1_K, sealed presence → 0_K matches
+% monus (1_K ∸ v) for any naturally ordered K. Downstream derivability
+% depends only on whether annotations are zero or nonzero, so supports agree.
+% The K-valued annotations within each determination use positive K only.
 \begin{theorem}[Monus elimination]
   \label{thm:monus-elimination}
   For any finite normal Datalog program $P$ and any naturally ordered
@@ -1414,32 +1412,25 @@ responsibility is tractable.
   whose edges connect commitments that share a transaction.
 \end{definition}
 
-\begin{theorem}[Tractability at bounded conflict treewidth]
+\begin{theorem}[Tractability at bounded support treewidth]
   \label{thm:responsibility-tw}
-  For a single-layer determination with conflict treewidth $w$ and a
-  monotone support predicate over the commitment variables,
-  determination responsibility is computable in time
-  $O(2^w \cdot n^2 \cdot p(n))$---FPT in $w$.
+  For a single-layer determination whose monotone support formula has
+  primal-graph treewidth $w$, determination responsibility is computable
+  in time $O(2^w \cdot n^2 \cdot p(n))$---FPT in $w$.
 \end{theorem}
 
 \noindent
-Monotonicity holds for threshold predicates (``at most $k$ aborts''),
-upward-closed SLA conditions (``latency $\le \tau$'' when earlier
-serialization implies lower latency), and any positive Boolean
-combination of such conditions.
+Conflict treewidth (Definition~\ref{def:conflict-tw}) is a sufficient
+condition: for predicates that depend only on pairwise ordering
+relationships (e.g., ``at most $k$ aborts,'' where each abort depends
+on a single ordering commitment), the support formula's primal graph is
+a subgraph of the conflict graph.
 
 \begin{proof}[Proof sketch]
-% TODO: The claim that the primal graph is a subgraph of the conflict graph
-% needs a locality lemma. Transitive ordering constraints (T_i ≺ T_Q and
-% T_j ≺ T_Q where T_i,T_j don't directly conflict) can create formula edges
-% not in the conflict graph. Options: (a) prove locality for the specific
-% SLA predicates we consider, (b) state theorem in terms of support-formula
-% treewidth with conflict treewidth as a sufficient condition for local predicates.
-  Under the ordering basis, each commitment corresponds to a Boolean
-  variable and the support is a monotone formula whose clauses involve
-  only commitments sharing a transaction (a conflict edge).
-  The primal graph of this formula is therefore a subgraph of the
-  conflict graph, so its treewidth is at most $w$.
+% NOTE: Theorem now stated in terms of support-formula treewidth directly.
+% Conflict treewidth is a sufficient condition for local predicates.
+% Transitive predicates may have higher formula treewidth than conflict tw.
+  Each commitment corresponds to a Boolean variable.
   Marginal contributions reduce to weighted model counting under partial
   assignments---computable in $O(2^w \cdot \mathrm{poly}(n))$ on
   bounded-treewidth formulas~\cite{samer2010algorithms}.
@@ -1477,38 +1468,37 @@ When treewidth is unbounded, sampling provides an additive approximation.
   inequality gives the stated guarantee.
 \end{proof}
 
-% TODO: Proposition 6.4 is likely FALSE as stated. Counterexample: if φ_i is
-% irrelevant to t_1 (ρ=0) but critical to t_2 (ρ=0.5), and S_1 ⊂ S_2,
-% then join support = S_1, and ρ(φ_i, join) = ρ(φ_i, t_1) = 0 < max.
-% Options: (a) find correct compositional bound, (b) retract, (c) weaken
-% to a statement about the *budget* v(N)-v(∅) rather than individual ρ.
+% NOTE: Individual responsibility inequalities (ρ for join ≥ max) are FALSE.
+% Counterexample: φ_i irrelevant to t_1 but critical to t_2, S_1 ⊂ S_2 →
+% join support = S_1, ρ(φ_i, join) = ρ(φ_i, t_1) = 0 < max.
+% Correct statement is about the TOTAL BUDGET, not individual players.
 \paragraph{Compositionality through queries.}
-Responsibility interacts predictably with relational algebra.
+Responsibility budgets compose predictably with relational algebra.
 
-\begin{proposition}[Responsibility under join and union]
+\begin{proposition}[Responsibility budget under join and union]
   \label{prop:resp-compose}
-  For tuples $t_1, t_2$ both present under $D^*$:
+  Let $B(t) = v(N) - v(\emptyset) = 1 - |\mathrm{supp}(t)|/2^n$ denote
+  the total responsibility budget for tuple $t$.
+  Then:
   \begin{enumerate}[nosep,label=(\alph*)]
-    \item \emph{Join concentrates:}
-          $\rho(\varphi_i,\, t_1 \bowtie t_2) \ge
-          \max(\rho(\varphi_i, t_1),\; \rho(\varphi_i, t_2))$.
-    \item \emph{Union dilutes:}
-          $\rho(\varphi_i,\, t_1 \cup t_2) \le
-          \min(\rho(\varphi_i, t_1),\; \rho(\varphi_i, t_2))$.
+    \item \emph{Join increases budget:}
+          $B(t_1 \bowtie t_2) \ge \max(B(t_1), B(t_2))$.
+    \item \emph{Union decreases budget:}
+          $B(t_1 \cup t_2) \le \min(B(t_1), B(t_2))$.
   \end{enumerate}
 \end{proposition}
-\begin{proof}[Proof sketch]
-  (a)~The join's support is $S_1 \cap S_2 \subseteq S_j$; removing
-  $\varphi_i$ from the coalition can only make membership in the smaller
-  set less likely, so marginal contributions are at least as large.
-  (b)~The union's support is $S_1 \cup S_2 \supseteq S_j$; the larger
-  set is easier to hit, so marginal contributions are at most as large.
+\begin{proof}
+  (a)~$|\mathrm{supp}(t_1 \bowtie t_2)| = |S_1 \cap S_2| \le |S_j|$,
+  so $B(t_1 \bowtie t_2) = 1 - |S_1 \cap S_2|/2^n \ge 1 - |S_j|/2^n$.
+  (b)~$|S_1 \cup S_2| \ge |S_j|$, so $B(t_1 \cup t_2) \le B(t_j)$.
 \end{proof}
 
 \noindent
-Joins concentrate responsibility on the bottleneck commitment (the one
-most needed by the more fragile input); unions dilute it (alternative
-derivation paths reduce dependence on any single commitment).
+Joins increase the total responsibility budget (more commitment-sensitive);
+unions decrease it (alternative derivations reduce overall dependence on
+commitments).
+Individual commitments' responsibilities redistribute within the budget
+but are not individually monotone under join.
 
 \paragraph{Multi-layer responsibility.}
 \label{sec:multi-layer-resp}
@@ -2569,8 +2559,8 @@ one stable model, is $\mathbf{u}$ under WFS, and is undefined under
 stratified semantics.
 It is not preserved from stable to well-founded or stratified.
 
-% TODO: This subsection is a sketch (bullet points, no theorems).
-% Either prove the general correspondence formally or label as conjecture.
+% NOTE: This subsection is a sketch. The correspondence is conjectured
+% to hold generally; the restricted class (Theorem 5.1) is proved.
 \subsection{General Case: Nested Negative Cycles}
 \label{app:datalog-general}
 
@@ -2593,7 +2583,8 @@ $\mathcal{F}_{k+1}, \ldots, \mathcal{F}_{k+d}$ refine as successive
 choice layers are discharged;
 $\mathcal{F}_{k+d} = 2^{\mathcal{D}}$.
 
-\paragraph{Semantics correspondence.}
+\paragraph{Semantics correspondence (conjectured).}
+We conjecture the following generalization of Theorem~\ref{thm:negation-filtration}:
 \begin{itemize}[nosep]
   \item \emph{Stable-model semantics} reads $\mathcal{F}_{k+d}$: all
         choice layers discharged.

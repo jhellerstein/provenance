@@ -883,16 +883,12 @@ incomparable in query-relative depth.
 
 The outcome space $O$ for transactions is the set of
 \emph{decision histories}: sequences of $\mathsf{start}(T_i)$,
-$\mathsf{commit}(T_i)$, and $\mathsf{abort}(T_i)$ events.
-An outcome records which transactions have been admitted and validated
-(and with what result); transactions not yet validated remain active.
-(Decision histories that differ only in the ordering of non-conflicting
-decisions produce the same conflict graph and are identified by the
-within-layer commutativity of the commitment basis.)
-The outcome order is:
-$o_1 \Ord o_2$ when $o_2$ extends $o_1$ with additional decisions,
-all consistent with $o_1$ (commitments are irrevocable).
-Incomparability arises exactly from contradictory decisions about the
+$\mathsf{commit}(T_i)$, and $\mathsf{abort}(T_i)$ events recording
+which transactions have been admitted and validated.
+The outcome order is prefix extension:
+$o_1 \Ord o_2$ when $o_2$ extends $o_1$ with additional decisions
+consistent with $o_1$ (commitments are irrevocable).
+Incomparability arises from contradictory decisions about the
 same transaction (one commits $T_i$, the other aborts it).
 
 Following Adya~\cite{adya1999weak}, each isolation level $L$

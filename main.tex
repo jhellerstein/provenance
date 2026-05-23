@@ -888,11 +888,12 @@ by reordering of non-conflicting decisions (decisions on transactions
 sharing no conflict edge may be permuted freely).
 The outcome order is trace-prefix extension:
 $o_1 \Ord o_2$ when $o_2$ extends $o_1$ with additional decisions
-that do not contradict any decision in $o_1$ (since commitments are
-irrevocable, a committed transaction cannot later abort or vice versa).
-Two outcomes are $\Ord$-incomparable when they make genuinely different
-choices: contradictory fates (commit vs.\ abort of the same
-transaction) or different orderings of conflicting transactions.
+while preserving the fate (commit/abort) of every transaction already
+decided in $o_1$ and the ordering of every conflicting pair already
+ordered in $o_1$.
+Two outcomes are $\Ord$-incomparable when they assign different fates
+to the same transaction or different orderings to the same conflicting
+pair.
 
 Following Adya~\cite{adya1999weak}, each isolation level $L$
 constrains which conflict patterns are admissible among committed

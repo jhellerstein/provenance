@@ -67,27 +67,32 @@
 \begin{document}
 
 \begin{abstract}
-  Semiring provenance traces how a query result is derived from a
-  single database instance, but cannot explain results that depend on
-  \emph{which} instance is realized---which transaction schedule
-  executes, which stable model is chosen, which conflicts are
-  resolved. This is the regime in which most concurrent and distributed
-  systems operate.
+  Semiring provenance is pointwise in each resolved semantics: it
+  explains how a query result is derived once the transaction schedule,
+  stable model, or conflict resolution has been chosen.
+  Many systems operate before such choices are determined.
   We introduce \emph{determination provenance} to track the
-  irrevocable \emph{commitments} that resolve this ambiguity.
-  A \emph{determination} is a layered structure of commitments,
-  each narrowing the set of admissible outcomes.
-  The \emph{supports} of a tuple---which determinations make it
-  hold---form a commutative semiring whose layered structure presents a \emph{filtration} of sub-semirings.
-  The filtration measures each tuple's \emph{query-relative depth}
-  (how many layers it depends on), is respected by positive
-  relational algebra, and admits a support-separation condition
-  characterizing when a layer can be relaxed without cascade.
+  irrevocable \emph{commitment events}---history-indexed, layered
+  records of semantic resolution---that select among incompatible
+  admissible outcomes.
+  A tuple's \emph{support} (the set of resolved histories in which it
+  holds) forms a commutative semiring; layered commitments induce a
+  \emph{filtration} of sub-semirings measuring each tuple's
+  \emph{query-relative depth}: how many layers of resolution it
+  depends on.
+  Positive relational algebra respects the filtration, and
+  support separation characterizes when a layer can be relaxed without
+  cascade.
 
-  We instantiate the framework for Datalog with negation, where the
-  classical semantics---stratified, well-founded, stable-model---correspond
-  to filtration levels, and for transactional systems, where the
-  filtration yields a per-tuple separation of isolation levels.
+  We instantiate the framework for transactional systems, where
+  determination depth captures protocol-level conflict resolution:
+  reactive protocols have depth zero, discretionary scheduling has
+  worst-case depth $\Theta(n)$, and the filtration yields a per-tuple
+  separation of serializability and snapshot isolation (neither
+  dominates the other in query-relative depth).
+  For a representative class of Datalog programs with negation,
+  stratified, well-founded, and stable-model semantics appear as
+  different readings of a single filtration.
 \end{abstract}
 
 \maketitle
@@ -121,8 +126,9 @@ before the transfer posted.
 This paper introduces \emph{determination provenance} to capture the
 commitments that resolve semantic ambiguity.
 A \emph{determination} is a layered sequence of irrevocable
-commitments that constrains a relational specification until no
-incompatible alternatives remain.
+commitment events---history-indexed records of semantic resolution,
+not abstract possible worlds---that constrains a relational
+specification until no incompatible alternatives remain.
 Classical provenance applies within each determination; determination
 provenance tracks which commitments were needed and how query results
 depend on them.
@@ -140,9 +146,12 @@ depend on them.
   All four are concurrent; any serialization is possible.
   Value $b$ appears in $Q$'s result regardless of ordering
   (the initial tuple $S(0,b)$ is never deleted): $b$ is \emph{robust}.
-  Value $d$ is \emph{contingent}: it appears if $T_2$'s insert
-  precedes $T_Q$'s read and $T_3$'s delete follows, but is absent
-  otherwise.
+  Value $d$ is \emph{contingent}: it appears in serializations where
+  $T_Q$ observes $T_2$'s insert before any effective delete---e.g.,
+  $T_2 \prec T_Q \prec T_3$, or $T_3 \prec T_2 \prec T_Q$ (where the
+  delete precedes the insert and is a no-op).
+  It is absent when the query precedes the insert or follows an
+  effective delete.
   Before resolving this ambiguity, even the \emph{form} of the
   provenance question for $d$ is undetermined: under one determination
   the question is \emph{why}; under another it is \emph{why-not}.
@@ -157,12 +166,13 @@ But $b$'s robustness and $d$'s contingency are properties of the
 To reason about such properties algebraically, we track each tuple's
 \emph{support}: the set of determinations under which it holds.
 Value $b$ has full support (every determination); $d$ has partial
-support (only those where $T_2$ precedes $T_Q$ precedes $T_3$).
+support (the equivalence class of determinations in which $T_Q$
+observes $T_2$'s insert).
 A provenance question like ``is $d$ robust?'' reduces to checking
 whether $d$'s support is full; counterfactual questions (``under which
 schedules does $d$ appear?'') are read from the support directly; and
-quantitative confidence (``what fraction of admissible executions
-produce $d$?'') is the support's measure---recovering, in the
+quantitative diagnosis (``what fraction of admissible executions
+produce $d$?'') is obtained from the support's measure---recovering, in the
 ambiguous setting, the three capabilities that classical semiring
 provenance provides in the resolved one.
 Supports compose through relational operations---joining two tuples
@@ -811,8 +821,8 @@ In transactional systems, semantic ambiguity arises from
 \emph{conflict resolution}: when concurrent transactions conflict,
 the system must decide which effects persist.
 We show that determination depth is protocol-agnostic---$\Theta(n)$
-worst-case for any non-HAT isolation level with scheduling
-discretion---and that the filtration provides a per-tuple separation
+worst-case for any isolation level that forbids some cycle type, given
+scheduling discretion---and that the filtration provides a per-tuple separation
 of isolation levels: SER and SI are incomparable in query-relative
 depth, with write-skew patterns favoring SI and FCW patterns favoring
 SER.
@@ -937,7 +947,8 @@ We model these with an \emph{ordering commitment basis}:
   \begin{enumerate}[nosep,label=(\alph*)]
     \item Under any isolation level that forbids no cycle type (e.g.,
           read committed): depth~$0$.
-          No conflict resolution is ever required.
+          No conflict resolution is required to satisfy the isolation
+          specification.
     \item Under any isolation level $L$ that forbids some cycle type
           (serializability, snapshot isolation, repeatable read, etc.),
           with a fully reactive protocol (no scheduling discretion):
@@ -1154,9 +1165,10 @@ all derivations of $p$ have been exhausted---a completeness guarantee
 that classical approaches handle via monus~\cite{dannert2021semiring}.
 Determination provenance decomposes this into stratum sealing (the
 commitment) followed by monotone evaluation (the entailment).
-The filtration then recovers the classical negation
-semantics---stratified, well-founded, and stable---as prefixes of a
-single determination; and determination provenance explains why-not
+The filtration then recovers, for the representative class below, the
+classical negation semantics---stratified, well-founded, and
+stable---as prefixes of a single determination; and determination
+provenance explains why-not
 under ambiguity: an atom can be absent because of a semantic commitment,
 not a blocked derivation.
 (Full details in Appendix~\ref{sec:appendix-datalog}.)

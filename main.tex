@@ -887,6 +887,10 @@ $\mathsf{commit}(T_i)$, and $\mathsf{abort}(T_i)$ events.
 An outcome $o \in O$ records which transactions have been admitted and
 which have been validated (and with what result); transactions not yet
 validated remain active.
+Two decision histories that commit the same transactions (possibly in
+different order) and produce the same conflict graph are
+outcome-equivalent; the determination semiring quotients by this
+equivalence (Section~\ref{sec:det-semiring}).
 The outcome order is prefix extension:
 $o_1 \Ord o_2$ when $o_2$ appends additional decision events to $o_1$.
 Two outcomes are $\Ord$-incomparable when they disagree on a

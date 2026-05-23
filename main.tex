@@ -882,15 +882,15 @@ incomparable in query-relative depth.
 \subsection{Isolation Levels as Specifications}
 
 The outcome space $O$ for transactions is the set of
-\emph{decision histories}: sequences of $\mathsf{start}(T_i)$,
-$\mathsf{commit}(T_i)$, and $\mathsf{abort}(T_i)$ events recording
-which transactions have been admitted and validated.
-The outcome order is prefix extension:
-$o_1 \Ord o_2$ when $o_2$ extends $o_1$ with additional decisions
-consistent with $o_1$ (commitments are irrevocable).
-Two outcomes are $\Ord$-incomparable when neither is a prefix of the
-other---either because they disagree on a transaction's fate, or
-because they order the same decisions differently.
+\emph{decision traces}: sequences of $\mathsf{start}(T_i)$,
+$\mathsf{commit}(T_i)$, and $\mathsf{abort}(T_i)$ events, quotiented
+by reordering of non-conflicting decisions (decisions on transactions
+sharing no conflict edge may be permuted freely).
+The outcome order is trace-prefix extension:
+$o_1 \Ord o_2$ when $o_2$ extends $o_1$ with additional decisions.
+Two outcomes are $\Ord$-incomparable when they make genuinely different
+choices: contradictory fates (commit vs.\ abort of the same
+transaction) or different orderings of conflicting transactions.
 
 Following Adya~\cite{adya1999weak}, each isolation level $L$
 constrains which conflict patterns are admissible among committed

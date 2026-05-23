@@ -888,8 +888,9 @@ which transactions have been admitted and validated.
 The outcome order is prefix extension:
 $o_1 \Ord o_2$ when $o_2$ extends $o_1$ with additional decisions
 consistent with $o_1$ (commitments are irrevocable).
-Incomparability arises from contradictory decisions about the
-same transaction (one commits $T_i$, the other aborts it).
+Two outcomes are $\Ord$-incomparable when neither is a prefix of the
+other---either because they disagree on a transaction's fate, or
+because they order the same decisions differently.
 
 Following Adya~\cite{adya1999weak}, each isolation level $L$
 constrains which conflict patterns are admissible among committed

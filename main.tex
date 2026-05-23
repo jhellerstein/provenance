@@ -194,15 +194,17 @@ correspond to different filtration levels.
         sub-semirings that query evaluation respects
         (Sections~\ref{sec:det-semiring}--\ref{sec:filtration}).
   \item Instantiation for transactional systems: determination depth
-        is $\Theta(n)$ worst-case for any non-HAT isolation level with
-        scheduling discretion (protocol-agnostic); the filtration
+        is $\Theta(n)$ worst-case for any isolation level that forbids
+        some cycle type, given scheduling discretion
+        (protocol-agnostic); the filtration
         provides a fine-grained, per-tuple separation of SER and SI
         that is incomparable---neither level dominates the other in
         query-relative depth
         (Section~\ref{sec:transactions}).
-  \item Instantiation for Datalog with negation: the classical negation
-        semantics---stratified, well-founded, stable-model---are
-        filtration levels of a single determination semiring;
+  \item Instantiation for Datalog with negation: for a representative
+        class of programs, the classical negation
+        semantics---stratified, well-founded, stable-model---correspond
+        to filtration levels of a single determination semiring;
         \emph{monus elimination} shows that layered monotone semirings
         are support-equivalent to semirings-with-monus for negation
         (Section~\ref{sec:negation-preview},
@@ -444,9 +446,9 @@ The \emph{depth} of a determination $L_1 \seq \cdots \seq L_k$ is $k$
 
 \begin{definition}[Minimal resolving determination]
   \label{def:minimal-resolving}
-  A resolving determination $D(H)$ is \emph{minimal} if no proper
-  subsequence of $D(H)$ is itself a resolving determination of any
-  history in $\Hist$.
+  A resolving determination $D(H)$ is \emph{minimal} if removing any
+  single commitment event from $H$ (while retaining all other events
+  in their original order) yields a history that is not resolved.
 \end{definition}
 
 \subsection{Resolution Enables Provenance}
@@ -490,17 +492,20 @@ compose through a commutative semiring, and query evaluation preserves
 that structure~\cite{green2007provenance}.
 One might expect that layered determinations---sequences of non-commuting
 commitments---resist such clean algebraic treatment.
-In fact, the space of all resolving determinations forms a commutative
+In fact, supports over resolving determinations form a commutative
 semiring, and the layering within each determination is reflected as a
 filtration of sub-semirings that query evaluation respects.
 
 Throughout, we fix a specification $\Spec$ over a history class $\Hist$ and
 a commitment basis $\Phi$.
-We write $\mathcal{D}_{\Spec,\Phi}$ (abbreviated $\mathcal{D}$) for the
-set of minimal resolving determinations over $\Hist$
-(Definition~\ref{def:minimal-resolving}): the resolving subsequences of
-commitment events from which no commitment can be dropped without
-losing resolution.
+Elements of $\mathcal{D}_{\Spec,\Phi}$ (abbreviated $\mathcal{D}$) are
+resolved histories with minimal determinations, identified up to
+outcome equivalence: $H_1 \sim H_2$ when $D(H_1)$ and $D(H_2)$ produce
+the same resolved outcome and the same conditioned provenance for every
+tuple.
+Concretely, each element of $\mathcal{D}$ is a representative resolved
+history $H$ whose determination $D(H)$ is minimal
+(Definition~\ref{def:minimal-resolving}).
 
 \subsection{The Determination Semiring}
 \label{sec:det-semiring}
@@ -717,7 +722,9 @@ No layer information is needed to make this distinction.
   multiplication.
   (Here each minimal determination is identified with its exact
   commitment set, and each commitment variable indicates whether that
-  commitment was applied.)
+  commitment was applied.
+  The formulas are interpreted over the set of valid minimal
+  determinations, not over all truth assignments to $\Phi$.)
 \end{proposition}
 \begin{proof}
   With a single layer, two determinations agree at level $1$ iff they
@@ -967,9 +974,12 @@ We model these with an \emph{ordering commitment basis}:
   round's decision depends on the previous (had $T_\infty$ been
   aborted earlier, no further conflict would arise), giving
   depth~$n{-}1$.
-  \emph{Per-batch}: within a sealed batch, the system's only choice is
-  processing order; all ordering decisions within a batch commute on
-  disjoint transaction pairs, giving one layer beyond the seal.
+  \emph{Per-batch}: within a sealed batch, the system makes a single
+  commitment: the choice of processing order $\pi$ for the batch
+  (a total order on pending requests).
+  All consequences (conflict edges, aborts, commits) are entailed by
+  $\pi$.
+  Hence per-batch depth is~$2$: seal + order selection.
   Full proof in Appendix~\ref{app:protocols}.
 \end{proof}
 
@@ -1020,11 +1030,13 @@ The filtration provides a fine-grained separation:
   $t$ holds only under determinations where its transaction survives,
   $\mathrm{qdepth}_{\mathrm{SER}}(t) > 0$.
 
-  (b)~$T_1$ writes $x$, $T_2$ writes $x$, no other conflicts.
-  Under SER: both commit (order either way, no cycle);
+  (b)~$T_1$ writes $x$ and also inserts a tuple $t$ into a separate
+  relation $R$; $T_2$ writes $x$; no other conflicts.
+  Under SER: both commit (order either way on $x$, no cycle);
+  $T_1$ always commits, so $t \in R$ in every determination;
   $\mathrm{qdepth}_{\mathrm{SER}}(t) = 0$.
-  Under SI: FCW forces one to abort; $t$ derived from $T_1$ holds only
-  if $T_1$ wins; $\mathrm{qdepth}_{\mathrm{SI}}(t) > 0$.
+  Under SI: FCW on $x$ forces one to abort; $t \in R$ only if
+  $T_1$ wins FCW; $\mathrm{qdepth}_{\mathrm{SI}}(t) > 0$.
 \end{proof}
 
 \noindent
@@ -1050,14 +1062,17 @@ Using ordering commitments (Section~\ref{sec:scheduling-basis}), the
 query-relevant determinations are those fixing the serialization order
 among $T_2$, $T_3$, $T_Q$ on the contested tuple.
 Two equivalence classes of determinations arise (quotienting by
-query-outcome equivalence):
+query-outcome equivalence).
+Representative members:
 $D_{\mathsf{in}} \triangleq
   \varphi_{T_2 \prec T_Q} \cdot \varphi_{T_Q \prec T_3}$
-(insert visible before query, delete after)
+(the class includes all orderings where $T_2$'s insert is visible to
+$T_Q$---e.g., also $T_3 \prec T_2 \prec T_Q$, where the delete
+precedes the insert and is a no-op)
 and
 $D_{\mathsf{out}} \triangleq
   \varphi_{T_2 \prec T_3} \cdot \varphi_{T_3 \prec T_Q}$
-(delete before query, so $d$ is absent).
+(the class of orderings where $d$ is absent at query time).
 We write $\mathcal{D} = \{D_{\mathsf{in}}, D_{\mathsf{out}}\}$ for
 these classes throughout.
 The determination provenance is:
@@ -1397,8 +1412,9 @@ restructured?
   Relaxing layer~$1$ means enlarging $\Ord$ so that the ordering of
   $T_Q$ relative to $T_3$ need not be committed---operationally,
   running this pair at snapshot isolation rather than serializability.
-  Under SI, $d$'s presence becomes nondeterministic (no commitment
-  resolves it); the contingency is eliminated.
+  Under SI, the ordering of $T_Q$ relative to $T_3$ is no longer
+  a forbidden cycle; the alternatives are compatible under the relaxed
+  $\Ord$, so no commitment is needed and $d$'s depth drops to~$0$.
 
   The provenance diagnosis: ``$d$ is contingent because the ordering of
   $T_Q$ relative to $T_3$ was committed; relaxing that commitment
@@ -2298,12 +2314,17 @@ transactions.
   With $n$ transactions, at most $n$ sequential commitments are needed.
 
   \emph{Lower bound.}
-  Consider a transaction $T_\infty$ that reads a hot key $x$ and never
-  completes (its commit/abort is indefinitely deferred).
+  Consider a transaction $T_\infty$ that reads object $x$ (creating a
+  read dependency on $x$) and never completes.
   A sequence of transactions $T_1, T_2, \ldots, T_{n-1}$ arrive one at
   a time, each writing $x$ and requesting commit.
-  At each step, $T_i$ and $T_\infty$ form a cycle (both access $x$,
-  creating a conflict edge in each direction via the rw/wr pattern).
+  Each $T_i$ and $T_\infty$ form a directed cycle:
+  $T_\infty \xrightarrow{\mathsf{rw}} T_i$ (anti-dependency: $T_\infty$
+  read $x$, $T_i$ writes $x$) and
+  $T_i \xrightarrow{\mathsf{wr}} T_\infty$ (dependency: $T_i$ writes
+  $x$, $T_\infty$ subsequently reads $x$---or equivalently, $T_\infty$'s
+  read must be ordered before $T_i$'s write for $T_\infty$'s read to
+  remain valid, creating the reverse edge).
   The system must resolve the cycle: either abort $T_i$ (letting
   $T_\infty$ survive) or abort $T_\infty$ (resolving all future
   conflicts).
@@ -2460,8 +2481,9 @@ MVTO has a particularly simple structure:
 Hence fully reactive MVTO has depth~$0$ (timestamp assignment is
 entailed by arrival order, and aborts are forced).
 With batched timestamp assignment (the system buffers arrivals and
-chooses timestamp order), depth is~$1$: all timestamp assignments
-within a batch commute on non-conflicting pairs.
+chooses timestamp order), per-batch depth is~$2$: the seal commitment
+(declaring the batch complete) followed by a single scheduling
+commitment (choosing the processing order within the batch).
 
 \paragraph{Comparison across protocols.}
 All three protocols implement serializability but differ in
@@ -3122,8 +3144,11 @@ $K$-valued provenance annotations.
   Then:
   \begin{enumerate}[nosep,label=(\alph*)]
     \item $\varphi_{\seal(S)}$ is hereditary.
-    \item The seal is non-filtering at $H$:
-          $\Spec(H \cdot \varphi_{\seal(S)}) = \Spec(H)$.
+    \item The seal is non-filtering at $H$ relative to the completed
+          history $H^*$:
+          $\Spec(H \cdot \varphi_{\seal(S)}) = \Spec(H)$
+          (since $S$ has already stabilized within $H^*$, the seal
+          excludes no outcome that was previously admissible).
     \item The entailment $f_\varphi$ reproduces $\varphi$'s exclusions
           exactly: $\Spec(H \cdot \varphi_{\seal(S)} \cdot f_\varphi)
           = \Spec(H \cdot \varphi)$.

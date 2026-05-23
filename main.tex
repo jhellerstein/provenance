@@ -698,11 +698,11 @@ number of layers.
 \begin{definition}[Filtration]
   Define $\mathcal{F}_k \triangleq \{S \subseteq \mathcal{D} \mid
   S \text{ is a level-}k\text{ support}\}$.
-  This yields:
-  \[
+  This yields:\\
+  $
     \mathcal{F}_0 \;\subseteq\; \mathcal{F}_1 \;\subseteq\; \cdots
     \;\subseteq\; \mathcal{F}_d \;=\; 2^{\mathcal{D}},
-  \]
+  $
   where $\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$.
 \end{definition}
 
@@ -1142,17 +1142,13 @@ isolation levels for this example.
 
   \caption{
     Determination structure across isolation levels
-    (Example~\ref{ex:example}), assuming scheduling discretion
-    (ordering commitment basis).
-    Read committed requires no commitments regardless of protocol.
-    Serializability has depth~$1$ without cycles, $O(n)$ worst-case
-    with overlapping cycles (Theorem~\ref{thm:txn-depth}).
-    Snapshot isolation: $O(n)$ from FCW-to-snapshot chains.
-    Under fully reactive protocols, all non-RC levels have depth~$0$.
+    (Example~\ref{ex:example}), assuming scheduling discretion.
+    Depth is $0$ under RC or fully reactive protocols;
+    $O(n)$ worst-case under SER or SI with discretion
+    (Theorem~\ref{thm:txn-depth}).
   }
-  \Description{Table showing resolving determinations and their depth for
-    read committed (depth 0), serializability (depth 1 or O(n)), and snapshot
-    isolation (depth O(n)), under scheduling discretion.}
+  \Description{Table showing resolving determinations and their depth
+    across isolation levels under scheduling discretion.}
   \label{fig:det-tables}
 \end{figure*}
 
@@ -1563,7 +1559,7 @@ for Datalog, the classical negation semantics correspond to
 filtration levels, and monus is eliminated by sealing.
 
 A long-standing promise of declarative approaches to systems---from
-Webdamlog's distributed Datalog~\cite{abiteboul2011webdamlog} to
+relational transducers~\cite{abiteboul2011webdamlog} to
 CALM~\cite{hellerstein2010declarative,ameloot2013relational}---is that
 query-centric abstractions bring database theory to bear on distributed
 and transactional systems.

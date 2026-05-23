@@ -822,12 +822,12 @@ Appendix~\ref{app:det-semiring-details}): the filtration is tight.
 In transactional systems, semantic ambiguity arises from
 \emph{conflict resolution}: when concurrent transactions conflict,
 the system must decide which effects persist.
-We show that determination depth is protocol-agnostic---$\Theta(n)$
-worst-case for any isolation level that forbids some cycle type, given
-scheduling discretion---and that the filtration provides a per-tuple separation
-of isolation levels: SER and SI are incomparable in query-relative
-depth, with write-skew patterns favoring SI and FCW patterns favoring
-SER.
+We show that determination depth is agnostic to concurrency control
+protocol: worst-case $\Theta(n)$ for any isolation level that forbids
+some cycle type, given scheduling discretion.
+The filtration also provides a per-tuple separation of isolation
+levels: SER and SI are incomparable in query-relative depth, with
+write-skew patterns favoring SI and FCW patterns favoring SER.
 
 \subsection{Transactional Histories}
 

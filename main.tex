@@ -881,18 +881,16 @@ incomparable in query-relative depth.
 
 \subsection{Isolation Levels as Specifications}
 
-The outcome space $O$ for transactions is the set of all possible
-\emph{decision histories}: sequences of $\mathsf{start}(T_i)$,
-$\mathsf{commit}(T_i)$, and $\mathsf{abort}(T_i)$ events.
-An outcome $o \in O$ records which transactions have been admitted and
-which have been validated (and with what result); transactions not yet
-validated remain active.
-Two decision histories that commit the same transactions (possibly in
-different order) and produce the same conflict graph are
-outcome-equivalent; the determination semiring quotients by this
-equivalence (Section~\ref{sec:det-semiring}).
-The outcome order is prefix extension:
-$o_1 \Ord o_2$ when $o_2$ appends additional decision events to $o_1$.
+The outcome space $O$ for transactions consists of equivalence classes
+of \emph{decision histories} (sequences of $\mathsf{start}(T_i)$,
+$\mathsf{commit}(T_i)$, and $\mathsf{abort}(T_i)$ events), where two
+histories are equivalent when they admit the same transactions and
+produce the same committed conflict graph.
+An outcome records which transactions have been admitted and validated
+(and with what result); transactions not yet validated remain active.
+The outcome order is:
+$o_1 \Ord o_2$ when $o_2$ extends $o_1$ by admitting or validating
+additional transactions (with a compatible conflict structure).
 Two outcomes are $\Ord$-incomparable when they disagree on a
 transaction's fate (one commits $T_i$, the other aborts it).
 

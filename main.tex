@@ -822,13 +822,13 @@ Appendix~\ref{app:det-semiring-details}): the filtration is tight.
 In transactional systems, semantic ambiguity arises from
 \emph{conflict resolution}: when concurrent transactions conflict,
 the system must decide which effects persist.
-We show that any isolation level forbidding some cycle type has
+We show that any isolation level forbidding a conflict cycle has
 worst-case determination depth $\Theta(n)$ given scheduling
 discretion---a result that holds regardless of concurrency control
 protocol.
 The filtration also provides a per-tuple separation of isolation
-levels: SER and SI are incomparable in query-relative depth, with
-write-skew patterns favoring SI and FCW patterns favoring SER.
+levels: serializability (SER) and snapshot isolation (SI) are
+incomparable in query-relative depth.
 
 \subsection{Transactional Histories}
 
@@ -884,19 +884,21 @@ write-skew patterns favoring SI and FCW patterns favoring SER.
 An \emph{outcome} at history $H$ is the sequence of scheduling and
 validation decisions made so far: which transactions have been started,
 and which have committed or aborted.
-Following Adya~\cite{adya1999weak}, each isolation level $L$ forbids
-certain labeled cycles in the conflict graph;
-$\Spec_L(H)$ admits those extensions of $H$ in which no $L$-forbidden
-cycle exists among committed transactions.
+Following Adya~\cite{adya1999weak}, each isolation level $L$
+constrains which conflict patterns are admissible among committed
+transactions;
+$\Spec_L(H)$ admits those extensions of $H$ consistent with $L$'s
+constraint.
 The outcome order tracks history extension: $o_1 \Ord o_2$ when $o_2$
 extends $o_1$ with additional decisions.
 Two outcomes are $\Ord$-incomparable when they disagree on a
 transaction's fate (one commits $T_i$, the other aborts it).
 We consider three levels:
-\emph{read committed} (RC; no forbidden cycle types),
-\emph{serializability} (SER; forbids all cycles regardless of edge
-labels), and \emph{snapshot isolation} (SI; forbids cycles containing
-consecutive $\mathsf{rw}$-edges from concurrent transactions;
+\emph{read committed} (RC; no constraint on conflict structure),
+\emph{serializability} (SER; forbids all directed cycles in the
+conflict graph), and \emph{snapshot isolation} (SI; each transaction
+reads from a consistent snapshot; concurrent writers on the same object
+are resolved by first-committer-wins;
 Appendix~\ref{sec:appendix-SI}).
 
 \subsection{Commitment Basis}

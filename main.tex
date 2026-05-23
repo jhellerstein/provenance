@@ -881,18 +881,22 @@ incomparable in query-relative depth.
 
 \subsection{Isolation Levels as Specifications}
 
-An \emph{outcome} at history $H$ is the sequence of scheduling and
-validation decisions made so far: which transactions have been started,
-and which have committed or aborted.
+The outcome space $O$ for transactions is the set of all possible
+\emph{decision histories}: sequences of $\mathsf{start}(T_i)$,
+$\mathsf{commit}(T_i)$, and $\mathsf{abort}(T_i)$ events.
+An outcome $o \in O$ records which transactions have been admitted and
+which have been validated (and with what result); transactions not yet
+validated remain active.
+The outcome order is prefix extension:
+$o_1 \Ord o_2$ when $o_2$ appends additional decision events to $o_1$.
+Two outcomes are $\Ord$-incomparable when they disagree on a
+transaction's fate (one commits $T_i$, the other aborts it).
+
 Following Adya~\cite{adya1999weak}, each isolation level $L$
 constrains which conflict patterns are admissible among committed
 transactions;
-$\Spec_L(H)$ admits those extensions of $H$ consistent with $L$'s
-constraint.
-The outcome order tracks history extension: $o_1 \Ord o_2$ when $o_2$
-extends $o_1$ with additional decisions.
-Two outcomes are $\Ord$-incomparable when they disagree on a
-transaction's fate (one commits $T_i$, the other aborts it).
+$\Spec_L(H)$ admits those extensions of the current outcome consistent
+with $L$'s constraint.
 We consider three levels:
 \emph{read committed} (RC; no constraint on conflict structure),
 \emph{serializability} (SER; forbids all directed cycles in the

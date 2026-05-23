@@ -648,9 +648,11 @@ layers are irrelevant to it.
 \noindent
 The layering function encodes the semantic structure of the domain
 (e.g., stratification layers in Datalog, conflict-independence
-structure in transactions); it is uniquely determined by the
-commutativity and dependency structure of $\Phi$.
-The uniqueness comes from the universal quantifier in~(i), which is conservative: if two commitments
+structure in transactions).
+In the instantiations below, the layering is canonical: it is the
+coarsest assignment consistent with the commutativity and dependency
+structure of $\Phi$.
+The universal quantifier in~(i) is conservative: if two commitments
 commute at some histories but not others, they must be placed in
 different layers.
 In both instantiations of this paper, commutativity is
@@ -1364,11 +1366,12 @@ restructured?
 
 \begin{definition}[Support-separating layer]
   \label{def:support-separating}
-  Layer~$k$ is \emph{support-separating} if: whenever two
-  determinations $D, D'$ disagree at some layer $j > k$, they already
-  disagree at layer~$k$.
-  Equivalently, every level-$k$ equivalence class is contained in a
-  single level-$j$ class for each $j > k$.
+  Layer~$k$ is \emph{support-separating} if no higher layer refines
+  the level-$k$ partition: for all $j > k$,
+  $D \equiv_k D'$ implies $D \equiv_j D'$.
+  Equivalently, the level-$k$ and level-$j$ equivalence classes
+  coincide for every $j > k$---layers above~$k$ introduce no further
+  distinctions.
 \end{definition}
 
 \begin{theorem}[Sufficient condition for safe relaxation]
@@ -2326,17 +2329,15 @@ transactions.
   With $n$ transactions, at most $n$ sequential commitments are needed.
 
   \emph{Lower bound.}
-  Consider a transaction $T_\infty$ that reads object $x$ (creating a
-  read dependency on $x$) and never completes.
+  Consider a long-running transaction $T_\infty$ that reads object $x$
+  and writes object $y$ (and never completes).
   A sequence of transactions $T_1, T_2, \ldots, T_{n-1}$ arrive one at
-  a time, each writing $x$ and requesting commit.
-  Each $T_i$ and $T_\infty$ form a directed cycle:
-  $T_\infty \xrightarrow{\mathsf{rw}} T_i$ (anti-dependency: $T_\infty$
-  read $x$, $T_i$ writes $x$) and
-  $T_i \xrightarrow{\mathsf{wr}} T_\infty$ (dependency: $T_i$ writes
-  $x$, $T_\infty$ subsequently reads $x$---or equivalently, $T_\infty$'s
-  read must be ordered before $T_i$'s write for $T_\infty$'s read to
-  remain valid, creating the reverse edge).
+  a time; each $T_i$ writes $x$ and reads $y$.
+  Each $T_i$ and $T_\infty$ form a directed cycle via two objects:
+  $T_\infty \xrightarrow{\mathsf{rw}} T_i$ (anti-dependency on $x$:
+  $T_\infty$ read $x$ before $T_i$ writes it) and
+  $T_i \xrightarrow{\mathsf{rw}} T_\infty$ (anti-dependency on $y$:
+  $T_i$ read $y$ before $T_\infty$ writes it).
   The system must resolve the cycle: either abort $T_i$ (letting
   $T_\infty$ survive) or abort $T_\infty$ (resolving all future
   conflicts).
@@ -3150,25 +3151,27 @@ $K$-valued provenance annotations.
   applied at history $H$ within a completed history $H^*$ (so that $S$
   has stabilized: no further events of types in $S$ occur in any
   extension within $H^*$).
+  Write $\Spec_{H^*}(H')$ for the admissible set at $H'$ conditioned
+  on the completed history $H^*$ (i.e., restricted to outcomes
+  consistent with $H^*$'s event structure).
   Define the replacement: $\varphi_{\seal(S)}$ followed by the
   deterministic function $f_\varphi$ that computes $\varphi$'s effect
   over the sealed state (an entailment, not a commitment).
   Then:
   \begin{enumerate}[nosep,label=(\alph*)]
     \item $\varphi_{\seal(S)}$ is hereditary.
-    \item The seal is non-filtering at $H$ relative to the completed
-          history $H^*$:
-          $\Spec(H \cdot \varphi_{\seal(S)}) = \Spec(H)$
+    \item The seal is non-filtering at $H$ relative to $H^*$:
+          $\Spec_{H^*}(H \cdot \varphi_{\seal(S)}) = \Spec_{H^*}(H)$
           (since $S$ has already stabilized within $H^*$, the seal
           excludes no outcome that was previously admissible).
     \item The entailment $f_\varphi$ reproduces $\varphi$'s exclusions
-          exactly: $\Spec(H \cdot \varphi_{\seal(S)} \cdot f_\varphi)
-          = \Spec(H \cdot \varphi)$.
+          exactly: $\Spec_{H^*}(H \cdot \varphi_{\seal(S)} \cdot f_\varphi)
+          = \Spec_{H^*}(H \cdot \varphi)$.
     \item The remainder of the determination is unchanged: for any
           subsequent commitments $\varphi_2 \cdot \varphi_3 \cdots$,
-          $\Spec(H \cdot \varphi_{\seal(S)} \cdot f_\varphi \cdot
+          $\Spec_{H^*}(H \cdot \varphi_{\seal(S)} \cdot f_\varphi \cdot
           \varphi_2 \cdot \varphi_3 \cdots)
-          = \Spec(H \cdot \varphi \cdot \varphi_2 \cdot \varphi_3 \cdots)$.
+          = \Spec_{H^*}(H \cdot \varphi \cdot \varphi_2 \cdot \varphi_3 \cdots)$.
     \item The canonicalization preserves the set of resolving
           determinations $\mathcal{D}$, all supports, the filtration,
           and all $K$-valued provenance annotations.

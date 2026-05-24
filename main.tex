@@ -891,9 +891,6 @@ $o_1 \Ord o_2$ when $o_2$ extends $o_1$ with additional decisions
 while preserving the fate (commit/abort) of every transaction already
 decided in $o_1$ and the ordering of every conflicting pair already
 ordered in $o_1$.
-Two outcomes are $\Ord$-incomparable when they assign different fates
-to the same transaction or different orderings to the same conflicting
-pair.
 
 Following Adya~\cite{adya1999weak}, each isolation level $L$
 constrains which conflict patterns are admissible among committed
@@ -911,15 +908,12 @@ Appendix~\ref{sec:appendix-SI}).
 \subsection{Commitment Basis}
 \label{sec:scheduling-basis}
 
-Under fully reactive OCC---where the environment controls all
-scheduling and the system applies validation
+Classical optimistic concurrency control is fully reactive: the environment
+controls all scheduling and the system applies validation
 deterministically---there are no system choices and depth is~$0$.
-Determination provenance becomes interesting under protocols with
-scheduling discretion.
-
-Protocols that fix serialization order incrementally---such as
-two-phase locking (2PL) and multiversion timestamp ordering
-(MVTO)---make irrevocable ordering decisions during execution.
+Any protocol acquires scheduling discretion when it buffers requests
+and chooses their processing order; the irrevocable ordering decisions
+that result are the commitments of interest.
 We model these with an \emph{ordering commitment basis}:
 
 \begin{definition}[Ordering commitments]

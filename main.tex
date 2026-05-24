@@ -928,10 +928,11 @@ commitment basis}:
 
 \begin{proposition}[Commutativity of independent orderings]
   \label{prop:commit-commute}
-  Ordering commitments on disjoint pairs of transactions commute:
-  fixing the order of $T_i$ relative to $T_j$ does not affect the
-  validity or effect of ordering $T_k$ relative to $T_l$ when
-  $\{T_i, T_j\} \cap \{T_k, T_l\} = \emptyset$.
+  When the conflict graph is fixed (transaction read/write sets do not
+  depend on the values read), ordering commitments on disjoint pairs
+  of transactions commute: fixing the order of $T_i$ relative to $T_j$
+  does not affect the validity or effect of ordering $T_k$ relative to
+  $T_l$ when $\{T_i, T_j\} \cap \{T_k, T_l\} = \emptyset$.
 \end{proposition}
 
 \begin{remark}[Non-commutativity under shared conflicts]

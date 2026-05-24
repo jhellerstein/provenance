@@ -1213,8 +1213,9 @@ Consider the program
   q(c) & \leftarrow \neg p(c). & s(c) & \leftarrow \neg r(c).
 \end{align*}
 with EDB $\{a(c)\}$.
-The pair $(p,q)$ is stratified; the pair $(r,s)$ forms a cycle through
-negation.
+The stratification depth is $1$: stratum~0 contains $\{a, p\}$, 
+stratum~1 contains $\{q\}$ (which negates $p$).
+Independently, the pair $(r, s)$ forms an unstratified cycle through negation.
 
 \paragraph{The specification.}
 Outcomes assign each atom a value in
@@ -1235,17 +1236,25 @@ $o_r = \{a(c), p(c), r(c)\}$ and $o_s = \{a(c), p(c), s(c)\}$.
 
 The resolving determinations are $\mathcal{D} = \{D^{(r)}, D^{(s)}\}$:
 \[
-  D^{(r)} = \varphi_{\seal}(S_1) \seq \varphi_{\seal}(S_2) \seq
+  D^{(r)} = \varphi_{\seal}(S_1) \seq
     \varphi_{r(c)=\mathbf{t}} \cdot \varphi_{s(c)=\mathbf{f}},
   \qquad
-  D^{(s)} = \varphi_{\seal}(S_1) \seq \varphi_{\seal}(S_2) \seq
+  D^{(s)} = \varphi_{\seal}(S_1) \seq
     \varphi_{s(c)=\mathbf{t}} \cdot \varphi_{r(c)=\mathbf{f}},
 \]
-sharing the stratified prefix (layers~1--2) and branching at layer~3.
-The filtration is
-$\mathcal{F}_0 = \mathcal{F}_1 = \mathcal{F}_2 = \{\emptyset, \mathcal{D}\}$
-and $\mathcal{F}_3 = 2^{\mathcal{D}}$ (trivial until the choice layer;
-the theorem's value is the correspondence, not intermediate richness).
+sharing the sealing layer (layer~1) and branching at the choice layer
+(layer~2).
+The seals for $\{a, p\}$ and $\{r, s\}$ commute (neither depends on
+the other's completion), so they form a single layer.
+The filtration index counts discharged layers:
+$\mathcal{F}_0$ is the state before any commitment;
+$\mathcal{F}_1$ reflects the sealing layer
+(which all determinations share, so no new distinctions arise); and
+$\mathcal{F}_2$ reflects the choice layer where the determinations
+diverge.
+Concretely:
+$\mathcal{F}_0 = \mathcal{F}_1 = \{\emptyset, \mathcal{D}\}$
+and $\mathcal{F}_2 = 2^{\mathcal{D}}$.
 
 \[
   \begin{array}{r@{\;=\;}l@{\qquad}r@{\;=\;}l}
@@ -1260,23 +1269,31 @@ determination.
 Under $D^{(r)}$, $s(c)$ is absent because of the commitment
 $\varphi_{r(c)=\mathbf{t}}$ itself---not a blocked derivation but a
 semantic choice.
-Reading the filtration only through the sealing layers
-($\mathcal{F}_2$ here), these atoms have partial support---which is
+Reading the filtration only through the sealing layer
+($\mathcal{F}_1$ here), these atoms have partial support---which is
 exactly the well-founded classification $\mathbf{u}$: their truth
 values are not determined without discharging the choice layer.
 
 \begin{theorem}[Negation semantics as filtration levels]
   \label{thm:negation-filtration}
-  For a finite normal Datalog program whose negative SCCs are mutually
-  independent, the determination semiring has depth $k{+}1$ and the
-  classical negation semantics correspond to filtration levels:
-  stable-model semantics reads $\mathcal{F}_{k+1}$;
-  well-founded semantics reads $\mathcal{F}_k$ and classifies residual
-  ambiguity as $\mathbf{u}$;
-  stratified semantics reads $\mathcal{F}_k$ and is defined only when
-  the sealing prefix resolves all atoms.
+  For a finite $\mbox{Datalog}^\neg$ program having $k$ stratification
+  layers and $d$ negative SCCs in the longest dependency chain, the
+  determination semiring has depth $k{+}d$.
+  The classical negation semantics correspond to filtration levels:
+  \begin{enumerate}[nosep,label=(\alph*)]
+    \item Stable-model semantics reads $\mathcal{F}_{k+d}$ (all choice
+          layers discharged).
+    \item Well-founded semantics reads $\mathcal{F}_k$; atoms with
+          partial support at that level are classified $\mathbf{u}$.
+    \item Stratified semantics reads $\mathcal{F}_k$ and is defined
+          only when $d = 0$.
+  \end{enumerate}
 \end{theorem}
 \begin{proof}[Proof sketch]
+  The commitment basis has $k$ sealing predicates (one per stratum)
+  followed by $d$ choice layers (one per negative SCC in topological
+  order); see Appendix~\ref{app:datalog-general} for the full
+  construction and soundness proof.
   The sealing prefix $\varphi_{\seal}(S_1) \seq \cdots \seq
   \varphi_{\seal}(S_k)$ is shared by all resolving determinations:
   stratified evaluation is unique (each stratum's least fixpoint is
@@ -1284,34 +1301,21 @@ values are not determined without discharging the choice layer.
   sequence exists.
   Hence all determinations agree at level $k$:
   $\mathcal{F}_k = \{\emptyset, \mathcal{D}\}$.
-  The choice layer (layer $k{+}1$) distinguishes stable models:
-  $\mathcal{F}_{k+1} = 2^{\mathcal{D}}$.
-  WFS computes the same sealing prefix and then applies the alternating
-  fixpoint~\cite{vanGelder1991wellFounded}---an entailment that
-  classifies each atom by whether it holds in all stable models (robust,
-  $\mathbf{t}$), none (robustly absent, $\mathbf{f}$), or some but not
-  all (contingent, $\mathbf{u}$).
-  For the restricted class (independent final negative SCCs), this
-  classification coincides exactly with the support structure at
-  filtration level~$k$: the alternating fixpoint discovers which atoms
-  have full, empty, or partial support without discharging layer $k{+}1$.
+  Each choice layer $k{+}i$ resolves the atoms in negative SCC $C_i$;
+  when SCCs interact, later choices depend on earlier outcomes, giving
+  $d$ non-commuting layers and depth $k{+}d$.
+  WFS applies the alternating fixpoint after the sealing prefix,
+  discharging choice layers that are forced (unique stable extension
+  given the discharged prefix) and classifying the remainder as
+  $\mathbf{u}$.
+  In the independent case ($d = 1$, as in the example above), there is
+  a single choice layer and $d^* = 0$: WFS reads $\mathcal{F}_k$.
   Full proof in Appendix~\ref{sec:appendix-datalog}.
 \end{proof}
 
 \noindent
 Classical stratification is the Datalog-specific instance of
 determination layering: each stratum boundary is a sealing commitment.
-The theorem covers programs with independent final negative SCCs;
-the correspondence generalizes to nested cycles with depth $k + d$
-(Appendix~\ref{app:datalog-general}).
-
-The correspondence: stable semantics discharges all $k{+}1$ layers
-(resolving $\neg$-cycle atoms to $\mathbf{t}$/$\mathbf{f}$); WFS
-discharges the $k$ sealing layers and classifies residual ambiguity as
-$\mathbf{u}$ (via the alternating fixpoint---an entailment, not a
-further commitment; see Appendix~\ref{sec:appendix-datalog});
-stratified semantics discharges the same sealing layers but is defined
-only when they resolve everything ($\neg$-cycle atoms remain $\bot$).
 The filtration makes this prefix structure explicit and compositional:
 supports at each filtration level compose through queries
 (Corollary~\ref{cor:propagation-filtration}), so preservation across
@@ -2777,10 +2781,10 @@ It is not preserved from stable to well-founded or stratified.
 \subsection{General Case: Nested Negative Cycles}
 \label{app:datalog-general}
 
-Theorem~\ref{thm:negation-filtration} covers programs whose negative
-SCCs are mutually independent and form a single final choice layer.
-Here we extend the correspondence to programs with nested or interacting
-negative cycles.
+Theorem~\ref{thm:negation-filtration} states the general correspondence
+for programs with nesting depth $d$.
+This appendix provides the full proof and detailed construction of the
+layered choice basis for nested or interacting negative cycles.
 
 \paragraph{Setup.}
 After SCC condensation, the negative components of a program form a
@@ -2790,7 +2794,8 @@ Let $C_1, \ldots, C_d$ be a topological ordering of the negative SCCs
 The \emph{nesting depth} is $d$ (the number of negative SCCs in the
 longest dependency chain).
 
-\begin{definition}[Layered choice basis for nested cycles]
+\begin{definition}[Canonical layered choice basis for nested cycles]
+  \label{def:canonical-choice-basis}
   The commitment basis has $k$ sealing predicates
   $\varphi_{\seal}(S_1), \ldots, \varphi_{\seal}(S_k)$ (one per
   stratification layer) followed by $d$ choice layers: layer $k{+}i$
@@ -2801,14 +2806,35 @@ longest dependency chain).
   atoms resolved by earlier cycles).
 \end{definition}
 
+\begin{proposition}[Soundness and completeness of the canonical basis]
+  \label{prop:canonical-basis-sc}
+  For any finite $\mbox{Datalog}^\neg$ program, the canonical layered
+  choice basis of Definition~\ref{def:canonical-choice-basis} is sound
+  and complete: each resolving determination produces a stable model,
+  and every stable model is produced by exactly one resolving
+  determination.
+\end{proposition}
+\begin{proof}
+  Each negative SCC $C_i$ has finitely many atoms; after discharging
+  layers $k{+}1, \ldots, k{+}i{-}1$, the atoms referenced by $C_i$'s
+  rules are fixed.
+  The binary choice predicates for $C_i$ enumerate all locally stable
+  extensions of $C_i$ given this fixed context (the Gelfond-Lifschitz
+  reduct of $C_i$'s rules has finitely many minimal models).
+  Soundness: each choice produces a locally stable extension, and the
+  composition across all SCCs (in topological order) yields a global
+  stable model.
+  Completeness: every global stable model restricts to a locally stable
+  extension at each $C_i$, which corresponds to exactly one choice at
+  layer $k{+}i$.
+\end{proof}
+
 \begin{theorem}[General negation semantics as filtration levels]
   \label{thm:negation-general}
-  For a finite normal Datalog program with $k$ stratification layers
-  and nesting depth $d$, \emph{assuming} the negative SCCs admit a
-  layered choice basis that is sound and complete for stable models
-  (i.e., each stable model corresponds to exactly one resolving
-  determination and vice versa), the determination semiring has depth
-  $k{+}d$.
+  For a finite $\mbox{Datalog}^\neg$ program having $k$ stratification
+  layers and nesting depth $d$, the determination semiring under the
+  canonical layered choice basis
+  (Definition~\ref{def:canonical-choice-basis}) has depth $k{+}d$.
   The semantics correspondence is:
   \begin{enumerate}[nosep,label=(\alph*)]
     \item \emph{Stable-model semantics} reads $\mathcal{F}_{k+d}$: all

@@ -982,22 +982,20 @@ We model them with an \emph{ordering commitment basis}:
   Full proof in Appendix~\ref{app:protocols}.
 \end{proof}
 
-\begin{example}[Per-batch depth: seal and order selection]
+\begin{example}[Per-batch depth under 2PL deadlock detection]
   \label{ex:overlapping-cycles}
-  Three transactions $T_1, T_2, T_3$ conflict pairwise on a shared
-  object.
-  Their commit requests arrive concurrently; the system buffers them.
-  Layer~1 (seal): the system declares the batch
-  $\{T_1, T_2, T_3\}$ complete.
-  Layer~2 (order): the system chooses a processing order $\pi$---e.g.,
-  $T_1 \prec T_2 \prec T_3$.
-  Under SER, this order entails a serialization; under SI, it
-  determines FCW winners.
-  A different $\pi$ (e.g., $T_3 \prec T_1 \prec T_2$) may produce a
-  different conflict graph and different aborts.
-  The two layers do not commute (the seal determines which requests
-  are in the batch; the order determines their resolution), giving
-  per-batch depth~$2$.
+  Under 2PL, three transactions hold locks forming a wait-for cycle:
+  $T_1$ waits for $T_2$, $T_2$ waits for $T_3$, $T_3$ waits for $T_1$.
+  The system periodically runs deadlock detection.
+  Layer~1 (seal): the system runs detection now, observing the current
+  wait-for graph (had it waited longer, additional transactions might
+  have joined the cycle).
+  Layer~2 (victim selection): the system chooses a victim to abort---say
+  $T_1$---breaking the cycle and allowing $T_2$ and $T_3$ to proceed.
+  Choosing $T_2$ or $T_3$ instead yields a different determination with
+  different surviving transactions.
+  The two layers do not commute: the seal determines which cycle the
+  system sees; the victim choice determines how it is resolved.
 \end{example}
 
 \subsection{Query-Relative Depth Across Isolation Levels}

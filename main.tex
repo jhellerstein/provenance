@@ -1000,9 +1000,9 @@ We model them with an \emph{ordering commitment basis}:
 
 \subsection{Per-Tuple Isolation Sensitivity}
 
-For a given conflict graph, the filtration identifies exactly which
-tuples are sensitive to the choice of isolation level---and in which
-direction.
+The filtration's key contribution to isolation-level analysis is
+\emph{compositionality}: isolation-insensitivity of base tuples
+propagates through queries.
 
 \begin{proposition}[Isolation-sensitive tuples]
   \label{prop:ser-si-incomparable}
@@ -1023,39 +1023,56 @@ direction.
           SER commits both (ordering them; $t$ is robust); SI aborts
           one via FCW (making $t$ contingent).
   \end{enumerate}
-  Tuples not matching either pattern have the same qdepth under both
-  levels: they are \emph{isolation-insensitive}.
+  Tuples not matching either pattern are \emph{isolation-insensitive}:
+  same qdepth under both levels.
 \end{proposition}
 \begin{proof}
   (a)~$T_A$ reads $x$, writes $y$; $T_B$ reads $y$, writes $x$
   (write skew).
-  Under SI: no write-write conflict, both commit in every
-  determination; $\mathrm{qdepth}_{\mathrm{SI}}(t) = 0$.
+  Under SI: no write-write conflict, both commit;
+  $\mathrm{qdepth}_{\mathrm{SI}}(t) = 0$.
   Under SER: the rw-rw cycle is forbidden; one must abort;
   $\mathrm{qdepth}_{\mathrm{SER}}(t) > 0$.
 
-  (b)~$T_1$ writes $x$ and also inserts a tuple $t$ into a separate
-  relation $R$; $T_2$ writes $x$; no other conflicts.
+  (b)~$T_1$ writes $x$ and inserts $t$ into a separate relation $R$;
+  $T_2$ writes $x$; no other conflicts.
   Under SER: both commit (no cycle);
   $\mathrm{qdepth}_{\mathrm{SER}}(t) = 0$.
-  Under SI: FCW on $x$ forces one to abort;
+  Under SI: FCW forces one to abort;
   $\mathrm{qdepth}_{\mathrm{SI}}(t) > 0$.
 
   Conversely, if $T_i$ is on no rw-only cycle and has no write-write
-  conflict without an enclosing cycle, then SER and SI impose the same
-  constraints on $T_i$'s fate, giving equal qdepth.
+  conflict without an enclosing cycle, SER and SI impose the same
+  constraints on $T_i$'s fate.
 \end{proof}
 
-\noindent
-This gives a per-tuple diagnostic for isolation-level migration:
-a query result is safe to migrate from SER to SI (or vice versa) iff
-none of its base tuples are isolation-sensitive.
-By Corollary~\ref{cor:propagation-filtration}, positive relational
-algebra preserves isolation-insensitivity.
-The isolation-insensitive tuples are exactly those whose supporting
-transactions are ``robustly portable'' in the sense of
-Vandevoort et al.~\cite{vandevoort2025mixed}; the filtration extends
-their per-transaction analysis to per-tuple, per-query granularity.
+\begin{corollary}[Compositional isolation migration]
+  \label{cor:isolation-migration}
+  If every base tuple of a positive relational query $Q$ is
+  isolation-insensitive, then $Q$'s result is also
+  isolation-insensitive: migrating from SER to SI (or vice versa)
+  does not change any result tuple's qdepth.
+\end{corollary}
+\begin{proof}
+  Immediate from Corollary~\ref{cor:propagation-filtration}: positive
+  RA cannot increase qdepth beyond its inputs.
+  Equal qdepth at the inputs implies equal qdepth at the output under
+  both levels.
+\end{proof}
+
+\begin{example}[Compositional migration safety]
+  Transactions $T_1, T_2, T_3$ each insert tuples into relations
+  $R_1, R_2, R_3$.
+  A query $Q = R_1 \bowtie R_2 \bowtie R_3$ joins their outputs.
+  If none of $T_1, T_2, T_3$ participates in a write-skew or FCW
+  pattern, each base tuple is isolation-insensitive.
+  The corollary guarantees that $Q$'s result is also
+  insensitive---without analyzing $Q$'s interaction with the conflict
+  graph.
+  Vandevoort et al.~\cite{vandevoort2025mixed} can certify each
+  transaction individually as portable; the filtration additionally
+  certifies the \emph{query result} compositionally.
+\end{example}
 
 \subsection{Running Example Revisited}
 

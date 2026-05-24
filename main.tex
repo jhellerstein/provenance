@@ -998,63 +998,64 @@ We model them with an \emph{ordering commitment basis}:
   system sees; the victim choice determines how it is resolved.
 \end{example}
 
-\subsection{Query-Relative Depth Across Isolation Levels}
+\subsection{Per-Tuple Isolation Sensitivity}
 
-Although worst-case depth is $\Theta(n)$ for both SER and SI
-(Theorem~\ref{thm:txn-depth}), the \emph{per-tuple} query-relative
-depth under one level does not uniformly dominate the other.
-The filtration provides a fine-grained separation:
+For a given conflict graph, the filtration identifies exactly which
+tuples are sensitive to the choice of isolation level---and in which
+direction.
 
-\begin{proposition}[Incomparability of SER and SI depth]
+\begin{proposition}[Isolation-sensitive tuples]
   \label{prop:ser-si-incomparable}
-  Neither
-  $\mathrm{qdepth}_{\mathrm{SER}}(t) \ge \mathrm{qdepth}_{\mathrm{SI}}(t)$
-  nor the reverse holds for all conflict graphs and tuples:
+  Fix a conflict graph $G$.
+  A tuple $t$ (derived from transaction $T_i$) has
+  $\mathrm{qdepth}_{\mathrm{SER}}(t) \neq
+  \mathrm{qdepth}_{\mathrm{SI}}(t)$ iff $T_i$ participates in one of
+  two patterns:
   \begin{enumerate}[nosep,label=(\alph*)]
     \item \emph{Write skew} ($\mathrm{qdepth}_{\mathrm{SER}} >
           \mathrm{qdepth}_{\mathrm{SI}}$):
-          If $t$ depends on a transaction involved in an rw-rw cycle,
-          SER must break the cycle (making $t$ contingent) while SI
+          $T_i$ is on an rw-rw cycle.
+          SER must break the cycle (making $t$ contingent); SI
           allows it ($t$ is robust).
     \item \emph{FCW-forced abort} ($\mathrm{qdepth}_{\mathrm{SI}} >
           \mathrm{qdepth}_{\mathrm{SER}}$):
-          If $t$ depends on a transaction in a write-write conflict
-          where no serialization cycle exists, SER commits both
-          (ordering them; $t$ is robust) while SI aborts one via FCW
-          (making $t$ contingent).
+          $T_i$ has a write-write conflict with no enclosing cycle.
+          SER commits both (ordering them; $t$ is robust); SI aborts
+          one via FCW (making $t$ contingent).
   \end{enumerate}
+  Tuples not matching either pattern have the same qdepth under both
+  levels: they are \emph{isolation-insensitive}.
 \end{proposition}
 \begin{proof}
   (a)~$T_A$ reads $x$, writes $y$; $T_B$ reads $y$, writes $x$
   (write skew).
   Under SI: no write-write conflict, both commit in every
-  determination; $\mathrm{supp}(t) = \mathcal{D}_{\mathrm{SI}}$,
-  $\mathrm{qdepth}_{\mathrm{SI}}(t) = 0$.
+  determination; $\mathrm{qdepth}_{\mathrm{SI}}(t) = 0$.
   Under SER: the rw-rw cycle is forbidden; one must abort;
-  $t$ holds only under determinations where its transaction survives,
   $\mathrm{qdepth}_{\mathrm{SER}}(t) > 0$.
 
   (b)~$T_1$ writes $x$ and also inserts a tuple $t$ into a separate
   relation $R$; $T_2$ writes $x$; no other conflicts.
-  Under SER: both commit (order either way on $x$, no cycle);
-  $T_1$ always commits, so $t \in R$ in every determination;
+  Under SER: both commit (no cycle);
   $\mathrm{qdepth}_{\mathrm{SER}}(t) = 0$.
-  Under SI: FCW on $x$ forces one to abort; $t \in R$ only if
-  $T_1$ wins FCW; $\mathrm{qdepth}_{\mathrm{SI}}(t) > 0$.
+  Under SI: FCW on $x$ forces one to abort;
+  $\mathrm{qdepth}_{\mathrm{SI}}(t) > 0$.
+
+  Conversely, if $T_i$ is on no rw-only cycle and has no write-write
+  conflict without an enclosing cycle, then SER and SI impose the same
+  constraints on $T_i$'s fate, giving equal qdepth.
 \end{proof}
 
 \noindent
-The incomparability of SI and SER in terms of allowed anomalies is
-well known~\cite{adya1999weak}; the contribution here is a
-\emph{per-tuple, quantitative} formulation via the filtration.
-A tuple's qdepth changes across levels precisely when its supporting
-transaction lies in the gap between SI and SER: either a write-skew
-participant (SI-safe, SER-unsafe) or an FCW victim (SER-safe,
-SI-forces-abort).
-Tuples whose qdepth is the same under both levels are exactly those
-whose supporting transactions behave identically under both---the
-``robustly portable'' transactions of
-Vandevoort et al.~\cite{vandevoort2025mixed}.
+This gives a per-tuple diagnostic for isolation-level migration:
+a query result is safe to migrate from SER to SI (or vice versa) iff
+none of its base tuples are isolation-sensitive.
+By Corollary~\ref{cor:propagation-filtration}, positive relational
+algebra preserves isolation-insensitivity.
+The isolation-insensitive tuples are exactly those whose supporting
+transactions are ``robustly portable'' in the sense of
+Vandevoort et al.~\cite{vandevoort2025mixed}; the filtration extends
+their per-transaction analysis to per-tuple, per-query granularity.
 
 \subsection{Running Example Revisited}
 

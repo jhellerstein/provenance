@@ -908,15 +908,10 @@ Appendix~\ref{sec:appendix-SI}).
 \subsection{Commitment Basis}
 \label{sec:scheduling-basis}
 
-Classical optimistic concurrency control is an example of a fully reactive
-protocol: the environment controls all scheduling (notably when commit requests
-arrive for handling) and the system applies validation
-deterministically---there are no system choices and depth is~$0$.
-Discretion arises whenever the protocol makes choices not entailed by
-the current state: buffering requests and choosing their order,
-selecting a deadlock victim, or deferring detection.
-We model the resulting irrevocable decisions with an \emph{ordering
-commitment basis}:
+Whenever a protocol makes scheduling choices not entailed by the
+current state---buffering requests, selecting a deadlock victim, or
+choosing commit order---those choices are the commitments of interest.
+We model them with an \emph{ordering commitment basis}:
 
 \begin{definition}[Ordering commitments]
   \label{def:commit-commitment}

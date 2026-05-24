@@ -1002,14 +1002,14 @@ We model them with an \emph{ordering commitment basis}:
 
 Although worst-case depth is $\Theta(n)$ for both SER and SI
 (Theorem~\ref{thm:txn-depth}), the \emph{per-tuple} query-relative
-depth can differ across levels for the same conflict graph.
+depth under one level does not uniformly dominate the other.
 The filtration provides a fine-grained separation:
 
 \begin{proposition}[Incomparability of SER and SI depth]
   \label{prop:ser-si-incomparable}
-  For the same workload, neither
+  Neither
   $\mathrm{qdepth}_{\mathrm{SER}}(t) \ge \mathrm{qdepth}_{\mathrm{SI}}(t)$
-  nor the reverse holds in general:
+  nor the reverse holds for all conflict graphs and tuples:
   \begin{enumerate}[nosep,label=(\alph*)]
     \item \emph{Write skew} ($\mathrm{qdepth}_{\mathrm{SER}} >
           \mathrm{qdepth}_{\mathrm{SI}}$):

@@ -828,7 +828,9 @@ discretion---a result that holds regardless of concurrency control
 protocol.
 The filtration also provides a per-tuple separation of isolation
 levels: serializability (SER) and snapshot isolation (SI) are
-incomparable in query-relative depth.
+incomparable in query-relative depth, yet isolation-sensitive queries
+can compose into isolation-insensitive ones when their supports are
+complementary.
 
 \subsection{Transactional Histories}
 
@@ -982,6 +984,12 @@ We model them with an \emph{ordering commitment basis}:
   Full proof in Appendix~\ref{app:protocols}.
 \end{proof}
 
+\noindent
+The lower bound assumes the forbidden cycle pattern is repeatably
+generable around a surviving transaction whose fate is discretionary
+(victim selection or deferred validation); this holds for SER and SI
+under the constructions in Appendix~\ref{app:protocols}.
+
 \begin{example}[Per-batch depth under 2PL deadlock detection]
   \label{ex:overlapping-cycles}
   Under 2PL, three transactions hold locks forming a wait-for cycle:
@@ -1048,30 +1056,52 @@ propagates through queries.
 
 \begin{corollary}[Compositional isolation migration]
   \label{cor:isolation-migration}
-  If every base tuple of a positive relational query $Q$ is
-  isolation-insensitive, then $Q$'s result is also
-  isolation-insensitive: migrating from SER to SI (or vice versa)
-  does not change any result tuple's qdepth.
+  Isolation sensitivity is not preserved by union: there exist
+  positive relational queries $Q_1, Q_2$ that are each
+  isolation-sensitive, yet whose union $Q = Q_1 \cup Q_2$ is
+  isolation-insensitive
+  ($\mathrm{qdepth}_{\mathrm{SER}}(Q) = \mathrm{qdepth}_{\mathrm{SI}}(Q) = 0$).
+  This occurs whenever the queries have complementary supports
+  ($\mathrm{supp}(Q_1) \cup \mathrm{supp}(Q_2) = \mathcal{D}$) under
+  both isolation levels.
 \end{corollary}
 \begin{proof}
-  Immediate from Corollary~\ref{cor:propagation-filtration}: positive
-  RA cannot increase qdepth beyond its inputs.
-  Equal qdepth at the inputs implies equal qdepth at the output under
-  both levels.
+  Union merges supports:
+  $\mathrm{supp}(Q) = \mathrm{supp}(Q_1) \cup \mathrm{supp}(Q_2) = \mathcal{D}$.
+  Full support implies $\mathrm{qdepth}(Q) = 0$ under both levels.
+  Example~\ref{ex:complement-union} witnesses the existential.
 \end{proof}
 
-\begin{example}[Compositional migration safety]
-  Transactions $T_1, T_2, T_3$ each insert tuples into relations
-  $R_1, R_2, R_3$.
-  A query $Q = R_1 \bowtie R_2 \bowtie R_3$ joins their outputs.
-  If none of $T_1, T_2, T_3$ participates in a write-skew or FCW
-  pattern, each base tuple is isolation-insensitive.
-  The corollary guarantees that $Q$'s result is also
-  insensitive---without analyzing $Q$'s interaction with the conflict
-  graph.
-  Vandevoort et al.~\cite{vandevoort2025mixed} can certify each
-  transaction individually as portable; the filtration additionally
-  certifies the \emph{query result} compositionally.
+\begin{example}[Complementary isolation-sensitive queries]
+  \label{ex:complement-union}
+  Consider two transactions $T_A$ and $T_B$ exhibiting write skew:
+  $T_A$ reads $x$, writes $y$; $T_B$ reads $y$, writes $x$.
+  Under SI both commit (no write-write conflict); under SER the rw-rw
+  cycle forces exactly one to abort.
+  Let $Q_1(z) \drule R_A(z)$ return tuples written by $T_A$, and
+  $Q_2(z) \drule R_B(z)$ return tuples written by $T_B$.
+  Both are isolation-sensitive:
+  under SER, each query's result is contingent
+  ($\mathrm{qdepth}_{\mathrm{SER}} > 0$), while under SI both are
+  robust ($\mathrm{qdepth}_{\mathrm{SI}} = 0$).
+
+  Now consider the union $Q = Q_1 \cup Q_2$.
+  Under SER, the determinations partition into two classes:
+  $D_A$ (abort $T_A$, commit $T_B$) and $D_B$ (abort $T_B$, commit
+  $T_A$).
+  $Q_1$ has support $\{D_B\}$ and $Q_2$ has support $\{D_A\}$---these
+  are complements:
+  $\mathrm{supp}(Q_1) \cup \mathrm{supp}(Q_2) = \mathcal{D}$.
+  Under SI both have full support (both commit).
+  In either case the union has full support, so
+  $\mathrm{qdepth}_{\mathrm{SER}}(Q) = \mathrm{qdepth}_{\mathrm{SI}}(Q) = 0$:
+  the union is isolation-insensitive despite each component being
+  isolation-sensitive.
+  The complementary structure of the supports cancels the sensitivity.
+  Vandevoort et al.~\cite{vandevoort2025mixed} can certify individual
+  transactions as portable; the filtration additionally certifies
+  \emph{query results} compositionally, even when the components are
+  not individually portable.
 \end{example}
 
 \subsection{Running Example Revisited}
@@ -1138,7 +1168,7 @@ isolation levels for this example.
     Snapshot isolation &
     $\{\varphi_{\snap(T_6){=}\emptyset},\, \varphi_{\snap(T_7){=}\emptyset}\}
       \seq \varphi_{\mathrm{fcw}(S(5),T_6)}
-      \seq \varphi_{\snap(T_Q){=}\{..\}}$ & $O(n)$ \\
+      \seq \varphi_{\snap(T_Q){=}\{\cdots\}}$ & $O(n)$ \\
     \bottomrule
   \end{tabular}
 
@@ -2889,7 +2919,8 @@ further in Appendix~\ref{app:systems-lineage}.
 The theory developed in this paper appears to unlock practical
 relevance for data provenance in settings---transactional databases,
 distributed services, concurrent pipelines---where formal provenance
-has historically had limited impact.
+has had less impact on mainstream tracing and debugging infrastructure
+than its theoretical power might suggest.
 This appendix sketches a research agenda for systems work building on
 determination provenance, mapping the framework's three levels of
 structure to concrete capabilities beyond what current lineage
@@ -3192,7 +3223,7 @@ $K$-valued provenance annotations.
   no further $S$-type events will arrive.
   The seal declares complete a set that is already complete; it excludes
   no outcome that was previously admissible.
-  Hence $\Spec(H \cdot \varphi_{\seal(S)}) = \Spec(H)$.
+  Hence $\Spec_{H^*}(H \cdot \varphi_{\seal(S)}) = \Spec_{H^*}(H)$.
 
   (c)~Non-heredity of $\varphi$ arose because its exclusion set
   depended on which events in $S$ had occurred.
@@ -3200,11 +3231,11 @@ $K$-valued provenance annotations.
   deterministic function of this fixed set.
   The entailment $f_\varphi$ computes exactly this function, producing
   the same exclusion set as $\varphi$.
-  Combined with (b): $\Spec(H) = \Spec(H \cdot \varphi_{\seal(S)})$,
-  so $f_\varphi$ applied to $\Spec(H)$ gives $\Spec(H \cdot \varphi)$.
+  Combined with (b): $\Spec_{H^*}(H) = \Spec_{H^*}(H \cdot \varphi_{\seal(S)})$,
+  so $f_\varphi$ applied to $\Spec_{H^*}(H)$ gives $\Spec_{H^*}(H \cdot \varphi)$.
 
   (d)~By (c), $\varphi_2$ sees the same admissible set
-  $\Spec(H \cdot \varphi)$ in both cases.
+  $\Spec_{H^*}(H \cdot \varphi)$ in both cases.
   Since $\varphi_2$'s effect depends only on the admissible set at its
   point of application, it behaves identically.
   By induction on the remaining commitments, the entire tail is unchanged.
@@ -3212,7 +3243,7 @@ $K$-valued provenance annotations.
   (e)~By (d), each resolving determination $D$ in the original basis
   maps to a determination in the canonicalized basis that produces the
   same admissible set at every point.
-  The resolved outcome $\Spec(H)$ is identical; hence supports
+  The resolved outcome is identical; hence supports
   $\mathrm{supp}(P(t))$ are identical for every tuple $t$.
   Since supports are preserved, the filtration (defined over supports)
   is preserved.

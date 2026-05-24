@@ -926,24 +926,6 @@ commitment basis}:
   \label{def:ordering-commitment}%
 \end{definition}
 
-\begin{proposition}[Commutativity of independent orderings]
-  \label{prop:commit-commute}
-  When the conflict graph is fixed (transaction read/write sets do not
-  depend on the values read), ordering commitments on disjoint pairs
-  of transactions commute: fixing the order of $T_i$ relative to $T_j$
-  does not affect the validity or effect of ordering $T_k$ relative to
-  $T_l$ when $\{T_i, T_j\} \cap \{T_k, T_l\} = \emptyset$.
-\end{proposition}
-
-\begin{remark}[Non-commutativity under shared conflicts]
-  \label{rem:commit-noncommute}
-  When two ordering decisions share a transaction (e.g., $T_i \prec T_j$
-  and $T_j \prec T_k$), the first may constrain the second (if
-  $T_i \prec T_j \prec T_k$ would close a cycle, forcing a different
-  resolution).
-  The determination has depth~$> 1$ in such cases.
-\end{remark}
-
 \subsection{Determination Depth by Isolation Level}
 
 \begin{theorem}[Determination depth for transactions]
@@ -2425,10 +2407,11 @@ The choice of victim is itself a commitment: different victims yield
 different determinations.
 
 \paragraph{Determination structure.}
-Under strict 2PL (locks held until commit), the ordering commitments
-made during the growing phase commute on distinct objects
-(Proposition~\ref{prop:commit-commute}).
-Non-commutativity arises only when deadlock forces a victim choice that
+Under strict 2PL (locks held until commit), ordering commitments
+made during the growing phase on distinct objects commute (when
+read/write sets are static, ordering $T_i$ on object $x$ does not
+affect the lock state of unrelated object $y$).
+Non-commutativity arises when deadlock forces a victim choice that
 affects subsequent lock availability.
 In the fully reactive case (deadlock detected and resolved immediately
 on each lock request, with the requestor as victim), all decisions are

@@ -67,32 +67,22 @@
 \begin{document}
 
 \begin{abstract}
-  Semiring provenance is pointwise in each resolved semantics: it
-  explains how a query result is derived once the transaction schedule,
-  stable model, or conflict resolution has been chosen.
-  Many systems operate before such choices are determined.
-  We introduce \emph{determination provenance} to track the
-  irrevocable \emph{commitment events}---history-indexed, layered
-  records of semantic resolution---that select among incompatible
-  admissible outcomes.
-  A tuple's \emph{support} (the set of resolved histories in which it
-  holds) forms a commutative semiring; layered commitments induce a
-  \emph{filtration} of sub-semirings measuring each tuple's
-  \emph{query-relative depth}: how many layers of resolution it
-  depends on.
-  Positive relational algebra respects the filtration, and
-  support separation characterizes when a layer can be relaxed without
-  cascade.
-
-  We instantiate the framework for transactional systems, where
-  determination depth captures protocol-level conflict resolution:
-  reactive protocols have depth zero, discretionary scheduling has
-  worst-case depth $\Theta(n)$, and the filtration yields a per-tuple
-  separation of serializability and snapshot isolation (neither
-  dominates the other in query-relative depth).
-  For a representative class of Datalog programs with negation,
-  stratified, well-founded, and stable-model semantics appear as
-  different readings of a single filtration.
+  Data provenance explains how a query result was derived---but only
+  after the system's semantics has been fixed.
+  When multiple admissible outcomes coexist, provenance cannot even
+  pose its question until something chooses among them.
+  We introduce \emph{determination provenance}: a tuple's
+  \emph{support} records which resolutions produce it, supports form a
+  commutative semiring, and layered commitments induce a
+  \emph{filtration} measuring each tuple's \emph{query-relative
+  depth}---how many layers of semantic resolution it depends on.
+  Positive relational algebra respects the filtration, enabling
+  compositional robustness analysis and safe relaxation of
+  coordination layers.
+  We instantiate the framework for transactional isolation
+  (yielding per-tuple separations of serializability and snapshot
+  isolation) and for Datalog with negation (where classical semantics
+  appear as different readings of a single filtration).
 \end{abstract}
 
 \maketitle
@@ -125,10 +115,10 @@ before the transfer posted.
 
 This paper introduces \emph{determination provenance} to capture the
 commitments that resolve semantic ambiguity.
-A \emph{determination} is a layered sequence of irrevocable
-commitment events---history-indexed records of semantic resolution,
-not abstract possible worlds---that constrains a relational
-specification until no incompatible alternatives remain.
+A \emph{determination} is a layered sequence of irrevocable,
+history-indexed
+commitment events that constrains a relational specification until no
+incompatible alternatives remain.
 Classical provenance applies within each determination; determination
 provenance tracks which commitments were needed and how query results
 depend on them.
@@ -166,7 +156,7 @@ But $b$'s robustness and $d$'s contingency are properties of the
 To reason about such properties algebraically, we track each tuple's
 \emph{support}: the set of determinations under which it holds.
 Value $b$ has full support (every determination); $d$ has partial
-support (the equivalence class of determinations in which $T_Q$
+support (the determinations in which $T_Q$
 observes $T_2$'s insert).
 A provenance question like ``is $d$ robust?'' reduces to checking
 whether $d$'s support is full; counterfactual questions (``under which
@@ -516,6 +506,10 @@ tuple.
 Concretely, each element of $\mathcal{D}$ is a representative resolved
 history $H$ whose determination $D(H)$ is minimal
 (Definition~\ref{def:minimal-resolving}).
+Unlike abstract possible worlds, elements of $\mathcal{D}$ are
+grounded in event structure: the same commitment operator may have
+different effects at different histories, so determinations are
+history-indexed records, not symbolic labels.
 
 \subsection{The Determination Semiring}
 \label{sec:det-semiring}
@@ -1197,17 +1191,19 @@ isolation levels for this example.
 % ================================================================
 
 In Datalog with negation, the non-monotone operation is
-\emph{negation-as-failure}: concluding $\neg p$ requires knowing that
-all derivations of $p$ have been exhausted---a completeness guarantee
+\emph{negation}: concluding $\neg p$ requires establishing that
+$p$ has no (further) derivation---a completeness guarantee
 that classical approaches handle via monus~\cite{dannert2021semiring}.
-Determination provenance decomposes this into stratum sealing (the
-commitment) followed by monotone evaluation (the entailment).
-The filtration then recovers, for the representative class below, the
+Determination provenance decomposes this into a \emph{commitment}
+(declaring a set of derivations complete, thereby licensing negation)
+followed by monotone evaluation (the entailment that propagates
+consequences of that commitment).
+The filtration recovers, for the representative class below, the
 classical negation semantics---stratified, well-founded, and
-stable---as prefixes of a single determination; and determination
-provenance explains why-not
-under ambiguity: an atom can be absent because of a semantic commitment,
-not a blocked derivation.
+stable---as readings of a single determination at different depths;
+and determination provenance explains why-not under ambiguity: an atom
+can be absent because of a semantic commitment, not a blocked
+derivation.
 (Full details in Appendix~\ref{sec:appendix-datalog}.)
 
 \paragraph{Setup.}
@@ -1233,8 +1229,8 @@ $\varphi_{\seal}(S_i)$ (stratum $S_i$ is complete) and \emph{choice
 predicates} $\varphi_{a=v}$ ($\neg$-cycle atom $a$ is fixed to
 $v \in \{\mathbf{t}, \mathbf{f}\}$).
 The specification $\Spec_P$ admits all assignments consistent with the
-program rules and EDB~\cite{gelfond1988stable};
-after all commitments are discharged, two resolved outcomes remain:
+program rules and EDB~\cite{gelfond1988stable}.
+After all commitments are discharged, two resolved outcomes remain:
 $o_r = \{a(c), p(c), r(c)\}$ and $o_s = \{a(c), p(c), s(c)\}$.
 
 The resolving determinations are $\mathcal{D} = \{D^{(r)}, D^{(s)}\}$:
@@ -1264,19 +1260,19 @@ determination.
 Under $D^{(r)}$, $s(c)$ is absent because of the commitment
 $\varphi_{r(c)=\mathbf{t}}$ itself---not a blocked derivation but a
 semantic choice.
+Reading the filtration only through the sealing layers
+($\mathcal{F}_2$ here), these atoms have partial support---which is
+exactly the well-founded classification $\mathbf{u}$: their truth
+values are not determined without discharging the choice layer.
 
 \begin{theorem}[Negation semantics as filtration levels]
   \label{thm:negation-filtration}
-  For a finite normal Datalog program (at most one negated body literal
-  per rule) whose dependency graph has $k$
-  stratification layers and whose negative strongly connected components
-  (after SCC condensation) are mutually independent and form a single
-  final choice layer resolved by binary choice predicates, the
-  determination semiring has depth $k{+}1$.
-  The classical negation semantics correspond to filtration levels:
-  stable-model semantics reads the full filtration ($\mathcal{F}_{k+1}$);
-  well-founded semantics reads $\mathcal{F}_k$ (the sealing prefix) and
-  classifies residual ambiguity as $\mathbf{u}$;
+  For a finite normal Datalog program whose negative SCCs are mutually
+  independent, the determination semiring has depth $k{+}1$ and the
+  classical negation semantics correspond to filtration levels:
+  stable-model semantics reads $\mathcal{F}_{k+1}$;
+  well-founded semantics reads $\mathcal{F}_k$ and classifies residual
+  ambiguity as $\mathbf{u}$;
   stratified semantics reads $\mathcal{F}_k$ and is defined only when
   the sealing prefix resolves all atoms.
 \end{theorem}

@@ -179,8 +179,15 @@ A contingent tuple like $d$ has positive depth reflecting which
 commitment layer it depends on (overlapping conflict cycles and nested
 negation produce deeper filtrations).
 Positive relational algebra cannot increase depth.
+The filtration supports three forms of reasoning beyond classification:
+\emph{bypass} (queries whose inputs are settled before layer~$k$ can
+skip layers $k, \ldots, d$); \emph{semantic-change analysis}
+(specifications over the same basis can be compared tuple-by-tuple,
+separating wasted coordination from genuine semantic differences); and
+a \emph{complexity connection} (depth-$1$ provenance coincides with
+PDB lineage; higher depths correspond to layered PDB evaluation).
 We instantiate the framework for transactional isolation and
-Datalog negation; for the latter, the classical negation semantics
+$\mbox{Datalog}^\neg$; for the latter, the classical negation semantics
 correspond to different filtration levels.
 
 \paragraph{Contributions.}
@@ -193,27 +200,31 @@ correspond to different filtration levels.
   \item Instantiation for transactional systems: determination depth
         is $\Theta(n)$ worst-case for any isolation level that forbids
         some cycle type, given scheduling discretion;
-        the filtration
-        provides a fine-grained, per-tuple separation of SER and SI
-        that is incomparable---neither level dominates the other in
-        query-relative depth
+        the filtration provides a per-tuple separation of SER and SI
+        that is incomparable in query-relative depth
         (Section~\ref{sec:transactions}).
-  \item Instantiation for Datalog: for a representative
+  \item Instantiation for $\mbox{Datalog}^\neg$: for a representative
         class of programs, the classical negation
-        semantics---stratified, well-founded, stable-model---correspond
-        to filtration levels of a single determination semiring;
-        \emph{monus elimination} shows that layered monotone semirings
-        are support-equivalent to semirings-with-monus for negation
+        semantics correspond to filtration levels of a single
+        determination semiring; monus elimination shows that layered
+        monotone supports are support-equivalent to semirings with
+        monus
         (Section~\ref{sec:negation-preview},
         Appendix~\ref{sec:appendix-datalog}).
-  \item \emph{Complexity and quantitative diagnosis} (appendices):
-        robustness is coNP-complete
-        (Appendix~\ref{app:robustness-proofs}); bypass verification
-        is coNP-complete in residual width
-        (Section~\ref{sec:bypass}); a Shapley-value
-        measure quantifies each commitment's
-        contribution
-        (Appendix~\ref{app:responsibility-details}).
+  \item \emph{Layer bypass and semantic-change analysis}: queries
+        whose inputs have depth below layer~$k$ can bypass layers
+        $k, \ldots, d$; specifications over the same basis can be
+        compared tuple-by-tuple, separating coordination \emph{work
+        regret} from genuine \emph{semantic shift}; depth-$1$
+        provenance coincides with PDB lineage, and higher depths
+        correspond to layered PDB evaluation
+        (Section~\ref{sec:bypass}).
+  \item \emph{Complexity and attribution} (appendices):
+        robustness and bypass verification are coNP-complete; a
+        Shapley-value measure attributes contingency to individual
+        commitments
+        (Appendices~\ref{app:robustness-proofs},
+        \ref{app:responsibility-details}).
 \end{enumerate}
 
 
@@ -1354,9 +1365,22 @@ positive $K$-evaluation.
 \end{proof}
 
 % ================================================================
-\section{Layer Bypass}
+\section{Consequences of the Filtration}
 \label{sec:bypass}
+\label{sec:discussion}
 % ================================================================
+
+Observation~\ref{obs:basis-entails-filtration} established that
+different specifications over the same commitment basis share a single
+filtration.
+The preceding sections showed that isolation levels
+(Section~\ref{sec:transactions}) and negation semantics
+(Section~\ref{sec:negation-preview}) are both instances of this
+principle.
+We now develop three consequences: layer bypass, quantitative
+specification comparison, and a connection to PDB query complexity.
+
+\subsection{Layer Bypass}
 
 The filtration assigns each tuple a depth relative to a provenance
 query $Q$ (Definition~\ref{def:det-provenance}).
@@ -1425,20 +1449,6 @@ The filtration makes this distinction visible: transactional
 coordination cost scales with workload (input-recurrent); Datalog
 commitment depth does not (program-bounded).
 
-% ================================================================
-\section{Filtration Structure}
-\label{sec:discussion}
-% ================================================================
-
-The filtration is the paper's central structural contribution.
-Observation~\ref{obs:basis-entails-filtration} established that
-different specifications over the same commitment basis share a single
-filtration; the preceding sections showed that isolation levels
-(Section~\ref{sec:transactions}) and negation semantics
-(Section~\ref{sec:negation-preview}) are both instances of this
-principle.
-We develop two consequences: a quantitative measure for comparing
-specifications, and a connection to PDB query complexity.
 
 \subsection{Quantitative Relaxation Assessment}
 
@@ -1503,8 +1513,8 @@ At depth $d > 1$, the filtration adds structure that PDBs lack:
   Computing the support of a provenance query $Q$ at depth~$d$ reduces
   to evaluating $Q$ over a $d$-level \emph{layered PDB}: at each
   level~$\ell$, the commitment variables are independent (commuting)
-  and their joint distribution is conditioned on the outcomes of levels
-  $1, \ldots, \ell{-}1$.
+  and the valid assignments at level~$\ell$ are restricted by the
+  commitments chosen at levels $1, \ldots, \ell{-}1$.
   At depth~$1$, this is standard tuple-independent PDB evaluation.
   At depth~$d > 1$, each additional level introduces a conditioning
   step: the lineage formula at level~$\ell$ is evaluated under the
@@ -1528,6 +1538,9 @@ tuple-independent PDBs (depth~$1$, well-studied) and general
 correlated PDBs (arbitrary dependencies, intractable): the
 correlations are structured by the filtration's layering, and each
 layer individually admits the PDB complexity toolkit.
+Appendix~\ref{app:depth-reduction} develops the corresponding design
+transformations for reducing depth: coarsening outcomes, forcing
+commutation, and replacing commitments by entailments.
 
 % ================================================================
 \section{Related Work}

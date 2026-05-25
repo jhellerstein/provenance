@@ -77,7 +77,7 @@
   \emph{filtration} measuring each tuple's \emph{query-relative
   depth}---how many layers of semantic resolution it depends on.
   Positive relational algebra respects the filtration, enabling
-  compositional robustness analysis and principled depth reduction.
+  compositional robustness analysis and layer bypass.
   We instantiate the framework for transactional isolation
   (yielding per-tuple separations of serializability and snapshot
   isolation) and for Datalog with negation (where classical semantics
@@ -208,7 +208,9 @@ correspond to different filtration levels.
         Appendix~\ref{sec:appendix-datalog}).
   \item \emph{Complexity and quantitative diagnosis} (appendices):
         robustness is coNP-complete
-        (Appendix~\ref{app:robustness-proofs}); a Shapley-value
+        (Appendix~\ref{app:robustness-proofs}); bypass verification
+        is coNP-complete in residual width
+        (Section~\ref{sec:bypass}); a Shapley-value
         measure quantifies each commitment's
         contribution
         (Appendix~\ref{app:responsibility-details}).
@@ -1357,133 +1359,72 @@ positive $K$-evaluation.
 \label{sec:bypass}
 % ================================================================
 
-The filtration assigns each tuple a depth: the number of commitment
-layers its membership depends on.
-Recall that depth is defined relative to a \emph{provenance query}
-$Q$ (the query whose results we are tracking across determinations,
-as in Definition~\ref{def:det-provenance}).
+The filtration assigns each tuple a depth relative to a provenance
+query $Q$ (Definition~\ref{def:det-provenance}).
 A tuple with $\mathrm{qdepth}(t) = j$ is settled once layers
-$1, \ldots, j$ are discharged --- layers $j{+}1, \ldots, d$ cannot
-affect it.
+$1, \ldots, j$ are discharged.
 This gives rise to \emph{layer bypass}: any provenance query whose
 outputs all have depth $< k$ can skip layer~$k$'s coordination.
 
 \begin{proposition}[Bypass criterion]
   \label{prop:bypass}
-  Let $Q$ be a provenance query (positive relational) over a
-  specification with depth $d$.
-  If every input tuple of $Q$ has $\mathrm{qdepth} < k$, then every
-  output tuple of $Q$ has $\mathrm{qdepth} < k$
+  If every input tuple of a positive relational provenance query $Q$
+  has $\mathrm{qdepth} < k$, then every output tuple does too
   (Corollary~\ref{cor:propagation-filtration}), and $Q$'s evaluation
-  can bypass layers $k, \ldots, d$ without affecting any result.
+  can bypass layers $k, \ldots, d$.
 \end{proposition}
-
-\noindent
-Bypass eligibility is thus a property of the base tuples' supports
-relative to the filtration --- it can be checked without evaluating
-the query.
 
 \begin{theorem}[Bypass verification complexity]
   \label{thm:bypass-complexity}
-  Checking whether all base tuples of a query have $\mathrm{qdepth}
-  < k$ is $\mathrm{coNP}$-complete in the residual width
-  $W_{\geq k} = \sum_{\ell=k}^{d} w_\ell$ (the total number of
-  commitments at layers $k, \ldots, d$).
-  A witness for bypass failure is a pair of determinations $D, D'$
-  agreeing at layers $1, \ldots, k{-}1$ but producing different
-  membership for some base tuple.
+  Checking whether all input tuples of $Q$ have $\mathrm{qdepth} < k$
+  is $\mathrm{coNP}$-complete in the residual width
+  $W_{\geq k} = \sum_{\ell=k}^{d} w_\ell$.
+  A witness for failure is a pair $(D, D', t)$ with $D \equiv_{k-1} D'$
+  and $P_D(t) \neq P_{D'}(t)$.
+  Hardness follows from robustness
+  (Theorem~\ref{thm:robustness-conp}).
 \end{theorem}
-\begin{proof}
-  Membership in coNP: the complement (bypass failure) has a
-  polynomial-size certificate --- a pair $(D, D', t)$ with
-  $D \equiv_{k-1} D'$ and $P_D(t) \neq P_{D'}(t)$.
-  Hardness: by reduction from robustness
-  (Theorem~\ref{thm:robustness-conp}), embedding a SAT instance into
-  the commitments at layers $k, \ldots, d$.
-\end{proof}
 
 \noindent
-The coNP bound is a worst case over unstructured specifications.
-In both instantiations of this paper, bypass reduces to a polynomial
-graph property that can be checked dynamically (per-batch):
+In both instantiations, the coNP bound is avoided by reducing bypass
+to a polynomial graph property:
 
 \begin{example}[Transactional bypass]
-  A transaction $T_i$ can bypass the conflict-resolution layer if it
-  participates in no forbidden cycle under the isolation level $L$:
-  its node in the conflict graph has no path through an $L$-forbidden
-  edge pattern (checkable in polynomial time from the conflict graph).
-  Such a transaction commits under every resolving determination ---
-  its outputs are robust regardless of how other conflicts are
-  resolved.
-  Under deterministic scheduling (pre-declared read/write
-  sets~\cite{thomson2012calvin}), bypass is checked prospectively: the
-  conflict graph is known at seal time, and cycle-free transactions
-  commit immediately.
-  Under dynamic protocols with discretion (2PL with periodic deadlock detection,
-  OCC with batched validation order, MVTO with lazy timestamp
-  assignment), bypass is determined retrospectively: at commit/abort
-  time the conflict neighborhood is known, and the system records the
-  transaction's depth --- cycle-free transactions commit at depth~$0$;
-  those whose survival depended on a victim choice or scheduling
-  decision commit at the corresponding layer depth.
+  A transaction bypasses the conflict-resolution layer if it
+  participates in no $L$-forbidden cycle (polynomial in the conflict
+  graph).
+  Under deterministic scheduling~\cite{thomson2012calvin}, this is
+  checked prospectively at seal time.
+  Under dynamic protocols with discretion (2PL deadlock detection, OCC
+  batched validation, MVTO lazy timestamps), bypass is determined
+  retrospectively at commit time and recorded as a depth annotation.
 \end{example}
 
 \begin{example}[$\mbox{Datalog}^\neg$ bypass]
-  Under stable-model semantics, the determination has two layers:
-  the sealing prefix (layer~$k$, shared by all models) and the choice
-  layer (layer~$k{+}1$, where models diverge).
-  An atom can bypass the choice layer if it does not transitively
-  depend on any atom in a negative SCC (checkable in linear time via
-  reachability in the dependency graph).
-  Such atoms have the same value in every stable model --- they are
-  settled by the sealing prefix alone.
-  Operationally, ASP solvers~\cite{gebser2012asp} already exploit this:
-  unit propagation resolves these atoms before branching begins.
-  The filtration explains why --- depth $\leq k$ means invariant across
-  all stable models.
+  Under stable-model semantics (sealing prefix + choice layer), an
+  atom bypasses the choice layer if it does not transitively depend on
+  any negative SCC (linear-time reachability check).
+  Such atoms have the same value in every stable model; ASP
+  solvers~\cite{gebser2012asp} already exploit this via unit
+  propagation.
+  The filtration explains why: depth $\leq k$ means invariant across
+  models.
 \end{example}
 
 \noindent
-In both instantiations, the coNP lower bound is avoided by the same
-pattern: bypass eligibility reduces to a graph property (conflict-graph
-independence for transactions, dependency-graph reachability for
-$\mbox{Datalog}^\neg$) checkable in polynomial time per layer.
-The filtration's contribution is compositional soundness: depth bounds
-compose through positive RA
-(Corollary~\ref{cor:propagation-filtration}), so a bypass check on a
-provenance query's input tuples propagates to all output tuples
-without per-query re-verification --- the algebraic guarantee that
-makes per-layer graph checks sufficient for entire provenance results.
+The filtration's contribution is compositional soundness: a bypass
+check on input tuples propagates to all outputs without per-query
+re-verification
+(Corollary~\ref{cor:propagation-filtration}).
 
-\paragraph{Filtration structure: program-bounded vs.\ input-recurrent
-depth.}
-The $\Theta(n)$ depth in the $T_\infty$ construction
-(Theorem~\ref{thm:txn-depth}) arises from a pair of decisions
-repeated $n{-}1$ times: (a)~\emph{when} to run deadlock detection
-(the seal), and (b)~\emph{which} transaction to abort (victim
-selection).
-Policies like wound-wait or wait-die eliminate discretion~(b)
-(deterministic victim choice, an entailment), but discretion~(a)
-remains: the system still decides when to observe the conflict graph,
-and that decision determines which cycle it sees.
-Each round's seal-plus-victim pair is structurally identical to the
-previous --- the same two decisions, applied to a new arrival.
-
-The filtration makes visible a structural distinction that is otherwise
-implicit.
-Both instantiations operate over unbounded event streams (arriving
-transactions, arriving EDB facts), but their filtrations behave
-differently.
-In $\mbox{Datalog}^\neg$, the filtration depth is bounded by the
-program's dependency structure ($k$ sealing layers, $d$ choice layers)
-regardless of how many EDB modifications arrive --- the filtration is
-\emph{program-bounded}.
-In transactions, the filtration depth grows with the content of the
-event stream: each new conflicting arrival can extend the chain of
-dependent commitments --- the filtration is \emph{input-recurrent}.
-This distinction, visible only through the filtration, clarifies why
-transactional coordination cost scales with workload while
-$\mbox{Datalog}^\neg$ evaluation cost (in commitment depth) does not.
+\paragraph{Program-bounded vs.\ input-recurrent depth.}
+The $\Theta(n)$ transactional depth arises from recurring structure:
+the same seal-plus-victim pair repeated as new conflicts arrive.
+In $\mbox{Datalog}^\neg$, depth is bounded by the program's dependency
+structure regardless of EDB size.
+The filtration makes this distinction visible: transactional
+coordination cost scales with workload (input-recurrent); Datalog
+commitment depth does not (program-bounded).
 
 % ================================================================
 \section{Filtration Structure}
@@ -1514,16 +1455,21 @@ The difference decomposes into two components:
 Tuples that are robust under both $I$ and $I'$ but have
 $\mathrm{qdepth}_I(t) > \mathrm{qdepth}_{I'}(t)$: the extra
 coordination under $I$ did not change the outcome.
-For transactions, these are tuples from transactions that committed
-under both SER and SI but required cycle-breaking under SER that SI
-would have skipped.
+For transactions, this can be bidirectional: some tuples have deeper
+qdepth under SER (cycle-breaking that SI skips), others have deeper
+qdepth under SI (FCW aborts that SER avoids).
 
 \paragraph{Semantic shift.}
 Tuples whose support differs between $I$ and $I'$: robust under one,
 contingent under the other.
-For transactions, these are the write-skew tuples (robust under SI,
-contingent under SER) and FCW tuples (robust under SER, contingent
-under SI) of Proposition~\ref{prop:ser-si-incomparable}.
+For transactions
+(Proposition~\ref{prop:ser-si-incomparable}): moving from SER to SI
+makes write-skew tuples robust (the rw-rw cycle is no longer
+forbidden), but makes FCW tuples contingent (under SI, concurrent
+writers to the same object cannot both commit because each has
+already read a snapshot that excludes the other's write; SER does
+not employ snapshots, so the constraint does not apply and the
+writes are simply ordered).
 For $\mbox{Datalog}^\neg$, shifting from stable-model to well-founded
 semantics converts choice-layer atoms from resolved
 ($\mathbf{t}$/$\mathbf{f}$) to $\mathbf{u}$ --- a semantic shift
@@ -1566,20 +1512,12 @@ At depth $d > 1$, the filtration adds structure that PDBs lack:
   assignment fixed by levels $1, \ldots, \ell{-}1$.
 \end{proposition}
 \begin{proof}
-  At depth~$1$, all commitments commute and supports are positive
-  Boolean formulas (Proposition~\ref{prop:collapse-depth-1}) ---
-  identical to tuple-independent PDB lineage.
-  At depth~$d$, the filtration
-  $\mathcal{F}_0 \subseteq \cdots \subseteq \mathcal{F}_d$ decomposes
-  the determination space into $d$ levels.
-  Within level~$\ell$, commitments commute
-  (Definition~\ref{def:layered-basis}(i)), so the support restricted
-  to level~$\ell$ is a positive Boolean formula over that level's
-  variables --- conditioned on the prefix assignment from levels
-  $1, \ldots, \ell{-}1$ (which determines which level-$\ell$
-  commitments are applicable and what they exclude).
-  The full support is the conjunction of these conditional formulas
-  across levels.
+  Within each level~$\ell$, commitments commute
+  (Definition~\ref{def:layered-basis}(i)), giving a positive Boolean
+  formula --- identical to tuple-independent PDB lineage at that level.
+  Cross-level dependencies are captured by conditioning: level~$\ell$'s
+  formula is evaluated under the assignment fixed by levels
+  $1, \ldots, \ell{-}1$.
 \end{proof}
 
 \noindent

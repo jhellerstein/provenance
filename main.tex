@@ -79,9 +79,11 @@
   Positive relational algebra respects the filtration, enabling
   compositional robustness analysis and layer bypass.
   We instantiate the framework for transactional isolation
-  (yielding per-tuple separations of serializability and snapshot
-  isolation) and for Datalog with negation (where classical semantics
-  appear as different readings of a single filtration).
+  (where isolation levels are different resolving subsets of a shared
+  filtration, yielding per-tuple separations of serializability and
+  snapshot isolation) and for Datalog with negation (where classical
+  negation semantics appear as different reading depths of the same
+  filtration).
 \end{abstract}
 
 \maketitle

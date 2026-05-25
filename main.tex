@@ -2743,6 +2743,36 @@ one stable model, is $\mathbf{u}$ under WFS, and is undefined under
 stratified semantics.
 It is not preserved from stable to well-founded or stratified.
 
+\subsubsection{Proof of Monus Elimination (Theorem~\ref{thm:monus-elimination})}
+
+Let $P$ be a finite stratified $\mbox{Datalog}^\neg$ program and $K$ a
+naturally ordered, zero-divisor-free commutative semiring.
+We show that for every atom $a$, the set of determinations under which
+$a$ holds (its support) is the same whether negation is computed via
+sealing or via monus.
+
+Under sealing: after sealing stratum~$i$, each atom $b$ in stratum~$i$
+has annotation $P(b) \in K$.
+A rule $a \leftarrow \ldots, \neg b, \ldots$ in stratum~$i{+}1$
+contributes to $a$'s annotation iff $P(b) = 0_K$ (sealed absence);
+the negation is annotated as $1_K$ when $b$ is absent and $0_K$
+otherwise.
+
+Under monus: the same rule contributes $1_K \dot{-} P(b)$.
+In a naturally ordered, zero-divisor-free semiring:
+$1_K \dot{-} 0_K = 1_K$ and $1_K \dot{-} v = 0_K$ for all
+$v \neq 0_K$ (since $v + c \leq 1_K$ with $v \neq 0_K$ forces
+$c = 0_K$ by the zero-divisor-free property in the natural order).
+
+Hence both approaches assign the same annotation ($1_K$ or $0_K$) to
+each negated literal.
+Since all subsequent derivation uses only positive operations
+($+$ and $\cdot$), the final annotation of every atom is identical
+under both approaches.
+In particular, an atom has nonzero annotation (holds) under the same
+set of determinations: supports agree.
+\qed
+
 \subsection{General Case: Nested Negative Cycles}
 \label{app:datalog-general}
 

@@ -192,8 +192,8 @@ correspond to different filtration levels.
         (Sections~\ref{sec:det-semiring}--\ref{sec:filtration}).
   \item Instantiation for transactional systems: determination depth
         is $\Theta(n)$ worst-case for any isolation level that forbids
-        some cycle type, given scheduling discretion
-        (protocol-agnostic); the filtration
+        some cycle type, given scheduling discretion;
+        the filtration
         provides a fine-grained, per-tuple separation of SER and SI
         that is incomparable---neither level dominates the other in
         query-relative depth
@@ -455,7 +455,7 @@ derivation.
 The question is what happens when the specification is \emph{not}
 resolved---when incompatible outcomes coexist.
 
-\begin{theorem}[Classical provenance requires resolution]
+\begin{theorem}[Classical provenance is pointwise in determinations]
   \label{thm:resolution-implies-monotone}
   \label{thm:necessity}
   \label{ass:prefix-closed}
@@ -636,9 +636,8 @@ layers are irrelevant to it.
 The layering function encodes the semantic structure of the domain
 (e.g., stratification layers in $\mbox{Datalog}^\neg$, conflict-independence
 structure in transactions).
-In the instantiations below, the layering is canonical: it is the
-coarsest assignment consistent with the commutativity and dependency
-structure of $\Phi$.
+In the instantiations below, we use the coarsest layering consistent
+with the commutativity and dependency structure of $\Phi$.
 The universal quantifier in~(i) is conservative: if two commitments
 commute at some histories but not others, they must be placed in
 different layers.
@@ -935,7 +934,7 @@ We model them with an \emph{ordering commitment basis}:
   \label{prop:rc-depth-zero}
   \label{prop:ser-depth}
   \label{prop:si-depth}
-  The result is protocol-agnostic:
+  The following bounds depend only on the protocol's resolution class:
   \begin{enumerate}[nosep,label=(\alph*)]
     \item Under any isolation level that forbids no cycle type (e.g.,
           read committed): depth~$0$.

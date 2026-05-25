@@ -70,7 +70,7 @@
   Data provenance explains how a query result was derived---but only
   after the system's semantics has been fixed.
   When multiple admissible outcomes coexist, provenance cannot even
-  pose its question until something chooses among them.
+  pose its question (why? why not?) until something chooses an outcome.
   We introduce \emph{determination provenance}: a tuple's
   \emph{support} records which resolutions produce it, supports form a
   commutative semiring, and layered commitments induce a
@@ -171,7 +171,7 @@ reflecting how much resolution each tuple requires.
 A tuple with full or empty support has depth~$0$; a contingent tuple
 has positive depth reflecting which layer it depends on.
 Query evaluation (positive RA) cannot make a tuple depend on more
-layers than its inputs do.
+layers than its base tuples do.
 The filtration supports three forms of reasoning:
 \emph{bypass} (queries whose inputs are settled before layer~$k$ can
 skip layers $k, \ldots, d$); \emph{semantic-change analysis}

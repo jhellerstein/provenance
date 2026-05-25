@@ -1397,45 +1397,15 @@ outputs all have depth $< k$ can skip layer~$k$'s coordination.
   can bypass layers $k, \ldots, d$.
 \end{proposition}
 
-\begin{theorem}[Bypass verification complexity]
-  \label{thm:bypass-complexity}
-  Checking whether all input tuples of $Q$ have $\mathrm{qdepth} < k$
-  is $\mathrm{coNP}$-complete in the residual width
-  $W_{\geq k} = \sum_{\ell=k}^{d} w_\ell$.
-  A witness for failure is a pair $(D, D', t)$ with $D \equiv_{k-1} D'$
-  and $P_D(t) \neq P_{D'}(t)$.
-  Hardness follows from robustness
-  (Theorem~\ref{thm:robustness-conp}).
-\end{theorem}
-
 \noindent
-In both instantiations, the coNP bound is avoided by reducing bypass
-to a polynomial graph property:
-
-\begin{example}[Transactional bypass]
-  A transaction $T_i$ bypasses the conflict-resolution layer if it
-  participates in no $L$-forbidden cycle (polynomial in the conflict
-  graph); all tuples whose provenance depends only on $T_i$ then have
-  depth~$0$.
-  Under deterministic scheduling~\cite{thomson2012calvin}, this is
-  checked prospectively at seal time.
-  Under dynamic protocols with discretion (2PL deadlock detection, OCC
-  batched validation, MVTO lazy timestamps), bypass is determined
-  retrospectively at commit time and recorded as a depth annotation.
-\end{example}
-
-\begin{example}[$\mbox{Datalog}^\neg$ bypass]
-  Under stable-model semantics (sealing prefix + choice layer), an
-  atom bypasses the choice layer if it does not transitively depend on
-  any negative SCC (linear-time reachability check).
-  Such atoms have the same value in every stable model; ASP
-  solvers~\cite{gebser2012asp} already exploit this via unit
-  propagation.
-  The filtration explains why: depth $\leq k$ means invariant across
-  models.
-\end{example}
-
-\noindent
+Bypass certification is coNP-complete in the residual width
+$W_{\geq k}$ (by reduction from robustness,
+Theorem~\ref{thm:robustness-conp}), but both instantiations admit
+polynomial sufficient checks:
+in transactions, absence from $L$-forbidden
+cycles~\cite{thomson2012calvin}; in $\mbox{Datalog}^\neg$,
+absence of transitive dependency on any negative
+SCC~\cite{gebser2012asp}.
 The filtration's contribution is compositional soundness: a bypass
 check on input tuples propagates to all outputs without per-query
 re-verification
@@ -1500,48 +1470,19 @@ cost but the individual commitment most responsible for it.
 
 \subsection{Provenance Query Complexity}
 
-The determination semiring at depth~$1$ coincides with the Boolean
-algebra of PDB lineage
-(Proposition~\ref{prop:collapse-depth-1}): supports are positive
-Boolean formulas over commitment variables, and computing them has the
-same complexity as PDB query evaluation --- tractable for hierarchical
-queries, \#P-hard in
-general~\cite{suciu2011probabilistic}.
-At depth $d > 1$, the filtration adds structure that PDBs lack:
-
-\begin{proposition}[Depth-$d$ provenance as layered PDB evaluation]
-  \label{prop:layered-pdb}
-  Computing the support of a provenance query $Q$ at depth~$d$ reduces
-  to evaluating $Q$ over a $d$-level \emph{layered PDB}: at each
-  level~$\ell$, the commitment variables are independent (commuting)
-  and the valid assignments at level~$\ell$ are restricted by the
-  commitments chosen at levels $1, \ldots, \ell{-}1$.
-  At depth~$1$, this is standard tuple-independent PDB evaluation.
-  At depth~$d > 1$, each additional level introduces a conditioning
-  step: the lineage formula at level~$\ell$ is evaluated under the
-  assignment fixed by levels $1, \ldots, \ell{-}1$.
-\end{proposition}
-\begin{proof}
-  Within each level~$\ell$, commitments commute
-  (Definition~\ref{def:layered-basis}(i)), giving a positive Boolean
-  formula --- identical to tuple-independent PDB lineage at that level.
-  Cross-level dependencies are captured by conditioning: level~$\ell$'s
-  formula is evaluated under the assignment fixed by levels
-  $1, \ldots, \ell{-}1$.
-\end{proof}
-
-\noindent
-The PDB dichotomy (hierarchical $\Leftrightarrow$ tractable) applies
-within each layer; the filtration's depth measures how many such
-layers must be composed.
+At depth~$1$, supports are positive Boolean formulas over commitment
+variables (Proposition~\ref{prop:collapse-depth-1}), and computing
+them has the same complexity as tuple-independent PDB query
+evaluation~\cite{suciu2011probabilistic}.
+At higher depths, the filtration structures the correlations: within
+each layer, commitments commute (giving PDB-style lineage), while
+cross-layer dependencies introduce conditioning.
 Determination provenance thus occupies a position between
-tuple-independent PDBs (depth~$1$, well-studied) and general
-correlated PDBs (arbitrary dependencies, intractable): the
-correlations are structured by the filtration's layering, and each
-layer individually admits the PDB complexity toolkit.
-Appendix~\ref{app:depth-reduction} develops the corresponding design
-transformations for reducing depth: coarsening outcomes, forcing
-commutation, and replacing commitments by entailments.
+tuple-independent PDBs (depth~$1$) and general correlated PDBs
+(intractable): each layer individually admits the PDB complexity
+toolkit, and depth measures how many layers must be composed.
+Appendix~\ref{app:depth-reduction} develops design transformations
+for reducing depth.
 
 % ================================================================
 \section{Related Work}

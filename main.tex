@@ -366,6 +366,11 @@ outcomes---this is what produces non-commutative commitments.
   structures and different provenance.
 \end{definition}
 
+\noindent
+In Section~\ref{sec:transactions}, the basis consists of ordering and
+abort commitments; in Section~\ref{sec:negation-preview}, of sealing
+and choice predicates.
+
 \paragraph{Three forces on a history.}
 \label{sec:three-forces}%
 A history evolves under three
@@ -1434,10 +1439,15 @@ cost but the individual commitment most responsible for it.
 
 \subsection{Provenance Query Complexity}
 
-At depth~$1$, supports are positive Boolean formulas over commitment
-variables (Proposition~\ref{prop:collapse-depth-1}), and computing
-them has the same complexity as tuple-independent PDB query
-evaluation~\cite{suciu2011probabilistic}.
+\begin{proposition}[Depth-$1$ = tuple-independent PDB]
+  \label{prop:layered-pdb}
+  A depth-$1$ determination semiring over $n$ binary commitments is
+  isomorphic to a tuple-independent PDB over $n$ tuple-existence
+  events: supports are positive Boolean formulas, and query evaluation
+  has the same complexity.
+\end{proposition}
+
+\noindent
 At higher depths, the filtration structures the correlations: within
 each layer, commitments commute (giving PDB-style lineage), while
 cross-layer dependencies introduce conditioning.

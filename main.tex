@@ -78,12 +78,10 @@
   depth}---how many layers of semantic resolution it depends on.
   Positive relational algebra respects the filtration, enabling
   compositional robustness analysis and layer bypass.
-  We instantiate the framework for transactional isolation
-  (where isolation levels are different resolving subsets of a shared
-  filtration, yielding per-tuple separations of serializability and
-  snapshot isolation) and for Datalog with negation (where classical
-  negation semantics appear as different reading depths of the same
-  filtration).
+  We instantiate the framework for transactional isolation and for
+  Datalog with negation; in both, classical semantic variants
+  (isolation levels; negation semantics) correspond to different views
+  of a single shared filtration.
 \end{abstract}
 
 \maketitle

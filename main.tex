@@ -167,14 +167,11 @@ supports; union merges them).
 
 When commitments are layered---some depending on others' outcomes---the
 semiring carries a \emph{filtration}: a chain of sub-semirings
-reflecting how much resolution each tuple actually requires.
-A tuple with full or empty support (like $b$) has depth~$0$: no
-commitment affects it.
-A contingent tuple like $d$ has positive depth reflecting which
-commitment layer it depends on (overlapping conflict cycles and nested
-negation produce deeper filtrations).
+reflecting how much resolution each tuple requires.
+A tuple with full or empty support has depth~$0$; a contingent tuple
+has positive depth reflecting which layer it depends on.
 Positive relational algebra cannot increase depth.
-The filtration supports three forms of reasoning beyond classification:
+The filtration supports three forms of reasoning:
 \emph{bypass} (queries whose inputs are settled before layer~$k$ can
 skip layers $k, \ldots, d$); \emph{semantic-change analysis}
 (specifications over the same basis can be compared tuple-by-tuple,

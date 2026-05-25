@@ -472,11 +472,12 @@ resolved---when incompatible outcomes coexist.
   \label{thm:resolution-implies-monotone}
   \label{thm:necessity}
   \label{ass:prefix-closed}
-  Any provenance representation that correctly accounts for every
-  admissible outcome must distinguish determinations that disagree on
-  tuple membership or derivation.
-  In particular, classical provenance (a single $K$-relation) suffices
-  iff all resolving determinations produce the same outcome.
+  Classical semiring provenance (a single $K$-relation) correctly
+  represents a specification $\Spec$ iff all resolving determinations
+  produce the same tuple membership and derivational annotation.
+  When two resolving determinations $D_1, D_2$ disagree on some tuple
+  $t$ ($P_{D_1}(t) \neq P_{D_2}(t)$), provenance must be indexed by
+  determination.
 \end{theorem}
 
 \begin{proof}
@@ -542,6 +543,7 @@ The resulting structure is a Boolean algebra on supports.
 In both instantiations of this paper (transactions and $\mbox{Datalog}^\neg$),
 $\Spec(H)$ is finite and finitely many commitments from $\Phi$ are
 applicable at any history, so $\mathcal{D}$ is finite.
+We assume finiteness of $\mathcal{D}$ throughout the main development.
 
 \begin{definition}[Determination Provenance]
   \label{def:det-provenance}
@@ -689,7 +691,7 @@ form~\cite{mazurkiewicz1977concurrent}) is left as future work
 Throughout this subsection, we fix a layered commitment basis
 $(\Phi, \lambda)$ with depth $d$.
 Two determinations $D(H), D'(H') \in \mathcal{D}$ \emph{agree at level $k$},
-written $D \equiv_k D'$, defined inductively:
+written $D \equiv_k D'$, as defined inductively:
 \begin{itemize}[nosep,leftmargin=*]
   \item $D \equiv_0 D'$ always (vacuous agreement).
   \item $D \equiv_{k+1} D'$ iff $D \equiv_k D'$, the histories $H$ and

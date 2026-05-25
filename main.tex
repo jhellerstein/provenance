@@ -557,9 +557,13 @@ applicable at any history, so $\mathcal{D}$ is finite.
 \end{definition}
 
 \noindent
-Determination provenance is a $K$-relation over
-determinations: it assigns each $D \in \mathcal{D}$ a semiring value
+Determination provenance is an element of the product semiring
+$K^{\mathcal{D}}$ (pointwise addition and multiplication):
+it assigns each $D \in \mathcal{D}$ a semiring value
 recording how $t$ is derived under $D$.
+Note that $\mathcal{D}$ depends on the specification and workload
+(unlike $\mathbb{N}[X]$, which is schema-level); the semiring
+$K^{\mathcal{D}}$ is instance-dependent by construction.
 Conditioned provenance is the special case of evaluating at a single point:
 $P(t)(D) = P_D(t)$.
 Classical provenance is the special case where $|\mathcal{D}| = 1$
@@ -1377,9 +1381,10 @@ outputs all have depth $< k$ can skip layer~$k$'s coordination.
 
 \noindent
 Bypass certification is coNP-complete in the residual width
-$W_{\geq k}$ (by reduction from robustness,
-Theorem~\ref{thm:robustness-conp}), but both instantiations admit
-polynomial sufficient checks:
+$W_{\geq k}$ --- a workload-complexity measure (the query is fixed;
+the number of commitments scales with the history) --- by reduction
+from robustness (Theorem~\ref{thm:robustness-conp}).
+Both instantiations admit polynomial sufficient checks:
 in transactions, absence from $L$-forbidden
 cycles~\cite{thomson2012calvin}; in $\mbox{Datalog}^\neg$,
 absence of transitive dependency on any negative

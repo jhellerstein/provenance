@@ -900,13 +900,13 @@ complementary.
 
 \begin{definition}[Conflict graph]
   \label{def:conflict-graph}
-  The \emph{conflict graph} $G(H)$ of a transactional history $H$ is a
-  directed graph derived from $H$: its vertices are the \emph{active}
-  (uncommitted, non-aborted) transactions in $H$, and it has an edge
+  The \emph{conflict graph} $G(H)$ derived from a transactional history $H$ is a
+  directed graph; vertices are the \emph{active}
+  (uncommitted, non-aborted) transactions in $H$, edges go from
   $T_i \to T_j$ whenever $T_i$ and $T_j$ conflict and $T_i$'s
   conflicting operation precedes $T_j$'s in $\rightarrow$.
   For an extension $H \sqsubseteq H'$, the graph $G(H')$ omits from
-  $G(H)$ any transactions that committed or aborted in $H'$.
+  $G(H)$ transactions that committed or aborted in $H'$.
 \end{definition}
 
 \subsection{Isolation Levels as Specifications}
@@ -1479,8 +1479,8 @@ Determination provenance thus occupies a position between
 tuple-independent PDBs (depth~$1$) and general correlated PDBs
 (intractable): each layer individually admits the PDB complexity
 toolkit, and depth measures how many layers must be composed.
-Appendix~\ref{app:depth-reduction} develops design transformations
-for reducing depth.
+Appendix~\ref{app:depth-reduction} develops design transformations for
+reducing depth.
 
 % ================================================================
 \section{Related Work}

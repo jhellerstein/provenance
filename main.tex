@@ -191,18 +191,17 @@ $\mbox{Datalog}^\neg$; for each, classical semantic variants
         semiring whose layered structure is reflected as a chain of
         sub-semirings that query evaluation respects
         (Sections~\ref{sec:det-semiring}--\ref{sec:filtration}).
-  \item Instantiation for transactional systems: determination depth
-        is $\Theta(n)$ worst-case for any isolation level that forbids
-        some cycle type, given scheduling discretion;
-        the filtration provides a per-tuple separation of SER and SI
-        that is incomparable in query-relative depth
+  \item Instantiation for transactional systems: isolation levels
+        (RC, SI, SER) are different resolving subsets of a shared
+        filtration; determination depth is $\Theta(n)$ worst-case
+        with scheduling discretion, and SER/SI are incomparable in
+        per-tuple query-relative depth
         (Section~\ref{sec:transactions}).
   \item Instantiation for $\mbox{Datalog}^\neg$: for a representative
-        class of programs, the classical negation
-        semantics correspond to filtration levels of a single
-        determination semiring; monus elimination shows that layered
-        monotone supports are support-equivalent to semirings with
-        monus
+        class of programs, negation semantics (stratified,
+        well-founded, stable) are different reading depths of a shared
+        filtration; monus elimination shows that sealing is
+        support-equivalent to semirings with monus
         (Section~\ref{sec:negation-preview},
         Appendix~\ref{sec:appendix-datalog}).
   \item \emph{Layer bypass and semantic-change analysis}: queries
@@ -1581,9 +1580,8 @@ Supports over resolving determinations form a filtered semiring;
 the filtration measures query-relative depth, is respected by positive
 relational algebra, and recovers classical provenance at depth~$0$.
 Transactions and $\mbox{Datalog}^\neg$ instantiate the framework;
-for transactions, SER and SI are incomparable in query-relative depth;
-for Datalog, classical negation semantics correspond to filtration
-levels, and monus is eliminated by sealing.
+in both, classical semantic variants (isolation levels; negation
+semantics) correspond to different views of a shared filtration.
 
 Determination provenance brings database-theoretic
 provenance~\cite{green2007provenance} to bear on the semantic

@@ -1344,50 +1344,39 @@ positive $K$-evaluation.
 
 The filtration assigns each tuple a depth: the number of commitment
 layers its membership depends on.
+Recall that depth is defined relative to a \emph{provenance query}
+$Q$ (the query whose results we are tracking across determinations,
+as in Definition~\ref{def:det-provenance}).
 A tuple with $\mathrm{qdepth}(t) = j$ is settled once layers
-$1, \ldots, j$ are discharged --- it does not need to participate in
-the coordination at layers $j{+}1, \ldots, d$.
-We call this \emph{layer bypass}: a transaction whose outputs all have
-depth $< k$ can skip layer~$k$'s coordination entirely.
-
-\subsection{When Is Bypass Valid?}
+$1, \ldots, j$ are discharged --- layers $j{+}1, \ldots, d$ cannot
+affect it.
+This gives rise to \emph{layer bypass}: any provenance query whose
+outputs all have depth $< k$ can skip layer~$k$'s coordination.
 
 \begin{proposition}[Bypass criterion]
   \label{prop:bypass}
-  A transaction $T_i$ can bypass layer~$k$ if every tuple $t$ in
-  $T_i$'s output has $\mathrm{qdepth}(t) < k$.
-  Equivalently, $T_i$'s outputs have supports in $\mathcal{F}_{k-1}$:
-  they are invariant under all commitments at layers $k, \ldots, d$.
+  Let $Q$ be a provenance query (positive relational) over a
+  specification with depth $d$.
+  If every input tuple of $Q$ has $\mathrm{qdepth} < k$, then every
+  output tuple of $Q$ has $\mathrm{qdepth} < k$
+  (Corollary~\ref{cor:propagation-filtration}), and $Q$'s evaluation
+  can bypass layers $k, \ldots, d$ without affecting any result.
 \end{proposition}
-\begin{proof}
-  By definition of the filtration: $\mathrm{supp}(t) \in
-  \mathcal{F}_{k-1}$ means $t$'s membership is the same in every pair
-  of determinations that agree at layers $1, \ldots, k{-}1$,
-  regardless of what layers $k, \ldots, d$ decide.
-  Hence layer~$k$'s commitment cannot affect $t$.
-\end{proof}
 
 \noindent
-The compositional corollary (Corollary~\ref{cor:propagation-filtration})
-strengthens this: if all of $T_i$'s \emph{base tuples} have depth
-$< k$, then all derived tuples do too (positive RA cannot increase
-depth).
-So bypass eligibility can be checked at the base-tuple level without
-evaluating the full query.
-
-\subsection{Complexity of Bypass Verification}
-
-In general, verifying that $\mathrm{qdepth}(t) < k$ is coNP-hard:
+Bypass eligibility is thus a property of the base tuples' supports
+relative to the filtration --- it can be checked without evaluating
+the query.
 
 \begin{theorem}[Bypass verification complexity]
   \label{thm:bypass-complexity}
-  Checking whether all outputs of a transaction $T_i$ have
-  $\mathrm{qdepth} < k$ is $\mathrm{coNP}$-complete in the residual
-  width $W_{\geq k} = \sum_{\ell=k}^{d} w_\ell$ (the total number of
+  Checking whether all base tuples of a query have $\mathrm{qdepth}
+  < k$ is $\mathrm{coNP}$-complete in the residual width
+  $W_{\geq k} = \sum_{\ell=k}^{d} w_\ell$ (the total number of
   commitments at layers $k, \ldots, d$).
   A witness for bypass failure is a pair of determinations $D, D'$
   agreeing at layers $1, \ldots, k{-}1$ but producing different
-  membership for some output tuple of $T_i$.
+  membership for some base tuple.
 \end{theorem}
 \begin{proof}
   Membership in coNP: the complement (bypass failure) has a
@@ -1398,43 +1387,117 @@ In general, verifying that $\mathrm{qdepth}(t) < k$ is coNP-hard:
   the commitments at layers $k, \ldots, d$.
 \end{proof}
 
-\subsection{Tractable Instances}
-
+\noindent
 The coNP bound is a worst case over unstructured specifications.
 In both instantiations of this paper, bypass reduces to a polynomial
-graph property:
+graph property that can be checked dynamically (per-batch):
 
-\paragraph{Transactions.}
-A transaction $T_i$ can bypass the victim-selection layer if it
-participates in no conflict cycle: its node in the conflict graph is
-not in any SCC of size $> 1$.
-This is checkable in linear time (Tarjan's algorithm on the conflict
-graph).
-In a batched system, bypass is checked per-batch: seal the batch,
-compute the conflict graph, and identify transactions not in any
-cycle.
-Those transactions commit immediately without waiting for victim
-selection --- they bypass layer~$2$ of the per-batch determination.
+\begin{example}[Transactional bypass]
+  A transaction $T_i$ can bypass the conflict-resolution layer if it
+  participates in no forbidden cycle under the isolation level $L$:
+  its node in the conflict graph has no path through an $L$-forbidden
+  edge pattern (checkable in polynomial time from the conflict graph).
+  Such a transaction commits under every resolving determination ---
+  its outputs are robust regardless of how other conflicts are
+  resolved.
+  Under deterministic scheduling (pre-declared read/write
+  sets~\cite{thomson2012calvin}), bypass is checked prospectively: the
+  conflict graph is known at seal time, and cycle-free transactions
+  commit immediately.
+  Under dynamic protocols with discretion (2PL with periodic deadlock detection,
+  OCC with batched validation order, MVTO with lazy timestamp
+  assignment), bypass is determined retrospectively: at commit/abort
+  time the conflict neighborhood is known, and the system records the
+  transaction's depth --- cycle-free transactions commit at depth~$0$;
+  those whose survival depended on a victim choice or scheduling
+  decision commit at the corresponding layer depth.
+\end{example}
 
-\paragraph{$\mbox{Datalog}^\neg$.}
-An atom $a$ can bypass the choice layer if it does not transitively
-depend (through the rule graph) on any atom in a negative SCC.
-This is checkable in linear time (reachability in the dependency
-graph).
-Atoms derived purely from stratified rules bypass all choice layers
-and are determined by the sealing prefix alone.
+\begin{example}[$\mbox{Datalog}^\neg$ bypass]
+  Under stable-model semantics, the determination has two layers:
+  the sealing prefix (layer~$k$, shared by all models) and the choice
+  layer (layer~$k{+}1$, where models diverge).
+  An atom can bypass the choice layer if it does not transitively
+  depend on any atom in a negative SCC (checkable in linear time via
+  reachability in the dependency graph).
+  Such atoms have the same value in every stable model --- they are
+  settled by the sealing prefix alone.
+  Operationally, ASP solvers~\cite{gebser2012asp} already exploit this:
+  unit propagation resolves these atoms before branching begins.
+  The filtration explains why --- depth $\leq k$ means invariant across
+  all stable models.
+\end{example}
 
-\paragraph{Dynamic bypass in batches.}
-Both checks above are per-batch: the conflict graph (transactions) or
-dependency graph ($\mbox{Datalog}^\neg$) may change as new work
-arrives.
-Within each batch, bypass eligibility is recomputed in polynomial time
-after the seal.
-This gives a dynamic protocol: each batch seals, classifies
-transactions into bypass-eligible (commit immediately) and
-cycle-involved (enter victim selection), and resolves only the latter.
-The filtration provides the algebraic justification; the graph check
-provides the efficient implementation.
+\noindent
+In both instantiations, the coNP lower bound is avoided by the same
+pattern: bypass eligibility reduces to a graph property (conflict-graph
+independence for transactions, dependency-graph reachability for
+$\mbox{Datalog}^\neg$) checkable in polynomial time per layer.
+The filtration's contribution is compositional soundness: depth bounds
+compose through positive RA
+(Corollary~\ref{cor:propagation-filtration}), so a bypass check on a
+provenance query's input tuples propagates to all output tuples
+without per-query re-verification --- the algebraic guarantee that
+makes per-layer graph checks sufficient for entire provenance results.
+
+\paragraph{Schema depth vs.\ instance depth.}
+The deep filtrations in this paper ($\Theta(n)$ for transactions) arise
+from \emph{recurring} layers: the same commitment structure repeats at
+each round.
+We distinguish the \emph{schema depth} (the number of structurally
+distinct layer types) from the \emph{instance depth} (the total number
+of layers in a given determination, which may grow with input size).
+
+\begin{definition}[Determination schema]
+  \label{def:det-schema}
+  A \emph{determination schema} for a specification $\Spec$ is a
+  finite directed graph $(Q, \delta)$ where $Q$ is a set of
+  \emph{commitment modes} and $\delta \subseteq Q \times Q$ encodes
+  possible transitions.
+  Each mode $q \in Q$ specifies a commitment type (width, bypass
+  condition, commutativity class).
+  A determination of depth $d$ corresponds to a walk of length $d$ in
+  the schema; the schema depth is the length of the longest simple
+  (non-repeating) path.
+\end{definition}
+
+\noindent
+Instance depth exceeds schema depth iff the schema contains a cycle:
+the determination revisits the same commitment mode.
+In the $T_\infty$ construction, the schema has two modes (``cycle
+exists, choose victim'' and ``resolved'') connected by a self-loop;
+schema depth is~$1$, but instance depth is $n{-}1$.
+In the $\mbox{Datalog}^\neg$ example, the schema is a DAG (seal$_1
+\to$ seal$_2 \to \cdots \to$ seal$_k \to$ choice); schema depth
+equals instance depth.
+
+\begin{proposition}[Bypass uniformity for recurring layers]
+  \label{prop:recurring-bypass}
+  If layers $k, k{+}1, \ldots, d$ all correspond to the same schema
+  mode (a self-loop), then the bypass condition is identical at each:
+  a tuple that bypasses layer~$k$ also bypasses layers
+  $k{+}1, \ldots, d$.
+  A single graph check suffices for all recurring layers.
+\end{proposition}
+\begin{proof}
+  By definition of the schema, each recurring layer has the same
+  commitment type and the same bypass condition (independence from the
+  same conflict structure).
+  If a tuple's support is invariant under one instance of the
+  commitment, it is invariant under all instances (the commitment's
+  effect on the tuple is determined by the tuple's relationship to the
+  conflict structure, which is the same at each recurrence).
+\end{proof}
+
+\noindent
+The schema/instance distinction clarifies the role of depth in
+practice: schema depth reflects the specification's inherent semantic
+complexity (how many fundamentally different kinds of commitment are
+needed); instance depth reflects the input's size (how many times the
+same kind of commitment recurs).
+Bounding instance depth requires bounding the input (timeouts,
+pre-declaration); bounding schema depth requires changing the
+specification's semantic structure.
 
 % ================================================================
 \section{Related Work}

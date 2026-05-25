@@ -918,9 +918,8 @@ by reordering of non-conflicting decisions (decisions on transactions
 sharing no conflict edge may be permuted freely).
 The outcome order is trace-prefix extension:
 $o_1 \Ord o_2$ when $o_2$ extends $o_1$ with additional decisions
-while preserving the fate (commit/abort) of every transaction already
-decided in $o_1$ and the ordering of every conflicting pair already
-ordered in $o_1$.
+while preserving the fate (commit/abort) of every transaction decided
+in $o_1$ and the ordering of every conflicting pair ordered in $o_1$.
 
 Following Adya~\cite{adya1999weak}, each isolation level $L$
 constrains which conflict patterns are admissible among committed

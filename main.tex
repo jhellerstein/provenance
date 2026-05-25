@@ -1440,64 +1440,121 @@ provenance query's input tuples propagates to all output tuples
 without per-query re-verification --- the algebraic guarantee that
 makes per-layer graph checks sufficient for entire provenance results.
 
-\paragraph{Schema depth vs.\ instance depth.}
-The deep filtrations in this paper ($\Theta(n)$ for transactions) arise
-from \emph{recurring} layers: the same commitment structure repeats at
-each round.
-We distinguish the \emph{schema depth} (the number of structurally
-distinct layer types) from the \emph{instance depth} (the total number
-of layers in a given determination, which may grow with input size).
+\paragraph{Filtration structure: program-bounded vs.\ input-recurrent
+depth.}
+The $\Theta(n)$ depth in the $T_\infty$ construction
+(Theorem~\ref{thm:txn-depth}) arises from a pair of decisions
+repeated $n{-}1$ times: (a)~\emph{when} to run deadlock detection
+(the seal), and (b)~\emph{which} transaction to abort (victim
+selection).
+Policies like wound-wait or wait-die eliminate discretion~(b)
+(deterministic victim choice, an entailment), but discretion~(a)
+remains: the system still decides when to observe the conflict graph,
+and that decision determines which cycle it sees.
+Each round's seal-plus-victim pair is structurally identical to the
+previous --- the same two decisions, applied to a new arrival.
 
-\begin{definition}[Determination schema]
-  \label{def:det-schema}
-  A \emph{determination schema} for a specification $\Spec$ is a
-  finite directed graph $(Q, \delta)$ where $Q$ is a set of
-  \emph{commitment modes} and $\delta \subseteq Q \times Q$ encodes
-  possible transitions.
-  Each mode $q \in Q$ specifies a commitment type (width, bypass
-  condition, commutativity class).
-  A determination of depth $d$ corresponds to a walk of length $d$ in
-  the schema; the schema depth is the length of the longest simple
-  (non-repeating) path.
-\end{definition}
+The filtration makes visible a structural distinction that is otherwise
+implicit.
+Both instantiations operate over unbounded event streams (arriving
+transactions, arriving EDB facts), but their filtrations behave
+differently.
+In $\mbox{Datalog}^\neg$, the filtration depth is bounded by the
+program's dependency structure ($k$ sealing layers, $d$ choice layers)
+regardless of how many EDB modifications arrive --- the filtration is
+\emph{program-bounded}.
+In transactions, the filtration depth grows with the content of the
+event stream: each new conflicting arrival can extend the chain of
+dependent commitments --- the filtration is \emph{input-recurrent}.
+This distinction, visible only through the filtration, clarifies why
+transactional coordination cost scales with workload while
+$\mbox{Datalog}^\neg$ evaluation cost (in commitment depth) does not.
 
-\noindent
-Instance depth exceeds schema depth iff the schema contains a cycle:
-the determination revisits the same commitment mode.
-In the $T_\infty$ construction, the schema has two modes (``cycle
-exists, choose victim'' and ``resolved'') connected by a self-loop;
-schema depth is~$1$, but instance depth is $n{-}1$.
-In the $\mbox{Datalog}^\neg$ example, the schema is a DAG (seal$_1
-\to$ seal$_2 \to \cdots \to$ seal$_k \to$ choice); schema depth
-equals instance depth.
+% ================================================================
+\section{Discussion}
+\label{sec:discussion}
+% ================================================================
 
-\begin{proposition}[Bypass uniformity for recurring layers]
-  \label{prop:recurring-bypass}
-  If layers $k, k{+}1, \ldots, d$ all correspond to the same schema
-  mode (a self-loop), then the bypass condition is identical at each:
-  a tuple that bypasses layer~$k$ also bypasses layers
-  $k{+}1, \ldots, d$.
-  A single graph check suffices for all recurring layers.
+The filtration is the paper's central structural contribution.
+We collect here the distinct roles it plays across the preceding
+sections, and connect determination provenance to the complexity
+landscape of probabilistic databases.
+
+\paragraph{What the filtration provides.}
+\begin{enumerate}[nosep,label=(\roman*)]
+  \item \emph{Compositional depth bounds.}
+        Positive RA cannot increase qdepth
+        (Corollary~\ref{cor:propagation-filtration}): if all inputs to
+        a provenance query have depth $\leq j$, so do all outputs.
+        This enables per-tuple reasoning about coordination
+        requirements without whole-query analysis.
+  \item \emph{Per-tuple isolation separation.}
+        The filtration reveals that SER and SI are incomparable at the
+        tuple level (Proposition~\ref{prop:ser-si-incomparable}): some
+        tuples are shallower under SER, others under SI.
+        No global ordering of isolation levels captures this.
+  \item \emph{Unified negation semantics.}
+        Stratified, well-founded, and stable-model semantics correspond
+        to readings of a single filtration at different depths
+        (Theorem~\ref{thm:negation-filtration}).
+  \item \emph{Bypass soundness.}
+        The filtration certifies which provenance queries can skip
+        coordination layers (Proposition~\ref{prop:bypass}), with
+        compositional propagation from inputs to outputs.
+  \item \emph{Structural classification of depth.}
+        The filtration makes visible whether coordination depth is
+        bounded by program structure or grows with input
+        (Section~\ref{sec:bypass}).
+\end{enumerate}
+
+\paragraph{Provenance query complexity and PDBs.}
+The determination semiring at depth~$1$ coincides with the Boolean
+algebra of PDB lineage
+(Proposition~\ref{prop:collapse-depth-1}): supports are positive
+Boolean formulas over commitment variables, and computing them has the
+same complexity as PDB query evaluation --- tractable for hierarchical
+queries, \#P-hard in
+general~\cite{suciu2011probabilistic}.
+At depth $d > 1$, the filtration adds structure that PDBs lack:
+
+\begin{proposition}[Depth-$d$ provenance as layered PDB evaluation]
+  \label{prop:layered-pdb}
+  Computing the support of a provenance query $Q$ at depth~$d$ reduces
+  to evaluating $Q$ over a $d$-level \emph{layered PDB}: at each
+  level~$\ell$, the commitment variables are independent (commuting)
+  and their joint distribution is conditioned on the outcomes of levels
+  $1, \ldots, \ell{-}1$.
+  At depth~$1$, this is standard tuple-independent PDB evaluation.
+  At depth~$d > 1$, each additional level introduces a conditioning
+  step: the lineage formula at level~$\ell$ is evaluated under the
+  assignment fixed by levels $1, \ldots, \ell{-}1$.
 \end{proposition}
 \begin{proof}
-  By definition of the schema, each recurring layer has the same
-  commitment type and the same bypass condition (independence from the
-  same conflict structure).
-  If a tuple's support is invariant under one instance of the
-  commitment, it is invariant under all instances (the commitment's
-  effect on the tuple is determined by the tuple's relationship to the
-  conflict structure, which is the same at each recurrence).
+  At depth~$1$, all commitments commute and supports are positive
+  Boolean formulas (Proposition~\ref{prop:collapse-depth-1}) ---
+  identical to tuple-independent PDB lineage.
+  At depth~$d$, the filtration
+  $\mathcal{F}_0 \subseteq \cdots \subseteq \mathcal{F}_d$ decomposes
+  the determination space into $d$ levels.
+  Within level~$\ell$, commitments commute
+  (Definition~\ref{def:layered-basis}(i)), so the support restricted
+  to level~$\ell$ is a positive Boolean formula over that level's
+  variables --- conditioned on the prefix assignment from levels
+  $1, \ldots, \ell{-}1$ (which determines which level-$\ell$
+  commitments are applicable and what they exclude).
+  The full support is the conjunction of these conditional formulas
+  across levels.
 \end{proof}
 
 \noindent
-The schema/instance distinction clarifies the role of depth in
-practice: schema depth reflects the specification's inherent semantic
-complexity (how many fundamentally different kinds of commitment are
-needed); instance depth reflects the input's size (how many times the
-same kind of commitment recurs).
-Bounding instance depth requires bounding the input (timeouts,
-pre-declaration); bounding schema depth requires changing the
-specification's semantic structure.
+The PDB dichotomy (hierarchical $\Leftrightarrow$ tractable) applies
+within each layer; the filtration's depth measures how many such
+layers must be composed.
+Determination provenance thus occupies a position between
+tuple-independent PDBs (depth~$1$, well-studied) and general
+correlated PDBs (arbitrary dependencies, intractable): the
+correlations are structured by the filtration's layering, and each
+layer individually admits the PDB complexity toolkit.
 
 % ================================================================
 \section{Related Work}
@@ -1545,7 +1602,7 @@ induce the filtration.
 A tuple-independent PDB is the depth-$1$ special case
 (Proposition~\ref{prop:collapse-depth-1}): the filtration collapses to
 $\mathrm{PosBool}(\Phi)$ and query-relative depth is uniformly~$1$.
-The filtration, query-relative depth, and hierarchical relaxation have
+The filtration, query-relative depth, and layer bypass have
 no PDB analog because PDB events lack the layered dependency structure
 that these concepts measure.
 Conversely, PDB tractability results (dichotomies for hierarchical

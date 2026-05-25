@@ -191,13 +191,13 @@ $\mbox{Datalog}^\neg$; for each, classical semantic variants
         semiring whose layered structure is reflected as a chain of
         sub-semirings that query evaluation respects
         (Sections~\ref{sec:det-semiring}--\ref{sec:filtration}).
-  \item Instantiation for transactional systems: isolation levels
+  \item \emph{Instantiation for transactional systems}: isolation levels
         (RC, SI, SER) are different resolving subsets of a shared
         filtration; determination depth is $\Theta(n)$ worst-case
         with scheduling discretion, and SER/SI are incomparable in
         per-tuple query-relative depth
         (Section~\ref{sec:transactions}).
-  \item Instantiation for $\mbox{Datalog}^\neg$: for a representative
+  \item \emph{Instantiation for $\mbox{Datalog}^\neg$}: for a representative
         class of programs, negation semantics (stratified,
         well-founded, stable) are different reading depths of a shared
         filtration; monus elimination shows that sealing is
@@ -207,8 +207,8 @@ $\mbox{Datalog}^\neg$; for each, classical semantic variants
   \item \emph{Layer bypass and semantic-change analysis}: queries
         whose inputs have depth below layer~$k$ can bypass layers
         $k, \ldots, d$; specifications over the same basis can be
-        compared tuple-by-tuple, separating coordination \emph{work
-        regret} from genuine \emph{semantic shift}; depth-$1$
+        compared tuple-by-tuple, quantifying coordination \emph{work
+        regret} vs.\ genuine \emph{semantic shift}; depth-$1$
         provenance coincides with PDB lineage, and higher depths
         correspond to layered PDB evaluation
         (Section~\ref{sec:bypass}).

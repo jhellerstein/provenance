@@ -77,8 +77,7 @@
   \emph{filtration} measuring each tuple's \emph{query-relative
   depth}---how many layers of semantic resolution it depends on.
   Positive relational algebra respects the filtration, enabling
-  compositional robustness analysis and safe relaxation of
-  coordination layers.
+  compositional robustness analysis and principled depth reduction.
   We instantiate the framework for transactional isolation
   (yielding per-tuple separations of serializability and snapshot
   isolation) and for Datalog with negation (where classical semantics
@@ -179,9 +178,7 @@ commitment affects it.
 A contingent tuple like $d$ has positive depth reflecting which
 commitment layer it depends on (overlapping conflict cycles and nested
 negation produce deeper filtrations).
-Positive relational algebra cannot increase depth, and a
-support-separation condition characterizes when a layer's coordination
-can be safely eliminated (Section~\ref{sec:relaxation}).
+Positive relational algebra cannot increase depth.
 We instantiate the framework for transactional isolation and
 Datalog negation; for the latter, the classical negation semantics
 correspond to different filtration levels.
@@ -201,7 +198,7 @@ correspond to different filtration levels.
         that is incomparable---neither level dominates the other in
         query-relative depth
         (Section~\ref{sec:transactions}).
-  \item Instantiation for Datalog with negation: for a representative
+  \item Instantiation for Datalog: for a representative
         class of programs, the classical negation
         semantics---stratified, well-founded, stable-model---correspond
         to filtration levels of a single determination semiring;
@@ -209,11 +206,6 @@ correspond to different filtration levels.
         are support-equivalent to semirings-with-monus for negation
         (Section~\ref{sec:negation-preview},
         Appendix~\ref{sec:appendix-datalog}).
-  \item \emph{Hierarchical relaxation}: the filtration decomposes the
-        question ``which layer can be relaxed without cascade?'' into
-        per-layer checks; safe relaxation is characterized by a
-        support-separation condition
-        (Section~\ref{sec:relaxation}).
   \item \emph{Complexity and quantitative diagnosis} (appendices):
         robustness is coNP-complete
         (Appendix~\ref{app:robustness-proofs}); a Shapley-value
@@ -283,8 +275,7 @@ to rule out $o_1$ but rather to \emph{refine} it---$o_2$ adds detail
 without contradicting $o_1$.
 The order $\Ord$ is part of the specification---a modeling choice, not
 derived from execution structure; changing $\Ord$ changes the
-specification (as in Section~\ref{sec:relaxation}, where enlarging
-$\Ord$ relaxes coordination requirements).
+specification (enlarging $\Ord$ relaxes coordination requirements).
 
 \begin{definition}[Specification]
   A \emph{specification} is a triple $(\Hist, O, \Ord)$ together with a
@@ -532,7 +523,7 @@ Answering such questions requires comparing provenance across multiple
 determinations.
 
 The resulting structure is a Boolean algebra on supports.
-In both instantiations of this paper (transactions and Datalog),
+In both instantiations of this paper (transactions and $\mbox{Datalog}^\neg$),
 $\Spec(H)$ is finite and finitely many commitments from $\Phi$ are
 applicable at any history, so $\mathcal{D}$ is finite.
 
@@ -641,7 +632,7 @@ layers are irrelevant to it.
 
 \noindent
 The layering function encodes the semantic structure of the domain
-(e.g., stratification layers in Datalog, conflict-independence
+(e.g., stratification layers in $\mbox{Datalog}^\neg$, conflict-independence
 structure in transactions).
 In the instantiations below, the layering is canonical: it is the
 coarsest assignment consistent with the commutativity and dependency
@@ -654,7 +645,7 @@ history-independent (it holds universally or not at all), so no
 precision is lost:
 for transactions, independent commit/abort decisions form a single layer
 while cycle-breaking decisions that depend on prior aborts form
-subsequent layers; for Datalog, stratum sealing forms layers
+subsequent layers; for $\mbox{Datalog}^\neg$, stratum sealing forms layers
 $1, \ldots, k$ and choice predicates form layer $k{+}1$.
 Whether a history-dependent layering can be derived from local
 commutativity (a dynamic analog of Foata normal
@@ -1314,13 +1305,13 @@ values are not determined without discharging the choice layer.
 \end{proof}
 
 \noindent
-Classical stratification is the Datalog-specific instance of
-determination layering: each stratum boundary is a sealing commitment.
-The filtration makes this prefix structure explicit and compositional:
-supports at each filtration level compose through queries
-(Corollary~\ref{cor:propagation-filtration}), so preservation across
-semantics can be checked algebraically rather than by re-running the
-alternating fixpoint.
+Beyond offering a unified account of divergent semantics for negation,
+the theorem's provenance payoff is compositionality: because supports at each
+filtration level compose through positive relational algebra
+(Corollary~\ref{cor:propagation-filtration}), one can check whether a
+query result is preserved across semantics (e.g., stable $\to$
+well-founded) by inspecting supports algebraically, without re-running
+evaluation under each semantics separately.
 
 % This is correct: sealed absence → 1_K, sealed presence → 0_K matches
 % monus (1_K ∸ v) for any naturally ordered K. Downstream derivability
@@ -1328,169 +1319,133 @@ alternating fixpoint.
 % The K-valued annotations within each determination use positive K only.
 \begin{theorem}[Monus elimination]
   \label{thm:monus-elimination}
-  For any finite \emph{stratified} Datalog program with negation $P$
-  and any naturally ordered, zero-divisor-free commutative semiring $K$
-  (including $\mathbb{N}[X]$, the Boolean semiring, and all standard
-  provenance semirings):
-  the \emph{support} of an atom $a$ (the set of
-  determinations under which $a$ holds) computed via sealing commitments
-  over $(K, +, \cdot)$ equals the support computed via LFP with
+  For any finite stratified $\mbox{Datalog}^\neg$ program and any
+  naturally ordered, zero-divisor-free commutative semiring $K$:
+  the support of every atom computed via sealing commitments over
+  $(K, +, \cdot)$ equals the support computed via least fixpoint with
   monus over $(K, \dot{-})$~\cite{dannert2021semiring}.
-  Within each resolving determination, derivational provenance is
-  computed by ordinary positive $K$-evaluation (no monus needed).
-  The monus is replaced by: a sealing commitment (fixing the stratum's
-  derivations) followed by a monotone annotation of sealed absence as
-  $0_K$ or $1_K$.
-  For the Boolean and why-provenance semirings (where annotations are in
-  $\{0_K, 1_K\}$), support equivalence implies full provenance
-  equivalence.
-  For programs with unstratified negation, monus is undefined (no unique
-  model to complement against), while determination provenance remains
-  well-defined across stable models when they exist.
 \end{theorem}
+
+\noindent
+That is, sealing replaces monus: rather than subtracting provenance
+annotations, one commits to a stratum's completeness and annotates
+sealed absence as $0_K$.
+Within each determination, derivational provenance uses ordinary
+positive $K$-evaluation.
+
 \begin{proof}
   See Appendix~\ref{sec:appendix-datalog}.
 \end{proof}
 
-\noindent
-Preservation across semantics is read from supports: $p(c)$ is preserved
-from stable to well-founded to stratified (full support); $r(c)$ is not
-(partial support, invisible until the choice layer).
-
 % ================================================================
-\section{Hierarchical Relaxation via the Filtration}
-\label{sec:relaxation}
+\section{Complexity of Depth Verification}
+\label{sec:depth-complexity}
 % ================================================================
 
-The filtration classifies tuples by how much semantic resolution they
-require.
-A natural next question: if a tuple is contingent at layer~$k$, can we
-\emph{relax} layer~$k$---weaken the specification so that layer~$k$'s
-commitments become unnecessary---without disturbing the rest of the
-determination structure?
-This section shows that the filtration decomposes the global relaxation
-problem into per-layer questions and characterizes when per-layer
-relaxation is safe.
+The filtration assigns each tuple a query-relative depth.
+A natural question: how hard is it to verify that a tuple's depth is
+at most $k$?
+We show that the filtration induces a complexity hierarchy: as the
+depth bound $k$ increases, verification becomes strictly easier,
+parameterized by the width of the layers above $k$.
 
-\subsection{Layer Relaxation}
-
-Fix a depth-$d$ specification $\Spec$ with layered commitment basis
-$(\Phi, \lambda)$ and filtration
-$\mathcal{F}_0 \subseteq \cdots \subseteq \mathcal{F}_d$.
-
-\begin{definition}[Layer-$k$ relaxation]
-  \label{def:layer-relaxation}
-  A \emph{layer-$k$ relaxation} of $\Spec = (\Hist, O, \Ord)$ is a
-  specification $\Spec' = (\Hist, O, \Ord')$ with
-  $\Ord' \supseteq \Ord$ such that:
-  (i)~layers $1, \ldots, k{-}1$ are unchanged (same commitments, same
-  effects);
-  (ii)~layer~$k$ is monotone under $\Ord'$ conditioned on the
-  discharged prefix (no layer-$k$ commitment is
-  needed)~\cite{anon2026coordinationcriterion};
-  (iii)~$\Ord'$ is minimal among orders satisfying (i)--(ii).
-  The \emph{layer-$k$ frontier} is the set of all such relaxations.
+\begin{definition}[Width]
+  The \emph{width} of layer~$\ell$ is the number of commitments in
+  $\{\varphi \in \Phi \mid \lambda(\varphi) = \ell\}$.
+  The \emph{residual width above $k$} is
+  $W_{>k} = \sum_{\ell=k+1}^{d} w_\ell$, where $w_\ell$ is the width
+  of layer~$\ell$.
 \end{definition}
 
 \noindent
-The key question is whether relaxing layer~$k$ \emph{propagates}: do
-layers $k{+}1, \ldots, d$ remain well-defined, or must they be
-restructured?
+Checking $\mathrm{qdepth}(t) \leq k$ amounts to verifying that $t$'s
+support is invariant under all possible commitments at layers
+$k{+}1, \ldots, d$: for every pair of determinations $D, D'$ that
+agree at layers $1, \ldots, k$ but may differ above, $t$ holds in $D$
+iff it holds in $D'$.
+This is a universal quantification over the choices at layers above
+$k$ --- a space of size at most $2^{W_{>k}}$.
 
-\subsection{The Cascade Condition}
-
-\begin{definition}[Support-separating layer]
-  \label{def:support-separating}
-  Layer~$k$ is \emph{support-separating} if no higher layer refines
-  the level-$k$ partition: for all $j > k$,
-  $D \equiv_k D'$ implies $D \equiv_j D'$.
-  Equivalently, the level-$k$ and level-$j$ equivalence classes
-  coincide for every $j > k$---layers above~$k$ introduce no further
-  distinctions.
-\end{definition}
-
-\begin{theorem}[Sufficient condition for safe relaxation]
-  \label{thm:safe-relaxation}
-  Assume \emph{upper-layer stability}: each layer-$(k{+}1)$ commitment
-  $\psi$'s exclusion set depends only on the level-$(k{+}1)$ equivalence
-  class, not on which specific layer-$k$ outcomes were excluded.
+\begin{theorem}[Depth-verification hierarchy]
+  \label{thm:depth-hierarchy}
+  For a specification with depth $d$ and layered commitment basis of
+  widths $w_1, \ldots, w_d$:
   \begin{enumerate}[nosep,label=(\alph*)]
-    \item If layer~$k$ is support-separating, then every layer-$k$
-          relaxation $\Spec'$ has depth $d{-}1$: layers above~$k$
-          remain valid with unchanged equivalence classes, and the
-          filtration of $\Spec'$ is obtained by removing level~$k$.
-    \item If layer~$k$ is not support-separating, then some layer-$k$
-          relaxation may invalidate a layer-$(k{+}1)$ commitment,
-          forcing restructuring of layers above~$k$.
+    \item Checking $\mathrm{qdepth}(t) \leq k$ is in
+          $\mathrm{coNP}$ with respect to $W_{>k}$ (the residual width
+          above $k$): a nondeterministic verifier guesses commitments
+          at layers $k{+}1, \ldots, d$ and checks whether $t$'s
+          membership changes.
+    \item Checking $\mathrm{qdepth}(t) \leq k$ is
+          $\mathrm{coNP}$-hard in $W_{>k}$ for every $k < d$, by
+          reduction from robustness
+          (Theorem~\ref{thm:robustness-conp}) restricted to the
+          sub-specification above layer~$k$.
+    \item Checking $\mathrm{qdepth}(t) \leq d$ is trivial (always
+          true).
   \end{enumerate}
+  Hence the filtration induces a hierarchy: as $k$ increases from $0$
+  to $d$, the verification problem ranges from
+  $\mathrm{coNP}(W_{>0})$ (full robustness) to trivial, with the
+  effective problem size shrinking at each level.
 \end{theorem}
 
-\begin{proof}[Proof sketch]
-  \emph{(a)}~After relaxation, the admissible set at layer~$(k{+}1)$'s
-  input is weakly larger (layer~$k$'s exclusions are absent).
-  Support-separation ensures that the level-$(k{+}1)$ class structure
-  is unchanged: no class was split by layer~$k$'s distinctions.
-  Hence each layer-$(k{+}1)$ commitment $\psi$ excludes the same
-  outcomes from a (weakly larger) set, preserving nonemptiness:
-  $\Spec'(H \cdot \psi) \supseteq \Spec(H \cdot \psi) \neq \emptyset$.
+\begin{proof}
+  \emph{(a)}~A certificate for $\mathrm{qdepth}(t) > k$ is a pair of
+  determinations $D, D'$ with $D \equiv_k D'$ such that $t$ holds in
+  $D$ but not $D'$ (or vice versa).
+  The certificate has size $O(W_{>k})$ (the differing commitments at
+  layers $k{+}1, \ldots, d$), and verification requires evaluating
+  $t$'s derivation under both determinations (polynomial in the query
+  and instance size).
+  Hence $\mathrm{qdepth}(t) \leq k$ is in $\mathrm{coNP}$ with
+  witness size $W_{>k}$.
 
-  \emph{(b)}~If $D \equiv_k D'$ but $D \not\equiv_j D'$ for some
-  $j > k$, relaxation merges their level-$k$ classes.
-  A layer-$j$ commitment valid for $D$'s branch may empty the
-  admissible set on outcomes from $D'$'s branch that layer~$k$ would
-  have excluded.
+  \emph{(b)}~The robustness reduction
+  (Theorem~\ref{thm:robustness-conp}) encodes a SAT instance into
+  commitment choices.
+  Given a specification with a single layer of width $w$ (depth~$1$),
+  robustness is coNP-hard in $w$.
+  For depth $> 1$: embed the same construction into layers
+  $k{+}1, \ldots, d$ while making layers $1, \ldots, k$ trivial
+  (all determinations agree there).
+  Then $\mathrm{qdepth}(t) \leq k$ iff $t$ is robust in the
+  sub-specification above layer~$k$, which is coNP-hard in $W_{>k}$.
+
+  \emph{(c)}~Every tuple has $\mathrm{qdepth} \leq d$ by definition
+  of the filtration.
 \end{proof}
 
-\subsection{Provenance-Guided Relaxation}
+\begin{example}[Depth hierarchy in transactions]
+  In the $T_\infty$ construction with $n$ transactions, depth is
+  $n{-}1$ and each layer has width~$1$ (a single binary victim
+  decision).
+  Checking robustness ($k = 0$) requires considering all $2^{n-1}$
+  determination paths.
+  Checking $\mathrm{qdepth}(t) \leq n{-}2$ requires considering only
+  the final victim decision ($W_{>n-2} = 1$): is $t$'s membership
+  affected by the last round's choice?
+  This is a single binary check --- trivially polynomial.
+\end{example}
 
-\begin{corollary}[Query-relative relaxation]
-  \label{cor:query-relaxation}
-  Let $\mathcal{Q}$ be a set of query tuples with
-  $k^* = \max_{t \in \mathcal{Q}} \mathrm{qdepth}(t)$.
-  If layer~$k^*$ is support-separating, then relaxing layer~$k^*$
-  makes every tuple in $\mathcal{Q}$ either robust or dependent only
-  on layers $< k^*$, without affecting tuples with support in
-  $\mathcal{F}_{k^*-1}$.
-\end{corollary}
-
-\begin{example}[Isolation-level relaxation]
-  \label{ex:relaxation}
-  In Example~\ref{ex:example}, value $d$ has $\mathrm{qdepth}(d) = 1$,
-  supported only by $D_{\mathsf{in}}$.
-  The single layer consists of ordering decisions; since depth is~$1$,
-  it is trivially support-separating.
-  Relaxing layer~$1$ means enlarging $\Ord$ so that the ordering of
-  $T_Q$ relative to $T_3$ need not be committed---operationally,
-  running this pair at snapshot isolation rather than serializability.
-  Under SI, the ordering of $T_Q$ relative to $T_3$ is no longer
-  a forbidden cycle; the alternatives are compatible under the relaxed
-  $\Ord$, so no commitment is needed and $d$'s depth drops to~$0$.
-
-  The provenance diagnosis: ``$d$ is contingent because the ordering of
-  $T_Q$ relative to $T_3$ was committed; relaxing that commitment
-  eliminates the contingency.''
-  This is a per-tuple, per-commitment answer that global robustness
-  analysis~\cite{vandevoort2025mixed} does not provide.
-
-  In the Datalog program of Section~\ref{sec:negation-preview},
-  relaxing the choice layer (layer~$3$, trivially support-separating)
-  means accepting well-founded semantics: $r(c)$ is classified as
-  $\mathbf{u}$ rather than resolved.
-  The sealing layers below are unchanged; $p(c)$ (qdepth~$0$) is
-  unaffected.
+\begin{example}[Depth hierarchy in $\mbox{Datalog}^\neg$]
+  A program with $k$ sealing layers and $d$ independent negative SCCs
+  (each binary) has $W_{>k} = d$ (one binary choice per SCC).
+  Checking $\mathrm{qdepth}(t) \leq k$ (is $t$ determined by the
+  sealing prefix alone?) is coNP in $d$ --- equivalent to checking
+  whether $t$ holds in all $2^d$ stable models.
+  Checking $\mathrm{qdepth}(t) \leq k{+}j$ for $j > 0$ reduces the
+  space to $2^{d-j}$ models: those consistent with the first $j$
+  choice layers already discharged.
 \end{example}
 
 \noindent
-Deciding support-separation requires inspecting the equivalence-class
-structure of $\mathcal{D}$.
-For transactions, it reduces to checking whether the conflict graph's
-SCC structure at layer~$k$ is independent of layers above (polynomial).
-For Datalog, the final choice layer is always support-separating; sealing
-layers are support-separating when stratification is canonical.
-In general, the check is coNP-hard (by reduction from robustness,
-Theorem~\ref{thm:robustness-conp}).
-
-% Responsibility section moved to Appendix~\ref{app:responsibility-details}.
+The hierarchy shows that depth is not merely a classification but a
+\emph{complexity measure}: the filtration stratifies the verification
+problem itself.
+A system that knows a tuple's depth can allocate verification effort
+proportionally --- shallow tuples are cheap to certify, deep tuples
+are expensive, and the filtration tells you which is which.
 
 % ================================================================
 \section{Related Work}
@@ -1589,8 +1544,7 @@ Determination provenance makes the commitments that resolve semantic
 ambiguity explicit and composable.
 Supports over resolving determinations form a filtered semiring;
 the filtration measures query-relative depth, is respected by positive
-relational algebra, recovers classical provenance at depth~$0$, and
-decomposes relaxation into per-layer questions via support-separation.
+relational algebra, and recovers classical provenance at depth~$0$.
 Transactions and Datalog with negation instantiate the framework;
 for transactions, the filtration yields a per-tuple separation of
 isolation levels (SER and SI are incomparable in query-relative depth);
@@ -1678,7 +1632,7 @@ polynomial time.
 \subsection{Datalog Hardness}
 
 The general theorem (Theorem~\ref{thm:robustness-conp}) applies directly
-to the Datalog instantiation, providing an independent proof of
+to the $\mbox{Datalog}^\neg$ instantiation, providing an independent proof of
 coNP-hardness via the DNF-Validity reduction.
 
 \paragraph{Instantiation.}
@@ -1687,7 +1641,7 @@ independent binary commitments (one per cycle).
 The DNF-Validity gadget of the transactional proof applies verbatim:
 encode a DNF $\psi$ as a UCQ over the choice-induced truth values, so
 that the distinguished tuple is robust iff $\psi$ is valid.
-This yields coNP-hardness for the Datalog instantiation.
+This yields coNP-hardness for the $\mbox{Datalog}^\neg$ instantiation.
 
 The result coincides with the known coNP-completeness of skeptical
 reasoning under stable-model
@@ -1704,7 +1658,7 @@ commitments, one per stratum plus one per $\neg$-cycle atom
 Condition~(ii): checking that a determination produces a valid stable
 model requires computing the Gelfond--Lifschitz reduct and verifying
 that the proposed model is its minimal model (polynomial time).
-Condition~(iii): evaluating a Datalog query over a fixed model is in
+Condition~(iii): evaluating a $\mbox{Datalog}^\neg$ query over a fixed model is in
 polynomial time.
 
 % ================================================================
@@ -3093,7 +3047,7 @@ another?
 Examples include isolation-level migration (does a transaction's result
 survive a move from SI to
 serializability?~\cite{vandevoort2025mixed}), semantic-change queries
-(would a Datalog result survive a change from stable to well-founded
+(would a $\mbox{Datalog}^\neg$ result survive a change from stable to well-founded
 semantics?), and specification tightening (which results are preserved
 when migrating to a stricter consistency model?).
 These are across-specification questions that require comparing
@@ -3355,6 +3309,127 @@ responsibility~\cite{livshits2021shapley} are sequential games.
 Formalizing their composition into a single joint game---with both
 commitments and tuples as players---would unify the two dimensions of
 provenance into a single attribution.
+
+% ================================================================
+\section{Depth Reduction: Bounding Determination Complexity}
+\label{app:depth-reduction}
+\label{sec:relaxation}
+% ================================================================
+
+The filtration measures determination complexity: a specification with
+depth $d$ requires $d$ sequential, non-commuting commitment decisions
+to resolve.
+High depth means long chains of dependent decisions --- each contingent
+on the previous --- and correspondingly high coordination cost.
+A natural question: given a specification with depth $d$, how can we
+reduce it to a target depth $d^* < d$?
+
+We identify three mechanisms for depth reduction, each corresponding to
+a different structural change to the specification or its commitment
+basis.
+
+\begin{definition}[Depth reduction mechanisms]
+  \label{def:depth-reduction}
+  Let $\Spec$ have depth $d$ under commitment basis $(\Phi, \lambda)$.
+  A \emph{depth reduction} to $d^* < d$ is achieved by one of:
+  \begin{enumerate}[nosep,label=(\roman*)]
+    \item \emph{Coarsening} $\Ord$: enlarge the outcome order to
+          $\Ord' \supseteq \Ord$ so that outcomes distinguished by
+          some layer~$k$ become $\Ord'$-comparable.
+          Layer~$k$'s commitments become unnecessary (nothing to choose
+          among) and the layer is eliminated.
+    \item \emph{Commutation}: impose additional structure so that
+          commitments in adjacent layers $k$ and $k{+}1$ commute.
+          The two layers merge into one, reducing depth by one.
+    \item \emph{Entailment}: replace a layer-$k$ commitment with a
+          deterministic function of the discharged prefix (an
+          entailment).
+          The decision is no longer discretionary; the layer is
+          eliminated.
+  \end{enumerate}
+\end{definition}
+
+\noindent
+Each mechanism has a cost:
+(i)~weakens the specification (more outcomes are considered equivalent);
+(ii)~restricts the commitment basis (decisions lose independence);
+(iii)~removes discretion (the system commits to a policy).
+The filtration diagnoses \emph{where} depth arises and \emph{which}
+mechanism applies at each layer.
+
+\begin{example}[Transactional depth reduction]
+  \label{ex:depth-reduction-txn}
+  The $T_\infty$ construction (Theorem~\ref{thm:txn-depth}) has depth
+  $\Theta(n)$: each round's victim decision depends on the previous.
+  The three mechanisms yield different bounded-depth protocols:
+  \begin{itemize}[nosep]
+    \item \emph{Coarsening} (SER $\to$ SI): the rw-rw cycle that
+          forced victim selection is no longer forbidden under SI.
+          The layer that broke the cycle is eliminated; depth drops for
+          tuples involved in write-skew patterns.
+    \item \emph{Commutation} (batching): seal a batch of $B$ pending
+          requests, then resolve all conflicts within the batch
+          simultaneously.
+          Within-batch decisions commute (they operate on disjoint
+          conflict edges), collapsing $B$ sequential layers into one.
+          Per-batch depth becomes~$2$ (seal + batch-order).
+          This requires pre-declared read/write sets so that conflict
+          edges are known at seal
+          time~\cite{thomson2012calvin}.
+    \item \emph{Entailment} (reactive protocol): process each event
+          deterministically given the current state (e.g., OCC:
+          validate on commit, abort if cycle exists; MVTO: assign
+          timestamp on arrival, abort on violation).
+          No system choice arises; victim selection is entailed by the
+          protocol and the arriving request.
+          Depth drops to~$0$.
+  \end{itemize}
+\end{example}
+
+\begin{example}[$\mbox{Datalog}^\neg$ depth reduction]
+  \label{ex:depth-reduction-datalog}
+  A program with $k$ stratification layers and $d$ nested negative
+  SCCs has depth $k{+}d$ (Theorem~\ref{thm:negation-filtration}).
+  \begin{itemize}[nosep]
+    \item \emph{Coarsening} (stable $\to$ well-founded): enlarge
+          $\Ord$ so that $\mathbf{u}$ refines to both $\mathbf{t}$ and
+          $\mathbf{f}$.
+          The choice layers become unnecessary (all outcomes are
+          $\Ord'$-comparable); depth drops from $k{+}d$ to $k$.
+    \item \emph{Entailment} (deterministic choice): impose a policy
+          that selects a unique stable extension for each negative SCC
+          (e.g., order atoms alphabetically and assign $\mathbf{t}$ to
+          the lowest in each cycle).
+          The choice layer becomes deterministic --- an entailment, not
+          a commitment.
+          Each such SCC reduces $d$ by one.
+  \end{itemize}
+  Commutation is already exploited: independent negative SCCs form a
+  single choice layer rather than $d$ sequential ones
+  (Section~\ref{sec:negation-preview}).
+\end{example}
+
+\begin{proposition}[Soundness of depth reduction]
+  \label{thm:depth-reduction}
+  Each mechanism produces a valid specification with strictly smaller
+  depth:
+  \begin{enumerate}[nosep,label=(\roman*)]
+    \item If coarsening $\Ord$ to $\Ord'$ makes all outcomes at
+          layer~$k$ pairwise $\Ord'$-comparable, then layer~$k$ is
+          eliminated and depth is $\le d{-}1$.
+    \item If layers $k$ and $k{+}1$ commute (within-layer commutativity
+          holds for their union), merging them yields depth $d{-}1$.
+    \item If layer~$k$'s commitment is uniquely determined by the
+          discharged prefix at every history, reclassifying it as an
+          entailment yields depth $d{-}1$.
+  \end{enumerate}
+\end{proposition}
+\begin{proof}
+  Follows directly from Definitions~\ref{def:determined},
+  \ref{def:layered-basis}, and~\ref{def:commitment}: (i)~comparable
+  outcomes need no commitment; (ii)~commuting commitments form a single
+  layer; (iii)~a deterministic commitment adds no branching.
+\end{proof}
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{references}

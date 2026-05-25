@@ -158,17 +158,14 @@ Value $b$ has full support (every determination); $d$ has partial
 support (the determinations in which $T_Q$
 observes $T_2$'s insert).
 A provenance question like ``is $d$ robust?'' reduces to checking
-whether $d$'s support is full; counterfactual questions (``under which
-schedules does $d$ appear?'') are read from the support directly; and
-quantitative diagnosis (``what fraction of admissible executions
-produce $d$?'') is obtained from the support's measure---recovering, in the
-ambiguous setting, the three capabilities that classical semiring
-provenance provides in the resolved one.
-Supports compose through relational operations---joining two tuples
-intersects their supports; taking their union merges
-supports---so the provenance of a complex query result can be computed
-from the provenance of its inputs, just as in the classical semiring
-setting.
+whether $d$'s support is full; counterfactual questions are read from
+the support directly; and quantitative diagnosis is obtained from the
+support's measure---recovering, in the ambiguous setting, the three
+capabilities that classical semiring provenance provides in the
+resolved one.
+Supports compose through relational operations (join intersects
+supports; union merges them), so the provenance of a complex query
+result can be computed from the provenance of its inputs.
 
 When commitments are layered---some depending on others' outcomes---the
 semiring carries a \emph{filtration}: a chain of sub-semirings
@@ -1118,37 +1115,24 @@ propagates through queries.
 
 \subsection{Running Example Revisited}
 
-Returning to Example~\ref{ex:example}: $T_2$, $T_3$, and $T_Q$ conflict on
-$(2,d)$ with no cycles.
-$T_1$ shares no conflict edge with $T_2$, $T_3$, or $T_Q$ on this object,
-so its ordering is irrelevant to $d$'s provenance.
-Using ordering commitments (Section~\ref{sec:scheduling-basis}), the
-query-relevant determinations are those fixing the serialization order
-among $T_2$, $T_3$, $T_Q$ on the contested tuple.
-Two equivalence classes of determinations arise (quotienting by
-query-outcome equivalence).
-Representative members:
+Returning to Example~\ref{ex:example}: using ordering commitments
+(Section~\ref{sec:scheduling-basis}), two equivalence classes of
+determinations arise (quotienting by query-outcome equivalence):
 $D_{\mathsf{in}} \triangleq
   \varphi_{T_2 \prec T_Q} \cdot \varphi_{T_Q \prec T_3}$
-(the class includes all orderings where $T_2$'s insert is visible to
-$T_Q$---e.g., also $T_3 \prec T_2 \prec T_Q$, where the delete
-precedes the insert and is a no-op)
+(all orderings where $T_Q$ observes $T_2$'s insert)
 and
 $D_{\mathsf{out}} \triangleq
   \varphi_{T_2 \prec T_3} \cdot \varphi_{T_3 \prec T_Q}$
-(the class of orderings where $d$ is absent at query time).
-We write $\mathcal{D} = \{D_{\mathsf{in}}, D_{\mathsf{out}}\}$ for
-these classes throughout.
+(orderings where $d$ is absent).
 The determination provenance is:
 \[
   P(b) = \mathcal{D} \times \{x_0\}, \qquad
   P(d) = \{(D_{\mathsf{in}},\, x_2)\}.
 \]
-Prior to resolution, even the \emph{form} of the provenance question for $d$
-is ambiguous (why vs.\ why-not).
-$b$ is robust (nonzero under every determination); $d$ is contingent.
+$b$ is robust; $d$ is contingent.
 Figure~\ref{fig:det-tables} summarizes the determination structure across
-isolation levels for this example.
+isolation levels.
 
 
 \begin{figure*}[t]
@@ -1308,26 +1292,15 @@ values are not determined without discharging the choice layer.
   \end{enumerate}
 \end{theorem}
 \begin{proof}[Proof sketch]
-  The commitment basis has $k$ sealing predicates (one per stratum)
-  followed by $d$ choice layers (one per negative SCC in topological
-  order); see Appendix~\ref{app:datalog-general} for the full
-  construction and soundness proof.
-  The sealing prefix $\varphi_{\seal}(S_1) \seq \cdots \seq
-  \varphi_{\seal}(S_k)$ is shared by all resolving determinations:
-  stratified evaluation is unique (each stratum's least fixpoint is
-  determined by the sealed strata below it), so no alternative sealing
-  sequence exists.
-  Hence all determinations agree at level $k$:
-  $\mathcal{F}_k = \{\emptyset, \mathcal{D}\}$.
-  Each choice layer $k{+}i$ resolves the atoms in negative SCC $C_i$;
-  when SCCs interact, later choices depend on earlier outcomes, giving
-  $d$ non-commuting layers and depth $k{+}d$.
-  WFS applies the alternating fixpoint after the sealing prefix,
-  discharging choice layers that are forced (unique stable extension
-  given the discharged prefix) and classifying the remainder as
-  $\mathbf{u}$.
-  In the independent case ($d = 1$, as in the example above), there is
-  a single choice layer and $d^* = 0$: WFS reads $\mathcal{F}_k$.
+  The commitment basis has $k$ sealing predicates followed by $d$
+  choice layers (one per negative SCC in topological order).
+  The sealing prefix is shared by all determinations (stratified
+  evaluation is unique), so $\mathcal{F}_k = \{\emptyset, \mathcal{D}\}$.
+  Each choice layer $k{+}i$ resolves SCC $C_i$; when SCCs interact,
+  later choices depend on earlier outcomes, giving $d$ non-commuting
+  layers and depth $k{+}d$.
+  WFS reads $\mathcal{F}_k$ (the sealing prefix) and classifies
+  residual ambiguity as $\mathbf{u}$.
   Full proof in Appendix~\ref{sec:appendix-datalog}.
 \end{proof}
 
@@ -1410,15 +1383,6 @@ The filtration's contribution is compositional soundness: a bypass
 check on input tuples propagates to all outputs without per-query
 re-verification
 (Corollary~\ref{cor:propagation-filtration}).
-
-\paragraph{Program-bounded vs.\ input-recurrent depth.}
-The $\Theta(n)$ transactional depth arises from recurring structure:
-the same seal-plus-victim pair repeated as new conflicts arrive.
-In $\mbox{Datalog}^\neg$, depth is bounded by the program's dependency
-structure regardless of EDB size.
-The filtration makes this distinction visible: transactional
-coordination cost scales with workload (input-recurrent); Datalog
-commitment depth does not (program-bounded).
 
 
 \subsection{Quantitative Relaxation Assessment}
@@ -3346,6 +3310,16 @@ responsibility~\cite{livshits2021shapley} are sequential games.
 Formalizing their composition into a single joint game---with both
 commitments and tuples as players---would unify the two dimensions of
 provenance into a single attribution.
+
+\paragraph{Program-bounded vs.\ input-recurrent depth.}
+The $\Theta(n)$ transactional depth arises from recurring structure:
+the same seal-plus-victim pair repeated as new conflicts arrive.
+In $\mbox{Datalog}^\neg$, depth is bounded by the program's dependency
+structure regardless of EDB size.
+Characterizing when a specification's depth is bounded by its static
+structure vs.\ when it grows with the input stream --- and whether
+recurring depth admits uniform bypass (a single check covering all
+recurrences) --- is open.
 
 % ================================================================
 \section{Depth Reduction: Bounding Determination Complexity}

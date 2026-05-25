@@ -170,7 +170,8 @@ semiring carries a \emph{filtration}: a chain of sub-semirings
 reflecting how much resolution each tuple requires.
 A tuple with full or empty support has depth~$0$; a contingent tuple
 has positive depth reflecting which layer it depends on.
-Positive relational algebra cannot increase depth.
+Positive relational algebra cannot increase depth: if all inputs to a
+query have depth $\leq j$, so do all outputs.
 The filtration supports three forms of reasoning:
 \emph{bypass} (queries whose inputs are settled before layer~$k$ can
 skip layers $k, \ldots, d$); \emph{semantic-change analysis}

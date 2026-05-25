@@ -1413,9 +1413,10 @@ In both instantiations, the coNP bound is avoided by reducing bypass
 to a polynomial graph property:
 
 \begin{example}[Transactional bypass]
-  A transaction bypasses the conflict-resolution layer if it
+  A transaction $T_i$ bypasses the conflict-resolution layer if it
   participates in no $L$-forbidden cycle (polynomial in the conflict
-  graph).
+  graph); all tuples whose provenance depends only on $T_i$ then have
+  depth~$0$.
   Under deterministic scheduling~\cite{thomson2012calvin}, this is
   checked prospectively at seal time.
   Under dynamic protocols with discretion (2PL deadlock detection, OCC

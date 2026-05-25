@@ -171,9 +171,9 @@ reflecting how much resolution each tuple requires.
 A tuple with full or empty support has depth~$0$; a contingent tuple
 has positive depth reflecting which layer it depends on.
 Query evaluation (positive RA) cannot make a result tuple depend on
-more layers than the base tuples it derives from.
+more layers than the tuples it reads from.
 The filtration supports three forms of reasoning:
-\emph{bypass} (queries whose base tuples are settled before layer~$k$
+\emph{bypass} (queries reading only tuples settled before layer~$k$
 can skip layers $k, \ldots, d$); \emph{semantic-change analysis}
 (specifications over the same basis can be compared tuple-by-tuple,
 separating wasted coordination from genuine semantic differences); and

@@ -1580,25 +1580,18 @@ ambiguity explicit and composable.
 Supports over resolving determinations form a filtered semiring;
 the filtration measures query-relative depth, is respected by positive
 relational algebra, and recovers classical provenance at depth~$0$.
-Transactions and Datalog with negation instantiate the framework;
-for transactions, the filtration yields a per-tuple separation of
-isolation levels (SER and SI are incomparable in query-relative depth);
-for Datalog, the classical negation semantics correspond to
-filtration levels, and monus is eliminated by sealing.
+Transactions and $\mbox{Datalog}^\neg$ instantiate the framework;
+for transactions, SER and SI are incomparable in query-relative depth;
+for Datalog, classical negation semantics correspond to filtration
+levels, and monus is eliminated by sealing.
 
-A long-standing promise of declarative approaches to systems---from
-relational transducers~\cite{abiteboul2011webdamlog} to
-CALM~\cite{hellerstein2010declarative,ameloot2013relational}---is that
-query-centric abstractions bring database theory to bear on distributed
-and transactional systems.
-Determination provenance is another step forward: the same
-algebraic machinery that explains query answers over a single instance
-now explains the semantic commitments that concurrent systems make.
-Appendix~\ref{app:systems-lineage} sketches a concrete systems agenda.
-Open theory directions (Appendix~\ref{app:open-questions}) include
-universality (a ``most general'' determination semiring analogous to
-$\mathbb{N}[X]$), factorized support representations exploiting the
-trie structure of $\mathcal{D}$, and applications of the filtration to
+Determination provenance brings database-theoretic
+provenance~\cite{green2007provenance} to bear on the semantic
+commitments that concurrent and logic-programming systems
+make~\cite{hellerstein2010declarative,ameloot2013relational}.
+Appendix~\ref{app:systems-lineage} sketches a systems agenda;
+open theory directions (Appendix~\ref{app:open-questions}) include
+universality, factorized support representations, and applications to
 incremental maintenance.
 
 \pagebreak

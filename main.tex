@@ -652,6 +652,21 @@ commutativity (a dynamic analog of Foata normal
 form~\cite{mazurkiewicz1977concurrent}) is left as future work
 (Appendix~\ref{app:open-questions}).
 
+\begin{observation}[Shared filtration across specifications]
+  \label{obs:basis-entails-filtration}
+  When a domain's conflict structure determines a natural commitment
+  basis $\Phi$ (ordering and abort operators for transactions;
+  sealing and choice operators for $\mbox{Datalog}^\neg$), different
+  specifications over that basis share a single filtration.
+  For transactions, isolation levels (RC, SI, SER) are different
+  resolving subsets within one filtration.
+  For $\mbox{Datalog}^\neg$, negation semantics (stratified,
+  well-founded, stable) are different reading depths of one
+  filtration.
+  In both cases, the filtration is a property of the workload's
+  conflict or dependency structure, not of the policy imposed on it.
+\end{observation}
+
 Throughout this subsection, we fix a layered commitment basis
 $(\Phi, \lambda)$ with depth $d$.
 Two determinations $D(H), D'(H') \in \mathcal{D}$ \emph{agree at level $k$},
@@ -1471,43 +1486,64 @@ transactional coordination cost scales with workload while
 $\mbox{Datalog}^\neg$ evaluation cost (in commitment depth) does not.
 
 % ================================================================
-\section{Discussion}
+\section{Filtration Structure}
 \label{sec:discussion}
 % ================================================================
 
 The filtration is the paper's central structural contribution.
-We collect here the distinct roles it plays across the preceding
-sections, and connect determination provenance to the complexity
-landscape of probabilistic databases.
+Observation~\ref{obs:basis-entails-filtration} established that
+different specifications over the same commitment basis share a single
+filtration; the preceding sections showed that isolation levels
+(Section~\ref{sec:transactions}) and negation semantics
+(Section~\ref{sec:negation-preview}) are both instances of this
+principle.
+We develop two consequences: a quantitative measure for comparing
+specifications, and a connection to PDB query complexity.
 
-\paragraph{What the filtration provides.}
-\begin{enumerate}[nosep,label=(\roman*)]
-  \item \emph{Compositional depth bounds.}
-        Positive RA cannot increase qdepth
-        (Corollary~\ref{cor:propagation-filtration}): if all inputs to
-        a provenance query have depth $\leq j$, so do all outputs.
-        This enables per-tuple reasoning about coordination
-        requirements without whole-query analysis.
-  \item \emph{Per-tuple isolation separation.}
-        The filtration reveals that SER and SI are incomparable at the
-        tuple level (Proposition~\ref{prop:ser-si-incomparable}): some
-        tuples are shallower under SER, others under SI.
-        No global ordering of isolation levels captures this.
-  \item \emph{Unified negation semantics.}
-        Stratified, well-founded, and stable-model semantics correspond
-        to readings of a single filtration at different depths
-        (Theorem~\ref{thm:negation-filtration}).
-  \item \emph{Bypass soundness.}
-        The filtration certifies which provenance queries can skip
-        coordination layers (Proposition~\ref{prop:bypass}), with
-        compositional propagation from inputs to outputs.
-  \item \emph{Structural classification of depth.}
-        The filtration makes visible whether coordination depth is
-        bounded by program structure or grows with input
-        (Section~\ref{sec:bypass}).
-\end{enumerate}
+\subsection{Quantitative Relaxation Assessment}
 
-\paragraph{Provenance query complexity and PDBs.}
+The shared filtration enables a per-tuple cost/benefit analysis of
+specification changes.
+Given a workload executed under specification $I$ (e.g., SER) and a
+candidate alternative $I'$ (e.g., SI), the per-tuple qdepth under
+both is measured in the same filtration
+(Observation~\ref{obs:basis-entails-filtration}).
+The difference decomposes into two components:
+
+\paragraph{Work regret.}
+Tuples that are robust under both $I$ and $I'$ but have
+$\mathrm{qdepth}_I(t) > \mathrm{qdepth}_{I'}(t)$: the extra
+coordination under $I$ did not change the outcome.
+For transactions, these are tuples from transactions that committed
+under both SER and SI but required cycle-breaking under SER that SI
+would have skipped.
+
+\paragraph{Semantic shift.}
+Tuples whose support differs between $I$ and $I'$: robust under one,
+contingent under the other.
+For transactions, these are the write-skew tuples (robust under SI,
+contingent under SER) and FCW tuples (robust under SER, contingent
+under SI) of Proposition~\ref{prop:ser-si-incomparable}.
+For $\mbox{Datalog}^\neg$, shifting from stable-model to well-founded
+semantics converts choice-layer atoms from resolved
+($\mathbf{t}$/$\mathbf{f}$) to $\mathbf{u}$ --- a semantic shift
+with zero work regret (WFS is strictly cheaper).
+
+\noindent
+This decomposition is finer-grained than the binary ``portable or
+not'' classification of Vandevoort et
+al.~\cite{vandevoort2025mixed}: it measures \emph{how much}
+coordination each tuple costs (depth difference) and \emph{which}
+tuples change semantics (support difference), enabling per-tuple
+cost/benefit analysis of isolation-level migration.
+The determination responsibility measure
+(Appendix~\ref{app:responsibility-details}) complements this by
+attributing each tuple's contingency to specific commitments via
+Shapley values --- identifying not just the depth of the coordination
+cost but the individual commitment most responsible for it.
+
+\subsection{Provenance Query Complexity}
+
 The determination semiring at depth~$1$ coincides with the Boolean
 algebra of PDB lineage
 (Proposition~\ref{prop:collapse-depth-1}): supports are positive

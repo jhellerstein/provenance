@@ -170,9 +170,9 @@ semiring carries a \emph{filtration}: a chain of sub-semirings
 reflecting how much resolution each tuple requires.
 A tuple with full or empty support has depth~$0$; a contingent tuple
 has positive depth reflecting which layer it depends on.
-Query evaluation (positive relational algebra) cannot make a tuple
-depend on more layers than its inputs do.
-We show how filtration supports three forms of reasoning:
+Query evaluation (positive RA) cannot make a tuple depend on more
+layers than its inputs do.
+The filtration supports three forms of reasoning:
 \emph{bypass} (queries whose inputs are settled before layer~$k$ can
 skip layers $k, \ldots, d$); \emph{semantic-change analysis}
 (specifications over the same basis can be compared tuple-by-tuple,

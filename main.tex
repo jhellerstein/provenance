@@ -1338,114 +1338,103 @@ positive $K$-evaluation.
 \end{proof}
 
 % ================================================================
-\section{Complexity of Depth Verification}
-\label{sec:depth-complexity}
+\section{Layer Bypass}
+\label{sec:bypass}
 % ================================================================
 
-The filtration assigns each tuple a query-relative depth.
-A natural question: how hard is it to verify that a tuple's depth is
-at most $k$?
-We show that the filtration induces a complexity hierarchy: as the
-depth bound $k$ increases, verification becomes strictly easier,
-parameterized by the width of the layers above $k$.
+The filtration assigns each tuple a depth: the number of commitment
+layers its membership depends on.
+A tuple with $\mathrm{qdepth}(t) = j$ is settled once layers
+$1, \ldots, j$ are discharged --- it does not need to participate in
+the coordination at layers $j{+}1, \ldots, d$.
+We call this \emph{layer bypass}: a transaction whose outputs all have
+depth $< k$ can skip layer~$k$'s coordination entirely.
 
-\begin{definition}[Width]
-  The \emph{width} of layer~$\ell$ is the number of commitments in
-  $\{\varphi \in \Phi \mid \lambda(\varphi) = \ell\}$.
-  The \emph{residual width above $k$} is
-  $W_{>k} = \sum_{\ell=k+1}^{d} w_\ell$, where $w_\ell$ is the width
-  of layer~$\ell$.
-\end{definition}
+\subsection{When Is Bypass Valid?}
 
-\noindent
-Checking $\mathrm{qdepth}(t) \leq k$ amounts to verifying that $t$'s
-support is invariant under all possible commitments at layers
-$k{+}1, \ldots, d$: for every pair of determinations $D, D'$ that
-agree at layers $1, \ldots, k$ but may differ above, $t$ holds in $D$
-iff it holds in $D'$.
-This is a universal quantification over the choices at layers above
-$k$ --- a space of size at most $2^{W_{>k}}$.
-
-\begin{theorem}[Depth-verification hierarchy]
-  \label{thm:depth-hierarchy}
-  For a specification with depth $d$ and layered commitment basis of
-  widths $w_1, \ldots, w_d$:
-  \begin{enumerate}[nosep,label=(\alph*)]
-    \item Checking $\mathrm{qdepth}(t) \leq k$ is in
-          $\mathrm{coNP}$ with respect to $W_{>k}$ (the residual width
-          above $k$): a nondeterministic verifier guesses commitments
-          at layers $k{+}1, \ldots, d$ and checks whether $t$'s
-          membership changes.
-    \item Checking $\mathrm{qdepth}(t) \leq k$ is
-          $\mathrm{coNP}$-hard in $W_{>k}$ for every $k < d$, by
-          reduction from robustness
-          (Theorem~\ref{thm:robustness-conp}) restricted to the
-          sub-specification above layer~$k$.
-    \item Checking $\mathrm{qdepth}(t) \leq d$ is trivial (always
-          true).
-  \end{enumerate}
-  Hence the filtration induces a hierarchy: as $k$ increases from $0$
-  to $d$, the verification problem ranges from
-  $\mathrm{coNP}(W_{>0})$ (full robustness) to trivial, with the
-  effective problem size shrinking at each level.
-\end{theorem}
-
+\begin{proposition}[Bypass criterion]
+  \label{prop:bypass}
+  A transaction $T_i$ can bypass layer~$k$ if every tuple $t$ in
+  $T_i$'s output has $\mathrm{qdepth}(t) < k$.
+  Equivalently, $T_i$'s outputs have supports in $\mathcal{F}_{k-1}$:
+  they are invariant under all commitments at layers $k, \ldots, d$.
+\end{proposition}
 \begin{proof}
-  \emph{(a)}~A certificate for $\mathrm{qdepth}(t) > k$ is a pair of
-  determinations $D, D'$ with $D \equiv_k D'$ such that $t$ holds in
-  $D$ but not $D'$ (or vice versa).
-  The certificate has size $O(W_{>k})$ (the differing commitments at
-  layers $k{+}1, \ldots, d$), and verification requires evaluating
-  $t$'s derivation under both determinations (polynomial in the query
-  and instance size).
-  Hence $\mathrm{qdepth}(t) \leq k$ is in $\mathrm{coNP}$ with
-  witness size $W_{>k}$.
-
-  \emph{(b)}~The robustness reduction
-  (Theorem~\ref{thm:robustness-conp}) encodes a SAT instance into
-  commitment choices.
-  Given a specification with a single layer of width $w$ (depth~$1$),
-  robustness is coNP-hard in $w$.
-  For depth $> 1$: embed the same construction into layers
-  $k{+}1, \ldots, d$ while making layers $1, \ldots, k$ trivial
-  (all determinations agree there).
-  Then $\mathrm{qdepth}(t) \leq k$ iff $t$ is robust in the
-  sub-specification above layer~$k$, which is coNP-hard in $W_{>k}$.
-
-  \emph{(c)}~Every tuple has $\mathrm{qdepth} \leq d$ by definition
-  of the filtration.
+  By definition of the filtration: $\mathrm{supp}(t) \in
+  \mathcal{F}_{k-1}$ means $t$'s membership is the same in every pair
+  of determinations that agree at layers $1, \ldots, k{-}1$,
+  regardless of what layers $k, \ldots, d$ decide.
+  Hence layer~$k$'s commitment cannot affect $t$.
 \end{proof}
 
-\begin{example}[Depth hierarchy in transactions]
-  In the $T_\infty$ construction with $n$ transactions, depth is
-  $n{-}1$ and each layer has width~$1$ (a single binary victim
-  decision).
-  Checking robustness ($k = 0$) requires considering all $2^{n-1}$
-  determination paths.
-  Checking $\mathrm{qdepth}(t) \leq n{-}2$ requires considering only
-  the final victim decision ($W_{>n-2} = 1$): is $t$'s membership
-  affected by the last round's choice?
-  This is a single binary check --- trivially polynomial.
-\end{example}
-
-\begin{example}[Depth hierarchy in $\mbox{Datalog}^\neg$]
-  A program with $k$ sealing layers and $d$ independent negative SCCs
-  (each binary) has $W_{>k} = d$ (one binary choice per SCC).
-  Checking $\mathrm{qdepth}(t) \leq k$ (is $t$ determined by the
-  sealing prefix alone?) is coNP in $d$ --- equivalent to checking
-  whether $t$ holds in all $2^d$ stable models.
-  Checking $\mathrm{qdepth}(t) \leq k{+}j$ for $j > 0$ reduces the
-  space to $2^{d-j}$ models: those consistent with the first $j$
-  choice layers already discharged.
-\end{example}
-
 \noindent
-The hierarchy shows that depth is not merely a classification but a
-\emph{complexity measure}: the filtration stratifies the verification
-problem itself.
-A system that knows a tuple's depth can allocate verification effort
-proportionally --- shallow tuples are cheap to certify, deep tuples
-are expensive, and the filtration tells you which is which.
+The compositional corollary (Corollary~\ref{cor:propagation-filtration})
+strengthens this: if all of $T_i$'s \emph{base tuples} have depth
+$< k$, then all derived tuples do too (positive RA cannot increase
+depth).
+So bypass eligibility can be checked at the base-tuple level without
+evaluating the full query.
+
+\subsection{Complexity of Bypass Verification}
+
+In general, verifying that $\mathrm{qdepth}(t) < k$ is coNP-hard:
+
+\begin{theorem}[Bypass verification complexity]
+  \label{thm:bypass-complexity}
+  Checking whether all outputs of a transaction $T_i$ have
+  $\mathrm{qdepth} < k$ is $\mathrm{coNP}$-complete in the residual
+  width $W_{\geq k} = \sum_{\ell=k}^{d} w_\ell$ (the total number of
+  commitments at layers $k, \ldots, d$).
+  A witness for bypass failure is a pair of determinations $D, D'$
+  agreeing at layers $1, \ldots, k{-}1$ but producing different
+  membership for some output tuple of $T_i$.
+\end{theorem}
+\begin{proof}
+  Membership in coNP: the complement (bypass failure) has a
+  polynomial-size certificate --- a pair $(D, D', t)$ with
+  $D \equiv_{k-1} D'$ and $P_D(t) \neq P_{D'}(t)$.
+  Hardness: by reduction from robustness
+  (Theorem~\ref{thm:robustness-conp}), embedding a SAT instance into
+  the commitments at layers $k, \ldots, d$.
+\end{proof}
+
+\subsection{Tractable Instances}
+
+The coNP bound is a worst case over unstructured specifications.
+In both instantiations of this paper, bypass reduces to a polynomial
+graph property:
+
+\paragraph{Transactions.}
+A transaction $T_i$ can bypass the victim-selection layer if it
+participates in no conflict cycle: its node in the conflict graph is
+not in any SCC of size $> 1$.
+This is checkable in linear time (Tarjan's algorithm on the conflict
+graph).
+In a batched system, bypass is checked per-batch: seal the batch,
+compute the conflict graph, and identify transactions not in any
+cycle.
+Those transactions commit immediately without waiting for victim
+selection --- they bypass layer~$2$ of the per-batch determination.
+
+\paragraph{$\mbox{Datalog}^\neg$.}
+An atom $a$ can bypass the choice layer if it does not transitively
+depend (through the rule graph) on any atom in a negative SCC.
+This is checkable in linear time (reachability in the dependency
+graph).
+Atoms derived purely from stratified rules bypass all choice layers
+and are determined by the sealing prefix alone.
+
+\paragraph{Dynamic bypass in batches.}
+Both checks above are per-batch: the conflict graph (transactions) or
+dependency graph ($\mbox{Datalog}^\neg$) may change as new work
+arrives.
+Within each batch, bypass eligibility is recomputed in polynomial time
+after the seal.
+This gives a dynamic protocol: each batch seals, classifies
+transactions into bypass-eligible (commit immediately) and
+cycle-involved (enter victim selection), and resolves only the latter.
+The filtration provides the algebraic justification; the graph check
+provides the efficient implementation.
 
 % ================================================================
 \section{Related Work}

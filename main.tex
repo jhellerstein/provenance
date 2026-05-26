@@ -540,11 +540,10 @@ To connect outcomes to provenance, we fix a relational schema
 $\mathbf{S}$ and an \emph{observation function}
 $\mathsf{obs}: O \to \mathrm{Inst}(\mathbf{S})$ mapping each outcome
 to a database instance.
-In our transaction and $\mbox{Datalog}^\neg$ examples,
-$\mathsf{obs}$ is the identity (outcomes are already database states);
-in other settings it encodes the observable relationally (e.g., a
-consensus log maps to $(\mathsf{index}, \mathsf{value})$ keyed by
-$\mathsf{index}$).
+In our $\mbox{Datalog}^\neg$ examples, $\mathsf{obs}$ is the identity
+(outcomes are models, i.e., database instances); for transactions,
+$\mathsf{obs}$ maps a decision trace to the database state that
+results from applying committed transactions' writes.
 A \emph{provenance query} is a positive relational algebra expression
 over $\mathbf{S}$; conditioned provenance is the familiar
 $K$-relational evaluation of Green et

@@ -291,6 +291,7 @@ specification (enlarging $\Ord$ relaxes coordination requirements).
 \end{definition}
 
 \begin{example}[Specification for Example~\ref{ex:example}]
+  \label{ex:spec}
   $O$ is the set of decision traces (commit/abort sequences for each
   transaction); $\Ord$ is trace-prefix extension (a longer trace
   refines a shorter one); $\Spec(H)$ is the set of traces consistent
@@ -901,16 +902,9 @@ complementary.
 
 \subsection{Isolation Levels as Specifications}
 
-The outcome space $O$ for transactions is the set of
-\emph{decision traces}: sequences of $\mathsf{start}(T_i)$,
-$\mathsf{commit}(T_i)$, and $\mathsf{abort}(T_i)$ events, quotiented
-by reordering of non-conflicting decisions (decisions on transactions
-sharing no conflict edge may be permuted freely).
-The outcome order is trace-prefix extension:
-$o_1 \Ord o_2$ when $o_2$ extends $o_1$ with additional decisions
-while preserving the fate (commit/abort) of every transaction decided
-in $o_1$ and the ordering of every conflicting pair ordered in $o_1$.
-
+The transactional specification was previewed in Example~\ref{ex:spec}:
+$O$ is the set of decision traces (quotiented by reordering of
+non-conflicting decisions), and $\Ord$ is trace-prefix extension.
 Following Adya~\cite{adya1999weak}, each isolation level $L$
 constrains which conflict patterns are admissible among committed
 transactions;

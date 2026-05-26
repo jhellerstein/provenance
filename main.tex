@@ -1003,22 +1003,21 @@ generable around a surviving transaction whose fate is discretionary
 (victim selection or deferred validation); this holds for SER and SI
 under the constructions in Appendix~\ref{app:protocols}.
 
-\begin{example}[Per-batch depth under 2PL with deadlock detection]
+\begin{example}[Per-batch depth under OCC with batch validation]
   \label{ex:overlapping-cycles}
-  Under 2PL \emph{without} wound-wait (i.e., with periodic deadlock
-  detection rather than deadlock avoidance), three transactions hold
-  locks forming a wait-for cycle:
-  $T_1$ waits for $T_2$, $T_2$ waits for $T_3$, $T_3$ waits for $T_1$.
-  The system periodically runs deadlock detection.
-  Layer~1 (seal): the system runs detection now, observing the current
-  wait-for graph (had it waited longer, additional transactions might
-  have joined the cycle).
-  Layer~2 (victim selection): the system chooses a victim to abort---say
-  $T_1$---breaking the cycle and allowing $T_2$ and $T_3$ to proceed.
-  Choosing $T_2$ or $T_3$ instead yields a different determination with
-  different surviving transactions.
-  The two layers do not commute: the seal determines which cycle the
-  system sees; the victim choice determines how it is resolved.
+  Three transactions $T_1, T_2, T_3$ execute concurrently and complete
+  their read/write phases.
+  The system seals the batch (layer~1): no further transactions will
+  join this validation round.
+  It then chooses a validation order $\pi$ (layer~2) --- say
+  $T_1 \prec T_2 \prec T_3$.
+  Under $\pi$, $T_2$'s write set is checked against $T_1$'s; if they
+  conflict, $T_2$ aborts (entailed by $\pi$, not a separate
+  commitment).
+  Choosing $T_2 \prec T_1 \prec T_3$ instead might let $T_2$ commit
+  and abort $T_1$.
+  The two layers do not commute: the seal determines which transactions
+  are in the batch; the order determines which survive validation.
 \end{example}
 
 \subsection{Per-Tuple Isolation Sensitivity}

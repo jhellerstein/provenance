@@ -1223,9 +1223,10 @@ $\bot \Ord \mathbf{u} \Ord \mathbf{f}$
 (with $\mathbf{t}$ and $\mathbf{f}$ incomparable); outcomes are total
 assignments over the Herbrand base (unevaluated atoms receive $\bot$),
 and $o_1 \Ord o_2$ iff $o_1(a) \Ord o_2(a)$ for every atom $a$.
-The commitment basis has \emph{sealing predicates}
-$\varphi_{\seal}(S_i)$ (stratum $S_i$'s derivation is fixed) and \emph{choice
-predicates} $\varphi_{a=v}$ ($\neg$-cycle atom $a$ is fixed to
+The commitment basis has two \emph{sealing predicates}
+$\varphi_{\seal}(\{a,p\})$ and $\varphi_{\seal}(\{r,s\})$ (each fixes
+a stratum's derivation) and two \emph{choice predicates}
+$\varphi_{a=v}$ (fixing a $\neg$-cycle atom to
 $v \in \{\mathbf{t}, \mathbf{f}\}$).
 The specification $\Spec$ admits all assignments consistent with the
 program rules and EDB~\cite{gelfond1988stable}.

@@ -1704,36 +1704,34 @@ polynomial time.
 Section~\ref{sec:discussion} introduced commitment responsibility and
 noted that in deeper filtrations, responsibility distributes across
 layers.
-We illustrate with a five-transaction example under a
-\emph{victim-selection basis} (abort commitments
-$\varphi_{\mathsf{a}}(T_i)$, as in 2PL deadlock detection), which
-produces a depth-$2$ determination.
+We illustrate with a five-transaction example under the ordering basis
+(Section~\ref{sec:scheduling-basis}).
 The workload has two conflict cycles sharing $T_3$:
 $T_1 \to T_2 \to T_3 \to T_1$ and $T_3 \to T_4 \to T_5 \to T_3$.
+The cycles do not commute: resolving Cycle~1 by ordering $T_3$ last
+(forcing $T_3$'s abort) also breaks Cycle~2, while ordering $T_1$ last
+leaves Cycle~2 intact.
+The determination has depth~$2$.
 
 \paragraph{Layer 1.}
-The first layer resolves Cycle~1.
-Two commitments are available: $\varphi_{\mathsf{a}}(T_1)$ (abort $T_1$)
-and $\varphi_{\mathsf{a}}(T_3)$ (abort $T_3$).
-These do not commute: aborting $T_3$ also breaks Cycle~2, while aborting
-$T_1$ leaves Cycle~2 intact.
-The layer-1 game has two players with a single binary choice each.
+The first layer resolves Cycle~1 via ordering commitments on its edges.
+Two outcomes matter: either $T_3$ is ordered last (entailing $T_3$'s
+abort, breaking both cycles) or $T_1$ is ordered last (entailing
+$T_1$'s abort, leaving Cycle~2).
+These do not commute with Cycle~2's orderings because $T_3$'s fate
+determines whether Cycle~2 exists.
 
 \paragraph{Layer 2 (conditioned on layer 1).}
-If layer~1 chose $\varphi_{\mathsf{a}}(T_3)$: both cycles are broken,
-no further commitments are needed, and layer-2 responsibility is zero
-for all commitments.
-If layer~1 chose $\varphi_{\mathsf{a}}(T_1)$: Cycle~2 remains, and
-layer~2 must resolve it (abort $T_4$ or $T_5$).
-The layer-2 game, conditioned on $\varphi_{\mathsf{a}}(T_1)$, has one
-binary commitment with responsibility equal to its marginal effect on
-the tuple of interest.
+If layer~1 ordered $T_3$ last: both cycles are broken, no further
+commitments are needed, and layer-2 responsibility is zero.
+If layer~1 ordered $T_1$ last: Cycle~2 remains, and layer~2 resolves
+it by ordering $T_4$ or $T_5$ last.
 
 \paragraph{Interpretation.}
-The layer-1 commitment $\varphi_{\mathsf{a}}(T_3)$ has higher
-responsibility than $\varphi_{\mathsf{a}}(T_1)$ for any tuple affected
-by both cycles: choosing $T_3$ resolves everything in one step, while
-choosing $T_1$ defers responsibility to layer~2.
+The layer-1 ordering that forces $T_3$'s abort has higher
+responsibility than the one forcing $T_1$'s abort for any tuple
+affected by both cycles: the former resolves everything in one step,
+while the latter defers responsibility to layer~2.
 The filtration makes this visible: a tuple with
 $\mathrm{qdepth} = 1$ (affected only by Cycle~1) has zero layer-2
 responsibility regardless of the layer-1 choice; a tuple with
@@ -1743,18 +1741,17 @@ responsibility that depends on the layer-1 outcome.
 \paragraph{Quantitative outcome.}
 Consider a tuple $t$ written by $T_5$ (qdepth~$2$, affected by both
 cycles).
-At layer~1: $\varphi_{\mathsf{a}}(T_3)$ makes $t$ robust in one step
-(marginal contribution~$1$); $\varphi_{\mathsf{a}}(T_1)$ leaves $t$
+At layer~1: ordering $T_3$ last makes $t$ robust in one step
+(marginal contribution~$1$); ordering $T_1$ last leaves $t$
 still contingent (marginal contribution~$0$).
-Shapley value at layer~1: $\rho(\varphi_{\mathsf{a}}(T_3), t) = 1/2$,
-$\rho(\varphi_{\mathsf{a}}(T_1), t) = 0$.
-At layer~2 (conditioned on $\varphi_{\mathsf{a}}(T_1)$): the victim
-choice between $T_4$ and $T_5$ has Shapley value~$1/2$ for $t$
+Shapley value at layer~1: $\rho(\text{order } T_3 \text{ last}, t) = 1/2$,
+$\rho(\text{order } T_1 \text{ last}, t) = 0$.
+At layer~2 (conditioned on $T_1$ ordered last): the ordering choice
+between $T_4$ and $T_5$ has Shapley value~$1/2$ for $t$
 (it solely determines $t$'s fate in this branch, but the branch
 itself occurs with probability~$1/2$).
 Total responsibility sums to~$1$, distributed as $1/2$ to the layer-1
-commitment that resolves both cycles and $1/2$ to the layer-2 victim
-choice.
+ordering that resolves both cycles and $1/2$ to the layer-2 ordering.
 
 % ================================================================
 \section{Responsibility: Additional Results}

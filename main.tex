@@ -960,8 +960,7 @@ Appendix~\ref{sec:appendix-SI}).
           commit-order choice, or victim selection): worst-case
           depth~$\Theta(n)$, where $n$ is the number of transactions.
           Per-batch depth is~$2$ (seal the batch; choose a processing
-          order within it), assuming pre-declared read/write
-          sets~\cite{thomson2012calvin}.
+          order within it).
   \end{enumerate}
 \end{theorem}
 \begin{proof}[Proof sketch]
@@ -989,11 +988,12 @@ Appendix~\ref{sec:appendix-SI}).
   round's decision depends on the previous (had $T_\infty$ been
   aborted earlier, no further conflict would arise), giving
   depth~$n{-}1$.
-  \emph{Per-batch}: within a sealed batch whose read/write sets are
-  pre-declared, the system makes a single commitment: the choice of
-  processing order $\pi$ (a total order on pending requests).
+  \emph{Per-batch}: within a sealed batch, the system makes a single
+  commitment: the choice of processing order $\pi$ (a total order on
+  pending transactions).
   All consequences (conflict edges, aborts, commits) are entailed by
-  $\pi$.
+  $\pi$ under any protocol (OCC validates in order; wound-wait aborts
+  by order; MVTO assigns timestamps by order).
   Hence per-batch depth is~$2$: seal + order selection.
   Full proof in Appendix~\ref{app:protocols}.
 \end{proof}

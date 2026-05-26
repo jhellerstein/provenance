@@ -236,7 +236,8 @@ irrevocable choice structures—called \emph{determinations}—that restrict amb
 meaning is determinate.
 
 \subsection{Histories}
-
+Histories are used to model ambiguity in distributed systems~\cite{lamport};
+we use them here as well.
 \begin{definition}[History]
   A \emph{history} is a finite partially ordered set
   $
@@ -278,7 +279,7 @@ When $o_1 \Ord o_2$, replacing outcome $o_1$ with $o_2$ is not considered
 to rule out $o_1$ but rather to \emph{refine} it---$o_2$ adds detail
 without contradicting $o_1$.
 The order $\Ord$ is part of the specification---a modeling choice, not
-derived from execution structure; changing $\Ord$ changes the
+derived from execution structure. Changing $\Ord$ changes the
 specification (enlarging $\Ord$ relaxes coordination requirements).
 
 \begin{definition}[Specification]
@@ -307,8 +308,12 @@ alternatives:
 A determined specification may admit multiple outcomes at a given
 history (at different levels of refinement), but they form a chain
 under $\Ord$---no conflicting alternatives exist.
-Each such outcome has well-defined classical provenance at its own
-point in the history; no commitment is needed to choose among them.
+Since this paper performs retrospective provenance analysis (the full
+history is available), we define the \emph{resolved outcome} at a
+determined history $H$ as the maximal element of $\Spec(H)$ under
+$\Ord$; in both instantiations this maximum is unique.
+Classical provenance is then computed over this single resolved
+outcome, and no further reference to the chain is needed.
 Ambiguity requiring determination arises only when $\Spec(H)$ contains
 $\Ord$-incomparable outcomes.
 
@@ -524,9 +529,8 @@ A \emph{$K$-relation} assigns each tuple a value in $K$: alternative
 derivations combine by $+$, joint use of facts by $\cdot$, absence by $0$.
 For a determination $D \in \mathcal{D}$ extracted from a resolved
 history $H$, the \emph{conditioned provenance} $P_D(t) \in K$ is the
-classical semiring provenance of tuple $t$ computed over the maximal
-outcome in $\Spec(H)$ (which, in a resolved history, is unique up to
-query/provenance equivalence in both instantiations).
+classical semiring provenance of tuple $t$ computed over the resolved
+outcome of $H$.
 
 Conditioned provenance suffices for explaining a single execution.
 But some questions require reasoning \emph{across} determinations:

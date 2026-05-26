@@ -201,7 +201,9 @@ $\mbox{Datalog}^\neg$; for each, classical semantic variants
         class of programs, negation semantics (stratified,
         well-founded, stable) are different reading depths of a shared
         filtration; monus elimination shows that sealing is
-        support-equivalent to semirings with monus
+        support-equivalent to semirings with monus for stratified
+        programs, and extends to unstratified negation where monus is
+        undefined
         (Section~\ref{sec:negation-preview},
         Appendix~\ref{sec:appendix-datalog}).
   \item \emph{Layer bypass and semantic-change analysis}: queries
@@ -1338,6 +1340,10 @@ $\neg b$ whose atom is sealed-absent contributes $1_K$ to
 downstream derivations (the negation succeeds).
 Within each determination, derivational provenance uses ordinary
 positive $K$-evaluation.
+For unstratified programs (multiple stable models), monus is undefined
+--- there is no unique model to subtract against --- while
+determination provenance remains well-defined: each stable model is a
+determination, and supports track which models produce each atom.
 
 \begin{proof}
   See Appendix~\ref{sec:appendix-datalog}.

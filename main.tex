@@ -653,14 +653,13 @@ Write $L_1(D), L_2(D), \ldots$ for the successive layers of $D$;
 the \emph{depth} of $D$ is its number of layers.
 
 Two determinations $D, D' \in \mathcal{D}$ \emph{agree at level $k$},
-written $D \equiv_k D'$, if their first $k$ layers are identical:
-same commitment events, same intervening non-commitment context.
+written $D \equiv_k D'$, if they have the same history through
+layer~$k$ (same events, same commitments, same order).
 Formally:
 \begin{itemize}[nosep,leftmargin=*]
   \item $D \equiv_0 D'$ always (vacuous agreement).
   \item $D \equiv_{k+1} D'$ iff $D \equiv_k D'$ and $L_{k+1}(D) =
-        L_{k+1}(D')$ (same commitment multiset at layer $k{+}1$,
-        applied in the same history context).
+        L_{k+1}(D')$.
 \end{itemize}
 Each $\equiv_k$ is an equivalence relation; classes refine as $k$
 increases.

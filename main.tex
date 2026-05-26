@@ -911,16 +911,15 @@ events, with ordering constrained by conflict edges), and $\Ord$ is
 sub-trace inclusion ($o_1 \Ord o_2$ when $o_2$ decides a superset of
 transactions while preserving all decisions and orderings in $o_1$).
 Following Adya~\cite{adya1999weak}, each isolation level $L$
-constrains which conflict patterns are admissible among committed
+constrains which labeled cycle patterns are admissible among committed
 transactions;
 $\Spec_L(H)$ admits those extensions of the current outcome consistent
 with $L$'s constraint.
 We consider three levels:
 \emph{read committed} (RC; no constraint on conflict structure),
-\emph{serializability} (SER; forbids all directed cycles in the
-conflict graph), and \emph{snapshot isolation} (SI; each transaction
-reads from a consistent snapshot; concurrent writers on the same object
-are resolved by first-committer-wins;
+\emph{serializability} (SER; forbids all directed cycles regardless of
+edge labels), and \emph{snapshot isolation} (SI; permits rw-only
+cycles but enforces first-committer-wins on $\mathsf{ww}$ edges;
 Appendix~\ref{sec:appendix-SI}).
 
 \subsection{Commitment Basis}

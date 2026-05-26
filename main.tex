@@ -1494,15 +1494,10 @@ explanations~\cite{halpern2001causes} likewise condition on a single
 outcome.
 Determination provenance generalizes these by making the
 commitments that precede derivational provenance explicit and composable.
-Determination responsibility
-(Appendix~\ref{app:responsibility-details}) lifts
-responsibility from data tuples~\cite{meliou2010causality} to semantic
-commitments: where Meliou et al.\ ask ``which input tuple is most
-responsible for an output,'' we ask ``which semantic commitment is most
-responsible for the output holding under this resolution.''
-Livshits et al.~\cite{livshits2021shapley} compute Shapley values for
-data tuples in query answers under a fixed semantics.
-The two games are sequential, not competing: determination
+Determination responsibility (Section~\ref{sec:bypass}) lifts
+Shapley-value attribution~\cite{meliou2010causality,livshits2021shapley}
+from data tuples to semantic commitments; the two games are sequential,
+not competing: determination
 responsibility attributes the resolution; tuple-level responsibility
 attributes the derivation under that resolution.
 

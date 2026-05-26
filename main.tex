@@ -1224,7 +1224,7 @@ $\bot \Ord \mathbf{u} \Ord \mathbf{f}$
 assignments over the Herbrand base (unevaluated atoms receive $\bot$),
 and $o_1 \Ord o_2$ iff $o_1(a) \Ord o_2(a)$ for every atom $a$.
 The commitment basis has one \emph{sealing predicate}
-$\varphi_{\seal}(\{a,p\})$ (fixing stratum~0's derivation, which
+$\varphi_{\seal}(p)$ (fixing $p$'s derivation, which
 licenses $\neg p$ in $q$'s rule) and two \emph{choice predicates}
 $\varphi_{a=v}$ (fixing a $\neg$-cycle atom to
 $v \in \{\mathbf{t}, \mathbf{f}\}$).
@@ -1235,10 +1235,10 @@ $o_r = \{a(c), p(c), r(c)\}$ and $o_s = \{a(c), p(c), s(c)\}$.
 
 The resolving determinations are $\mathcal{D} = \{D^{(r)}, D^{(s)}\}$:
 \[
-  D^{(r)} = \varphi_{\seal}(\{a,p\}) \seq
+  D^{(r)} = \varphi_{\seal}(p) \seq
     \varphi_{r(c)=\mathbf{t}} \cdot \varphi_{s(c)=\mathbf{f}},
   \qquad
-  D^{(s)} = \varphi_{\seal}(\{a,p\}) \seq
+  D^{(s)} = \varphi_{\seal}(p) \seq
     \varphi_{s(c)=\mathbf{t}} \cdot \varphi_{r(c)=\mathbf{f}},
 \]
 sharing the sealing layer (layer~1, one seal) and branching

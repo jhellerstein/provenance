@@ -2999,13 +2999,12 @@ relational instances.
 In systems settings, observables are often partially-ordered,
 semi-structured records (distributed traces, replicated logs, event
 streams).
-The framework applies whenever such records admit a relational
-encoding: a Paxos log becomes $(\mathsf{index}, \mathsf{value})$
-keyed by $\mathsf{index}$; a distributed trace becomes a relation of
-$(span\_id, parent\_id, service, timestamp)$ tuples; a stream
-becomes a time-keyed append-only relation.
-Any query language equivalent to positive RA over such encodings
-inherits the filtration's compositionality guarantees.
+The framework applies whenever provenance queries over such records
+can be expressed in a language equivalent to positive RA --- for
+example, by encoding the records relationally (a Paxos log as
+$(\mathsf{index}, \mathsf{value})$; a trace as
+$(span\_id, parent\_id, service, timestamp)$) and applying standard
+$K$-relational evaluation.
 
 \subsection{Level 1: Repeatability from a Single Determination}
 

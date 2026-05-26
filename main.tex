@@ -291,9 +291,9 @@ specification (enlarging $\Ord$ relaxes coordination requirements).
 \end{definition}
 
 \begin{example}[Specification for Example~\ref{ex:example}]
-  $O$ is the set of database states over schema $S(k,y)$;
-  $\Spec(H)$ is the set of states reachable by some serialization of
-  the transactions in $H$.
+  $O$ is the set of decision traces (commit/abort sequences for each
+  transaction); $\Spec(H)$ is the set of traces consistent with some
+  serialization of the concurrent transactions in $H$.
   With four concurrent transactions, $|\Spec(H)| > 1$: the
   specification is ambiguous.
 \end{example}

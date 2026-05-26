@@ -296,8 +296,6 @@ specification (enlarging $\Ord$ relaxes coordination requirements).
   transaction); $\Ord$ is trace-prefix extension (a longer trace
   refines a shorter one); $\Spec(H)$ is the set of traces consistent
   with some serialization of the concurrent transactions in $H$.
-  With four concurrent transactions, $|\Spec(H)| > 1$: the
-  specification is ambiguous.
 \end{example}
 
 \noindent
@@ -322,7 +320,8 @@ the maximal element of $\Spec(H)$ under $\Ord$.
 A determined specification defines a function from histories to
 outcomes; classical provenance applies directly.
 Ambiguity requiring determination arises only when $\Spec(H)$ contains
-$\Ord$-incomparable outcomes.
+$\Ord$-incomparable outcomes (as in Example~\ref{ex:spec}, where
+multiple serializations yield incomparable decision traces).
 
 
 \subsection{Commitments}

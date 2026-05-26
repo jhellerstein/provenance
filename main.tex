@@ -1220,8 +1220,9 @@ $\{\mathbf{t}, \mathbf{f}, \mathbf{u}, \bot\}$
 ($\bot$ = not yet evaluated, $\mathbf{u}$ = genuinely ambiguous),
 ordered $\bot \Ord \mathbf{u} \Ord \mathbf{t}$ and
 $\bot \Ord \mathbf{u} \Ord \mathbf{f}$
-(with $\mathbf{t}$ and $\mathbf{f}$ incomparable), applied
-pointwise.
+(with $\mathbf{t}$ and $\mathbf{f}$ incomparable); the outcome order
+compares assignments atom-by-atom ($o_1 \Ord o_2$ iff
+$o_1(a) \Ord o_2(a)$ for every atom $a$).
 The commitment basis has \emph{sealing predicates}
 $\varphi_{\seal}(S_i)$ (stratum $S_i$ is complete) and \emph{choice
 predicates} $\varphi_{a=v}$ ($\neg$-cycle atom $a$ is fixed to

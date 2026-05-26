@@ -611,7 +611,9 @@ layered commitment process.
   \label{ex:det-semiring}
   Two resolved histories arise from Example~\ref{ex:example}: one in
   which $T_2$'s insert is visible to $T_Q$ (determination
-  $D_{\mathsf{in}}$) and one in which $T_3$'s delete precedes $T_Q$
+  $D_{\mathsf{in}}$; this class also includes orderings where the
+  delete precedes the insert and is a no-op) and one in which $T_3$'s
+  delete effectively removes the insert before $T_Q$ reads
   (determination $D_{\mathsf{out}}$).
   With $\mathcal{D} = \{D_{\mathsf{in}}, D_{\mathsf{out}}\}$:
   \[

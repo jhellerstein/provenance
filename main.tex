@@ -546,9 +546,8 @@ object itself; the resolved history uniquely identifies the observable
 instance.
 The framework handles any observable domain (e.g., log content in
 Multi-Paxos, represented relationally as $(index, value)$ with $index$
-as key); we use ``tuple'' below to mean an observable item
-that parameterizes our relational provenance queries, whatever the
-underlying domain.
+as key); we use ``tuple'' below for the observable items over which
+provenance is defined, whatever the underlying domain.
 
 \begin{definition}[Determination Provenance]
   \label{def:det-provenance}

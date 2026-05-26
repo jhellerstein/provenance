@@ -906,8 +906,10 @@ SI~\cite{adya1999weak} to a per-tuple depth comparison.
 \subsection{Isolation Levels as Specifications}
 
 The transactional specification was previewed in Example~\ref{ex:spec}:
-$O$ is the set of decision traces (quotiented by reordering of
-non-conflicting decisions), and $\Ord$ is trace-prefix extension.
+$O$ is the set of decision traces (partial orders on commit/abort
+events, with ordering constrained by conflict edges), and $\Ord$ is
+sub-trace inclusion ($o_1 \Ord o_2$ when $o_2$ decides a superset of
+transactions while preserving all decisions and orderings in $o_1$).
 Following Adya~\cite{adya1999weak}, each isolation level $L$
 constrains which conflict patterns are admissible among committed
 transactions;

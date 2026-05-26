@@ -413,6 +413,17 @@ they provide the context in which commitments take effect (and hence
 why determinations are history-indexed).
 When the history is clear from context we write $D$ for $D(H)$.
 
+\begin{example}[Determinations for Example~\ref{ex:example}]
+  \label{ex:det-intro}
+  The ordering decisions $\varphi_{T_2 \prec T_Q}$ and
+  $\varphi_{T_Q \prec T_3}$ are commitments: each excludes
+  serializations incompatible with the chosen order.
+  The determination $D_{\mathsf{in}} = \varphi_{T_2 \prec T_Q} \cdot
+  \varphi_{T_Q \prec T_3}$ resolves the specification so that $T_Q$
+  observes $T_2$'s insert; $D_{\mathsf{out}} = \varphi_{T_2 \prec T_3}
+  \cdot \varphi_{T_3 \prec T_Q}$ resolves it so that $d$ is absent.
+\end{example}
+
 \paragraph{Layer-sequencing notation.}
 Commitments in a determination are sequenced for two reasons.
 First, non-commitment events may intervene: in

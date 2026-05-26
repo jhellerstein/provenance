@@ -1020,6 +1020,28 @@ under the constructions in Appendix~\ref{app:protocols}.
   are in the batch; the order determines which survive validation.
 \end{example}
 
+\begin{example}[Running example under the ordering basis]
+  \label{ex:running-revisited}
+  Returning to Example~\ref{ex:example}: using ordering commitments
+  (Section~\ref{sec:scheduling-basis}), two equivalence classes of
+  determinations arise (quotienting by query-outcome equivalence):
+  $D_{\mathsf{in}} \triangleq
+    \varphi_{T_2 \prec T_Q} \cdot \varphi_{T_Q \prec T_3}$
+  (all orderings where $T_Q$ observes $T_2$'s insert)
+  and
+  $D_{\mathsf{out}} \triangleq
+    \varphi_{T_2 \prec T_3} \cdot \varphi_{T_3 \prec T_Q}$
+  (orderings where $d$ is absent).
+  The determination provenance is:
+  \[
+    P(b) = \mathcal{D} \times \{x_0\}, \qquad
+    P(d) = \{(D_{\mathsf{in}},\, x_2)\}.
+  \]
+  $b$ is robust; $d$ is contingent.
+  Figure~\ref{fig:det-tables} summarizes the determination structure
+  across isolation levels.
+\end{example}
+
 \subsection{Per-Tuple Isolation Sensitivity}
 
 Vandevoort et al.~\cite{vandevoort2025mixed} certify individual
@@ -1102,28 +1124,6 @@ per-tuple reasoning.
   Vandevoort et al.~\cite{vandevoort2025mixed} certify transactions
   individually; the filtration additionally certifies
   \emph{provenance query results} compositionally.
-\end{example}
-
-\begin{example}[Running example under the ordering basis]
-  \label{ex:running-revisited}
-  Returning to Example~\ref{ex:example}: using ordering commitments
-  (Section~\ref{sec:scheduling-basis}), two equivalence classes of
-  determinations arise (quotienting by query-outcome equivalence):
-  $D_{\mathsf{in}} \triangleq
-    \varphi_{T_2 \prec T_Q} \cdot \varphi_{T_Q \prec T_3}$
-  (all orderings where $T_Q$ observes $T_2$'s insert)
-  and
-  $D_{\mathsf{out}} \triangleq
-    \varphi_{T_2 \prec T_3} \cdot \varphi_{T_3 \prec T_Q}$
-  (orderings where $d$ is absent).
-  The determination provenance is:
-  \[
-    P(b) = \mathcal{D} \times \{x_0\}, \qquad
-    P(d) = \{(D_{\mathsf{in}},\, x_2)\}.
-  \]
-  $b$ is robust; $d$ is contingent.
-  Figure~\ref{fig:det-tables} summarizes the determination structure
-  across isolation levels.
 \end{example}
 
 

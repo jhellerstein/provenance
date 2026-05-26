@@ -2245,7 +2245,7 @@ Hence if all base tuples in a query have equal qdepth across SER and
 SI, the query result does too.
 A query result can have different qdepth across levels only if at least
 one of its base tuples participates in a write-skew or FCW pattern.
-This gives a sufficient condition for safe isolation-level migration:
+This gives a sufficient condition for safe isolation-level change:
 if no base tuple of a query is in the SER/SI gap, the query's
 provenance is identical under both levels.
 
@@ -3079,7 +3079,7 @@ single determination; the determination semiring enables optimization
 Supports across variant specifications answer preservation questions:
 does an outcome that holds under one specification also hold under
 another?
-Examples include isolation-level migration (does a transaction's result
+Examples include isolation-level comparison (does a transaction's result
 survive a move from SI to
 serializability?~\cite{vandevoort2025mixed}), semantic-change queries
 (would a $\mbox{Datalog}^\neg$ result survive a change from stable to well-founded

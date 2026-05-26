@@ -658,9 +658,8 @@ layers are irrelevant to it.
   \label{def:layered-basis}
   A \emph{layered commitment basis} is a commitment basis $\Phi$ equipped
   with a \emph{layering function} $\lambda : \Phi \to \{1, \ldots, d\}$.
-  The layering classifies commitment operators (each operator has a
-  fixed layer assignment), though the \emph{effect} of an operator
-  remains history-dependent.
+  The function $\lambda$ is defined over operators (not histories), but
+  its validity depends on commutativity holding universally:
   The classification must satisfy:
   \begin{enumerate}[nosep,label=(\roman*)]
     \item \emph{within-layer commutativity}: for all

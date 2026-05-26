@@ -1379,7 +1379,7 @@ $1, \ldots, j$ are discharged --- layers $j{+}1, \ldots, d$ were
 irrelevant to it.
 
 \begin{proposition}[Compositional depth bound]
-  \label{prop:bypass}
+  \label{prop:depth-bound}
   If every input tuple of a positive relational provenance query $Q$
   has $\mathrm{qdepth} < k$, then every output tuple does too
   (Corollary~\ref{cor:propagation-filtration}): layers $k, \ldots, d$
@@ -3396,8 +3396,8 @@ In $\mbox{Datalog}^\neg$, depth is bounded by the program's dependency
 structure regardless of EDB size.
 Characterizing when a specification's depth is bounded by its static
 structure vs.\ when it grows with the input stream --- and whether
-recurring depth admits uniform bypass (a single check covering all
-recurrences) --- is open.
+recurring depth admits uniform depth certification (a single check
+covering all recurrences) --- is open.
 
 % ================================================================
 \section{Depth Reduction: Bounding Determination Complexity}

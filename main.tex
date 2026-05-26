@@ -550,16 +550,16 @@ instance.
 
 \begin{definition}[Determination Provenance]
   \label{def:det-provenance}
-  For a specification $\Spec$, provenance query $Q$, and result tuple
-  $t$ of $Q$, the \emph{determination provenance} of $t$ is the
-  function
+  Fix a specification $\Spec$ and a provenance query $Q$.
+  Each determination $D \in \mathcal{D}$ corresponds to a resolved
+  history $H$; evaluating $Q$ over the database instance defined by
+  $\Spec(H)$ yields a $K$-annotation for each tuple $t$.
+  The \emph{determination provenance} of $t$ is the function
   \[
     P_{\Spec}(t) : \mathcal{D} \to K
   \]
-  that assigns to each $D(H) \in \mathcal{D}$ the conditioned
-  provenance $P_D(t)$ of $t$ in the resolved outcome of $H$, recording
-  how $t$ is derived (or not: $P_D(t) = 0_K$ when $t$ is absent from
-  the resolved outcome) under every possible resolution.
+  mapping each determination to the conditioned provenance $P_D(t)$
+  ($= 0_K$ when $t$ is absent from the instance).
   When $\Spec$ is clear from context, we write $P(t)$.
 \end{definition}
 

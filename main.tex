@@ -960,7 +960,8 @@ Appendix~\ref{sec:appendix-SI}).
           commit-order choice, or victim selection): worst-case
           depth~$\Theta(n)$, where $n$ is the number of transactions.
           Per-batch depth is~$2$ (seal the batch; choose a processing
-          order within it).
+          order within it), assuming pre-declared read/write
+          sets~\cite{thomson2012calvin}.
   \end{enumerate}
 \end{theorem}
 \begin{proof}[Proof sketch]

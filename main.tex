@@ -869,10 +869,8 @@ SI~\cite{adya1999weak} to a per-tuple depth comparison.
   write that a subsequent read observes).
   Under protocols with scheduling discretion, ordering decisions among
   conflicting operations are the commitment events
-  (Section~\ref{sec:scheduling-basis}); under this modeling, commit and
-  abort outcomes are consequences of the chosen orderings.
-  (Under alternative bases, e.g., victim selection in 2PL, the abort
-  itself is the commitment.)
+  (Section~\ref{sec:scheduling-basis}); commit and abort outcomes
+  follow from the chosen orderings.
   All other events (arrivals, reads, writes) are non-commitment events;
   they extend the history and may introduce conflict edges but do not
   themselves exclude outcomes.

@@ -1030,15 +1030,16 @@ filtration (Observation~\ref{obs:basis-entails-filtration}), we can
 compare qdepth under SER and SI for each tuple individually.
 The key structural result is that isolation-insensitivity of base
 tuples propagates through queries.
+We first characterize which transactions are isolation-sensitive
+(their tuples inherit the classification); the compositional corollary
+then lifts this to query results.
 
-\begin{proposition}[Isolation-sensitive tuples]
+\begin{proposition}[Isolation-sensitive transactions]
   \label{prop:ser-si-incomparable}
-  Fix a conflict graph $G$ and a tuple $t$ derived directly from
-  transaction $T_i$'s writes.
-  In the Adya conflict-graph model, $t$ has
-  $\mathrm{qdepth}_{\mathrm{SER}}(t) \neq
-  \mathrm{qdepth}_{\mathrm{SI}}(t)$ iff $T_i$ participates in one of
-  two patterns:
+  In the Adya conflict-graph model, a transaction $T_i$ is
+  \emph{isolation-sensitive} ($\mathrm{qdepth}_{\mathrm{SER}}$ and
+  $\mathrm{qdepth}_{\mathrm{SI}}$ differ for its output tuples) iff
+  $T_i$ participates in one of two patterns:
   \begin{enumerate}[nosep,label=(\alph*)]
     \item \emph{Write skew} ($\mathrm{qdepth}_{\mathrm{SER}} >
           \mathrm{qdepth}_{\mathrm{SI}}$):

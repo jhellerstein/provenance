@@ -1697,65 +1697,8 @@ Condition~(iii): evaluating a $\mbox{Datalog}^\neg$ query over a fixed model is 
 polynomial time.
 
 % ================================================================
-\section{Multi-Layer Responsibility: Worked Example}
-\label{app:multi-layer-resp}
-% ================================================================
-
-Section~\ref{sec:discussion} introduced commitment responsibility and
-noted that in deeper filtrations, responsibility distributes across
-layers.
-We illustrate with a five-transaction example under the ordering basis
-(Section~\ref{sec:scheduling-basis}).
-The workload has two conflict cycles sharing $T_3$:
-$T_1 \to T_2 \to T_3 \to T_1$ and $T_3 \to T_4 \to T_5 \to T_3$.
-The cycles do not commute: resolving Cycle~1 by ordering $T_3$ last
-(forcing $T_3$'s abort) also breaks Cycle~2, while ordering $T_1$ last
-leaves Cycle~2 intact.
-The determination has depth~$2$.
-
-\paragraph{Layer 1.}
-The first layer resolves Cycle~1 via ordering commitments on its edges.
-The cycle can be broken by ordering any of $T_1$, $T_2$, or $T_3$ last
-(entailing that transaction's abort).
-The key distinction: ordering $T_3$ last breaks \emph{both} cycles
-(since $T_3$ is shared), while ordering $T_1$ or $T_2$ last breaks
-only Cycle~1, leaving Cycle~2 intact.
-Layer~1's orderings do not commute with Cycle~2's because $T_3$'s fate
-determines whether Cycle~2 exists.
-
-\paragraph{Layer 2 (conditioned on layer 1).}
-If layer~1 ordered $T_3$ last: both cycles are broken, no further
-commitments are needed, and layer-2 responsibility is zero.
-If layer~1 ordered $T_1$ last: Cycle~2 remains, and layer~2 resolves
-it by ordering $T_4$ or $T_5$ last.
-
-\paragraph{Interpretation.}
-The layer-1 ordering that forces $T_3$'s abort has higher
-responsibility than the one forcing $T_1$'s abort for any tuple
-affected by both cycles: the former resolves everything in one step,
-while the latter defers responsibility to layer~2.
-The filtration makes this visible: a tuple with
-$\mathrm{qdepth} = 1$ (affected only by Cycle~1) has zero layer-2
-responsibility regardless of the layer-1 choice; a tuple with
-$\mathrm{qdepth} = 2$ (affected by both cycles) has layer-2
-responsibility that depends on the layer-1 outcome.
-
-\paragraph{Quantitative outcome.}
-Consider a tuple $t$ written by $T_5$ (qdepth~$2$, affected by both
-cycles).
-At layer~1: ordering $T_3$ last makes $t$ robust in one step;
-ordering a non-shared transaction last leaves $t$ contingent.
-The Shapley value at layer~1 concentrates responsibility on the
-$T_3$-last ordering (it has the highest marginal contribution).
-At layer~2 (conditioned on a non-shared abort at layer~1): the
-ordering choice between $T_4$ and $T_5$ carries the remaining
-responsibility for $t$.
-Total responsibility distributes across layers: the layer-1 ordering
-that resolves both cycles bears more than the layer-2 ordering that
-resolves only one.
-
-% ================================================================
 \section{Responsibility: Additional Results}
+\label{app:multi-layer-resp}
 \label{app:responsibility-details}
 \label{sec:responsibility}
 % ================================================================
@@ -1847,6 +1790,21 @@ Complexity per layer is the same as the single-layer case.
 The filtration provides the stopping criterion: if
 $\mathrm{qdepth}(t) = k$, only layers $1, \ldots, k$ contribute
 nonzero responsibility.
+
+\begin{example}[Multi-layer responsibility]
+  Consider five transactions with two conflict cycles sharing $T_3$:
+  $T_1 \to T_2 \to T_3 \to T_1$ and $T_3 \to T_4 \to T_5 \to T_3$
+  (depth~$2$ under the ordering basis).
+  Layer~1 resolves Cycle~1: ordering $T_3$ last breaks both cycles;
+  ordering $T_1$ or $T_2$ last breaks only Cycle~1.
+  Layer~2 (conditioned on a non-shared abort at layer~1) resolves
+  Cycle~2 by ordering $T_4$ or $T_5$ last.
+  For a tuple $t$ written by $T_5$ (qdepth~$2$): the layer-1 ordering
+  that forces $T_3$'s abort concentrates responsibility (it resolves
+  $t$ in one step), while the layer-2 ordering carries the remainder.
+  A tuple with qdepth~$1$ (affected only by Cycle~1) has zero layer-2
+  responsibility regardless of the layer-1 outcome.
+\end{example}
 
 % ================================================================
 \section{Within a Determination: Algebraic Details}

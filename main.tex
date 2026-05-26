@@ -1234,17 +1234,16 @@ $o_r = \{a(c), p(c), r(c)\}$ and $o_s = \{a(c), p(c), s(c)\}$.
 
 The resolving determinations are $\mathcal{D} = \{D^{(r)}, D^{(s)}\}$:
 \[
-  D^{(r)} = \varphi_{\seal}(S_1) \seq
+  D^{(r)} = \{\varphi_{\seal}(\{a,p\}),\, \varphi_{\seal}(\{r,s\})\} \seq
     \varphi_{r(c)=\mathbf{t}} \cdot \varphi_{s(c)=\mathbf{f}},
   \qquad
-  D^{(s)} = \varphi_{\seal}(S_1) \seq
+  D^{(s)} = \{\varphi_{\seal}(\{a,p\}),\, \varphi_{\seal}(\{r,s\})\} \seq
     \varphi_{s(c)=\mathbf{t}} \cdot \varphi_{r(c)=\mathbf{f}},
 \]
-sharing the sealing layer (layer~1) and branching at the choice layer
-(layer~2).
-Here $\varphi_{\seal}(S_1)$ abbreviates the commuting seals for
-$\{a, p\}$ and $\{r, s\}$, which form a single layer (neither
-depends on the other's completion).
+sharing the sealing layer (layer~1, two commuting seals) and branching
+at the choice layer (layer~2).
+The two seals commute because neither stratum's fixpoint depends on
+the other's.
 The filtration index counts discharged layers:
 $\mathcal{F}_0$ is the state before any commitment;
 $\mathcal{F}_1$ reflects the sealing layer

@@ -848,9 +848,10 @@ worst-case determination depth $\Theta(n)$ (in the number of
 transactions) given scheduling
 discretion---a result that holds regardless of concurrency control
 protocol.
-The filtration also provides a per-tuple separation of isolation
-levels: serializability (SER) and snapshot isolation (SI) are
-incomparable in query-relative depth.
+The filtration refines the classical result that SER and SI are
+incomparable~\cite{adya1999weak} to a per-tuple level, identifying
+which tuples in a workload benefit from each level and enabling
+quantitative migration analysis (Section~\ref{sec:bypass}).
 
 \subsection{Transactional Histories}
 

@@ -641,58 +641,49 @@ as positive Boolean formulas over commitment variables
 \label{sec:filtration}
 
 The Boolean algebra on supports tells us \emph{whether} a tuple is
-contingent, but not \emph{why}---which layer of commitment it depends on.
-When commitments are organized into layers (some depending on others'
-outcomes), the determination semiring carries a finer structure: a
-\emph{filtration}---a nested chain of sub-semirings
-$\mathcal{F}_0 \subseteq \mathcal{F}_1 \subseteq \cdots \subseteq
-\mathcal{F}_d = 2^{\mathcal{D}}$ (at the finest level $d$, all
-determinations are distinguished and any subset is a valid
-support)---that records how much of the determination each tuple
-actually requires.
-A tuple whose support lies in $\mathcal{F}_k$ depends only on layers
-$1, \ldots, k$ (those discharged earliest); commitments at deeper
-layers are irrelevant to it.
+contingent, but not \emph{why}---which commitment layer it depends on.
+Every determination $D$ is a sequence of commitment events
+(Definition~\ref{def:determination}); within that sequence, a
+\emph{layer} is a maximal contiguous set of commitments that commute
+pairwise in the history at which they are applied.
+The layers of $D$ are its Foata normal
+form~\cite{mazurkiewicz1977concurrent}: the coarsest grouping into
+commuting stages.
+Write $L_1(D), L_2(D), \ldots$ for the successive layers of $D$;
+the \emph{depth} of $D$ is its number of layers.
 
-\begin{definition}[Layered commitment basis]
-  \label{def:layered-basis}
-  A \emph{layered commitment basis} is a commitment basis $\Phi$ equipped
-  with a \emph{layering function} $\lambda : \Phi \to \{1, \ldots, d\}$,
-  a modeling choice that must satisfy:
-  The classification must satisfy:
-  \begin{enumerate}[nosep,label=(\roman*)]
-    \item \emph{within-layer commutativity}: for all
-          $\varphi, \psi \in \Phi$ with $\lambda(\varphi) = \lambda(\psi)$
-          and all histories $H$ where both are applicable,
-          $\Spec(H \cdot \varphi \cdot \psi) = \Spec(H \cdot \psi \cdot \varphi)$;
-    \item \emph{cross-layer dependence}: commitments at layer $k$ may
-          depend on the outcomes of layers $1, \ldots, k{-}1$ (which
-          commitments are applicable and what they exclude may change
-          depending on the discharged prefix).
-  \end{enumerate}
-  The number $d$ is the \emph{depth} of the basis.
+Two determinations $D, D' \in \mathcal{D}$ \emph{agree at level $k$},
+written $D \equiv_k D'$, if their first $k$ layers are identical:
+same commitment events, same intervening non-commitment context.
+Formally:
+\begin{itemize}[nosep,leftmargin=*]
+  \item $D \equiv_0 D'$ always (vacuous agreement).
+  \item $D \equiv_{k+1} D'$ iff $D \equiv_k D'$ and $L_{k+1}(D) =
+        L_{k+1}(D')$ (same commitment multiset at layer $k{+}1$,
+        applied in the same history context).
+\end{itemize}
+Each $\equiv_k$ is an equivalence relation; classes refine as $k$
+increases.
+
+\begin{definition}[Filtration]
+  \label{def:filtration}
+  A set $S \subseteq \mathcal{D}$ is a \emph{level-$k$ support} if it
+  is a union of $\equiv_k$ classes (closed under level-$k$ agreement).
+  Define $\mathcal{F}_k \triangleq \{S \subseteq \mathcal{D} \mid
+  S \text{ is a level-}k\text{ support}\}$.
+  This yields a filtration:
+  $\mathcal{F}_0 \subseteq \mathcal{F}_1 \subseteq \cdots$, with
+  $\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$ and
+  $\mathcal{F}_d = 2^{\mathcal{D}}$ once all determinations are
+  distinguished.
+  The \emph{query-relative depth} (qdepth) of a tuple $t$ is the
+  smallest $k$ with $\mathrm{supp}(P(t)) \in \mathcal{F}_k$.
 \end{definition}
 
 \noindent
-The layering function encodes the semantic structure of the domain
-(e.g., stratification layers in $\mbox{Datalog}^\neg$, conflict-independence
-structure in transactions).
-In the instantiations below, we use the coarsest layering consistent
-with the commutativity and dependency structure of $\Phi$.
-The universal quantifier in~(i) is conservative: if two commitments
-commute at some histories but not others, they must be placed in
-different layers.
-In both instantiations of this paper, commutativity is
-history-independent (it holds universally or not at all), so no
-precision is lost:
-for transactions, independent commit/abort decisions form a single layer
-while cycle-breaking decisions that depend on prior aborts form
-subsequent layers; for $\mbox{Datalog}^\neg$, stratum sealing forms layers
-$1, \ldots, k$ and choice predicates form layer $k{+}1$.
-Whether a history-dependent layering can be derived from local
-commutativity (a dynamic analog of Foata normal
-form~\cite{mazurkiewicz1977concurrent}) is left as future work
-(Appendix~\ref{app:open-questions}).
+A tuple with qdepth~$0$ is robust (full support) or impossible (empty
+support); positive qdepth reflects which layer first differentiates
+the tuple's membership across determinations.
 
 \begin{observation}[Shared filtration across specifications]
   \label{obs:basis-entails-filtration}
@@ -718,44 +709,18 @@ Each specification $I$ selects a resolving subset
 $\mathcal{D}_I \subseteq \mathcal{D}^\star_\Phi$; supports and qdepth
 are then compared over this common carrier.
 
-Throughout this subsection, we fix a layered commitment basis
-$(\Phi, \lambda)$ with depth $d$.
-Two determinations $D(H), D'(H') \in \mathcal{D}$ \emph{agree at level $k$},
-written $D \equiv_k D'$, as defined inductively:
-\begin{itemize}[nosep,leftmargin=*]
-  \item $D \equiv_0 D'$ always (vacuous agreement).
-  \item $D \equiv_{k+1} D'$ iff $D \equiv_k D'$, the histories $H$ and
-        $H'$ are identical through all events preceding layer-$(k{+}1)$
-        commitment events (including intervening non-commitment events),
-        and the multisets of layer-$(k{+}1)$ commitment events are equal:
-        $\{\varphi \in D \mid \lambda(\varphi) = k{+}1\}
-        = \{\varphi \in D' \mid \lambda(\varphi) = k{+}1\}$.
-\end{itemize}
-Each $\equiv_k$ is an equivalence relation (reflexivity, symmetry, and
-transitivity follow from history-prefix identity and multiset equality
-at each layer).
-Write $[D]_k$ for the equivalence class of $D$ at level $k$.
-These classes refine as $k$ increases:
-$[D]_0 = \mathcal{D}$ and $[D]_k = \{D\}$ when $k$ equals the
-number of layers.
-
-\begin{definition}[Level-$k$ support]
-  A set $S \subseteq \mathcal{D}$ is a \emph{level-$k$ support} if it is a
-  union of level-$k$ equivalence classes.
-  Equivalently, $S$ is closed under level-$k$ agreement:
-  if $D \in S$ and $D'$ agrees with $D$ at level $k$, then $D' \in S$.
-\end{definition}
-
-\begin{definition}[Filtration]
-  Define $\mathcal{F}_k \triangleq \{S \subseteq \mathcal{D} \mid
-  S \text{ is a level-}k\text{ support}\}$.
-  This yields:\\
-  $
-    \mathcal{F}_0 \;\subseteq\; \mathcal{F}_1 \;\subseteq\; \cdots
-    \;\subseteq\; \mathcal{F}_d \;=\; 2^{\mathcal{D}},
-  $
-  where $\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$.
-\end{definition}
+\begin{remark}[Uniform layering in the instantiations]
+  \label{rem:uniform-layering}
+  In both instantiations of this paper, commutativity is
+  history-independent (it holds universally or not at all), so all
+  determinations share the same layer structure: for transactions,
+  independent ordering decisions form a single layer while
+  cycle-breaking decisions form subsequent layers; for
+  $\mbox{Datalog}^\neg$, stratum sealing forms layers $1, \ldots, k$
+  and choice predicates form layer $k{+}1$.
+  We exploit this uniform structure in the instantiation sections
+  without further comment.
+\end{remark}
 
 \noindent
 $\mathcal{F}_0$ captures the coarsest distinction: $\mathcal{D}$ is the
@@ -3435,7 +3400,7 @@ basis.
 
 \begin{definition}[Depth reduction mechanisms]
   \label{def:depth-reduction}
-  Let $\Spec$ have depth $d$ under commitment basis $(\Phi, \lambda)$.
+  Let $\Spec$ have depth $d$ under commitment basis $\Phi$.
   A \emph{depth reduction} to $d^* < d$ is achieved by one of:
   \begin{enumerate}[nosep,label=(\roman*)]
     \item \emph{Coarsening} $\Ord$: enlarge the outcome order to
@@ -3531,7 +3496,7 @@ mechanism applies at each layer.
 \end{proposition}
 \begin{proof}
   Follows directly from Definitions~\ref{def:determined},
-  \ref{def:layered-basis}, and~\ref{def:commitment}: (i)~comparable
+  \ref{def:filtration}, and~\ref{def:commitment}: (i)~comparable
   outcomes need no commitment; (ii)~commuting commitments form a single
   layer; (iii)~a deterministic commitment adds no branching.
 \end{proof}

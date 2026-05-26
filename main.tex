@@ -1028,11 +1028,11 @@ The filtration also enables a finer, \emph{per-tuple} analysis:
 because different isolation levels are resolving subsets of the same
 filtration (Observation~\ref{obs:basis-entails-filtration}), we can
 compare qdepth under SER and SI for each tuple individually.
-The key structural result is that isolation-insensitivity of base
-tuples propagates through queries.
-We first characterize which transactions are isolation-sensitive
-(their tuples inherit the classification); the compositional corollary
-then lifts this to query results.
+The key structural result is that isolation-insensitivity propagates
+compositionally: if all transactions contributing to a provenance
+query's output are isolation-insensitive, so is every output tuple.
+We first characterize which transactions are isolation-sensitive; the
+corollary then gives the compositional guarantee.
 
 \begin{proposition}[Isolation-sensitive transactions]
   \label{prop:ser-si-incomparable}

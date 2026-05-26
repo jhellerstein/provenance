@@ -906,10 +906,11 @@ SI~\cite{adya1999weak} to a per-tuple depth comparison.
 \subsection{Commitment Basis and Specifications}
 \label{sec:scheduling-basis}
 
-Whenever a protocol makes scheduling choices not entailed by the
-current state---buffering requests, selecting a deadlock victim, or
-choosing commit order---those choices are the commitments of interest.
-We model them with an \emph{ordering commitment basis}:
+Standard concurrency-control protocols all effectively order
+conflicting transactions: 2PL via the time of first lock release, OCC
+via validation order, MVTO via timestamp assignment.
+We capture this shared structure with an \emph{ordering commitment
+basis}:
 
 \begin{definition}[Ordering commitments]
   \label{def:commit-commitment}

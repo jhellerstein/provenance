@@ -3001,10 +3001,9 @@ semi-structured records (distributed traces, replicated logs, event
 streams).
 The framework applies whenever provenance queries over such records
 can be expressed in a language equivalent to positive RA --- for
-example, by encoding the records relationally (a Paxos log as
-$(\mathsf{index}, \mathsf{value})$; a trace as
-$(span\_id, parent\_id, service, timestamp)$) and applying standard
-$K$-relational evaluation.
+example, the positive fragment of a semi-structured query language
+(select, filter, and join over JSON log entries, without negation or
+aggregation) is RA-equivalent and natural for log analysis.
 
 \subsection{Level 1: Repeatability from a Single Determination}
 

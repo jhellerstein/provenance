@@ -1077,52 +1077,29 @@ corollary then gives the compositional guarantee.
 
 \begin{corollary}[Compositional isolation migration]
   \label{cor:isolation-migration}
-  Isolation-sensitive queries can compose into isolation-insensitive
-  ones: there exist positive relational queries $Q_1, Q_2$ that are
-  each isolation-sensitive, yet whose union $Q = Q_1 \cup Q_2$ is
-  isolation-insensitive
-  ($\mathrm{qdepth}_{\mathrm{SER}}(Q) = \mathrm{qdepth}_{\mathrm{SI}}(Q) = 0$).
-  This occurs whenever the queries have complementary supports
-  ($\mathrm{supp}(Q_1) \cup \mathrm{supp}(Q_2) = \mathcal{D}$) under
-  both isolation levels.
+  If every transaction contributing to a provenance query $Q$ is
+  isolation-insensitive, then every output tuple of $Q$ is also
+  isolation-insensitive: same qdepth under SER and SI.
 \end{corollary}
 \begin{proof}
-  Union merges supports:
-  $\mathrm{supp}(Q) = \mathrm{supp}(Q_1) \cup \mathrm{supp}(Q_2) = \mathcal{D}$.
-  Full support implies $\mathrm{qdepth}(Q) = 0$ under both levels.
-  Example~\ref{ex:complement-union} witnesses the existential.
+  Immediate from Corollary~\ref{cor:propagation-filtration}: positive
+  RA cannot increase qdepth beyond its inputs.
 \end{proof}
 
-\begin{example}[Complementary isolation-sensitive queries]
+\begin{example}[Compositional migration safety]
   \label{ex:complement-union}
-  Consider two transactions $T_A$ and $T_B$ exhibiting write skew:
-  $T_A$ reads $x$, writes $y$; $T_B$ reads $y$, writes $x$.
-  Under SI both commit (no write-write conflict); under SER the rw-rw
-  cycle forces exactly one to abort.
-  Let $Q_1(z) \drule R_A(z)$ return tuples written by $T_A$, and
-  $Q_2(z) \drule R_B(z)$ return tuples written by $T_B$.
-  Both are isolation-sensitive:
-  under SER, each query's result is contingent
-  ($\mathrm{qdepth}_{\mathrm{SER}} > 0$), while under SI both are
-  robust ($\mathrm{qdepth}_{\mathrm{SI}} = 0$).
-
-  Now consider the union $Q = Q_1 \cup Q_2$.
-  Under SER, exactly one of $T_A, T_B$ survives in each
-  determination: $D_A$ aborts $T_A$ (so $Q_2$ produces a result) and
-  $D_B$ aborts $T_B$ (so $Q_1$ produces a result).
-  Either way, the union $Q$ has a nonempty result ---
-  $\mathrm{supp}(Q_1) \cup \mathrm{supp}(Q_2) = \{D_B\} \cup \{D_A\}
-  = \mathcal{D}$.
-  Under SI both have full support (both commit).
-  In either case the union has full support, so
-  $\mathrm{qdepth}_{\mathrm{SER}}(Q) = \mathrm{qdepth}_{\mathrm{SI}}(Q) = 0$:
-  the union is isolation-insensitive despite each component being
-  isolation-sensitive.
-  The complementary structure of the supports cancels the sensitivity.
-  Vandevoort et al.~\cite{vandevoort2025mixed} can certify individual
-  transactions as portable; the filtration additionally certifies
-  \emph{query results} compositionally, even when the components are
-  not individually portable.
+  Transactions $T_1, T_2, T_3$ each insert into relations
+  $R_1, R_2, R_3$.
+  None participates in a write-skew or FCW pattern, so each is
+  isolation-insensitive.
+  A provenance query $Q = R_1 \bowtie R_2 \bowtie R_3$ joins their
+  outputs.
+  The corollary guarantees that every tuple in $Q$'s result is also
+  insensitive---without analyzing $Q$'s interaction with the conflict
+  graph.
+  Vandevoort et al.~\cite{vandevoort2025mixed} certify transactions
+  individually as portable; the filtration additionally certifies
+  \emph{provenance query results} compositionally.
 \end{example}
 
 \subsection{Running Example Revisited}

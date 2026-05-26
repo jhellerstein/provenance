@@ -1223,9 +1223,9 @@ $\bot \Ord \mathbf{u} \Ord \mathbf{f}$
 (with $\mathbf{t}$ and $\mathbf{f}$ incomparable); outcomes are total
 assignments over the Herbrand base (unevaluated atoms receive $\bot$),
 and $o_1 \Ord o_2$ iff $o_1(a) \Ord o_2(a)$ for every atom $a$.
-The commitment basis has two \emph{sealing predicates}
-$\varphi_{\seal}(\{a,p\})$ and $\varphi_{\seal}(\{r,s\})$ (each fixes
-a stratum's derivation) and two \emph{choice predicates}
+The commitment basis has one \emph{sealing predicate}
+$\varphi_{\seal}(\{a,p\})$ (fixing stratum~0's derivation, which
+licenses $\neg p$ in $q$'s rule) and two \emph{choice predicates}
 $\varphi_{a=v}$ (fixing a $\neg$-cycle atom to
 $v \in \{\mathbf{t}, \mathbf{f}\}$).
 The specification $\Spec$ admits all assignments consistent with the
@@ -1235,16 +1235,14 @@ $o_r = \{a(c), p(c), r(c)\}$ and $o_s = \{a(c), p(c), s(c)\}$.
 
 The resolving determinations are $\mathcal{D} = \{D^{(r)}, D^{(s)}\}$:
 \[
-  D^{(r)} = \{\varphi_{\seal}(\{a,p\}),\, \varphi_{\seal}(\{r,s\})\} \seq
+  D^{(r)} = \varphi_{\seal}(\{a,p\}) \seq
     \varphi_{r(c)=\mathbf{t}} \cdot \varphi_{s(c)=\mathbf{f}},
   \qquad
-  D^{(s)} = \{\varphi_{\seal}(\{a,p\}),\, \varphi_{\seal}(\{r,s\})\} \seq
+  D^{(s)} = \varphi_{\seal}(\{a,p\}) \seq
     \varphi_{s(c)=\mathbf{t}} \cdot \varphi_{r(c)=\mathbf{f}},
 \]
-sharing the sealing layer (layer~1, two commuting seals) and branching
+sharing the sealing layer (layer~1, one seal) and branching
 at the choice layer (layer~2).
-The two seals commute because neither stratum's fixpoint depends on
-the other's.
 The filtration index counts discharged layers:
 $\mathcal{F}_0$ is the state before any commitment;
 $\mathcal{F}_1$ reflects the sealing layer

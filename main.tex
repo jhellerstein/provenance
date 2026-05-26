@@ -1744,13 +1744,13 @@ responsibility that depends on the layer-1 outcome.
 Consider a tuple $t$ written by $T_5$ (qdepth~$2$, affected by both
 cycles).
 At layer~1: ordering $T_3$ last makes $t$ robust in one step
-(marginal contribution~$1$); ordering $T_1$ last leaves $t$
-still contingent (marginal contribution~$0$).
+(marginal contribution~$1$); ordering a non-shared transaction last
+leaves $t$ still contingent (marginal contribution~$0$).
 Shapley value at layer~1: $\rho(\text{order } T_3 \text{ last}, t) = 1/2$,
-$\rho(\text{order } T_1 \text{ last}, t) = 0$.
-At layer~2 (conditioned on $T_1$ ordered last): the ordering choice
-between $T_4$ and $T_5$ has Shapley value~$1/2$ for $t$
-(it solely determines $t$'s fate in this branch, but the branch
+$\rho(\text{non-shared last}, t) = 0$.
+At layer~2 (conditioned on a non-shared abort at layer~1): the
+ordering choice between $T_4$ and $T_5$ has Shapley value~$1/2$ for
+$t$ (it solely determines $t$'s fate in this branch, but the branch
 itself occurs with probability~$1/2$).
 Total responsibility sums to~$1$, distributed as $1/2$ to the layer-1
 ordering that resolves both cycles and $1/2$ to the layer-2 ordering.

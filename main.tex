@@ -1022,17 +1022,21 @@ under the constructions in Appendix~\ref{app:protocols}.
 
 \subsection{Per-Tuple Isolation Sensitivity}
 
-The preceding subsection characterized depth globally (worst-case over
-all transactions).
-The filtration also enables a finer, \emph{per-tuple} analysis:
-because different isolation levels are resolving subsets of the same
-filtration (Observation~\ref{obs:basis-entails-filtration}), we can
-compare qdepth under SER and SI for each tuple individually.
-The key structural result is that isolation-insensitivity propagates
-compositionally: if all transactions contributing to a provenance
-query's output are isolation-insensitive, so is every output tuple.
-We first characterize which transactions are isolation-sensitive; the
-corollary then gives the compositional guarantee.
+Vandevoort et al.~\cite{vandevoort2025mixed} certify individual
+transactions as isolation-insensitive.
+Can we extend this to finer granularity --- even individual tuples?
+Our commitment basis is also per-transaction (ordering operators
+$\varphi_{T_i \prec T_j}$), so the raw classification is
+transaction-level.
+But the filtration's compositionality
+(Corollary~\ref{cor:propagation-filtration}) bridges the gap: any
+provenance query over insensitive transactions produces insensitive
+output tuples, and any set of tuples --- including singletons --- can
+be captured as the result of a provenance query.
+We thus go from per-transaction reasoning to per-query or even
+per-tuple reasoning.
+
+We first characterize which transactions are isolation-sensitive:
 
 \begin{proposition}[Isolation-sensitive transactions]
   \label{prop:ser-si-incomparable}

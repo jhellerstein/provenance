@@ -69,17 +69,21 @@
 \begin{abstract}
   Data provenance explains how a query result was derived---but only
   after the system's semantics has been fixed.
-  When multiple admissible outcomes coexist, provenance cannot even
-  pose its question (why? why not?) until something chooses an outcome.
-  We introduce \emph{determination provenance}: a tuple's
-  \emph{support} records which resolutions produce it, supports form a
-  commutative semiring, and layered commitments induce a
-  \emph{filtration} measuring each tuple's \emph{query-relative
+  When multiple admissible outcomes coexist (concurrent transactions
+  may serialize differently; a logic program may have multiple stable
+  models), provenance cannot even pose its question until something
+  chooses among them.
+  We introduce \emph{determination provenance} to track the
+  commitments that resolve this ambiguity.
+  A tuple's \emph{support} records which resolutions produce it;
+  supports form a commutative semiring; and layered commitments induce
+  a \emph{filtration} measuring each tuple's \emph{query-relative
   depth}---how many layers of semantic resolution it depends on.
   Positive relational algebra respects the filtration, enabling
-  compositional robustness analysis and layer bypass.
+  compositional robustness analysis and quantitative diagnosis of
+  coordination cost.
   We instantiate the framework for transactional isolation and for
-  Datalog with negation; in both, classical semantic variants
+  $\mbox{Datalog}^\neg$; in both, classical semantic variants
   (isolation levels; negation semantics) correspond to different views
   of a single shared filtration.
 \end{abstract}

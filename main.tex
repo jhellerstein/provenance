@@ -652,10 +652,15 @@ commuting stages.
 Write $L_1(D), L_2(D), \ldots$ for the successive layers of $D$;
 the \emph{depth} of $D$ is its number of layers.
 
-Two determinations $D, D' \in \mathcal{D}$ \emph{agree at level $k$},
-written $D \equiv_k D'$, if they have the same history through
-layer~$k$ (same events, same commitments, same order, including all
-intervening non-commitment events).
+\begin{definition}[Level-$k$ agreement]
+  \label{def:level-k-agreement}
+  Two determinations $D, D' \in \mathcal{D}$ \emph{agree at level $k$},
+  written $D \equiv_k D'$, if they have the same history through
+  layer~$k$ (same events, same commitments, same order, including all
+  intervening non-commitment events).
+\end{definition}
+
+\noindent
 Each $\equiv_k$ is an equivalence relation; classes refine as $k$
 increases.
 

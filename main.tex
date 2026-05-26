@@ -290,6 +290,14 @@ specification (enlarging $\Ord$ relaxes coordination requirements).
   admissible set at~$H$.
 \end{definition}
 
+\begin{example}[Specification for Example~\ref{ex:example}]
+  $O$ is the set of database states over schema $S(k,y)$;
+  $\Spec(H)$ is the set of states reachable by some serialization of
+  the transactions in $H$.
+  With four concurrent transactions, $|\Spec(H)| > 1$: the
+  specification is ambiguous.
+\end{example}
+
 \noindent
 As noted in the introduction, a specification is in general a
 relation; the goal of determination is to turn it into a function

@@ -536,30 +536,35 @@ Answering such questions requires comparing provenance across multiple
 determinations.
 
 \paragraph{Observables and provenance queries.}
-Classical data provenance is defined over relational database instances.
-We assume that each resolved outcome $o \in O$ maps uniquely to a
-database instance.
-In our transaction and $\mbox{Datalog}^\neg$ examples, this mapping is
-direct; in other settings a relational encoding is required (e.g., a
-sequential log of consensus decisions maps to a relation
-$(\mathsf{index}, \mathsf{value})$ keyed by $\mathsf{index}$).
-Conditioned provenance queries are then the familiar $K$-relational
-queries of Green et al.~\cite{green2007provenance}, evaluated over
-that instance; ``tuple'' as used below refers to a tuple in this
-instance.
+To connect outcomes to provenance, we fix a relational schema
+$\mathbf{S}$ and an \emph{observation function}
+$\mathsf{obs}: O \to \mathrm{Inst}(\mathbf{S})$ mapping each outcome
+to a database instance.
+In our transaction and $\mbox{Datalog}^\neg$ examples,
+$\mathsf{obs}$ is the identity (outcomes are already database states);
+in other settings it encodes the observable relationally (e.g., a
+consensus log maps to $(\mathsf{index}, \mathsf{value})$ keyed by
+$\mathsf{index}$).
+A \emph{provenance query} is a positive relational algebra expression
+over $\mathbf{S}$; conditioned provenance is the familiar
+$K$-relational evaluation of Green et
+al.~\cite{green2007provenance} applied to $\mathsf{obs}(\Spec(H))$.
+Throughout, ``tuple'' refers to a tuple in $\mathsf{obs}(o)$ or in a
+query result over it.
 
 \begin{definition}[Determination Provenance]
   \label{def:det-provenance}
-  Fix a specification $\Spec$ and a provenance query $Q$.
+  Fix a specification $\Spec$ and a provenance query $Q$ over
+  $\mathbf{S}$.
   Each determination $D \in \mathcal{D}$ corresponds to a resolved
-  history $H$; evaluating $Q$ over the database instance defined by
-  $\Spec(H)$ yields a $K$-annotation for each tuple $t$.
+  history $H$; evaluating $Q$ over $\mathsf{obs}(\Spec(H))$ yields a
+  $K$-annotation for each tuple $t$.
   The \emph{determination provenance} of $t$ is the function
   \[
     P_{\Spec}(t) : \mathcal{D} \to K
   \]
   mapping each determination to the conditioned provenance $P_D(t)$
-  ($= 0_K$ when $t$ is absent from the instance).
+  ($= 0_K$ when $t$ is absent).
   When $\Spec$ is clear from context, we write $P(t)$.
 \end{definition}
 

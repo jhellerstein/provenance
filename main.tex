@@ -75,8 +75,9 @@
   chooses among them.
   We introduce \emph{determination provenance} to track the
   commitments that resolve this ambiguity.
-  A tuple's \emph{support} records which resolutions produce it;
-  supports form a commutative semiring; and layered commitments induce
+  A tuple's \emph{support} is the set of resolutions under which it
+  holds.
+  Supports form a commutative semiring, and layered commitments induce
   a \emph{filtration} measuring each tuple's \emph{query-relative
   depth}---how many layers of semantic resolution it depends on.
   Positive relational algebra respects the filtration, enabling

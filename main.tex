@@ -577,15 +577,19 @@ $P(t)(D) = P_D(t)$.
 Classical provenance is the special case where $|\mathcal{D}| = 1$
 (the specification is already determined; no commitments needed).
 
-The \emph{support}
-$\mathrm{supp}(P(t))
-  \triangleq
-  \{\, D \in \mathcal{D} \mid P(t)(D) \neq 0 \,\}$
-is the set of determinations under which $t$ holds.
-Supports form a Boolean algebra
-$(2^{\mathcal{D}}, \cup, \cap, \emptyset, \mathcal{D})$
-under the operations induced by query evaluation (join intersects
-supports; union merges them).
+\begin{definition}[Support and the determination semiring]
+  The \emph{support} of a tuple $t$ is
+  $\mathrm{supp}(P(t))
+    \triangleq
+    \{\, D \in \mathcal{D} \mid P(t)(D) \neq 0 \,\}$:
+  the set of determinations under which $t$ holds.
+  Supports form a Boolean algebra
+  $(2^{\mathcal{D}}, \cup, \cap, \emptyset, \mathcal{D})$
+  under the operations induced by query evaluation (join intersects
+  supports; union merges them).
+\end{definition}
+
+\noindent
 This algebra is elementary; the non-trivial structure is the
 \emph{filtration} (Section~\ref{sec:filtration}), which reflects the
 layered commitment process.

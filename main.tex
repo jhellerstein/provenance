@@ -992,8 +992,7 @@ Appendix~\ref{sec:appendix-SI}).
   commitment: the choice of processing order $\pi$ (a total order on
   pending transactions).
   All consequences (conflict edges, aborts, commits) are entailed by
-  $\pi$ under any protocol (OCC validates in order; 2PL with wound-wait aborts
-  by order; MVTO assigns timestamps by order).
+  $\pi$.
   Hence per-batch depth is~$2$: seal + order selection.
   Full proof in Appendix~\ref{app:protocols}.
 \end{proof}

@@ -1362,22 +1362,18 @@ The preceding sections showed that isolation levels
 (Section~\ref{sec:transactions}) and negation semantics
 (Section~\ref{sec:negation-preview}) are both instances of this
 principle.
-We now develop three consequences: layer bypass, quantitative
-specification comparison, and a connection to PDB query complexity.
+We now develop two consequences: quantitative specification
+comparison and a connection to PDB query complexity.
 
-\subsection{Layer Bypass}
+\subsection{Work Regret and Semantic Shift}
 
 The filtration assigns each tuple a depth relative to a provenance
 query $Q$ (Definition~\ref{def:det-provenance}).
 A tuple with $\mathrm{qdepth}(t) = j$ is settled once layers
 $1, \ldots, j$ are discharged --- layers $j{+}1, \ldots, d$ were
 irrelevant to it.
-Retrospectively, this identifies \emph{wasted coordination}: if a
-provenance query's outputs all have depth $< k$, then layer~$k$'s
-commitments did not affect those results.
-We call this \emph{layer bypass}.
 
-\begin{proposition}[Bypass criterion]
+\begin{proposition}[Compositional depth bound]
   \label{prop:bypass}
   If every input tuple of a positive relational provenance query $Q$
   has $\mathrm{qdepth} < k$, then every output tuple does too
@@ -1386,30 +1382,21 @@ We call this \emph{layer bypass}.
 \end{proposition}
 
 \noindent
-Bypass certification is coNP-complete in the residual width
-$W_{\geq k}$ --- a workload-complexity measure (the query is fixed;
-the number of commitments scales with the history) --- by reduction
-from robustness (Theorem~\ref{thm:robustness-conp}).
-Both instantiations admit polynomial sufficient checks:
+Certifying this is coNP-complete in the residual width
+$W_{\geq k}$ (by reduction from robustness,
+Theorem~\ref{thm:robustness-conp}), but both instantiations admit
+polynomial sufficient checks:
 in transactions, absence from $L$-forbidden
 cycles~\cite{thomson2012calvin}; in $\mbox{Datalog}^\neg$,
 absence of transitive dependency on any negative
 SCC~\cite{gebser2012asp}.
-The filtration's contribution is compositional soundness: a bypass
-check on input tuples propagates to all outputs without per-query
-re-verification
-(Corollary~\ref{cor:propagation-filtration}).
 
-
-\subsection{Quantitative Relaxation Assessment}
-
-The shared filtration enables a per-tuple cost/benefit analysis of
-specification changes.
+Because different specifications over the same commitment basis share
+a filtration (Observation~\ref{obs:basis-entails-filtration}), we can
+compare per-tuple qdepth across specifications.
 Given a workload executed under specification $I$ (e.g., SER) and a
-candidate alternative $I'$ (e.g., SI), the per-tuple qdepth under
-both is measured in the same filtration
-(Observation~\ref{obs:basis-entails-filtration}).
-The difference decomposes into two components:
+candidate alternative $I'$ (e.g., SI), the difference decomposes into
+two components:
 
 \paragraph{Work regret.}
 Tuples that are robust under both $I$ and $I'$ but have

@@ -537,15 +537,16 @@ determinations.
 
 \begin{definition}[Determination Provenance]
   \label{def:det-provenance}
-  For a specification $\Spec$, provenance query $P$, and tuple $t$, the
-  \emph{determination provenance} of $t$ is the function
+  For a specification $\Spec$, provenance query $Q$, and result tuple
+  $t$ of $Q$, the \emph{determination provenance} of $t$ is the
+  function
   \[
     P_{\Spec}(t) : \mathcal{D} \to K
   \]
   that assigns to each $D(H) \in \mathcal{D}$ the conditioned
-  provenance $P_D(t)$ of $t$ in the resolved history $H$, recording
-  how $t$ is derived (or not: $P_D(t) = 0_K$ when $t \notin \Spec(H)$)
-  under every possible resolution.
+  provenance $P_D(t)$ of $t$ in the resolved outcome of $H$, recording
+  how $t$ is derived (or not: $P_D(t) = 0_K$ when $t$ is absent from
+  the resolved outcome) under every possible resolution.
   When $\Spec$ is clear from context, we write $P(t)$.
 \end{definition}
 

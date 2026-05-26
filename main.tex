@@ -1700,10 +1700,9 @@ polynomial time.
 \label{app:multi-layer-resp}
 % ================================================================
 
-We illustrate multi-layer responsibility using
-Example~\ref{ex:overlapping-cycles}: five transactions with two conflict
-cycles sharing $T_3$ ($T_1 \to T_2 \to T_3 \to T_1$ and
-$T_3 \to T_4 \to T_5 \to T_3$).
+We illustrate multi-layer responsibility using a five-transaction
+example with two conflict cycles sharing $T_3$: $T_1 \to T_2 \to T_3
+\to T_1$ and $T_3 \to T_4 \to T_5 \to T_3$.
 The determination has depth~$2$.
 
 \paragraph{Layer 1.}
@@ -2790,10 +2789,10 @@ $c = 0_K$ by the zero-divisor-free property in the natural order).
 Hence both approaches assign the same annotation ($1_K$ or $0_K$) to
 each negated literal.
 Since all subsequent derivation uses only positive operations
-($+$ and $\cdot$), the final annotation of every atom is identical
-under both approaches.
-In particular, an atom has nonzero annotation (holds) under the same
-set of determinations: supports agree.
+($+$ and $\cdot$), the final annotation of every atom is nonzero
+under sealing exactly when it is nonzero under monus.
+Supports (the zero/nonzero distinction) agree; we do not claim
+equality of full $K$-annotations.
 \qed
 
 \subsection{General Case: Nested Negative Cycles}
@@ -2828,9 +2827,10 @@ longest dependency chain).
 
 \begin{proposition}[Soundness and completeness of the canonical basis]
   \label{prop:canonical-basis-sc}
-  For any finite $\mbox{Datalog}^\neg$ program, the canonical layered
-  choice basis of Definition~\ref{def:canonical-choice-basis} is sound
-  and complete: each resolving determination produces a stable model,
+  For the class of finite $\mbox{Datalog}^\neg$ programs satisfying
+  the assumptions of Theorem~\ref{thm:negation-filtration}, the
+  canonical layered choice basis of
+  Definition~\ref{def:canonical-choice-basis} is sound and complete: each resolving determination produces a stable model,
   and every stable model is produced by exactly one resolving
   determination.
 \end{proposition}

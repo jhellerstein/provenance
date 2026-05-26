@@ -1799,9 +1799,11 @@ nonzero responsibility.
   ordering $T_1$ or $T_2$ last breaks only Cycle~1.
   Layer~2 (conditioned on a non-shared abort at layer~1) resolves
   Cycle~2 by ordering $T_4$ or $T_5$ last.
-  For a tuple $t$ written by $T_5$ (qdepth~$2$): the layer-1 ordering
-  that forces $T_3$'s abort concentrates responsibility (it resolves
-  $t$ in one step), while the layer-2 ordering carries the remainder.
+  For a tuple $t$ written by $T_5$ (qdepth~$2$): applying the
+  presence game at each layer, the layer-1 ordering that forces
+  $T_3$'s abort has the highest marginal contribution (it makes $t$
+  robust in one step), while the layer-2 ordering carries the
+  remaining responsibility.
   A tuple with qdepth~$1$ (affected only by Cycle~1) has zero layer-2
   responsibility regardless of the layer-1 outcome.
 \end{example}

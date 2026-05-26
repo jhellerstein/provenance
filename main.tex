@@ -1402,39 +1402,27 @@ two components:
 Tuples that are robust under both $I$ and $I'$ but have
 $\mathrm{qdepth}_I(t) > \mathrm{qdepth}_{I'}(t)$ exhibit wasted
 coordination: the extra depth under $I$ did not change the outcome.
-For transactions, this can be bidirectional: some tuples have deeper
-qdepth under SER (cycle-breaking that SI skips), others have deeper
-qdepth under SI (FCW aborts that SER avoids).
+For transactions this is bidirectional
+(Proposition~\ref{prop:ser-si-incomparable}).
 
 \paragraph{Semantic shift.}
 Tuples whose support differs between $I$ and $I'$ --- robust under
 one, contingent under the other --- represent a genuine change in
 meaning, not wasted work.
-For transactions
-(Proposition~\ref{prop:ser-si-incomparable}): moving from SER to SI
-makes write-skew tuples robust (the rw-rw cycle is no longer
-forbidden), but makes FCW tuples contingent (under SI, concurrent
-writers to the same object cannot both commit because each has
-already read a snapshot that excludes the other's write; SER does
-not employ snapshots, so the constraint does not apply and the
-writes are simply ordered).
-For $\mbox{Datalog}^\neg$, shifting from stable-model to well-founded
-semantics converts choice-layer atoms from resolved
-($\mathbf{t}$/$\mathbf{f}$) to $\mathbf{u}$ --- a semantic shift
-with zero work regret (WFS is strictly cheaper).
+For transactions, write-skew and FCW patterns
+(Proposition~\ref{prop:ser-si-incomparable}) witness the shift in
+each direction; for $\mbox{Datalog}^\neg$, shifting from stable-model
+to well-founded semantics converts choice-layer atoms to $\mathbf{u}$.
 
 \noindent
 Section~\ref{sec:transactions} classified provenance queries as
 isolation-sensitive or not; this decomposition goes further by
 measuring \emph{how much} coordination each tuple costs (depth
 difference) and \emph{which} tuples change semantics (support
-difference), enabling per-tuple cost/benefit analysis of
-isolation-level choices.
+difference).
 The determination responsibility measure
 (Appendix~\ref{app:responsibility-details}) complements this by
-attributing each tuple's contingency to specific commitments via
-Shapley values --- identifying not just the depth of the coordination
-cost but the individual commitment most responsible for it.
+attributing contingency to specific commitments via Shapley values.
 
 \subsection{Provenance Query Complexity}
 

@@ -292,8 +292,9 @@ specification (enlarging $\Ord$ relaxes coordination requirements).
 
 \begin{example}[Specification for Example~\ref{ex:example}]
   $O$ is the set of decision traces (commit/abort sequences for each
-  transaction); $\Spec(H)$ is the set of traces consistent with some
-  serialization of the concurrent transactions in $H$.
+  transaction); $\Ord$ is trace-prefix extension (a longer trace
+  refines a shorter one); $\Spec(H)$ is the set of traces consistent
+  with some serialization of the concurrent transactions in $H$.
   With four concurrent transactions, $|\Spec(H)| > 1$: the
   specification is ambiguous.
 \end{example}

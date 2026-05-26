@@ -611,9 +611,7 @@ layered commitment process.
   \label{ex:det-semiring}
   Two resolved histories arise from Example~\ref{ex:example}: one in
   which $T_2$'s insert is visible to $T_Q$ (determination
-  $D_{\mathsf{in}}$; this class also includes orderings where the
-  delete precedes the insert and is a no-op) and one in which $T_3$'s
-  delete effectively removes the insert before $T_Q$ reads
+  $D_{\mathsf{in}}$) and one in which $T_3$'s delete precedes $T_Q$
   (determination $D_{\mathsf{out}}$).
   With $\mathcal{D} = \{D_{\mathsf{in}}, D_{\mathsf{out}}\}$:
   \[
@@ -648,8 +646,10 @@ When commitments are organized into layers (some depending on others'
 outcomes), the determination semiring carries a finer structure: a
 \emph{filtration}---a nested chain of sub-semirings
 $\mathcal{F}_0 \subseteq \mathcal{F}_1 \subseteq \cdots \subseteq
-\mathcal{F}_d = 2^{\mathcal{D}}$---that records how much of the
-determination each tuple actually requires.
+\mathcal{F}_d = 2^{\mathcal{D}}$ (at the finest level, all
+determinations are distinguished and any subset is a valid
+support)---that records how much of the determination each tuple
+actually requires.
 A tuple whose support lies in $\mathcal{F}_k$ depends only on layers
 $1, \ldots, k$ (those discharged earliest); commitments at deeper
 layers are irrelevant to it.

@@ -1715,10 +1715,12 @@ The determination has depth~$2$.
 
 \paragraph{Layer 1.}
 The first layer resolves Cycle~1 via ordering commitments on its edges.
-Two outcomes matter: either $T_3$ is ordered last (entailing $T_3$'s
-abort, breaking both cycles) or $T_1$ is ordered last (entailing
-$T_1$'s abort, leaving Cycle~2).
-These do not commute with Cycle~2's orderings because $T_3$'s fate
+The cycle can be broken by ordering any of $T_1$, $T_2$, or $T_3$ last
+(entailing that transaction's abort).
+The key distinction: ordering $T_3$ last breaks \emph{both} cycles
+(since $T_3$ is shared), while ordering $T_1$ or $T_2$ last breaks
+only Cycle~1, leaving Cycle~2 intact.
+Layer~1's orderings do not commute with Cycle~2's because $T_3$'s fate
 determines whether Cycle~2 exists.
 
 \paragraph{Layer 2 (conditioned on layer 1).}

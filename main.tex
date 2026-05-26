@@ -817,7 +817,7 @@ No layer information is needed to make this distinction.
   Value $b$ has $\mathrm{qdepth}(b) = 0$: it holds under every
   determination (robust).
   Value $d$ has $\mathrm{qdepth}(d) = 1$: its support is a proper subset
-  of $\mathcal{D}$ (determinations where $T_Q$ is serialized before $T_3$),
+  of $\mathcal{D}$ (determinations where $T_Q$ observes $T_2$'s insert),
   which is not in $\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$.
   Classical provenance works for $b$; determination provenance is needed
   for $d$.
@@ -1488,8 +1488,8 @@ reducing depth.
 Semiring provenance~\cite{green2007provenance} and its extensions to
 probabilistic~\cite{suciu2011probabilistic},
 factorized~\cite{olteanu2015factorized}, and
-aggregate~\cite{senellart2018provenance} settings all operate at
-depth~$0$: a fixed, resolved semantics.
+aggregate~\cite{senellart2018provenance} settings all assume a
+fixed, resolved semantics (depth~$0$ in our framework).
 Why-not provenance~\cite{buneman2001why}, causal
 responsibility~\cite{meliou2010causality}, and counterfactual
 explanations~\cite{halpern2001causes} likewise condition on a single

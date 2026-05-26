@@ -2427,7 +2427,7 @@ The following details supplement the protocol-agnostic analysis above.
 Each lock acquisition implicitly fixes an ordering on the locked
 object: if $T_i$ holds a write lock on $x$ and $T_j$ requests a
 conflicting lock, the system has irrevocably decided $T_i \prec T_j$ on $x$.
-Under the enriched scheduling basis
+Under the ordering basis
 (Section~\ref{sec:scheduling-basis}), this is exactly the ordering
 commitment $\varphi_{T_i \prec T_j}$.
 The key difference from the protocol-agnostic view is \emph{timing}:
@@ -2487,7 +2487,7 @@ The primary semantic commitment in MVTO is the timestamp assignment itself.
 Assigning $ts_i < ts_j$ irrevocably fixes $T_i \prec T_j$ in the serial
 order on every object they both access.
 This is an ordering commitment
-$\varphi_{T_i \prec T_j}$ in the enriched scheduling basis
+$\varphi_{T_i \prec T_j}$ in the ordering basis
 (Section~\ref{sec:scheduling-basis}), but with a crucial structural
 property: a single timestamp assignment simultaneously fixes the
 ordering of $T_i$ relative to \emph{all} other active transactions.

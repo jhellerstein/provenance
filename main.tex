@@ -194,7 +194,7 @@ $\mbox{Datalog}^\neg$; for each, classical semantic variants
   \item \emph{Instantiation for transactional systems}: isolation levels
         (RC, SI, SER) are different resolving subsets of a shared
         filtration; determination depth is $\Theta(n)$ worst-case
-        with scheduling discretion, and SER/SI are incomparable in
+        (in the number of transactions) with scheduling discretion, and SER/SI are incomparable in
         per-tuple query-relative depth
         (Section~\ref{sec:transactions}).
   \item \emph{Instantiation for $\mbox{Datalog}^\neg$}: for a representative
@@ -379,7 +379,8 @@ single outcome on each run; the commitment basis lifts the strategies
 that such implementations use into a semantic domain, enabling
 reasoning across different implementations and their nondeterminism.
 (In Example~\ref{ex:example}, $\Phi = \{\varphi_{T_i \prec T_j}\}$:
-the set of all pairwise ordering operators.)
+the set of all pairwise ordering operators, capturing shared
+aspects of 2PL, OCC and MVTO.)
 
 \paragraph{Three forces on a history.}
 \label{sec:three-forces}%
@@ -843,7 +844,8 @@ In transactional systems, semantic ambiguity arises from
 \emph{conflict resolution}: when concurrent transactions conflict,
 the system must decide which effects persist.
 We show that any isolation level forbidding a conflict cycle has
-worst-case determination depth $\Theta(n)$ given scheduling
+worst-case determination depth $\Theta(n)$ (in the number of
+transactions) given scheduling
 discretion---a result that holds regardless of concurrency control
 protocol.
 The filtration also provides a per-tuple separation of isolation

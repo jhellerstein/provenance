@@ -536,18 +536,16 @@ Answering such questions requires comparing provenance across multiple
 determinations.
 
 \paragraph{Observables and provenance queries.}
-In our operating examples (transactions, $\mbox{Datalog}^\neg$), we
-assume an underlying relational schema; each resolved outcome
-determines a database instance, and provenance queries are the
-familiar $K$-relational queries of Green et
-al.~\cite{green2007provenance}.
-Note that outcomes (e.g., abort decisions) need not be the observable
-object itself; the resolved history uniquely identifies the observable
+Classical data provenance is defined over relational database
+instances.
+We therefore assume that each resolved outcome $o \in O$ has been
+uniquely mapped to a database instance (in our examples, the mapping
+is direct; for other domains such as replicated logs, the observable
+is first represented relationally).
+Conditioned provenance queries are then the familiar $K$-relational
+queries of Green et al.~\cite{green2007provenance}, evaluated over
+that instance; ``tuple'' as used below refers to a tuple in this
 instance.
-The framework handles any observable domain (e.g., log content in
-Multi-Paxos, represented relationally as $(index, value)$ with $index$
-as key); we use ``tuple'' below for the observable items over which
-provenance is defined, whatever the underlying domain.
 
 \begin{definition}[Determination Provenance]
   \label{def:det-provenance}

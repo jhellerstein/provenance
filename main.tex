@@ -1421,21 +1421,37 @@ measuring \emph{how much} coordination each tuple costs (depth
 difference) and \emph{which} tuples change semantics (support
 difference).
 
-\paragraph{Commitment responsibility.}
+\subsection{Commitment Responsibility}
+
 Work regret identifies wasted layers; \emph{determination
-responsibility} (Appendix~\ref{app:responsibility-details}) identifies
-the individual commitment most responsible for a tuple's contingency.
-We adapt the Shapley value from cooperative game theory: each
-commitment in the determination is a player; the game's value is
-whether the tuple's support changes when that commitment is removed.
-The Shapley value of commitment $\varphi$ for tuple $t$ measures
-$\varphi$'s marginal contribution to $t$'s contingency, averaged over
-all orderings in which commitments might be removed.
-In Example~\ref{ex:running-revisited}, the ordering commitment
-$\varphi_{T_2 \prec T_Q}$ has Shapley value~$1$ for $d$'s
-contingency: it is solely responsible (removing it makes $d$ robust).
-In deeper filtrations, responsibility distributes across layers,
-giving a per-commitment, per-tuple attribution of coordination cost.
+responsibility} identifies the individual commitment most responsible
+for a tuple's contingency.
+We adapt the Shapley value from cooperative game
+theory~\cite{livshits2021shapley}: each commitment in the
+determination is a player; the game's value for tuple $t$ is $1$ if
+$t$'s support changes (from full to partial, or vice versa) when that
+commitment is removed, and $0$ otherwise.
+The Shapley value of commitment $\varphi$ for tuple $t$ is then
+$\varphi$'s average marginal contribution to $t$'s contingency over
+all removal orderings.
+
+In Example~\ref{ex:running-revisited}, the single-layer determination
+has two ordering commitments.
+The commitment $\varphi_{T_2 \prec T_Q}$ has Shapley value~$1$ for
+$d$'s contingency: it is solely responsible (removing it makes $d$
+robust regardless of other orderings).
+In deeper filtrations (e.g., the $T_\infty$ construction),
+responsibility distributes across layers: each round's victim decision
+contributes a fraction of the total contingency, and the Shapley value
+quantifies how much.
+
+This lifts the classical tuple-level responsibility of Meliou et
+al.~\cite{meliou2010causality} from data tuples to semantic
+commitments: where they ask ``which input tuple is most responsible
+for an output,'' we ask ``which commitment is most responsible for the
+output holding under this resolution.''
+Full development, including hardness and approximation results, appears
+in Appendix~\ref{app:responsibility-details}.
 
 \subsection{Provenance Query Complexity}
 

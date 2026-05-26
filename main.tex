@@ -1127,9 +1127,6 @@ insensitivity propagates through any such query.
   The corollary guarantees that every tuple in $Q$'s result is also
   insensitive---without analyzing $Q$'s interaction with the conflict
   graph.
-  Vandevoort et al.~\cite{vandevoort2025mixed} certify transactions
-  individually; the filtration additionally certifies
-  \emph{provenance query results} compositionally.
 \end{example}
 
 
@@ -1424,12 +1421,13 @@ semantics converts choice-layer atoms from resolved
 with zero work regret (WFS is strictly cheaper).
 
 \noindent
-This decomposition is finer-grained than the binary ``portable or
-not'' classification of Vandevoort et
-al.~\cite{vandevoort2025mixed}: it measures \emph{how much}
-coordination each tuple costs (depth difference) and \emph{which}
-tuples change semantics (support difference), enabling per-tuple
-cost/benefit analysis of isolation-level migration.
+This decomposition extends the per-transaction portability
+classification of Vandevoort et
+al.~\cite{vandevoort2025mixed} (Section~\ref{sec:transactions}): it
+measures \emph{how much} coordination each tuple costs (depth
+difference) and \emph{which} tuples change semantics (support
+difference), enabling per-tuple cost/benefit analysis of
+isolation-level choices.
 The determination responsibility measure
 (Appendix~\ref{app:responsibility-details}) complements this by
 attributing each tuple's contingency to specific commitments via

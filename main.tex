@@ -1107,12 +1107,12 @@ corollary then gives the compositional guarantee.
   robust ($\mathrm{qdepth}_{\mathrm{SI}} = 0$).
 
   Now consider the union $Q = Q_1 \cup Q_2$.
-  Under SER, the determinations partition into two classes:
-  $D_A$ (abort $T_A$, commit $T_B$) and $D_B$ (abort $T_B$, commit
-  $T_A$).
-  $Q_1$ has support $\{D_B\}$ and $Q_2$ has support $\{D_A\}$---these
-  are complements:
-  $\mathrm{supp}(Q_1) \cup \mathrm{supp}(Q_2) = \mathcal{D}$.
+  Under SER, exactly one of $T_A, T_B$ survives in each
+  determination: $D_A$ aborts $T_A$ (so $Q_2$ produces a result) and
+  $D_B$ aborts $T_B$ (so $Q_1$ produces a result).
+  Either way, the union $Q$ has a nonempty result ---
+  $\mathrm{supp}(Q_1) \cup \mathrm{supp}(Q_2) = \{D_B\} \cup \{D_A\}
+  = \mathcal{D}$.
   Under SI both have full support (both commit).
   In either case the union has full support, so
   $\mathrm{qdepth}_{\mathrm{SER}}(Q) = \mathrm{qdepth}_{\mathrm{SI}}(Q) = 0$:

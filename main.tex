@@ -1052,8 +1052,8 @@ corollary then gives the compositional guarantee.
           SER commits both (ordering them; $t$ is robust); SI aborts
           one via FCW (making $t$ contingent).
   \end{enumerate}
-  Tuples not matching either pattern are \emph{isolation-insensitive}:
-  same qdepth under both levels.
+  Transactions not matching either pattern are
+  \emph{isolation-insensitive}: same qdepth under both levels.
 \end{proposition}
 \begin{proof}
   (a)~$T_A$ reads $x$, writes $y$; $T_B$ reads $y$, writes $x$

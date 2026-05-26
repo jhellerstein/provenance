@@ -2316,72 +2316,16 @@ questions require retaining more semantic information
 % ===============================================================
 
 \subsection{Protocol-Agnostic Depth Bounds}
+\label{prop:ser-depth-n}
 
-\paragraph{Read committed.}
-Under RC, no cycle type is forbidden, so no ordering or abort decision
-is needed to maintain the isolation constraint.
-Depth~$0$ regardless of protocol.
-
-\paragraph{Serializability under fully reactive protocols.}
-Under a fully reactive protocol---one that processes each event
-(start, read, write, commit request) immediately upon arrival with no
-buffering or scheduling discretion---every system response is
-determined by the current state.
-OCC validates deterministically (commit if no cycle, abort otherwise);
-MVTO assigns timestamps in arrival order and forces aborts
-deterministically when timestamp constraints are violated.
-In both cases the system makes no choices: depth~$0$.
-
-\paragraph{Serializability with discretion: depth $O(n)$.}
-When the protocol has discretion---victim selection (which transaction
-to abort when a cycle exists), batching (which requests to process
-together), or scheduling (in what order to process buffered
-requests)---depth can grow to $O(n)$ where $n$ is the number of
-transactions.
-
-\begin{proposition}[Worst-case SER depth]
-  \label{prop:ser-depth-n}
-  Under serializability with any protocol that permits either victim
-  selection or batched scheduling, worst-case determination depth is
-  $\Theta(n)$.
-\end{proposition}
-\begin{proof}
-  \emph{Upper bound.}
-  Each commitment resolves at least one transaction's fate (commit or
-  abort).
-  With $n$ transactions, at most $n$ sequential commitments are needed.
-
-  \emph{Lower bound.}
-  Consider a long-running transaction $T_\infty$ that reads object $x$
-  and writes object $y$ (and never completes).
-  A sequence of transactions $T_1, T_2, \ldots, T_{n-1}$ arrive one at
-  a time; each $T_i$ writes $x$ and reads $y$.
-  Each $T_i$ and $T_\infty$ form a directed cycle via two objects:
-  $T_\infty \xrightarrow{\mathsf{rw}} T_i$ (anti-dependency on $x$:
-  $T_\infty$ read $x$ before $T_i$ writes it) and
-  $T_i \xrightarrow{\mathsf{rw}} T_\infty$ (anti-dependency on $y$:
-  $T_i$ read $y$ before $T_\infty$ writes it).
-  The system must resolve the cycle: either abort $T_i$ (letting
-  $T_\infty$ survive) or abort $T_\infty$ (resolving all future
-  conflicts).
-  If the system aborts $T_i$ at each step (a valid choice under victim
-  selection), $T_\infty$ survives and the next arrival creates a new
-  cycle.
-  Each abort decision depends on the previous one (had $T_\infty$ been
-  aborted earlier, no further cycles would arise), so the decisions do
-  not commute across rounds.
-  After $n-1$ such rounds, depth is $n-1 = \Theta(n)$.
-\end{proof}
-
-\noindent
-The argument is protocol-agnostic: it requires only that the protocol
-permits choosing which transaction to abort (victim selection) or
-permits deferring a transaction's resolution across multiple rounds
-(batching).
-Under OCC with commit-order discretion, the same construction applies:
-the system chooses to validate $T_i$ before $T_\infty$ at each round,
-forcing $T_i$'s abort.
-Under 2PL, the construction maps to repeated deadlock detection with
+Theorem~\ref{thm:txn-depth} in the body establishes depth~$0$ for RC
+and reactive protocols, $\Theta(n)$ worst-case with discretion, and
+per-batch depth~$2$.
+The body proof sketch gives the explicit $T_\infty$ two-object
+rw-rw witness.
+Under OCC with commit-order discretion, the same construction applies
+(the system validates $T_i$ before $T_\infty$ at each round, forcing
+$T_i$'s abort); under 2PL, it maps to repeated deadlock detection with
 $T_\infty$ as the surviving lock holder.
 
 \subsection{Per-Round Structure}

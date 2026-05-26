@@ -1420,9 +1420,22 @@ isolation-sensitive or not; this decomposition goes further by
 measuring \emph{how much} coordination each tuple costs (depth
 difference) and \emph{which} tuples change semantics (support
 difference).
-The determination responsibility measure
-(Appendix~\ref{app:responsibility-details}) complements this by
-attributing contingency to specific commitments via Shapley values.
+
+\paragraph{Commitment responsibility.}
+Work regret identifies wasted layers; \emph{determination
+responsibility} (Appendix~\ref{app:responsibility-details}) identifies
+the individual commitment most responsible for a tuple's contingency.
+We adapt the Shapley value from cooperative game theory: each
+commitment in the determination is a player; the game's value is
+whether the tuple's support changes when that commitment is removed.
+The Shapley value of commitment $\varphi$ for tuple $t$ measures
+$\varphi$'s marginal contribution to $t$'s contingency, averaged over
+all orderings in which commitments might be removed.
+In Example~\ref{ex:running-revisited}, the ordering commitment
+$\varphi_{T_2 \prec T_Q}$ has Shapley value~$1$ for $d$'s
+contingency: it is solely responsible (removing it makes $d$ robust).
+In deeper filtrations, responsibility distributes across layers,
+giving a per-commitment, per-tuple attribution of coordination cost.
 
 \subsection{Provenance Query Complexity}
 

@@ -1370,16 +1370,19 @@ specification comparison, and a connection to PDB query complexity.
 The filtration assigns each tuple a depth relative to a provenance
 query $Q$ (Definition~\ref{def:det-provenance}).
 A tuple with $\mathrm{qdepth}(t) = j$ is settled once layers
-$1, \ldots, j$ are discharged.
-This gives rise to \emph{layer bypass}: any provenance query whose
-outputs all have depth $< k$ can skip layer~$k$'s coordination.
+$1, \ldots, j$ are discharged --- layers $j{+}1, \ldots, d$ were
+irrelevant to it.
+Retrospectively, this identifies \emph{wasted coordination}: if a
+provenance query's outputs all have depth $< k$, then layer~$k$'s
+commitments did not affect those results.
+We call this \emph{layer bypass}.
 
 \begin{proposition}[Bypass criterion]
   \label{prop:bypass}
   If every input tuple of a positive relational provenance query $Q$
   has $\mathrm{qdepth} < k$, then every output tuple does too
-  (Corollary~\ref{cor:propagation-filtration}), and $Q$'s evaluation
-  can bypass layers $k, \ldots, d$.
+  (Corollary~\ref{cor:propagation-filtration}): layers $k, \ldots, d$
+  did not affect $Q$'s results.
 \end{proposition}
 
 \noindent

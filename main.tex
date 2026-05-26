@@ -1738,6 +1738,22 @@ responsibility regardless of the layer-1 choice; a tuple with
 $\mathrm{qdepth} = 2$ (affected by both cycles) has layer-2
 responsibility that depends on the layer-1 outcome.
 
+\paragraph{Quantitative outcome.}
+Consider a tuple $t$ written by $T_5$ (qdepth~$2$, affected by both
+cycles).
+At layer~1: $\varphi_{\mathsf{a}}(T_3)$ makes $t$ robust in one step
+(marginal contribution~$1$); $\varphi_{\mathsf{a}}(T_1)$ leaves $t$
+still contingent (marginal contribution~$0$).
+Shapley value at layer~1: $\rho(\varphi_{\mathsf{a}}(T_3), t) = 1/2$,
+$\rho(\varphi_{\mathsf{a}}(T_1), t) = 0$.
+At layer~2 (conditioned on $\varphi_{\mathsf{a}}(T_1)$): the victim
+choice between $T_4$ and $T_5$ has Shapley value~$1/2$ for $t$
+(it solely determines $t$'s fate in this branch, but the branch
+itself occurs with probability~$1/2$).
+Total responsibility sums to~$1$, distributed as $1/2$ to the layer-1
+commitment that resolves both cycles and $1/2$ to the layer-2 victim
+choice.
+
 % ================================================================
 \section{Responsibility: Additional Results}
 \label{app:responsibility-details}

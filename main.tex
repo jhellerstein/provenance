@@ -740,18 +740,12 @@ No layer information is needed to make this distinction.
 
 \begin{proposition}[Single-layer case]
   \label{prop:collapse-depth-1}
-  When all commitments commute (a single layer), the filtration has exactly
-  two levels
-  ($\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$ and
-  $\mathcal{F}_1 = 2^{\mathcal{D}}$), and the determination semiring
-  coincides with $\mathrm{PosBool}(\Phi)$---positive Boolean formulas
-  over commitment variables, with $\vee$ as addition and $\wedge$ as
-  multiplication.
-  (Here each minimal determination is identified with its exact
-  commitment set, and each commitment variable indicates whether that
-  commitment was applied.
-  The formulas are interpreted over the set of valid minimal
-  determinations, not over all truth assignments to $\Phi$.)
+  When all commitments commute (a single layer), the filtration has
+  exactly two levels ($\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$ and
+  $\mathcal{F}_1 = 2^{\mathcal{D}}$), and supports coincide with
+  $\mathrm{PosBool}(\Phi)$---positive Boolean formulas over commitment
+  variables, interpreted over valid minimal determinations.
+  This connects to PDB lineage in Section~\ref{sec:bypass}.
 \end{proposition}
 \begin{proof}
   With a single layer, two determinations agree at level $1$ iff they

@@ -1077,9 +1077,9 @@ corollary then gives the compositional guarantee.
 
 \begin{corollary}[Compositional isolation migration]
   \label{cor:isolation-migration}
-  Isolation sensitivity is not preserved by union: there exist
-  positive relational queries $Q_1, Q_2$ that are each
-  isolation-sensitive, yet whose union $Q = Q_1 \cup Q_2$ is
+  Isolation-sensitive queries can compose into isolation-insensitive
+  ones: there exist positive relational queries $Q_1, Q_2$ that are
+  each isolation-sensitive, yet whose union $Q = Q_1 \cup Q_2$ is
   isolation-insensitive
   ($\mathrm{qdepth}_{\mathrm{SER}}(Q) = \mathrm{qdepth}_{\mathrm{SI}}(Q) = 0$).
   This occurs whenever the queries have complementary supports

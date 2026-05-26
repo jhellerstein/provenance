@@ -1251,10 +1251,9 @@ $\mathcal{F}_2$ reflects the choice layer where the determinations
 diverge.
 Concretely:
 $\mathcal{F}_0 = \mathcal{F}_1 = \{\emptyset, \mathcal{D}\}$
-(only full or empty support is expressible before the choice layer ---
-all determinations agree through layer~1)
+(all determinations agree through layer~1)
 and $\mathcal{F}_2 = 2^{\mathcal{D}}$ (once the choice layer is
-discharged, all determinations are distinguished).
+discharged, all determinations are distinguished so all subsets are possible).
 
 \[
   \begin{array}{r@{\;=\;}l@{\qquad}r@{\;=\;}l}
@@ -1312,6 +1311,11 @@ filtration level compose through positive relational algebra
 query result is preserved across semantics (e.g., stable $\to$
 well-founded) by inspecting supports algebraically, without re-running
 evaluation under each semantics separately.
+Note the structural contrast with transactions: negation semantics
+form a chain within the filtration (each is a deeper reading of the
+same structure), while isolation levels are incomparable resolving
+subsets of a shared filtration
+(Observation~\ref{obs:basis-entails-filtration}).
 
 % This is correct: sealed absence → 1_K, sealed presence → 0_K matches
 % monus (1_K ∸ v) for any naturally ordered K. Downstream derivability

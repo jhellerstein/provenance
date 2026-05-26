@@ -658,8 +658,9 @@ layer~$k$ (same events, same commitments, same order).
 Formally:
 \begin{itemize}[nosep,leftmargin=*]
   \item $D \equiv_0 D'$ always (vacuous agreement).
-  \item $D \equiv_{k+1} D'$ iff $D \equiv_k D'$ and $L_{k+1}(D) =
-        L_{k+1}(D')$.
+  \item $D \equiv_{k+1} D'$ iff $D \equiv_k D'$ and the histories of
+        $D$ and $D'$ are identical through layer~$k{+}1$ (including
+        all intervening non-commitment events).
 \end{itemize}
 Each $\equiv_k$ is an equivalence relation; classes refine as $k$
 increases.

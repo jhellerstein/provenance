@@ -1086,7 +1086,7 @@ corollary then gives the compositional guarantee.
   RA cannot increase qdepth beyond its inputs.
 \end{proof}
 
-\begin{example}[Compositional migration safety]
+\begin{example}[Compositional insensitivity]
   \label{ex:complement-union}
   Transactions $T_1, T_2, T_3$ each insert into relations
   $R_1, R_2, R_3$.
@@ -1098,7 +1098,7 @@ corollary then gives the compositional guarantee.
   insensitive---without analyzing $Q$'s interaction with the conflict
   graph.
   Vandevoort et al.~\cite{vandevoort2025mixed} certify transactions
-  individually as portable; the filtration additionally certifies
+  individually; the filtration additionally certifies
   \emph{provenance query results} compositionally.
 \end{example}
 

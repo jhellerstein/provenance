@@ -536,12 +536,13 @@ Answering such questions requires comparing provenance across multiple
 determinations.
 
 \paragraph{Observables and provenance queries.}
-Classical data provenance is defined over relational database
-instances.
-We therefore assume that each resolved outcome $o \in O$ has been
-uniquely mapped to a database instance (in our examples, the mapping
-is direct; for other domains such as replicated logs, the observable
-is first represented relationally).
+Classical data provenance is defined over relational database instances.
+We assume that each resolved outcome $o \in O$ maps uniquely to a
+database instance.
+In our transaction and $\mbox{Datalog}^\neg$ examples, this mapping is
+direct; in other settings a relational encoding is required (e.g., a
+sequential log of consensus decisions maps to a relation
+$(\mathsf{index}, \mathsf{value})$ keyed by $\mathsf{index}$).
 Conditioned provenance queries are then the familiar $K$-relational
 queries of Green et al.~\cite{green2007provenance}, evaluated over
 that instance; ``tuple'' as used below refers to a tuple in this

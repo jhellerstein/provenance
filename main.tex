@@ -992,7 +992,7 @@ Appendix~\ref{sec:appendix-SI}).
   commitment: the choice of processing order $\pi$ (a total order on
   pending transactions).
   All consequences (conflict edges, aborts, commits) are entailed by
-  $\pi$ under any protocol (OCC validates in order; wound-wait aborts
+  $\pi$ under any protocol (OCC validates in order; 2PL with wound-wait aborts
   by order; MVTO assigns timestamps by order).
   Hence per-batch depth is~$2$: seal + order selection.
   Full proof in Appendix~\ref{app:protocols}.
@@ -1004,9 +1004,11 @@ generable around a surviving transaction whose fate is discretionary
 (victim selection or deferred validation); this holds for SER and SI
 under the constructions in Appendix~\ref{app:protocols}.
 
-\begin{example}[Per-batch depth under 2PL deadlock detection]
+\begin{example}[Per-batch depth under 2PL with deadlock detection]
   \label{ex:overlapping-cycles}
-  Under 2PL, three transactions hold locks forming a wait-for cycle:
+  Under 2PL \emph{without} wound-wait (i.e., with periodic deadlock
+  detection rather than deadlock avoidance), three transactions hold
+  locks forming a wait-for cycle:
   $T_1$ waits for $T_2$, $T_2$ waits for $T_3$, $T_3$ waits for $T_1$.
   The system periodically runs deadlock detection.
   Layer~1 (seal): the system runs detection now, observing the current

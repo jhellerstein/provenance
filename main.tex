@@ -381,7 +381,7 @@ forces~\cite{hellerstein2026complexity}:
 without excluding any alternative (they add detail that is compatible
 with every remaining admissible outcome).
 In transactional systems, operation interleavings are environment and
-commit/abort decisions are commitments; in Datalog with negation, EDB
+commit/abort decisions are commitments; in $\mbox{Datalog}^\neg$, EDB
 facts are environment, sealing and choice predicates are commitments,
 and the alternating fixpoint's classifications are entailments.
 
@@ -396,7 +396,7 @@ A full resolution requires a collection of them:
   $\Phi$ is the subsequence of commitment events in $H$, listed in the
   order induced by $\rightarrow$:
   $D(H) = \varphi_1 \cdot \varphi_2 \cdot \cdots \cdot \varphi_m$.
-  Environment events may occur between successive commitments; the
+  Non-commitment events may occur between successive commitments; the
   effect of each $\varphi_i$ depends on the full history at its point
   of application.
 \end{definition}
@@ -1215,7 +1215,7 @@ isolation levels.
 \label{sec:negation-preview}
 % ================================================================
 
-In Datalog with negation, the non-monotone operation is
+In $\mbox{Datalog}^\neg$, the non-monotone operation is
 \emph{negation}: concluding $\neg p$ requires establishing that
 $p$ has no (further) derivation---a completeness guarantee
 that classical approaches handle via monus~\cite{dannert2021semiring}.

@@ -1022,9 +1022,14 @@ under the constructions in Appendix~\ref{app:protocols}.
 
 \subsection{Per-Tuple Isolation Sensitivity}
 
-The filtration's key contribution to isolation-level analysis is
-\emph{compositionality}: isolation-insensitivity of base tuples
-propagates through queries.
+The preceding subsection characterized depth globally (worst-case over
+all transactions).
+The filtration also enables a finer, \emph{per-tuple} analysis:
+because different isolation levels are resolving subsets of the same
+filtration (Observation~\ref{obs:basis-entails-filtration}), we can
+compare qdepth under SER and SI for each tuple individually.
+The key structural result is that isolation-insensitivity of base
+tuples propagates through queries.
 
 \begin{proposition}[Isolation-sensitive tuples]
   \label{prop:ser-si-incomparable}

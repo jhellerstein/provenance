@@ -2992,6 +2992,21 @@ We map the framework's three levels of structure
 to concrete capabilities, then develop two orthogonal
 dimensions of parsimony that make the theory practical.
 
+\paragraph{Observation functions beyond relational databases.}
+The body defines an observation function
+$\mathsf{obs}: O \to \mathrm{Inst}(\mathbf{S})$ mapping outcomes to
+relational instances.
+In systems settings, observables are often partially-ordered,
+semi-structured records (distributed traces, replicated logs, event
+streams).
+The framework applies whenever such records admit a relational
+encoding: a Paxos log becomes $(\mathsf{index}, \mathsf{value})$
+keyed by $\mathsf{index}$; a distributed trace becomes a relation of
+$(span\_id, parent\_id, service, timestamp)$ tuples; a stream
+becomes a time-keyed append-only relation.
+Any query language equivalent to positive RA over such encodings
+inherits the filtration's compositionality guarantees.
+
 \subsection{Level 1: Repeatability from a Single Determination}
 
 A resolving determination records the non-deterministic commitments

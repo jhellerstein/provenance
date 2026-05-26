@@ -571,6 +571,10 @@ A \emph{provenance query} is a positive relational algebra expression
 over $\mathbf{S}$; conditioned provenance is the familiar
 $K$-relational evaluation of Green et
 al.~\cite{green2007provenance} applied to $\mathsf{obs}(\Spec(H))$.
+This is where the framework gains expressive power beyond
+per-commitment analysis: provenance queries can select individual
+tuples, join across transactions, or aggregate --- enabling
+fine-grained and cross-transaction sensitivity analysis.
 Throughout, ``tuple'' refers to a tuple in $\mathsf{obs}(o)$ or in a
 query result over it.
 

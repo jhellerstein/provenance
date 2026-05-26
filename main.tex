@@ -1400,15 +1400,16 @@ two components:
 
 \paragraph{Work regret.}
 Tuples that are robust under both $I$ and $I'$ but have
-$\mathrm{qdepth}_I(t) > \mathrm{qdepth}_{I'}(t)$: the extra
-coordination under $I$ did not change the outcome.
+$\mathrm{qdepth}_I(t) > \mathrm{qdepth}_{I'}(t)$ exhibit wasted
+coordination: the extra depth under $I$ did not change the outcome.
 For transactions, this can be bidirectional: some tuples have deeper
 qdepth under SER (cycle-breaking that SI skips), others have deeper
 qdepth under SI (FCW aborts that SER avoids).
 
 \paragraph{Semantic shift.}
-Tuples whose support differs between $I$ and $I'$: robust under one,
-contingent under the other.
+Tuples whose support differs between $I$ and $I'$ --- robust under
+one, contingent under the other --- represent a genuine change in
+meaning, not wasted work.
 For transactions
 (Proposition~\ref{prop:ser-si-incomparable}): moving from SER to SI
 makes write-skew tuples robust (the rw-rw cycle is no longer

@@ -937,6 +937,29 @@ edge labels), and \emph{snapshot isolation} (SI; permits rw-only
 cycles but enforces first-committer-wins on $\mathsf{ww}$ edges;
 Appendix~\ref{sec:appendix-SI}).
 
+\begin{example}[Running example: depth~$1$ under SER]
+  \label{ex:running-revisited}
+  Returning to Example~\ref{ex:example}: the conflict graph is
+  acyclic, so all ordering commitments commute and form a single layer.
+  Two equivalence classes of determinations arise:
+  $D_{\mathsf{in}} \triangleq
+    \varphi_{T_2 \prec T_Q} \cdot \varphi_{T_Q \prec T_3}$
+  (all orderings where $T_Q$ observes $T_2$'s insert)
+  and
+  $D_{\mathsf{out}} \triangleq
+    \varphi_{T_2 \prec T_3} \cdot \varphi_{T_3 \prec T_Q}$
+  (orderings where $d$ is absent).
+  The determination provenance is:
+  \[
+    P(b) = \mathcal{D} \times \{x_0\}, \qquad
+    P(d) = \{(D_{\mathsf{in}},\, x_2)\}.
+  \]
+  $b$ is robust ($\mathrm{qdepth} = 0$); $d$ is contingent
+  ($\mathrm{qdepth} = 1$).
+  Figure~\ref{fig:det-tables} summarizes the determination structure
+  across isolation levels.
+\end{example}
+
 \subsection{Determination Depth by Isolation Level}
 
 \begin{theorem}[Determination depth for transactions]
@@ -1018,31 +1041,6 @@ under the constructions in Appendix~\ref{app:protocols}.
   and abort $T_1$.
   The two layers do not commute: the seal determines which transactions
   are in the batch; the order determines which survive validation.
-\end{example}
-
-\begin{example}[Running example: depth~$1$ under SER]
-  \label{ex:running-revisited}
-  Returning to Example~\ref{ex:example}: the conflict graph is
-  acyclic, so under SER with scheduling discretion (case~(c) above)
-  all ordering commitments commute and form a single layer.
-  Two equivalence classes of determinations arise:
-  $D_{\mathsf{in}} \triangleq
-    \varphi_{T_2 \prec T_Q} \cdot \varphi_{T_Q \prec T_3}$
-  (all orderings where $T_Q$ observes $T_2$'s insert)
-  and
-  $D_{\mathsf{out}} \triangleq
-    \varphi_{T_2 \prec T_3} \cdot \varphi_{T_3 \prec T_Q}$
-  (orderings where $d$ is absent).
-  The determination provenance is:
-  \[
-    P(b) = \mathcal{D} \times \{x_0\}, \qquad
-    P(d) = \{(D_{\mathsf{in}},\, x_2)\}.
-  \]
-  $b$ is robust ($\mathrm{qdepth} = 0$); $d$ is contingent
-  ($\mathrm{qdepth} = 1$, since the ordering commitments commute and
-  form a single layer).
-  Figure~\ref{fig:det-tables} summarizes the determination structure
-  across isolation levels.
 \end{example}
 
 \subsection{Per-Tuple Isolation Sensitivity}

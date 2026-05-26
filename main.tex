@@ -646,7 +646,7 @@ When commitments are organized into layers (some depending on others'
 outcomes), the determination semiring carries a finer structure: a
 \emph{filtration}---a nested chain of sub-semirings
 $\mathcal{F}_0 \subseteq \mathcal{F}_1 \subseteq \cdots \subseteq
-\mathcal{F}_d = 2^{\mathcal{D}}$ (at the finest level, all
+\mathcal{F}_d = 2^{\mathcal{D}}$ (at the finest level $d$, all
 determinations are distinguished and any subset is a valid
 support)---that records how much of the determination each tuple
 actually requires.
@@ -658,8 +658,9 @@ layers are irrelevant to it.
   \label{def:layered-basis}
   A \emph{layered commitment basis} is a commitment basis $\Phi$ equipped
   with a \emph{layering function} $\lambda : \Phi \to \{1, \ldots, d\}$.
-  The layering is history-independent: it classifies commitments
-  (operators), not their effects at particular histories.
+  The layering classifies commitment operators (each operator has a
+  fixed layer assignment), though the \emph{effect} of an operator
+  remains history-dependent.
   The classification must satisfy:
   \begin{enumerate}[nosep,label=(\roman*)]
     \item \emph{within-layer commutativity}: for all

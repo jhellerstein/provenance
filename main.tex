@@ -1020,11 +1020,12 @@ under the constructions in Appendix~\ref{app:protocols}.
   are in the batch; the order determines which survive validation.
 \end{example}
 
-\begin{example}[Running example under the ordering basis]
+\begin{example}[Running example: depth~$1$ under SER]
   \label{ex:running-revisited}
-  Returning to Example~\ref{ex:example}: using ordering commitments
-  (Section~\ref{sec:scheduling-basis}), two equivalence classes of
-  determinations arise (quotienting by query-outcome equivalence):
+  Returning to Example~\ref{ex:example}: the conflict graph is
+  acyclic, so under SER with scheduling discretion (case~(c) above)
+  all ordering commitments commute and form a single layer.
+  Two equivalence classes of determinations arise:
   $D_{\mathsf{in}} \triangleq
     \varphi_{T_2 \prec T_Q} \cdot \varphi_{T_Q \prec T_3}$
   (all orderings where $T_Q$ observes $T_2$'s insert)

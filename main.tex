@@ -907,8 +907,9 @@ SI~\cite{adya1999weak} to a per-tuple depth comparison.
 \label{sec:scheduling-basis}
 
 Standard concurrency-control protocols all effectively order
-conflicting transactions: 2PL via the time of first lock release, OCC
-via validation order, MVTO via timestamp assignment.
+conflicting transactions: OCC
+via validation order, MVTO via timestamp assignment, 2PL via the time of first lock release
+or deadlock-driven abort.
 We capture this shared structure with an \emph{ordering commitment
 basis}:
 
@@ -955,11 +956,9 @@ Appendix~\ref{sec:appendix-SI}).
           depth~$0$.
           Every response is entailed by the current state and the
           arriving request.
-    \item Under any such $L$ whose forbidden pattern can be generated
-          repeatedly around a surviving transaction, with scheduling
-          discretion (batching, commit-order choice, or victim
-          selection): worst-case depth~$\Theta(n)$, where $n$ is the
-          number of transactions.
+    \item Under any such $L$ with scheduling discretion (batching,
+          commit-order choice, or victim selection): worst-case
+          depth~$\Theta(n)$, where $n$ is the number of transactions.
           Per-batch depth is~$2$ (seal the batch; choose a processing
           order within it).
   \end{enumerate}
@@ -970,8 +969,8 @@ Appendix~\ref{sec:appendix-SI}).
 
   (b)~A fully reactive protocol processes each event deterministically
   given the current state.
-  Witness: OCC (validate on commit request; abort iff cycle exists) or
-  MVTO (assign timestamp on arrival; force abort on violation).
+  Witness: textbook OCC (validate on commit request; abort iff cycle exists) or
+  textbook MVTO (assign timestamp on arrival; force abort on violation).
   No system choice arises; depth~$0$.
 
   (c)~\emph{Upper bound}: each commitment resolves at least one

@@ -1046,18 +1046,15 @@ under the constructions in Appendix~\ref{app:protocols}.
 \subsection{Per-Tuple Isolation Sensitivity}
 
 Vandevoort et al.~\cite{vandevoort2025mixed} certify individual
-transactions as isolation-insensitive.
-Can we extend this to finer granularity --- even individual tuples?
-Our commitment basis is also per-transaction (ordering operators
-$\varphi_{T_i \prec T_j}$), so the raw classification is
-transaction-level.
-But the filtration's compositionality
-(Corollary~\ref{cor:propagation-filtration}) bridges the gap: any
-provenance query over insensitive transactions produces insensitive
-output tuples, and any set of tuples --- including singletons --- can
-be captured as the result of a provenance query.
-We thus go from per-transaction reasoning to per-query or even
-per-tuple reasoning.
+transactions as isolation-insensitive --- a per-transaction result,
+like our commitment basis.
+Provenance queries over the resulting database enable a richer cut:
+both finer grain (a query selecting a single tuple) and
+cross-transaction questions (a join combining outputs of multiple
+transactions).
+The filtration's compositionality
+(Corollary~\ref{cor:propagation-filtration}) guarantees that
+insensitivity propagates through any such query.
 
 \begin{proposition}[Isolation-sensitive transactions]
   \label{prop:ser-si-incomparable}

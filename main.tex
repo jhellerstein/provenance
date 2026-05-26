@@ -178,8 +178,9 @@ has positive depth reflecting which layer it depends on.
 Provenance query evaluation (positive RA) cannot make a result tuple
 depend on more layers than the tuples it reads from.
 The filtration supports three forms of reasoning:
-\emph{bypass} (queries reading only tuples settled before layer~$k$
-can skip layers $k, \ldots, d$); \emph{semantic-change analysis}
+\emph{depth bounds} (queries reading only tuples settled before
+layer~$k$ are unaffected by layers $k, \ldots, d$);
+\emph{semantic-change analysis}
 (specifications over the same basis can be compared tuple-by-tuple,
 separating wasted coordination from genuine semantic differences); and
 a \emph{complexity connection} (depth-$1$ provenance coincides with
@@ -211,16 +212,16 @@ $\mbox{Datalog}^\neg$; for each, classical semantic variants
         undefined
         (Section~\ref{sec:negation-preview},
         Appendix~\ref{sec:appendix-datalog}).
-  \item \emph{Layer bypass and semantic-change analysis}: queries
-        whose inputs have depth below layer~$k$ can bypass layers
-        $k, \ldots, d$; specifications over the same basis can be
+  \item \emph{Quantitative measures and semantic-change analysis}:
+        queries whose inputs have depth below layer~$k$ are unaffected
+        by layers $k, \ldots, d$; specifications over the same basis can be
         compared tuple-by-tuple, quantifying coordination \emph{work
         regret} vs.\ genuine \emph{semantic shift}; depth-$1$
         provenance coincides with PDB lineage, and higher depths
         correspond to layered PDB evaluation
-        (Section~\ref{sec:bypass}).
+        (Section~\ref{sec:discussion}).
   \item \emph{Complexity and attribution} (appendices):
-        robustness and bypass verification are coNP-complete; a
+        robustness is coNP-complete; a
         Shapley-value measure attributes contingency to individual
         commitments (Appendices~\ref{app:robustness-proofs},~\ref{app:responsibility-details}).
 \end{enumerate}
@@ -580,8 +581,8 @@ $K$-relational evaluation of Green et
 al.~\cite{green2007provenance} applied to $\mathsf{obs}(\Spec(H))$.
 This is where the framework gains expressive power beyond
 per-commitment analysis: provenance queries can select individual
-tuples, join across transactions, or aggregate --- enabling
-fine-grained and cross-transaction sensitivity analysis.
+tuples or join across transactions --- enabling fine-grained and
+cross-transaction sensitivity analysis.
 Throughout, ``tuple'' refers to a tuple in $\mathsf{obs}(o)$ or in a
 query result over it.
 
@@ -768,7 +769,7 @@ No layer information is needed to make this distinction.
   $\mathcal{F}_1 = 2^{\mathcal{D}}$), and supports coincide with
   $\mathrm{PosBool}(\Phi)$---positive Boolean formulas over commitment
   variables, interpreted over valid minimal determinations.
-  This connects to PDB lineage in Section~\ref{sec:bypass}.
+  This connects to PDB lineage in Section~\ref{sec:discussion}.
 \end{proposition}
 \begin{proof}
   With a single layer, two determinations agree at level $1$ iff they
@@ -1356,7 +1357,6 @@ determination, and supports track which models produce each atom.
 
 % ================================================================
 \section{Consequences of the Filtration}
-\label{sec:bypass}
 \label{sec:discussion}
 % ================================================================
 
@@ -1433,18 +1433,15 @@ responsibility} identifies the individual commitment most responsible
 for a tuple's contingency.
 We adapt the Shapley value from cooperative game
 theory~\cite{livshits2021shapley}: each commitment in the
-determination is a player; the game's value for tuple $t$ is $1$ if
-$t$'s support changes (from full to partial, or vice versa) when that
-commitment is removed, and $0$ otherwise.
-The Shapley value of commitment $\varphi$ for tuple $t$ is then
-$\varphi$'s average marginal contribution to $t$'s contingency over
-all removal orderings.
+determination is a player, and the game measures how much each
+commitment contributes to a tuple's contingency.
+The Shapley value of commitment $\varphi$ for tuple $t$ is
+$\varphi$'s average marginal contribution over all removal orderings
+(formal definition in Appendix~\ref{app:responsibility-details}).
 
-In Example~\ref{ex:running-revisited}, the single-layer determination
-has two ordering commitments.
-The commitment $\varphi_{T_2 \prec T_Q}$ has Shapley value~$1$ for
-$d$'s contingency: it is solely responsible (removing it makes $d$
-robust regardless of other orderings).
+In Example~\ref{ex:running-revisited}, responsibility is concentrated
+on the ordering commitments that determine whether $T_Q$ observes
+$T_2$'s insert before an effective delete.
 In deeper filtrations (e.g., the $T_\infty$ construction),
 responsibility distributes across layers: each round's victim decision
 contributes a fraction of the total contingency, and the Shapley value
@@ -1499,7 +1496,7 @@ explanations~\cite{halpern2001causes} likewise condition on a single
 outcome.
 Determination provenance generalizes these by making the
 commitments that precede derivational provenance explicit and composable.
-Determination responsibility (Section~\ref{sec:bypass}) lifts
+Determination responsibility (Section~\ref{sec:discussion}) lifts
 Shapley-value attribution~\cite{meliou2010causality,livshits2021shapley}
 from data tuples to semantic commitments; the two games are sequential,
 not competing: determination
@@ -1523,7 +1520,7 @@ induce the filtration.
 A tuple-independent PDB is the depth-$1$ special case
 (Proposition~\ref{prop:collapse-depth-1}): the filtration collapses to
 $\mathrm{PosBool}(\Phi)$ and query-relative depth is uniformly~$1$.
-The filtration, query-relative depth, and layer bypass have
+The filtration and query-relative depth have
 no PDB analog because PDB events lack the layered dependency structure
 that these concepts measure.
 Conversely, PDB tractability results (dichotomies for hierarchical

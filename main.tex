@@ -1216,8 +1216,8 @@ consequences of that commitment).
 The payoff is twofold: determination provenance explains \emph{why-not}
 under ambiguity (an atom can be absent because of a semantic
 commitment, not a blocked derivation), and the filtration's
-compositionality lets one check preservation across semantics
-algebraically.
+compositionality lets one check whether a query result holds under
+multiple semantics by inspecting supports algebraically.
 (Full details in Appendix~\ref{sec:appendix-datalog}.)
 
 \paragraph{Setup.}
@@ -1248,7 +1248,12 @@ $v \in \{\mathbf{t}, \mathbf{f}\}$).
 The specification $\Spec$ admits all assignments consistent with the
 program rules and EDB~\cite{gelfond1988stable}.
 After all commitments are discharged, two resolved outcomes remain:
-$o_r = \{a(c), p(c), r(c)\}$ and $o_s = \{a(c), p(c), s(c)\}$.
+$o_r = \{a(c), p(c), r(c)\}$ and $o_s = \{a(c), p(c), s(c)\}$---the
+two stable models, each the minimal model of the Gelfond-Lifschitz
+reduct under the corresponding truth assignment.
+(Our choice predicates enumerate exactly the minimal models of the
+local GL reduct for each negative SCC;
+Appendix~\ref{sec:appendix-datalog} proves the correspondence.)
 
 The resolving determinations are $\mathcal{D} = \{D^{(r)}, D^{(s)}\}$:
 \[
@@ -1286,9 +1291,12 @@ Under $D^{(r)}$, $s(c)$ is absent because of the commitment
 $\varphi_{r(c)=\mathbf{t}}$ itself---not a blocked derivation but a
 semantic choice.
 Reading the filtration only through the sealing layer
-($\mathcal{F}_1$ here), these atoms have partial support---which is
-exactly the well-founded classification $\mathbf{u}$: their truth
-values are not determined without discharging the choice layer.
+($\mathcal{F}_1$ here), these atoms have partial support---they are
+\emph{contingent} in our terminology, which is exactly the
+well-founded classification $\mathbf{u}$.
+Conversely, atoms with full or empty support are \emph{robust}
+(WFS's $\mathbf{t}$ and $\mathbf{f}$ respectively): their truth
+values are settled without discharging the choice layer.
 
 \begin{theorem}[Negation semantics as filtration levels]
   \label{thm:negation-filtration}
@@ -1302,7 +1310,9 @@ values are not determined without discharging the choice layer.
     \item Stable-model semantics reads $\mathcal{F}_{k+d}$ (all choice
           layers discharged).
     \item Well-founded semantics reads $\mathcal{F}_k$; atoms with
-          partial support at that level are classified $\mathbf{u}$.
+          full or empty support are \emph{robust} (WFS's $\mathbf{t}$
+          and $\mathbf{f}$); atoms with partial support are
+          \emph{contingent} (WFS's $\mathbf{u}$).
     \item Stratified semantics reads $\mathcal{F}_k$ and is defined
           only when $d = 0$.
   \end{enumerate}
@@ -1325,7 +1335,7 @@ As in Section~\ref{sec:transactions}, the theorem's provenance payoff
 is compositionality: because supports at each filtration level compose
 through positive relational algebra
 (Corollary~\ref{cor:propagation-filtration}), one can check whether a
-query result is preserved across semantics (e.g., stable $\to$
+query result holds under multiple semantics (e.g., stable $\to$
 well-founded) by inspecting supports algebraically, without re-running
 evaluation under each semantics separately.
 Note the structural contrast with transactions: negation semantics
@@ -1341,7 +1351,8 @@ subsets of a shared filtration
 \begin{theorem}[Monus elimination]
   \label{thm:monus-elimination}
   For any finite stratified $\mbox{Datalog}^\neg$ program and any
-  naturally ordered, zero-divisor-free commutative semiring $K$:
+  naturally ordered, zero-divisor-free, $\omega$-continuous commutative
+  semiring $K$:
   the support of every atom computed via sealing commitments over
   $(K, +, \cdot)$ equals the support computed via least fixpoint with
   monus over $(K, \dot{-})$~\cite{dannert2021semiring}.
@@ -1546,7 +1557,7 @@ Smoke~\cite{psallidas2018smoke}) trace derivations under a fixed
 execution.
 Vandevoort et al.~\cite{vandevoort2025mixed} study which transactions can
 run at weaker isolation while preserving serializable behavior---a
-preservation question in our sense.
+cross-specification support comparison in our framework.
 Our framework separates semantic commitments from derivational explanation,
 enabling per-execution provenance to be composed across alternative
 resolutions (Appendix~\ref{app:systems-lineage}).
@@ -2188,9 +2199,14 @@ questions require retaining more semantic information
 
 Theorem~\ref{thm:txn-depth} establishes protocol-agnostic depth
 bounds via the $T_\infty$ witness.
-Here we show how 2PL, OCC, and MVTO each instantiate the ordering
-basis, confirm that the bounds are tight for each, and detail the
-per-batch commitment structure.
+Here we show how 2PL and MVTO instantiate the ordering basis and
+confirm that the bounds are tight.
+OCC requires no separate treatment: its determination structure (seal +
+transaction-ordering layer) is the body's default presentation
+(Example~\ref{ex:overlapping-cycles}), with all conflict detection and
+aborts entailed by the chosen validation order.
+We first compare per-batch structure across all three protocols, then
+give protocol-specific details for 2PL and MVTO.
 
 \subsection{Per-Batch Structure}
 
@@ -2325,7 +2341,7 @@ the batch complete) followed by a single commitment choosing the
 processing order over buffered actions (one total order determines all
 version visibility and forced aborts).
 
-\paragraph{Comparison across protocols.}
+\subsection{Comparison Across Protocols.}
 All three protocols share a common determination structure (seal +
 resolution layer) and the same worst-case depth bounds
 (Theorem~\ref{thm:txn-depth}): depth~$0$ when fully reactive,
@@ -2342,28 +2358,28 @@ system's discretion---but yield the same depth structure.
 \section[Datalog with Negation: Worked Determination Provenance]{Datalog$^{\neg}$ Worked Determination Provenance}
 \label{sec:appendix-datalog}
 
-This appendix instantiates determination provenance for the Datalog-with-negation
-sandbox.
-Following Section~\ref{sec:negation-preview}, we begin with the most resolved
-semantics---stable models---and then show how coarser semantics are recovered
-by reading less of the determination semiring.
-We work through the running example below, making explicit the commitments,
-their dependency structure, and the resulting provenance annotations.
+This appendix instantiates determination provenance for
+$\mbox{Datalog}^\neg$ in full generality, then illustrates the
+machinery on a running example.
+We first develop the canonical commitment basis for programs with
+arbitrarily nested negative cycles, prove soundness and completeness,
+and state the general semantics-as-filtration theorem.
+We then show how the three classical negation semantics (stable,
+well-founded, stratified) are recovered as different readings of the
+determination semiring, and close with the monus elimination proof.
 
-\begin{example}[Datalog with negation]
+\begin{example}[Running example]
   \label{ex:datalog-negation}
-  Consider the following program $P$ over EDB facts in a history $H$.
-  For notational economy we use a fixed constant $c$ and take all predicates unary, so the EDB fact is $a(c)$ and the derived atoms are $p(c),q(c),r(c),s(c)$.
+  Consider the following program $P$ with EDB fact $a(c)$:
   \begin{align*}
     p(c) & \leftarrow a(c).      & r(c) & \leftarrow \neg s(c). \\[1mm]
     q(c) & \leftarrow \neg p(c). & s(c) & \leftarrow \neg r(c).
   \end{align*}
-  Assume $H$ contains the single extensional fact $a(c)$.
-  The pair $(P,H)$ contains both a stratified fragment
-  ($q(c)$ depends negatively on $p(c)$, and $p(c)$ depends positively on $a(c)$)
-  and a cycle through negation ($r \leftrightarrow \neg s$).
-  We use this single instance to exhibit three distinct readings of the
-  determination semiring.
+  The pair $(P, \{a(c)\})$ has a stratified fragment ($p, q$: one
+  stratum boundary) and a single negative SCC ($r \leftrightarrow
+  \neg s$).
+  Parameters: $k = 1$, $d = 1$.
+  We instantiate the general constructions on this example throughout.
 \end{example}
 
 Throughout, we use \emph{sealing predicates}
@@ -2372,287 +2388,111 @@ no additional atoms in $X$ will be derived in any admissible outcome.
 Such predicates rule out outcomes and therefore constitute genuine semantic
 commitments.
 
-\subsection{Stable Model Semantics}
+\subsection{The Canonical Layered Choice Basis}
+\label{app:datalog-general}
 
-\paragraph{Determination structure.}
-Stable semantics insists on total two-valued models.
-The resolving determinations share a stratified prefix---sealing each
-stratum before negation in the next is evaluated---and then branch to
-resolve the cycle.
+\paragraph{Setup.}
+Let $P$ be a finite $\mbox{Datalog}^\neg$ program with $k$
+stratification layers and $d$ negative SCCs in the longest dependency
+chain after SCC condensation.
+Let $C_1, \ldots, C_d$ be a topological ordering of the negative SCCs
+(if $C_i$'s resolution affects $C_j$'s admissible models, then
+$i < j$).
+SCCs that are incomparable in the DAG (no dependency path between them)
+have choice predicates that do not interact: neither's rules reference
+the other's atoms.
+Their choices therefore commute and are placed in the same
+determination layer.
+The nesting depth $d$ counts the longest chain of dependent SCCs, not
+the total number; independent SCCs at the same DAG level share a layer.
 
-\paragraph{Resolving determinations.}
-For the running example, resolution begins with the stratified-prefix sealing
+\paragraph{Relationship to the Gelfond-Lifschitz reduct.}
+In the original formulation~\cite{gelfond1988stable}, a candidate model
+$I$ is \emph{stable} if $I$ equals the minimal model of the
+Gelfond-Lifschitz (GL) reduct $P^I$---the positive program obtained by
+(i)~dropping every rule whose body contains $\neg C$ with $C \in I$,
+and (ii)~deleting all remaining negated literals.
+This is a global, verify-and-check definition.
+Our layered choice basis reformulates it constructively: once atoms
+outside a negative SCC $C_j$ are fixed (by the stratified prefix and
+earlier SCC resolutions), the GL reduct of $C_j$'s rules depends only
+on those fixed atoms, and its minimal models are exactly the
+\emph{locally stable extensions} that our choice predicates enumerate.
+
+\begin{definition}[Canonical layered choice basis]
+  \label{def:canonical-choice-basis}
+  The commitment basis has $k$ sealing predicates
+  $\varphi_{\seal}(S_1), \ldots, \varphi_{\seal}(S_k)$---where $S_i$
+  is the set of atoms sealed at step~$i$, declaring their derivations
+  complete and licensing negation of $S_i$-atoms in subsequent
+  rules---followed by $d$ choice layers: layer $k{+}i$ contains choice
+  predicates that select a local stable extension of $C_i$, applied
+  after all layers $k{+}1, \ldots, k{+}i{-}1$ are discharged.
+  Sealing predicates do not commute across strata; within a single
+  choice layer, choice predicates commute.
+\end{definition}
+
+\noindent
+A resolving determination takes the form
 \[
+  D \;\triangleq\;
+  \bigl(
   \varphi_{\seal}(S_1)
   \seq \cdots \seq
-  \varphi_{\seal}(S_k),
+  \varphi_{\seal}(S_k)
+  \bigr)
+  \seq
+  \varphi_{C_1} \seq \cdots \seq \varphi_{C_d},
 \]
-where each $S_i$ is the set of atoms whose truth is fixed at stratum~$i$.
-These sealing predicates do \emph{not} commute across strata: sealing $S_i$
-is a prerequisite for applying negation commitment events in $S_{i+1}$.
-After this prefix, the negation cycle admits two incompatible resolutions:
+where $\varphi_{C_j}$ denotes the (commuting) set of choice predicates
+that resolve SCC $C_j$.
+The determination depth is $k{+}d$.
+
+\begin{proposition}[Soundness and completeness]
+  \label{prop:canonical-basis-sc}
+  The canonical layered choice basis is sound and complete: each
+  resolving determination produces a stable model, and every stable
+  model is produced by exactly one resolving determination.
+\end{proposition}
+\begin{proof}
+  The full GL reduct decomposes along the SCC DAG: once atoms outside
+  $C_i$ are fixed, the reduct of $C_i$'s rules depends only on those
+  fixed atoms.
+
+  \emph{Soundness:} composing local stable extensions in topological
+  order yields a global stable model (each local extension is a minimal
+  model of its local reduct; their composition is a minimal model of
+  the full reduct).
+
+  \emph{Completeness:} given a stable model $M$, define $D_M$ by
+  taking the shared sealing prefix
+  $\varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k)$
+  followed by the choice $\varphi_{C_i} = M|_{C_i}$ at each layer
+  $k{+}i$.
+  Local minimality of $M|_{C_i}$ follows from global minimality of $M$
+  (a smaller local model would give a smaller global one).
+  The map $M \mapsto D_M$ is injective.
+\end{proof}
+
+\paragraph{Instantiation (Example~\ref{ex:datalog-negation}).}
+With $k = 1$ (one seal: $S_1 = \{p\}$) and $d = 1$ (one SCC:
+$\{r, s\}$), the two resolving determinations are:
 \[
   D^{(r)}
   \;\triangleq\;
-  \bigl(
   \varphi_{\seal}(S_1)
-  \seq \cdots \seq
-  \varphi_{\seal}(S_k)
-  \bigr)
   \seq
   \varphi_{r(c)=\mathbf{t}} \cdot \varphi_{s(c)=\mathbf{f}},
-\]
-\[
+  \qquad
   D^{(s)}
   \;\triangleq\;
-  \bigl(
   \varphi_{\seal}(S_1)
-  \seq \cdots \seq
-  \varphi_{\seal}(S_k)
-  \bigr)
   \seq
   \varphi_{s(c)=\mathbf{t}} \cdot \varphi_{r(c)=\mathbf{f}}.
 \]
-Within either determination, the cycle-resolution commitments are logically
-simultaneous and commute.
-The determination height is $k{+}1$: the $k$ stratification stages plus one
-additional non-commuting branching stage.
+Depth $= k{+}d = 2$.
 
-\paragraph{Provenance.}
-Determination provenance records which stable determination is assumed:
-\[
-  P_{D^{(r)}}(r(c)) = 1,
-  \qquad
-  P_{D^{(s)}}(s(c)) = 1.
-\]
-Only after this choice does ordinary derivational provenance apply.
-For atoms determined by the stratified prefix:
-$P_{D^{(r)}}(p(c)) = P_{D^{(s)}}(p(c)) = P(a(c))$.
-
-\subsection{Relaxing to Well-Founded Semantics}
-
-\paragraph{Determination structure.}
-Well-founded semantics (WFS) makes the same $k$ stratified commitments as
-stable semantics but does not discharge the layer that resolves the cycle.
-It then performs a nontrivial computation---the alternating
-fixpoint~\cite{vanGelder1991wellFounded}---to classify which atoms are
-forced true or false by the existing commitments and which remain genuinely
-ambiguous.
-
-The alternating fixpoint operates on the knowledge ordering
-$\mathbf{u} \le_k \mathbf{t}$ and $\mathbf{u} \le_k \mathbf{f}$
-(with $\mathbf{t}$ and $\mathbf{f}$ incomparable), moving atoms upward
-from ``unknown'' to ``known true'' or ``known false'' by alternating
-between deriving positive consequences and eliminating unfounded sets.
-This ordering is an instance of the outcome order $\Ord$.
-The distinction between the alternating fixpoint and a commitment is
-precisely the distinction between these two operations:
-\begin{itemize}[nosep,leftmargin=*]
-  \item A \emph{commitment} operates on $2^O$: it replaces the admissible
-        set with a (possibly strict) subset, constraining which outcomes
-        remain possible.
-  \item The \emph{alternating fixpoint} operates on $O$ via $\Ord$: it
-        replaces the observed outcome $o$ with some $o'$ where
-        $o \Ord o'$---an upward move that the specification recognizes
-        as adding detail, not contradicting what came before.
-        It is the specification's choice of $\Ord$ that makes the
-        alternating fixpoint an entailment rather than a commitment.
-\end{itemize}
-
-The correspondence to the determination semiring is exact (for programs
-with stable models): WFS assigns $\mathbf{t}$ to an atom iff it holds in
-every stable model (robust); $\mathbf{f}$ iff it fails in every stable
-model (robustly absent); and $\mathbf{u}$ iff it holds in some but not all
-(contingent).
-
-\paragraph{Determination.}
-The WFS determination for the running example is the same stratified prefix:
-\[
-  D_{\mathrm{wfs}}
-  \;\triangleq\;
-  \varphi_{\seal}(S_1)
-  \seq
-  \varphi_{\seal}(S_2)
-  \seq \cdots \seq
-  \varphi_{\seal}(S_k).
-\]
-This is \emph{not} a resolving determination in the sense of
-Definition~\ref{def:determined}: $\Spec(H)$ under the WFS determination
-is not a function, because multiple two-valued completions of the cycle
-remain admissible.
-WFS accepts this and classifies the residual ambiguity.
-
-For the running example, the stratified prefix determines:
-$p(c)=\mathbf{t}$ (robust), $q(c)=\mathbf{f}$ (robustly absent),
-while the $\neg$-cycle atoms have partial support:
-$r(c)$ and $s(c)$ each hold in exactly one of the two stable models.
-WFS reports this as $r(c)=\mathbf{u}$, $s(c)=\mathbf{u}$.
-
-\paragraph{A nontrivial example.}
-The alternating fixpoint can discover robust atoms that depend on the cycle
-without resolving it.
-Consider adding the rule $d(c) \leftarrow r(c);\; d(c) \leftarrow s(c)$.
-Then $d(c)$ holds in every stable model (since exactly one of $r(c)$, $s(c)$
-is true in each), so $\mathrm{supp}(P(d(c))) = \mathcal{D}$ and WFS
-correctly assigns $d(c) = \mathbf{t}$.
-The alternating fixpoint discovers this in multiple rounds---deriving $d(c)$
-optimistically, confirming it survives skeptical revision---without making
-any commitment about which of $r(c)$ or $s(c)$ is true.
-
-\paragraph{Provenance.}
-For atoms determined by the stratified prefix, provenance is classical:
-$P_{D_{\mathrm{wfs}}}(p(c)) = P(a(c))$.
-For $\neg$-cycle atoms, determination provenance has partial support:
-$P(r(c)) = \{(D^{(r)}, 1)\}$, $P(s(c)) = \{(D^{(s)}, 1)\}$.
-WFS does not select a determination, so it reports these as $\mathbf{u}$
-rather than reading off the conditioned provenance.
-But the determination semiring retains the \emph{contingency structure}
-of these atoms: the support $\{D^{(r)}\}$ records exactly which
-determinations make $r(c)$ hold and which do not.
-This is not provenance---provenance requires resolution
-(Theorem~\ref{thm:resolution-implies-monotone})---but a property
-\emph{of} the determination provenance function, read at filtration
-level~$k$ without selecting a determination.
-
-\paragraph{Relationship to the filtration.}
-The filtration of the stable-model determination semiring
-(Section~\ref{sec:filtration}) \emph{encodes} the classification that
-WFS \emph{computes}.
-Robust, robustly absent, and contingent support in the semiring correspond
-to WFS's $\mathbf{t}$, $\mathbf{f}$, and $\mathbf{u}$ respectively.
-The filtration is a static algebraic structure; the alternating fixpoint
-is an algorithm that discovers, for each atom, exactly the support
-classification that the filtration carries.
-
-\subsection{Relaxing Further to Stratified Semantics}
-
-\paragraph{Determination structure.}
-Stratified semantics applies only to programs (or fragments of programs)
-whose dependency graph admits a stratification---no cycles through negation.
-For the running example, the stratified fragment consists of the predicates
-$p(c)$ and $q(c)$; the cycle $(r, s)$ is outside its scope.
-
-The resolving determination for the stratified fragment is the same
-stratified prefix used by stable and well-founded semantics:
-\[
-  D_{\mathrm{strat}}
-  \;\triangleq\;
-  \varphi_{\seal}(S_1)
-  \seq
-  \varphi_{\seal}(S_2)
-  \seq \cdots \seq
-  \varphi_{\seal}(S_k).
-\]
-For stratifiable programs, this prefix is itself a resolving determination:
-$|\Spec(H)| = 1$ (the stratified prefix resolves all atoms).
-For programs with cycles, it is not---the $\neg$-cycle atoms remain unresolved,
-and stratified semantics is simply undefined for them.
-
-\paragraph{Provenance.}
-Once $D_{\mathrm{strat}}$ is fixed, derivational provenance applies for
-the stratifiable fragment:
-$P_{D_{\mathrm{strat}}}(p(c)) = P(a(c))$.
-Absences such as $\neg q(c)$ are derivational consequences of the sealed
-lower stratum and require no additional commitments.
-
-\subsubsection{Preservation Across Negation Semantics}
-
-Holding the program and EDB fixed, different negation semantics induce
-different readings of the determination semiring, and preservation
-(Section~\ref{sec:det-semiring}) can be checked directly.
-
-For the running example, $p(c)$ has full support
-($\mathrm{supp} = \mathcal{D}$): it holds under every stable model, is
-robust under WFS, and is derived by stratified evaluation.
-It is preserved across all three semantics.
-By contrast, $r(c)$ has partial support ($\{D^{(r)}\}$): it holds under
-one stable model, is $\mathbf{u}$ under WFS, and is undefined under
-stratified semantics.
-It is not preserved from stable to well-founded or stratified.
-
-\subsubsection{Proof of Monus Elimination (Theorem~\ref{thm:monus-elimination})}
-
-Let $P$ be a finite stratified $\mbox{Datalog}^\neg$ program and $K$ a
-naturally ordered, zero-divisor-free commutative semiring.
-We show that for every atom $a$, the set of determinations under which
-$a$ holds (its support) is the same whether negation is computed via
-sealing or via monus.
-
-Under sealing: after sealing stratum~$i$, each atom $b$ in stratum~$i$
-has annotation $P(b) \in K$.
-A rule $a \leftarrow \ldots, \neg b, \ldots$ in stratum~$i{+}1$
-contributes to $a$'s annotation iff $P(b) = 0_K$ (sealed absence);
-the negation is annotated as $1_K$ when $b$ is absent and $0_K$
-otherwise.
-
-Under monus: the same rule contributes $1_K \dot{-} P(b)$.
-In a naturally ordered, zero-divisor-free semiring:
-$1_K \dot{-} 0_K = 1_K$ and $1_K \dot{-} v = 0_K$ for all
-$v \neq 0_K$ (since $v + c \leq 1_K$ with $v \neq 0_K$ forces
-$c = 0_K$ by the zero-divisor-free property in the natural order).
-
-Hence both approaches assign the same annotation ($1_K$ or $0_K$) to
-each negated literal.
-Since all subsequent derivation uses only positive operations
-($+$ and $\cdot$), the final annotation of every atom is nonzero
-under sealing exactly when it is nonzero under monus.
-Supports (the zero/nonzero distinction) agree; we do not claim
-equality of full $K$-annotations.
-\qed
-
-\subsection{General Case: Nested Negative Cycles}
-\label{app:datalog-general}
-
-Theorem~\ref{thm:negation-filtration} states the general correspondence
-for programs with nesting depth $d$.
-This appendix provides the full proof and detailed construction of the
-layered choice basis for nested or interacting negative cycles.
-
-\paragraph{Setup.}
-After SCC condensation, the negative components of a program form a
-DAG $G_\neg$.
-Let $C_1, \ldots, C_d$ be a topological ordering of the negative SCCs
-(if $C_i$'s resolution affects $C_j$'s admissible models, then $i < j$).
-The \emph{nesting depth} is $d$ (the number of negative SCCs in the
-longest dependency chain).
-
-\begin{definition}[Canonical layered choice basis for nested cycles]
-  \label{def:canonical-choice-basis}
-  The commitment basis has $k$ sealing predicates
-  $\varphi_{\seal}(S_1), \ldots, \varphi_{\seal}(S_k)$ (one per
-  stratification layer) followed by $d$ choice layers: layer $k{+}i$
-  contains choice predicates that select a \emph{local stable
-  extension} of $C_i$ (a two-valued assignment to $C_i$'s atoms
-  consistent with $C_i$'s rules given the discharged prefix), applied
-  after all layers $k{+}1, \ldots, k{+}i{-}1$ are discharged.
-  Choice predicates in layer $k{+}i$ may depend on the outcomes of
-  layers $k{+}1, \ldots, k{+}i{-}1$ (because $C_i$'s rules reference
-  atoms resolved by earlier cycles).
-\end{definition}
-
-\begin{proposition}[Soundness and completeness of the canonical basis]
-  \label{prop:canonical-basis-sc}
-  For the class of finite $\mbox{Datalog}^\neg$ programs satisfying
-  the assumptions of Theorem~\ref{thm:negation-filtration}, the
-  canonical layered choice basis of
-  Definition~\ref{def:canonical-choice-basis} is sound and complete: each resolving determination produces a stable model,
-  and every stable model is produced by exactly one resolving
-  determination.
-\end{proposition}
-\begin{proof}
-  Each negative SCC $C_i$ has finitely many atoms; after discharging
-  layers $k{+}1, \ldots, k{+}i{-}1$, the atoms referenced by $C_i$'s
-  rules are fixed.
-  The binary choice predicates for $C_i$ enumerate all locally stable
-  extensions of $C_i$ given this fixed context (the Gelfond-Lifschitz
-  reduct of $C_i$'s rules has finitely many minimal models).
-  Soundness: each choice produces a locally stable extension, and the
-  composition across all SCCs (in topological order) yields a global
-  stable model.
-  Completeness: every global stable model restricts to a locally stable
-  extension at each $C_i$, which corresponds to exactly one choice at
-  layer $k{+}i$.
-\end{proof}
+\subsection{Negation Semantics as Filtration Levels}
 
 \begin{theorem}[General negation semantics as filtration levels]
   \label{thm:negation-general}
@@ -2664,22 +2504,22 @@ longest dependency chain).
   \begin{enumerate}[nosep,label=(\alph*)]
     \item \emph{Stable-model semantics} reads $\mathcal{F}_{k+d}$: all
           choice layers discharged, yielding a two-valued model.
-    \item \emph{Stratified semantics} reads $\mathcal{F}_k$: defined
-          only when no negative cycles exist ($d = 0$).
     \item \emph{Well-founded semantics} reads $\mathcal{F}_{k+d^*}$
           where $d^* \le d$ is the number of consecutive choice
           layers (starting from $k{+}1$) whose resolution is forced
-          (uniquely determined by the preceding prefix); for the
-          restricted classes above, this coincides with the alternating
-          fixpoint's classification.
+          (uniquely determined by the preceding prefix).
+          Atoms with full or empty support are robust (WFS's
+          $\mathbf{t}$ and $\mathbf{f}$); atoms with partial support
+          are contingent (WFS's $\mathbf{u}$).
+    \item \emph{Stratified semantics} reads $\mathcal{F}_k$: defined
+          only when no negative cycles exist ($d = 0$).
   \end{enumerate}
 \end{theorem}
 
 \begin{proof}
   \emph{Depth $k{+}d$.}
   The $k$ sealing layers are shared by all resolving determinations
-  (uniqueness of stratified evaluation, as in
-  Theorem~\ref{thm:negation-filtration}).
+  (uniqueness of stratified evaluation).
   Each choice layer $k{+}i$ resolves the atoms in $C_i$; since $C_i$'s
   rules reference atoms in earlier cycles, the choices available at
   layer $k{+}i$ depend on the outcomes of layers $k{+}1, \ldots,
@@ -2688,44 +2528,57 @@ longest dependency chain).
   depth $k{+}d$.
 
   \emph{(a) Stable models.}
-  A stable model assigns every atom a two-valued truth value consistent
-  with the program rules.
   Each resolving determination $D$ discharges all $k{+}d$ layers,
   producing a unique two-valued assignment---a stable model.
-  Conversely, every stable model corresponds to a resolving determination
-  (the sequence of choices that produces it).
+  Conversely, every stable model corresponds to a resolving determination.
   Hence stable models biject with $\mathcal{D}$, and stable-model
   semantics reads $\mathcal{F}_{k+d} = 2^{\mathcal{D}}$.
 
-  \emph{(b) Stratified semantics.}
-  When $d = 0$ (no negative cycles), the sealing prefix resolves all
-  atoms.
-  $|\mathcal{D}| = 1$ and $\mathcal{F}_k = \{\emptyset, \mathcal{D}\}$
-  is the full filtration.
-
-  \emph{(c) Well-founded semantics.}
-  WFS applies the alternating fixpoint after the sealing prefix.
+  \emph{(b) Well-founded semantics.}
+  WFS applies the alternating fixpoint~\cite{vanGelder1991wellFounded}
+  after the sealing prefix.
   At each choice layer $k{+}i$, the alternating fixpoint checks whether
-  $C_i$ has a unique stable extension given the discharged prefix
-  (i.e., whether both the optimistic and skeptical iterations converge
-  to the same assignment for $C_i$'s atoms).
-  If so, that layer is \emph{forced}: its resolution is determined
-  without arbitrary choice, and WFS discharges it.
+  $C_i$ has a unique stable extension given the discharged prefix.
+  If so, that layer is \emph{forced} and WFS discharges it.
   If not, $C_i$'s atoms are classified as $\mathbf{u}$ and WFS stops
   discharging further layers that depend on $C_i$.
-
   Let $d^*$ be the number of consecutive forced layers starting from
   $k{+}1$.
-  WFS reads $\mathcal{F}_{k+d^*}$: it classifies atoms resolved by
-  layers $1, \ldots, k{+}d^*$ as $\mathbf{t}$ or $\mathbf{f}$
-  (they have full or empty support at level $k{+}d^*$), and atoms
-  depending on layers $k{+}d^*{+}1, \ldots, k{+}d$ as $\mathbf{u}$
-  (their support is partial at level $k{+}d^*$).
-
+  WFS reads $\mathcal{F}_{k+d^*}$: atoms resolved by layers
+  $1, \ldots, k{+}d^*$ have full or empty support ($\mathbf{t}$ or
+  $\mathbf{f}$); atoms depending on layers $k{+}d^*{+}1, \ldots, k{+}d$
+  have partial support ($\mathbf{u}$).
   In the restricted case of Theorem~\ref{thm:negation-filtration}
-  ($d = 1$, independent cycles), no choice layer is forced
-  ($d^* = 0$), so WFS reads $\mathcal{F}_k$.
+  ($d = 1$, independent cycles), $d^* = 0$ and WFS reads $\mathcal{F}_k$.
+
+  \emph{(c) Stratified semantics.}
+  When $d = 0$, the sealing prefix resolves all atoms.
+  $|\mathcal{D}| = 1$ and $\mathcal{F}_k = \{\emptyset, \mathcal{D}\}$.
 \end{proof}
+
+\paragraph{The alternating fixpoint as entailment.}
+The distinction between the alternating fixpoint and a commitment is:
+a \emph{commitment} operates on $2^O$ (replacing the admissible set
+with a subset); the \emph{alternating fixpoint} operates on $O$ via
+$\Ord$ (refining the observed outcome upward without excluding
+alternatives).
+It is the specification's choice of $\Ord$ that makes the alternating
+fixpoint an entailment rather than a commitment.
+
+\paragraph{Provenance structure.}
+For atoms determined by the stratified prefix, all resolving
+determinations agree: conditioned provenance is classical.
+For atoms in negative SCCs, determination provenance records which
+resolving determination is assumed; only after this choice does
+ordinary derivational provenance apply.
+WFS does not select a determination; it reports contingent atoms as
+$\mathbf{u}$.
+But the determination semiring retains the full contingency structure:
+the support records exactly which determinations make each atom hold.
+This is not provenance---provenance requires resolution
+(Theorem~\ref{thm:resolution-implies-monotone})---but a property
+\emph{of} the determination provenance function, read at filtration
+level~$k$ without selecting a determination.
 
 \begin{example}[Nested cycles]
   Consider: $a \leftarrow \neg b.\; b \leftarrow \neg a.\;
@@ -2745,278 +2598,331 @@ longest dependency chain).
   $c = d = \mathbf{u}$.
 \end{example}
 
-\subsection{Certificates and Semantic-Change Queries}
+\subsection{Worked Instantiation (Example~\ref{ex:datalog-negation})}
 
-The certificate required to justify a provenance answer depends on the
-query.
-A minimal certificate for derivational provenance of $p(c)$ need only
-preserve the sealing commitments for the stratified prefix.
-Answering a preservation query (``Would $q(c)$ become true under stable
-semantics?'') requires a strictly stronger certificate that preserves the
-unresolved negation structure itself.
-This query-parametric nature of certificate sufficiency is developed
-further in Appendix~\ref{app:systems-lineage}.
+We trace the three semantics through the running example ($k=1$,
+$d=1$, $\mathcal{D} = \{D^{(r)}, D^{(s)}\}$).
+
+\paragraph{Stable models.}
+The two stable models are $o_r = \{a, p, r\}$ and $o_s = \{a, p, s\}$.
+Provenance:
+$P_{D^{(r)}}(r(c)) = 1$, $P_{D^{(s)}}(s(c)) = 1$,
+$P_{D^{(r)}}(p(c)) = P_{D^{(s)}}(p(c)) = x_a$
+(the EDB annotation of $a(c)$).
+
+\paragraph{Well-founded semantics.}
+The stratified prefix determines $p(c) = \mathbf{t}$ (robust),
+$q(c) = \mathbf{f}$ (robustly absent).
+The $\neg$-cycle atoms have partial support:
+$P(r(c)) = \{(D^{(r)}, 1)\}$, $P(s(c)) = \{(D^{(s)}, 1)\}$.
+WFS reports $r(c) = s(c) = \mathbf{u}$ (contingent).
+
+Adding the rule $d(c) \leftarrow r(c);\; d(c) \leftarrow s(c)$ gives
+$\mathrm{supp}(P(d(c))) = \{D^{(r)}\} \cup \{D^{(s)}\} = \mathcal{D}$:
+full support, read off algebraically without iterative fixpoint.
+
+\paragraph{Stratified semantics.}
+The stratified fragment ($p, q$) is resolved by the sealing prefix
+alone: $P_{D_{\mathrm{strat}}}(p(c)) = P(a(c))$.
+The cycle $(r, s)$ is outside its scope.
+
+\paragraph{Cross-semantics comparison.}
+$p(c)$ has full support---it holds under every stable model, is robust
+under WFS, and is derived by stratified evaluation.
+$r(c)$ has partial support ($\{D^{(r)}\}$): it holds under one stable
+model, is contingent ($\mathbf{u}$) under WFS, and is undefined under
+stratified semantics.
+
+\subsection{Proof of Monus Elimination (Theorem~\ref{thm:monus-elimination})}
+
+Let $P$ be a finite stratified $\mbox{Datalog}^\neg$ program with
+stratification $S_0, S_1, \ldots, S_k$ (where $S_0$ is the EDB
+stratum), and let $(K, +, \cdot, 0_K, 1_K)$ be a naturally ordered,
+zero-divisor-free, $\omega$-continuous commutative semiring.
+The zero-divisor-free condition ($a \cdot b = 0_K$ implies $a = 0_K$
+or $b = 0_K$) is satisfied by all semirings commonly used in
+provenance: $\mathbb{N}[X]$ (the provenance polynomials of Green et
+al.~\cite{green2007provenance}), $\mathrm{PosBool}[X]$, the Viterbi
+semiring, the tropical semiring, and the access-control
+semiring---but not by semirings with absorbing elements such as
+$(\{0,1,\ldots,k\}, \max, \min, 0, k)$ for finite $k > 1$.
+The $\omega$-continuity condition (directed suprema distribute over
+$+$ and $\cdot$) ensures that infinite descending chains in $K$
+stabilize; it holds for all the semirings above and is the standard
+assumption for datalog fixpoint semantics over
+semirings~\cite{green2007provenance,dannert2021semiring}.
+We prove that for every derived atom $a$, the support of $a$
+(the set of determinations under which $a$'s annotation is nonzero)
+is the same whether negation is handled via sealing or via monus.
+
+\paragraph{Setup.}
+Fix a single resolving determination $D$.
+Under $D$, the specification is resolved: there is a unique outcome
+(a model of the program), and classical semiring
+provenance~\cite{green2007provenance} assigns each atom $a$ an
+annotation $P_D(a) \in K$ recording how $a$ is derived from EDB facts.
+The question is how to compute $P_D(a)$ when the program contains
+negation.
+Both strategies below produce a $K$-annotation for every atom; they
+differ only in how negated literals are handled.
+We compare them and show they agree on the zero/nonzero distinction.
+
+\paragraph{Definitions.}
+We recall the two evaluation strategies.
+Both proceed bottom-up through the stratification, computing a least
+fixpoint at each stratum over $(K, +, \cdot)$.
+EDB atoms are annotated by their base semiring labels (or $0_K$ if
+absent); positive body literals contribute their annotation
+multiplicatively (as in standard $K$-relational
+evaluation~\cite{green2007provenance}); alternative derivations
+(multiple rules for the same head) combine additively.
+The strategies differ only in the annotation assigned to a negated
+literal $\neg b_j$ appearing in a rule body, where $b_j$ is in some
+lower stratum whose fixpoint has already been computed.
+
+\emph{Sealing evaluation.}
+After stratum~$i$'s fixpoint stabilizes, \emph{seal} it.
+At this point, standard $K$-relational
+evaluation~\cite{green2007provenance} has assigned each atom $b$ in
+stratum~$i$ a semiring value---call it $\mathrm{val}(b) \in K$---which
+is a polynomial in the EDB annotations (in $\mathbb{N}[X]$) or more
+generally an element of $K$ built from the base annotations via $+$
+and $\cdot$.
+This is the familiar provenance polynomial of $b$; it equals $0_K$
+iff $b$ is not derivable from the EDB.
+For a rule in stratum~$i{+}1$ containing $\neg b_j$ (with $b_j$ in
+stratum~$\le i$, already sealed), the negated literal contributes:
+\[
+  \llbracket \neg b_j \rrbracket_{\mathrm{seal}}
+  \;\triangleq\;
+  \begin{cases}
+    1_K & \text{if } \mathrm{val}(b_j) = 0_K
+          \quad\text{(atom absent from the model)}, \\
+    0_K & \text{if } \mathrm{val}(b_j) \neq 0_K
+          \quad\text{(atom present)}.
+  \end{cases}
+\]
+That is, a successful negation contributes $1_K$ (the multiplicative
+identity---it does not block the derivation) and a failed negation
+contributes $0_K$ (killing the rule's contribution).
+
+\emph{Monus evaluation}~\cite{dannert2021semiring}.
+The same bottom-up fixpoint computation, but the negated literal
+contributes:
+\[
+  \llbracket \neg b_j \rrbracket_{\mathrm{monus}}
+  \;\triangleq\;
+  1_K \mathbin{\dot{-}} \mathrm{val}(b_j),
+\]
+where $\mathbin{\dot{-}}$ is the \emph{monus} (truncated subtraction)
+of $K$, defined by
+$a \mathbin{\dot{-}} b \triangleq \max\{\,c \in K \mid b + c \le a\,\}$
+in the natural order $\le$ (where $x \le y$ iff $\exists d.\; x + d = y$).
+Here $\mathrm{val}(b_j)$ is the same provenance polynomial as in the
+sealing case---the two strategies compute the same fixpoint for
+positive rules and differ only in how they interpret $\neg b_j$.
+
+\paragraph{Key lemma.}
+The only non-obvious step is showing that monus against $1_K$ acts as
+a zero-test---the same behavior as sealing.
+The tricky aspect of monus is that $1_K \mathbin{\dot{-}} v$ could in
+principle be some nonzero value less than $1_K$ when $v \neq 0_K$; the
+zero-divisor-free condition rules this out.
+
+\begin{lemma}
+  \label{lem:monus-negation-value}
+  In a naturally ordered, zero-divisor-free, $\omega$-continuous
+  commutative semiring $K$:
+  $1_K \mathbin{\dot{-}} v = 1_K$ if $v = 0_K$, and
+  $1_K \mathbin{\dot{-}} v = 0_K$ if $v \neq 0_K$.
+\end{lemma}
+\begin{proof}
+  The case $v = 0_K$ is immediate:
+  $\max\{c \mid c \le 1_K\} = 1_K$.
+
+  For $v \neq 0_K$: suppose for contradiction that $c \neq 0_K$
+  satisfies $v + c \le 1_K$.
+  Since $v, c \le 1_K$, monotonicity gives $vc \le v$ and $vc \le c$,
+  so $vc + vc \le v + c \le 1_K$.
+  Zero-divisor-freeness gives $vc \neq 0_K$.
+  Squaring preserves both properties ($w \neq 0_K$ and $w + w \le 1_K$
+  imply $w^2 \neq 0_K$ and $w^2 + w^2 \le 1_K$), so repeated squaring
+  yields a descending chain $(vc)^{2^n}$, all nonzero, all satisfying
+  $w + w \le 1_K$.
+  By $\omega$-continuity this chain has an infimum
+  $e = (vc)^{2^\infty}$, still nonzero, with $e^2 = e$ and
+  $e + e \le 1_K$.
+  We claim $e = 1_K$: write $e + f = 1_K$; if $f \neq 0_K$ then
+  $ef \neq 0_K$ (zero-divisor-free) and $ef + ef \le e + f = 1_K$,
+  so $ef$ is another nonzero element below $e$ satisfying the same
+  bound---contradicting $e$ being the infimum.
+  So $f = 0_K$ and $e = 1_K$.
+  But then $1_K + 1_K \le 1_K$ implies $0_K \ge 1_K$, a contradiction.
+\end{proof}
+
+\paragraph{Main argument.}
+Given the lemma, the two strategies assign the same zero/nonzero value
+to every negated literal (both yield $1_K$ when the atom is absent,
+$0_K$ when present).
+Since positive evaluation is identical in both strategies, and $K$ is
+zero-divisor-free (a product is nonzero iff all factors are; a sum is
+nonzero iff some summand is), a straightforward induction on strata
+shows that every atom has the same zero/nonzero provenance value under
+sealing and monus.
+Supports (the zero/nonzero distinction across determinations) therefore
+agree.
+\qed
+
+\begin{remark}
+  Under the assumptions of the theorem (zero-divisor-free,
+  $\omega$-continuous), the lemma shows that monus and sealing assign
+  \emph{identical} values to negated literals---both collapse to
+  $\{0_K, 1_K\}$---so no quantitative information is lost.
+  If one relaxes zero-divisor-freeness (e.g., the bounded semiring
+  $(\{0,\ldots,k\}, \max, \min, 0, k)$), monus can assign intermediate
+  values $1_K \mathbin{\dot{-}} v \notin \{0_K, 1_K\}$, encoding a
+  quantitative residual that sealing discards.
+  Whether this residual can be captured within the determination
+  framework---perhaps via a richer commitment structure that records
+  \emph{how much} of a derivation was overcome, not merely whether it
+  was present---is an open question
+  (Appendix~\ref{app:open-questions}).
+\end{remark}
+
 
 % ================================================================
-\section{Future Work: Systems Agenda}
+\section{Systems Directions}
 \label{app:systems-lineage}
 \label{app:certificates}
 % ================================================================
 
-The theory developed in this paper appears to unlock practical
-relevance for data provenance in settings---transactional databases,
-distributed services, concurrent pipelines---where formal provenance
-has had less impact on mainstream tracing and debugging infrastructure
-than its theoretical power might suggest.
-This appendix sketches a research agenda for systems work building on
-determination provenance, mapping the framework's three levels of
-structure to concrete capabilities beyond what current lineage
-infrastructure provides.
-
-Systems lineage---as practiced in distributed
+Algebraic data provenance~\cite{green2007provenance} offers powerful
+compositional analysis---robustness, counterfactuals, quantitative
+attribution---but applies only after semantics is fixed: a single
+database, a single execution, a single model.
+Systems observability (distributed
 tracing~\cite{sigelman2010dapper}, workflow
-provenance~\cite{seltzer2005provenance}, and pipeline
-auditing~\cite{bates2015trustworthy}---records \emph{which} services,
-operations, or data sources contributed to an observed result.
-This is lineage in the sense of Cui et al.~\cite{cui2000lineage}:
-set-valued input attribution without algebraic structure.
-It answers ``which inputs contributed?'' but not
-``how did they combine?'' (no semiring), ``would the result
-survive a different execution?'' (no counterfactuals), or ``which
-assumptions were necessary?'' (no determination).
-The result is verbose (full execution traces are retained) yet
-expressively limited (only positive, single-execution queries are
-supported).
+provenance~\cite{seltzer2005provenance}) is broadly deployed but
+expressively weak: it records which events occurred, not how they
+combined or whether the outcome would survive a different execution.
+Determination provenance bridges the two. Here we sketch some
+opportunities and open problems.
 
-Determination provenance addresses both deficiencies.
-We map the framework's three levels of structure
-(within a determination, across determinations, across specifications)
-to concrete capabilities, then develop two orthogonal
-dimensions of parsimony that make the theory practical.
+\paragraph{From traces to algebraic provenance.}
+Standard systems traces are histories in our sense: partially ordered
+event records.
+The only additional modeling step is to define an outcome space $O$ and
+refinement order $\Ord$ (e.g., consistent serializations ordered by
+sub-trace inclusion).
+The commitment events---those that narrow the admissible set---are then
+determined in principle, though identifying them efficiently requires
+domain structure (conflict graphs, dependency annotations) rather than
+brute-force comparison of $\Spec(H)$ before and after each event;
+developing general-purpose extraction algorithms is an open problem.
+The layer structure follows from the specification and the identified
+commitments.
 
-\paragraph{Observation functions beyond relational databases.}
-The body defines an observation function
-$\mathsf{obs}: O \to \mathrm{Inst}(\mathbf{S})$ mapping outcomes to
-relational instances.
-In systems settings, observables are often partially-ordered,
-semi-structured records (distributed traces, replicated logs, event
-streams).
-The framework applies whenever provenance queries over such records
-can be expressed in a language equivalent to positive RA --- for
-example, the positive fragment of a semi-structured query language
-(select, filter, and join over JSON log entries, without negation or
-aggregation) is RA-equivalent and natural for log analysis.
+Once the determination is extracted, the full algebraic machinery
+applies to the trace: supports give robustness and fragility;
+the filtration gives depth bounds and layer-specific diagnosis;
+responsibility attributes root causes to individual commitments;
+cross-specification comparison answers ``what if'' questions about
+alternative policies.
+The framework applies whenever provenance queries can be expressed in
+positive RA over the observation function---including semi-structured
+settings (select, filter, join over trace spans or log entries).
+The determination also compresses: rather than retaining every
+intermediate state, the system stores only the commitment sequence and
+reconstructs derivational detail on demand.
 
-\subsection{Level 1: Repeatability from a Single Determination}
+As a concrete example: in distributed
+tracing~\cite{sigelman2010dapper}, unsynchronized clocks leave the
+relative ordering of concurrent spans ambiguous.
+A determination commits to clock alignments between hosts, fixing a
+single timeline.
+The support of a critical-path predicate then answers questions that
+current tracing cannot: is the database \emph{robustly} on the
+critical path (full support), or only under certain clock assumptions
+(partial support)?
+Or one could ask a counterfactual: if the clock alignment had gone
+differently (a different determination in the same $\mathcal{D}$),
+would the ad server rather than the database have been the
+bottleneck?
+The support $\mathrm{supp}(P(\mathrm{cp}=A))$ answers this directly.
 
-A resolving determination records the non-deterministic commitments
-that resolved the specification to a function.
-Once a determination is fixed, the remaining execution is deterministic:
-given the history and the commitments, the resolved outcome can be
-reconstructed by re-execution.
-(If entailment steps involve non-determinism---e.g., hash-based
-tie-breaking---the determination must be augmented with random seeds
-for those steps; we assume deterministic entailment throughout.)
+\paragraph{Quantitative fragility and scheduler design.}
+The support ratio $|\mathrm{supp}(P(t))| / |\mathcal{D}|$ measures
+outcome fragility structurally---from the commitment basis and conflict
+graph rather than from repeated execution.
+Computing it exactly requires enumerating $\mathcal{D}$ (exponential in
+general), but compact representations (Boolean formulas at depth~$1$;
+factorized supports at higher depths) and the Shapley-value
+approximation of Appendix~\ref{app:responsibility-details} make
+tractable estimates feasible for bounded-treewidth conflict structures.
+Given a determination structure extracted from prior runs---and
+assuming the workload's conflict structure is stable across
+runs---a scheduler could minimize maximum responsibility for an
+SLA predicate by avoiding the high-responsibility commitments
+(e.g., preferring orderings that keep fragile tuples robust).
+This is a new optimization objective: optimize across the space of
+determinations rather than within a single execution.
 
-This is already a compression over full-trace lineage: rather than
-recording every intermediate state, the system retains only the
-commitment sequence.
-All derivational detail can be reconstructed on demand.
-Once reconstructed, classical semiring provenance applies, answering
-positive provenance queries (why-provenance, how-provenance) with full
-algebraic structure.
+\paragraph{Parsimony: truncation and certificates.}
+A full determination may record far more than any particular query
+needs.
+Two orthogonal dimensions of compression apply.
 
-More broadly, determination provenance serves as a \emph{query layer}
-on top of existing logs.
-Full traces are retained as today; the determination (the
-non-deterministic commitments and their structure) is extracted as a
-\emph{semantic index} over the log.
-Diagnostic queries---robustness, counterfactuals, root-cause
-identification---are evaluated against the determination structure
-($O(k)$ commitments) rather than by scanning raw events ($O(ne)$
-log records).
-The algebraic structure enables queries that log-scanning cannot answer
-at all (e.g., ``under what fraction of admissible schedules does the
-SLA hold?''), and answers those it can more efficiently by routing
-through the determination semiring rather than correlating events.
+\emph{Vertical parsimony (truncation).}
+The filtration tells us which layers matter: if a query family depends
+only on tuples with $\mathrm{qdepth} \le k$, layers
+$k{+}1, \ldots, d$ are irrelevant and can be discarded from the
+stored determination.
+For a depth-$d$ determination with $n$ commitments per layer, this
+reduces the stored commitment sequence from $O(nd)$ to $O(nk)$.
 
-\begin{example}[Distributed tracing {\`a} la Dapper~\cite{sigelman2010dapper}]
-  \label{ex:dapper}
-  A web-search request spawns a tree of spans: the frontend ($F$)
-  calls a cache ($C$) and an ad server ($A$) in parallel; the cache
-  misses and calls a database ($D$).
-  Each span has client-send/server-receive events on different hosts
-  with unsynchronized clocks.
-  Causal constraints ($\mathsf{cs}_X \prec \mathsf{sr}_X$,
-  $\mathsf{ss}_X \prec \mathsf{cr}_X$) are known, but the relative
-  wall-clock durations of $C$ and $A$ are not---multiple orderings are
-  admissible.
+\emph{Horizontal parsimony (certificates).}
+Within a retained layer, the full commitment may carry more detail than
+the query requires.
+We envision a \emph{certificate} for commitment $\varphi$: a predicate $C$ that
+over-approximates $\varphi$'s effect. Commitments must guarantee
+$\Spec(H \cdot \varphi) \subseteq \{o \mid C(o)\}$ (soundness---no
+outcome excluded by $\varphi$ is admitted by $C$), but may admit
+additional outcomes that $\varphi$ would have excluded.
+A certificate is \emph{sufficient} for a query family $\mathcal{Q}$ if
+replacing $\varphi$ with $C$ yields the same query answers.
+The space savings come from the gap between the full commitment (which
+may encode an entire conflict graph or the complete state of a
+stratum) and the minimal certificate (which need only record the
+aspects relevant to $\mathcal{Q}$---e.g., the ordering predicates in a
+tuple's conflict neighborhood rather than the full serialization order).
+Richer queries require stronger certificates:
+derivational provenance needs only local conflict information, while
+cross-specification queries need the full conflict-graph structure.
 
-  A resolving determination commits to clock alignments
-  ($\varphi_{\mathrm{align}(h_i,h_j)}$) between hosts, fixing a single
-  execution timeline.
-  Once fixed, critical-path analysis is deterministic: either $C$
-  (cache miss + DB) or $A$ (ad auction) is on the critical path.
-
-  Determination provenance enables queries that Dapper cannot answer:
-  \begin{itemize}[nosep]
-    \item \emph{Is span $D$ robustly on the critical path?}
-          If $\mathrm{supp}(P(\mathrm{cp}=D)) = \mathcal{D}$, the
-          database is the bottleneck under every admissible clock
-          alignment.
-    \item \emph{Under which clock assumptions does the ad server
-          dominate latency?}
-          The support $\mathrm{supp}(P(\mathrm{cp}=A))$ identifies
-          exactly the determinations where $A$ is critical.
-    \item \emph{Would migrating the cache to a closer datacenter
-          change the critical path?}
-          A preservation question: compare supports under the current
-          spec vs.\ a spec with tighter latency bounds on $C$.
-  \end{itemize}
-\end{example}
-
-\subsection{Level 2: Robustness, Tail Bounds, and Scheduler Design}
-
-Supports across the space of resolving determinations enable queries
-that systems lineage cannot express.
-
-\paragraph{Robustness and fragility.}
-The ratio $|\mathrm{supp}(P(t))| / |\mathcal{D}|$ measures how
-\emph{fragile} an outcome is: a result with support ratio $0.99$ is
-nearly robust (almost any schedule produces it); one with ratio $0.01$
-depends on a very specific interleaving.
-Boolean robustness ($\mathrm{supp} = \mathcal{D}$) is the extreme case.
-
-\paragraph{Structural tail bounds.}
-Consider a database with $n$ concurrent transactions and a latency
-predicate $\ell(T_Q) < \tau$ (``query $T_Q$ completes within $\tau$
-ms'').
-The support of this predicate---the set of serializations under which
-the SLA is met---gives a \emph{structural} tail-bound estimate:
-$|\mathrm{supp}(\ell < \tau)| / |\mathcal{D}|$ is the fraction of
-admissible schedules satisfying the SLA, without empirical sampling.
-If this fraction is $0.95$, the system has a structural p95 guarantee.
-
-\paragraph{Diagnosis via determination responsibility.}
-When the tail is violated, determination responsibility
-(Section~\ref{sec:responsibility}) quantifies each commitment's
-contribution to the violation.
-Rather than merely identifying which commitments are shared by all
-violating determinations (a set-intersection test), responsibility
-assigns each commitment a Shapley value measuring its marginal effect
-on the SLA predicate.
-A commitment with responsibility $0.73$ is the dominant root cause;
-one with responsibility $0.02$ is incidental.
-When the conflict structure has bounded treewidth---as in partitioned
-workloads or tree-shaped service dependencies---these values are
-efficiently computable (Theorem~\ref{thm:responsibility-tw}).
-
-\paragraph{Scheduler design.}
-A scheduler that avoids high-responsibility commitments (e.g., never
-serializes $T_i$ before $T_j$ on the contested object) eliminates the
-tail without changing the isolation level or the workload.
-This is a new optimization objective: not ``minimize average latency''
-(a single-determination metric) but ``minimize the maximum
-determination responsibility for the SLA-violation predicate''
-(a distributional metric over the determination semiring).
-Baccaert et al.~\cite{baccaert2026makespan} optimize makespan within a
-single determination; the determination semiring enables optimization
-\emph{across} determinations.
-
-\subsection{Level 3: Preservation Across Specifications}
-
-Supports across variant specifications answer preservation questions:
-does an outcome that holds under one specification also hold under
-another?
-Examples include isolation-level comparison (does a transaction's result
-survive a move from SI to
-serializability?~\cite{vandevoort2025mixed}), semantic-change queries
-(would a $\mbox{Datalog}^\neg$ result survive a change from stable to well-founded
-semantics?), and specification tightening (which results are preserved
-when migrating to a stricter consistency model?).
-These are across-specification questions that require comparing
-determination semirings of different specs---a capability entirely
-absent from systems lineage.
-
-\subsection{Parsimony via Truncation (Filtration)}
-\label{sec:parsimony-truncation}
-
-The filtration (Section~\ref{sec:filtration}) provides a structural
-answer to ``which layers do I need?''
-If a query family $\mathcal{Q}$ depends only on tuples whose supports
-lie in $\mathcal{F}_k$, then layers $k{+}1, \ldots, d$ are irrelevant:
-the determination can be truncated at depth $k$ without affecting any
-answer in $\mathcal{Q}$.
-
-Query-relative depth (Definition~\ref{def:query-depth}) makes this
-precise: a tuple with $\mathrm{qdepth}(t) = k$ is fully explained by
-the first $k$ layers.
-A system that retains only the first $k$ layers of each determination
-can answer all queries whose inputs have depth $\le k$---and by
-Corollary~\ref{cor:propagation-filtration}, positive relational algebra
-cannot increase depth beyond its inputs.
-
-This is \emph{vertical} parsimony: discard layers that the query family
-does not need.
-
-\subsection{Parsimony via Compression (Certificates)}
-\label{sec:parsimony-compression}
-
-Within a layer that \emph{is} retained, the full commitment may carry
-more detail than the query requires.
-A \emph{certificate} is a sound over-approximation of a commitment's
-effect: it may admit outcomes that the actual commitment excludes, but
-excludes none that the commitment admits.
-
-\begin{definition}[Certificate]
-  A certificate for commitment $\varphi$ is a predicate
-  $C : O \to \{\mathsf{true}, \mathsf{false}\}$ such that for all $H$,
-  $\Spec(H \cdot \varphi) \subseteq \{o \in \Spec(H) \mid C(o)\}$.
-\end{definition}
-
-\begin{definition}[Sufficient certificate]
-  A certificate $C$ is \emph{sufficient for a query family
-  $\mathcal{Q}$} if for every $q \in \mathcal{Q}$ and every history $H$,
-  $q(\Spec(H \cdot \varphi)) = q(\Spec(H \cdot C))$---that is,
-  replacing $\varphi$ with $C$ yields the same answer.
-\end{definition}
-
-\begin{theorem}[Query monotonicity]
-  If $\mathcal{Q}_1 \subseteq \mathcal{Q}_2$, every certificate
-  sufficient for $\mathcal{Q}_2$ is sufficient for $\mathcal{Q}_1$.
-\end{theorem}
-
-\noindent
-This is \emph{horizontal} parsimony: within each retained layer,
-coarsen the representation to the minimum fidelity the query family
-demands.
-
-\begin{example}[Certificates in practice]
-  Under serializability, a certificate for derivational provenance need
-  only record the ordering predicates relevant to the queried tuple's
-  conflict neighborhood.
-  Answering a preservation query (``would this result survive under a
-  different isolation level?'') requires a strictly stronger
-  certificate that preserves the full conflict-graph structure.
-  In distributed tracing, a certificate for critical-path analysis
-  retains only the clock-alignment and ordering commitments on the
-  path itself---not the full trace.
-\end{example}
-
-\paragraph{The two dimensions compose.}
-For a given query family: first truncate (filtration identifies the
-deepest relevant layer), then compress each retained layer (certificates
-identify the minimum per-layer fidelity).
-Together they define a well-parameterized design space for parsimonious
-systems lineage.
-Fixing the parameters---choosing the query family, computing minimal
-certificates, implementing adaptive retention---is the systems work
-that remains.
+Together, truncation and certificates define a parameterized design
+space for parsimonious determination storage; fixing the
+parameters---choosing the query family, computing minimal certificates,
+implementing adaptive retention---is the systems work that remains.
 
 % ================================================================
 \section{Heredity Canonicalization}
 \label{app:persistence-canonicalization}
 % ================================================================
+
+A commitment is \emph{hereditary} if the outcomes it excludes stay
+excluded as the history grows: once ruled out, an outcome never
+becomes admissible again.
+This is a natural monotonicity property---commitments should be
+irrevocable---but not all commitment bases satisfy it syntactically.
+For example, a commitment ``proposal $A$ wins the vote based on the
+majority so far''
+excludes outcomes where $A$ loses; but if new voters submit ballots, the
+majority can flip, and the exclusion no longer holds.
+The commitment's effect depends on context that has not yet stabilized.
+We care about heredity because it guarantees that the admissible set
+shrinks monotonically along any history extension, which simplifies
+reasoning about determination structure: one need not worry that a
+later event could ``undo'' an earlier commitment's exclusion.
 
 We show that heredity is without loss of generality in the
 retrospective setting: any non-hereditary commitment basis can be
@@ -3132,48 +3038,33 @@ analysis that determination provenance performs.
 
 Several structural questions about determinations remain open.
 
-\paragraph{Dynamic Foata normal form.}
-In classical trace theory~\cite{mazurkiewicz1977concurrent}, the Foata normal
-form canonically represents a word in a partially commutative monoid as a
-sequence of maximal independent layers.
-The layered structure of a determination is the analog---but commutation is
-\emph{dynamic}: whether $\varphi$ and $\psi$ commute depends on the current
-admissible set, which changes as earlier layers are discharged.
+\paragraph{Algebraic structure of the determination space.}
+Three related questions concern the internal algebra of determinations.
+\emph{Equivalence:}
+In classical trace theory~\cite{mazurkiewicz1977concurrent}, the Foata
+normal form canonically represents a word in a partially commutative
+monoid as a sequence of maximal independent layers.
+The layered structure of a determination is the analog---but commutation
+is \emph{dynamic}: whether $\varphi$ and $\psi$ commute depends on the
+current admissible set, which changes as earlier layers are discharged.
 Characterizing when two determinations are equivalent (produce the same
 resolved specification) would give determinations a precise algebraic
 identity beyond their definition.
-
-\paragraph{Depth under history extension.}
-Call a commitment basis \emph{hereditary} if for every
-$\varphi \in \Phi$ and all $H_1 \sqsubseteq H_2$,
-$o \notin \Spec(H_1 \cdot \varphi) \Rightarrow o \notin \Spec(H_2 \cdot \varphi)$
-(exclusions are permanent).
-Under a hereditary basis, $\Spec(H') \subseteq \Spec(H)$ for all $H \sqsubseteq H'$.
-Canonicalization to a hereditary basis is always possible in the
-retrospective setting (Appendix~\ref{app:persistence-canonicalization}).
-\emph{Conjecture:} determination depth is monotonically non-increasing under
-history extension---as more information arrives, resolution becomes easier
-(or at least no harder).
-
-\paragraph{Query-relative depth.}
-A provenance query may depend on only a subset of the determination's layers.
-Characterizing which queries require which layers would provide a formal
-basis for adaptive log retention, connecting to layer certificates
-(Appendix~\ref{app:certificates}).
-
-\paragraph{Reversible commitments.}
-In settings with rollback (transactional abort-and-retry, speculative
-execution, backtracking search), commitments can be undone.
-Extending the framework to reversible commitments---replacing monoids with
-groups at each layer---is open.
-
-\paragraph{Factorized supports and universality.}
-Within-layer commutativity gives $\mathcal{D}$ the structure of a trie:
-each layer branches on the choice of commitment set, and a
-determination is a root-to-leaf path.
-A level-$k$ support is a union of complete subtrees rooted at depth~$k$,
-specified by its depth-$k$ prefixes without enumerating exponentially
-many leaves.
+\emph{Composition:}
+When two determinations share a common prefix, they share initial
+layers.
+A formal treatment of determination morphisms---how determinations
+relate under prefix extension, restriction, and substitution---would
+enable compositional reasoning across sub-specifications.
+\emph{Factorized representation:}
+Within-layer commutativity gives $\mathcal{D}$ the structure of a trie
+(each layer branches on the choice of commitment set; a determination
+is a root-to-leaf path), yielding a factorized
+representation~\cite{olteanu2015factorized} over the determination
+space.
+A level-$k$ support is a union of complete subtrees rooted at
+depth~$k$, specified by its depth-$k$ prefixes without enumerating
+exponentially many leaves.
 This trie plays a role analogous to $\mathbb{N}[X]$ in classical
 provenance: one computes the support trie once and reads off robustness,
 qdepth, responsibility, or cross-spec comparison as different views.
@@ -3183,21 +3074,48 @@ our specializations include combinatorial operations (Shapley values)
 and metric ones ($|\mathrm{supp}|/|\mathcal{D}|$) that are not
 semiring maps.
 Whether there is a formal category in which the support trie is
-universal---and what efficient algorithms the factorized representation
-enables~\cite{olteanu2015factorized}---remain open.
+universal---and what efficient algorithms the factorized structure
+enables---remain open.
 
-\paragraph{Determination composition.}
-When two determinations share a common prefix, they share initial layers.
-A formal treatment of determination morphisms---how determinations relate
-under prefix extension, restriction, and substitution---would enable
-compositional reasoning across sub-specifications.
+\paragraph{Reversible commitments.}
+In settings with rollback (speculative execution, backtracking search,
+optimistic replication with conflict resolution), commitments can be
+undone.
+Extending the framework to reversible commitments---replacing monoids
+with groups at each layer, in the spirit of incremental computation
+via group-structured changes~\cite{budiu2023dbsp}---is open.
+
+\paragraph{Depth under history extension.}
+Under a hereditary basis
+(Appendix~\ref{app:persistence-canonicalization}), the admissible set
+can only shrink as history grows:
+$\Spec(H') \subseteq \Spec(H)$ for all $H \sqsubseteq H'$.
+One would expect that determination depth is also non-increasing---as
+more events arrive, fewer commitments should be needed to resolve the
+remaining ambiguity.
+\emph{Conjecture:} under a hereditary basis, determination depth is
+monotonically non-increasing under history extension.
 
 \paragraph{Joint attribution.}
-Determination responsibility and tuple-level
-responsibility~\cite{livshits2021shapley} are sequential games.
+Classical provenance asks ``which input tuples are most responsible for
+an output?''---a game where base tuples are players and the Shapley
+value measures each tuple's marginal contribution to the
+output~\cite{livshits2021shapley}.
+Determination responsibility (Appendix~\ref{app:responsibility-details})
+asks a different question: ``which commitments are most responsible for
+this output holding under this resolution?''---a game where commitments
+are players.
+These two games are currently sequential: first attribute the
+resolution (determination responsibility), then attribute the
+derivation within that resolution (tuple-level responsibility).
 Formalizing their composition into a single joint game---with both
-commitments and tuples as players---would unify the two dimensions of
-provenance into a single attribution.
+commitments and tuples as players, and a unified Shapley value
+measuring each player's contribution to the final output---would
+unify the two dimensions of provenance into a single attribution.
+The challenge is that the two player sets interact: a commitment can
+make a tuple relevant (by including it in the resolved model), and a
+tuple can make a commitment relevant (by participating in a conflict
+that forces the commitment).
 
 \paragraph{Program-bounded vs.\ input-recurrent depth.}
 The $\Theta(n)$ transactional depth arises from recurring structure:
@@ -3208,6 +3126,19 @@ Characterizing when a specification's depth is bounded by its static
 structure vs.\ when it grows with the input stream --- and whether
 recurring depth admits uniform depth certification (a single check
 covering all recurrences) --- is open.
+
+\paragraph{Quantitative negation beyond zero-divisor-free semirings.}
+Theorem~\ref{thm:monus-elimination} shows that sealing and monus agree
+on supports under zero-divisor-free, $\omega$-continuous semirings.
+In semirings that violate zero-divisor-freeness (e.g., bounded
+lattice semirings $(\{0,\ldots,k\}, \max, \min, 0, k)$), monus can
+assign intermediate values $1_K \mathbin{\dot{-}} v \notin \{0_K, 1_K\}$
+to negated literals, encoding a quantitative residual---how much of a
+derivation was ``overcome'' by the negation.
+Sealing discards this information.
+Whether the determination framework can be extended to capture such
+quantitative negation---perhaps via graded commitments that record
+residual strength rather than binary presence/absence---remains open.
 
 % ================================================================
 \section{Depth Reduction: Bounding Determination Complexity}
@@ -3266,15 +3197,22 @@ mechanism applies at each layer.
           forced victim selection is no longer forbidden under SI.
           The layer that broke the cycle is eliminated; depth drops for
           tuples involved in write-skew patterns.
-    \item \emph{Commutation} (batching): seal a batch of $B$ pending
-          requests, then resolve all conflicts within the batch
-          simultaneously.
-          Within-batch decisions commute (they operate on disjoint
-          conflict edges), collapsing $B$ sequential layers into one.
-          Per-batch depth becomes~$2$ (seal + batch-order).
-          This requires pre-declared read/write sets so that conflict
-          edges are known at seal
-          time~\cite{thomson2012calvin}.
+    \item \emph{Commutation} (commutative basis rewriting): replace
+          non-commutative commitments with globally commutative
+          variants.
+          For example, replace cycle-based victim selection
+          ($\varphi_{\mathsf{abort}(T_v)}$, whose effect depends on
+          which other aborts have already occurred---non-commutative)
+          with per-transaction age-based abort predicates
+          ($\varphi_{\mathsf{abort\text{-}if\text{-}old}(T_i)}$: abort
+          $T_i$ if its age exceeds a threshold).
+          The age predicates commute unconditionally (each depends only
+          on its own transaction's metadata), so all abort decisions
+          collapse into a single layer.
+          The cost: the rewritten basis may abort transactions that
+          precise victim selection would have spared---a semantic
+          change, but one that buys global commutativity and reduces
+          depth from $\Theta(n)$ to~$1$.
     \item \emph{Entailment} (reactive protocol): process each event
           deterministically given the current state (e.g., OCC:
           validate on commit, abort if cycle exists; MVTO: assign
@@ -3295,6 +3233,24 @@ mechanism applies at each layer.
           $\mathbf{f}$.
           The choice layers become unnecessary (all outcomes are
           $\Ord'$-comparable); depth drops from $k{+}d$ to $k$.
+    \item \emph{Commutation} (conservative choice): dependent
+          SCC-resolution choices do not commute ($C_j$'s choice reads
+          $C_i$'s outcome).
+          Replace the precise choice for $C_j$ (minimal model of the
+          GL reduct given $C_i$'s resolution) with a conservative one:
+          include every atom in $C_j$ that is derivable under
+          \emph{any} resolution of $C_i$.
+          This choice no longer depends on $C_i$'s outcome, so the two
+          layers commute and merge.
+          The cost: the resulting model may not be minimal---it
+          over-derives, including atoms that a precise reduct would
+          have excluded.
+          This parallels the transactional case (age-based abort
+          over-aborts); both trade precision for commutativity.
+          We present this merely as an illustration; whether such
+          conservative models correspond to a natural
+          semantics (perhaps supported models or some relaxation of
+          stability) is unclear.
     \item \emph{Entailment} (deterministic choice): impose a policy
           that selects a unique stable extension for each negative SCC
           (e.g., order atoms alphabetically and assign $\mathbf{t}$ to
@@ -3303,32 +3259,8 @@ mechanism applies at each layer.
           a commitment.
           Each such SCC reduces $d$ by one.
   \end{itemize}
-  Commutation is already exploited: independent negative SCCs form a
-  single choice layer rather than $d$ sequential ones
-  (Section~\ref{sec:negation-preview}).
 \end{example}
 
-\begin{proposition}[Soundness of depth reduction]
-  \label{thm:depth-reduction}
-  Each mechanism produces a valid specification with strictly smaller
-  depth:
-  \begin{enumerate}[nosep,label=(\roman*)]
-    \item If coarsening $\Ord$ to $\Ord'$ makes all outcomes at
-          layer~$k$ pairwise $\Ord'$-comparable, then layer~$k$ is
-          eliminated and depth is $\le d{-}1$.
-    \item If layers $k$ and $k{+}1$ commute (within-layer commutativity
-          holds for their union), merging them yields depth $d{-}1$.
-    \item If layer~$k$'s commitment is uniquely determined by the
-          discharged prefix at every history, reclassifying it as an
-          entailment yields depth $d{-}1$.
-  \end{enumerate}
-\end{proposition}
-\begin{proof}
-  Follows directly from Definitions~\ref{def:determined},
-  \ref{def:filtration}, and~\ref{def:commitment}: (i)~comparable
-  outcomes need no commitment; (ii)~commuting commitments form a single
-  layer; (iii)~a deterministic commitment adds no branching.
-\end{proof}
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{references}

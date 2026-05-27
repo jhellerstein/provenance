@@ -1,0 +1,253 @@
+% ================================================================
+% FULL SYSTEMS AGENDA (saved for future use as standalone vision paper)
+% Originally Appendix in "Determination Provenance: From Ambiguity to Algebra"
+% ================================================================
+
+\section{Systems Agenda}
+\label{app:systems-lineage}
+\label{app:certificates}
+
+The theory developed in this paper appears to unlock practical
+relevance for data provenance in settings---transactional databases,
+distributed services, concurrent pipelines---where formal provenance
+has had less impact on mainstream tracing and debugging infrastructure
+than its theoretical power might suggest.
+This appendix sketches a research agenda for systems work building on
+determination provenance, mapping the framework's three levels of
+structure to concrete capabilities beyond what current lineage
+infrastructure provides.
+
+Systems lineage---as practiced in distributed
+tracing~\cite{sigelman2010dapper}, workflow
+provenance~\cite{seltzer2005provenance}, and pipeline
+auditing~\cite{bates2015trustworthy}---records \emph{which} services,
+operations, or data sources contributed to an observed result.
+This is lineage in the sense of Cui et al.~\cite{cui2000lineage}:
+set-valued input attribution without algebraic structure.
+It answers ``which inputs contributed?'' but not
+``how did they combine?'' (no semiring), ``would the result
+survive a different execution?'' (no counterfactuals), or ``which
+assumptions were necessary?'' (no determination).
+The result is verbose (full execution traces are retained) yet
+expressively limited (only positive, single-execution queries are
+supported).
+
+Determination provenance addresses both deficiencies.
+We map the framework's three levels of structure
+(within a determination, across determinations, across specifications)
+to concrete capabilities, then develop two orthogonal
+dimensions of parsimony that make the theory practical.
+
+\paragraph{Observation functions beyond relational databases.}
+The body defines an observation function
+$\mathsf{obs}: O \to \mathrm{Inst}(\mathbf{S})$ mapping outcomes to
+relational instances.
+In systems settings, observables are often partially-ordered,
+semi-structured records (distributed traces, replicated logs, event
+streams).
+The framework applies whenever provenance queries over such records
+can be expressed in a language equivalent to positive RA --- for
+example, the positive fragment of a semi-structured query language
+(select, filter, and join over JSON log entries, without negation or
+aggregation) is RA-equivalent and natural for log analysis.
+
+\subsection{Level 1: Repeatability from a Single Determination}
+
+A resolving determination records the non-deterministic commitments
+that resolved the specification to a function.
+Once a determination is fixed, the remaining execution is deterministic:
+given the history and the commitments, the resolved outcome can be
+reconstructed by re-execution.
+(If entailment steps involve non-determinism---e.g., hash-based
+tie-breaking---the determination must be augmented with random seeds
+for those steps; we assume deterministic entailment throughout.)
+
+This is already a compression over full-trace lineage: rather than
+recording every intermediate state, the system retains only the
+commitment sequence.
+All derivational detail can be reconstructed on demand.
+Once reconstructed, classical semiring provenance applies, answering
+positive provenance queries (why-provenance, how-provenance) with full
+algebraic structure.
+
+More broadly, determination provenance serves as a \emph{query layer}
+on top of existing logs.
+Full traces are retained as today; the determination (the
+non-deterministic commitments and their structure) is extracted as a
+\emph{semantic index} over the log.
+Diagnostic queries---robustness, counterfactuals, root-cause
+identification---are evaluated against the determination structure
+($O(k)$ commitments) rather than by scanning raw events ($O(ne)$
+log records).
+The algebraic structure enables queries that log-scanning cannot answer
+at all (e.g., ``under what fraction of admissible schedules does the
+SLA hold?''), and answers those it can more efficiently by routing
+through the determination semiring rather than correlating events.
+
+\begin{example}[Distributed tracing {\`a} la Dapper~\cite{sigelman2010dapper}]
+  \label{ex:dapper}
+  A web-search request spawns a tree of spans: the frontend ($F$)
+  calls a cache ($C$) and an ad server ($A$) in parallel; the cache
+  misses and calls a database ($D$).
+  Each span has client-send/server-receive events on different hosts
+  with unsynchronized clocks.
+  Causal constraints ($\mathsf{cs}_X \prec \mathsf{sr}_X$,
+  $\mathsf{ss}_X \prec \mathsf{cr}_X$) are known, but the relative
+  wall-clock durations of $C$ and $A$ are not---multiple orderings are
+  admissible.
+
+  A resolving determination commits to clock alignments
+  ($\varphi_{\mathrm{align}(h_i,h_j)}$) between hosts, fixing a single
+  execution timeline.
+  Once fixed, critical-path analysis is deterministic: either $C$
+  (cache miss + DB) or $A$ (ad auction) is on the critical path.
+
+  Determination provenance enables queries that Dapper cannot answer:
+  \begin{itemize}[nosep]
+    \item \emph{Is span $D$ robustly on the critical path?}
+          If $\mathrm{supp}(P(\mathrm{cp}=D)) = \mathcal{D}$, the
+          database is the bottleneck under every admissible clock
+          alignment.
+    \item \emph{Under which clock assumptions does the ad server
+          dominate latency?}
+          The support $\mathrm{supp}(P(\mathrm{cp}=A))$ identifies
+          exactly the determinations where $A$ is critical.
+    \item \emph{Would migrating the cache to a closer datacenter
+          change the critical path?}
+          A cross-specification question: compare supports under the
+          current spec vs.\ a spec with tighter latency bounds on $C$.
+  \end{itemize}
+\end{example}
+
+\subsection{Level 2: Robustness, Tail Bounds, and Scheduler Design}
+
+Supports across the space of resolving determinations enable queries
+that systems lineage cannot express.
+
+\paragraph{Robustness and fragility.}
+The ratio $|\mathrm{supp}(P(t))| / |\mathcal{D}|$ measures how
+\emph{fragile} an outcome is: a result with support ratio $0.99$ is
+nearly robust (almost any schedule produces it); one with ratio $0.01$
+depends on a very specific interleaving.
+Boolean robustness ($\mathrm{supp} = \mathcal{D}$) is the extreme case.
+
+\paragraph{Structural tail bounds.}
+Consider a database with $n$ concurrent transactions and a latency
+predicate $\ell(T_Q) < \tau$ (``query $T_Q$ completes within $\tau$
+ms'').
+The support of this predicate---the set of serializations under which
+the SLA is met---gives a \emph{structural} tail-bound estimate:
+$|\mathrm{supp}(\ell < \tau)| / |\mathcal{D}|$ is the fraction of
+admissible schedules satisfying the SLA, without empirical sampling.
+If this fraction is $0.95$, the system has a structural p95 guarantee.
+
+\paragraph{Diagnosis via determination responsibility.}
+When the tail is violated, determination responsibility
+quantifies each commitment's contribution to the violation.
+Rather than merely identifying which commitments are shared by all
+violating determinations (a set-intersection test), responsibility
+assigns each commitment a Shapley value measuring its marginal effect
+on the SLA predicate.
+A commitment with responsibility $0.73$ is the dominant root cause;
+one with responsibility $0.02$ is incidental.
+When the conflict structure has bounded treewidth---as in partitioned
+workloads or tree-shaped service dependencies---these values are
+efficiently computable.
+
+\paragraph{Scheduler design.}
+A scheduler that avoids high-responsibility commitments (e.g., never
+serializes $T_i$ before $T_j$ on the contested object) eliminates the
+tail without changing the isolation level or the workload.
+This is a new optimization objective: not ``minimize average latency''
+(a single-determination metric) but ``minimize the maximum
+determination responsibility for the SLA-violation predicate''
+(a distributional metric over the determination semiring).
+Baccaert et al.~\cite{baccaert2026makespan} optimize makespan within a
+single determination; the determination semiring enables optimization
+\emph{across} determinations.
+
+\subsection{Level 3: Cross-Specification Comparison}
+
+Supports across variant specifications answer cross-specification
+questions: does an outcome that holds under one specification also hold
+under another?
+Examples include isolation-level comparison (does a transaction's result
+survive a move from SI to
+serializability?~\cite{vandevoort2025mixed}), semantic-change queries
+(would a $\mbox{Datalog}^\neg$ result survive a change from stable to well-founded
+semantics?), and specification tightening (which results hold
+when migrating to a stricter consistency model?).
+These require comparing determination semirings of different
+specs---a capability entirely absent from systems lineage.
+
+\subsection{Parsimony via Truncation (Filtration)}
+\label{sec:parsimony-truncation}
+
+The filtration provides a structural answer to ``which layers do I need?''
+If a query family $\mathcal{Q}$ depends only on tuples whose supports
+lie in $\mathcal{F}_k$, then layers $k{+}1, \ldots, d$ are irrelevant:
+the determination can be truncated at depth $k$ without affecting any
+answer in $\mathcal{Q}$.
+
+Query-relative depth makes this precise: a tuple with
+$\mathrm{qdepth}(t) = k$ is fully explained by the first $k$ layers.
+A system that retains only the first $k$ layers of each determination
+can answer all queries whose inputs have depth $\le k$---and positive
+relational algebra cannot increase depth beyond its inputs.
+
+This is \emph{vertical} parsimony: discard layers that the query family
+does not need.
+
+\subsection{Parsimony via Compression (Certificates)}
+\label{sec:parsimony-compression}
+
+Within a layer that \emph{is} retained, the full commitment may carry
+more detail than the query requires.
+A \emph{certificate} is a sound over-approximation of a commitment's
+effect: it may admit outcomes that the actual commitment excludes, but
+excludes none that the commitment admits.
+
+\begin{definition}[Certificate]
+  A certificate for commitment $\varphi$ is a predicate
+  $C : O \to \{\mathsf{true}, \mathsf{false}\}$ such that for all $H$,
+  $\Spec(H \cdot \varphi) \subseteq \{o \in \Spec(H) \mid C(o)\}$.
+\end{definition}
+
+\begin{definition}[Sufficient certificate]
+  A certificate $C$ is \emph{sufficient for a query family
+  $\mathcal{Q}$} if for every $q \in \mathcal{Q}$ and every history $H$,
+  $q(\Spec(H \cdot \varphi)) = q(\Spec(H \cdot C))$---that is,
+  replacing $\varphi$ with $C$ yields the same answer.
+\end{definition}
+
+\begin{theorem}[Query monotonicity]
+  If $\mathcal{Q}_1 \subseteq \mathcal{Q}_2$, every certificate
+  sufficient for $\mathcal{Q}_2$ is sufficient for $\mathcal{Q}_1$.
+\end{theorem}
+
+\noindent
+This is \emph{horizontal} parsimony: within each retained layer,
+coarsen the representation to the minimum fidelity the query family
+demands.
+
+\begin{example}[Certificates in practice]
+  Under serializability, a certificate for derivational provenance need
+  only record the ordering predicates relevant to the queried tuple's
+  conflict neighborhood.
+  Answering a cross-specification query (``would this result survive
+  under a different isolation level?'') requires a strictly stronger
+  certificate that preserves the full conflict-graph structure.
+  In distributed tracing, a certificate for critical-path analysis
+  retains only the clock-alignment and ordering commitments on the
+  path itself---not the full trace.
+\end{example}
+
+\paragraph{The two dimensions compose.}
+For a given query family: first truncate (filtration identifies the
+deepest relevant layer), then compress each retained layer (certificates
+identify the minimum per-layer fidelity).
+Together they define a well-parameterized design space for parsimonious
+systems lineage.
+Fixing the parameters---choosing the query family, computing minimal
+certificates, implementing adaptive retention---is the systems work
+that remains.

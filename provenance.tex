@@ -69,24 +69,19 @@
 \begin{abstract}
   Data provenance explains how a query result was derived---but only
   after the system's semantics has been fixed.
-  When multiple admissible outcomes coexist (concurrent transactions
-  may serialize differently; a logic program may have multiple stable
-  models), provenance cannot even pose its question until something
-  chooses among them.
-  We introduce \emph{determination provenance} to track the
-  commitments that resolve this ambiguity.
-  A tuple's \emph{support} is the set of resolutions under which it
-  holds.
-  Supports form a commutative semiring, and layered commitments induce
-  a \emph{filtration} measuring each tuple's \emph{query-relative
+  When multiple admissible outcomes coexist, provenance cannot even
+  pose its question until something chooses among them.
+  We introduce \emph{determination provenance}: a tuple's
+  \emph{support} records which resolutions produce it, supports form a
+  commutative semiring, and layered commitments induce a
+  \emph{filtration} measuring each tuple's \emph{query-relative
   depth}---how many layers of semantic resolution it depends on.
   Positive relational algebra respects the filtration, enabling
-  compositional robustness analysis and quantitative diagnosis of
-  coordination cost.
-  We instantiate the framework for transactional isolation and for
-  $\mbox{Datalog}^\neg$; in both, classical semantic variants
-  (isolation levels; negation semantics) correspond to different views
-  of a single shared filtration.
+  compositional robustness analysis and layer bypass.
+  We instantiate the framework for transactional isolation
+  (yielding per-tuple separations of serializability and snapshot
+  isolation) and for Datalog with negation (where classical semantics
+  appear as different readings of a single filtration).
 \end{abstract}
 
 \maketitle
@@ -164,31 +159,33 @@ support (the determinations in which $T_Q$
 observes $T_2$'s insert).
 A provenance question like ``is $d$ robust?'' reduces to checking
 whether $d$'s support is full; counterfactual questions are read from
-the support; and quantitative diagnosis from the support's
-measure---recovering the three capabilities that classical semiring
-provenance provides in the resolved setting.
+the support directly; and quantitative diagnosis is obtained from the
+support's measure---recovering, in the ambiguous setting, the three
+capabilities that classical semiring provenance provides in the
+resolved one.
 Supports compose through relational operations (join intersects
-supports; union merges them).
+supports; union merges them), so the provenance of a complex query
+result can be computed from the provenance of its inputs.
 
 When commitments are layered---some depending on others' outcomes---the
 semiring carries a \emph{filtration}: a chain of sub-semirings
-reflecting how much resolution each tuple requires.
-A tuple with full or empty support has depth~$0$; a contingent tuple
-has positive depth reflecting which layer it depends on.
-Provenance query evaluation (positive RA) cannot make a result tuple
-depend on more layers than the tuples it reads from.
-The filtration supports three forms of reasoning:
-\emph{depth bounds} (queries reading only tuples settled before
-layer~$k$ are unaffected by layers $k, \ldots, d$);
-\emph{semantic-change analysis}
+reflecting how much resolution each tuple actually requires.
+A tuple with full or empty support (like $b$) has depth~$0$: no
+commitment affects it.
+A contingent tuple like $d$ has positive depth reflecting which
+commitment layer it depends on (overlapping conflict cycles and nested
+negation produce deeper filtrations).
+Positive relational algebra cannot increase depth.
+The filtration supports three forms of reasoning beyond classification:
+\emph{bypass} (queries whose inputs are settled before layer~$k$ can
+skip layers $k, \ldots, d$); \emph{semantic-change analysis}
 (specifications over the same basis can be compared tuple-by-tuple,
 separating wasted coordination from genuine semantic differences); and
 a \emph{complexity connection} (depth-$1$ provenance coincides with
 PDB lineage; higher depths correspond to layered PDB evaluation).
 We instantiate the framework for transactional isolation and
-$\mbox{Datalog}^\neg$; for each, classical semantic variants
-  (isolation levels; negation semantics) correspond to different views
-  of a single filtration.
+$\mbox{Datalog}^\neg$; for the latter, the classical negation semantics
+correspond to different filtration levels.
 
 \paragraph{Contributions.}
 \begin{enumerate}[label=(\roman*),nosep,leftmargin=*]
@@ -197,33 +194,34 @@ $\mbox{Datalog}^\neg$; for each, classical semantic variants
         semiring whose layered structure is reflected as a chain of
         sub-semirings that query evaluation respects
         (Sections~\ref{sec:det-semiring}--\ref{sec:filtration}).
-  \item \emph{Instantiation for transactional systems}: isolation levels
-        (RC, SI, SER) are different resolving subsets of a shared
-        filtration; determination depth is $\Theta(n)$ worst-case
-        (in the number of transactions) with scheduling discretion, and SER/SI are incomparable in
-        per-tuple query-relative depth
+  \item Instantiation for transactional systems: determination depth
+        is $\Theta(n)$ worst-case for any isolation level that forbids
+        some cycle type, given scheduling discretion;
+        the filtration provides a per-tuple separation of SER and SI
+        that is incomparable in query-relative depth
         (Section~\ref{sec:transactions}).
-  \item \emph{Instantiation for $\mbox{Datalog}^\neg$}: for a representative
-        class of programs, negation semantics (stratified,
-        well-founded, stable) are different reading depths of a shared
-        filtration; monus elimination shows that sealing is
-        support-equivalent to semirings with monus for stratified
-        programs, and extends to unstratified negation where monus is
-        undefined
+  \item Instantiation for $\mbox{Datalog}^\neg$: for a representative
+        class of programs, the classical negation
+        semantics correspond to filtration levels of a single
+        determination semiring; monus elimination shows that layered
+        monotone supports are support-equivalent to semirings with
+        monus
         (Section~\ref{sec:negation-preview},
         Appendix~\ref{sec:appendix-datalog}).
-  \item \emph{Quantitative measures and semantic-change analysis}:
-        queries whose inputs have depth below layer~$k$ are unaffected
-        by layers $k, \ldots, d$; specifications over the same basis can be
-        compared tuple-by-tuple, quantifying coordination \emph{work
-        regret} vs.\ genuine \emph{semantic shift}; depth-$1$
+  \item \emph{Layer bypass and semantic-change analysis}: queries
+        whose inputs have depth below layer~$k$ can bypass layers
+        $k, \ldots, d$; specifications over the same basis can be
+        compared tuple-by-tuple, separating coordination \emph{work
+        regret} from genuine \emph{semantic shift}; depth-$1$
         provenance coincides with PDB lineage, and higher depths
         correspond to layered PDB evaluation
-        (Section~\ref{sec:discussion}).
+        (Section~\ref{sec:bypass}).
   \item \emph{Complexity and attribution} (appendices):
-        robustness is coNP-complete; a
+        robustness and bypass verification are coNP-complete; a
         Shapley-value measure attributes contingency to individual
-        commitments (Appendices~\ref{app:robustness-proofs},~\ref{app:responsibility-details}).
+        commitments
+        (Appendices~\ref{app:robustness-proofs},
+        \ref{app:responsibility-details}).
 \end{enumerate}
 
 
@@ -244,8 +242,7 @@ irrevocable choice structures—called \emph{determinations}—that restrict amb
 meaning is determinate.
 
 \subsection{Histories}
-Histories are used to model ambiguity in distributed systems~\cite{lamport};
-we use them here as well.
+
 \begin{definition}[History]
   A \emph{history} is a finite partially ordered set
   $
@@ -287,7 +284,7 @@ When $o_1 \Ord o_2$, replacing outcome $o_1$ with $o_2$ is not considered
 to rule out $o_1$ but rather to \emph{refine} it---$o_2$ adds detail
 without contradicting $o_1$.
 The order $\Ord$ is part of the specification---a modeling choice, not
-derived from execution structure. Changing $\Ord$ changes the
+derived from execution structure; changing $\Ord$ changes the
 specification (enlarging $\Ord$ relaxes coordination requirements).
 
 \begin{definition}[Specification]
@@ -298,52 +295,42 @@ specification (enlarging $\Ord$ relaxes coordination requirements).
   admissible set at~$H$.
 \end{definition}
 
-\begin{example}[Specification for Example~\ref{ex:example}]
-  \label{ex:spec}
-  $O$ is the set of decision traces (commit/abort sequences for each
-  transaction); $\Ord$ is trace-prefix extension (a longer trace
-  refines a shorter one); $\Spec(H)$ is the set of traces consistent
-  with some serialization of the concurrent transactions in $H$.
-\end{example}
-
 \noindent
 As noted in the introduction, a specification is in general a
-relation; the goal of determination is to turn it into a function
-(a unique outcome per history).
-Since provenance analysis is retrospective---the full history is
-available---we define the \emph{resolved outcome} at a history $H$ as
-the maximal element of $\Spec(H)$ under $\Ord$.
+relation; the goal of determination is to eliminate incompatible
+alternatives:
 
 \begin{definition}[Determined specification]
   \label{def:determined}
-  A specification is \emph{determined} at $H$ if $\Spec(H)$ forms a
-  chain under $\Ord$ (all outcomes are pairwise comparable).
-  For a determined history, we write $\Spec(H)$ to denote the chain's
-  maximum (the resolved outcome).
+  A specification is \emph{determined} at $H$ if all outcomes in
+  $\Spec(H)$ are pairwise $\Ord$-comparable (i.e., $\Spec(H)$ forms a
+  chain under $\Ord$).
   A specification is \emph{determined} if it is determined at every
   $H \in \Hist$.
 \end{definition}
 
 \noindent
-A determined specification defines a function from histories to
-outcomes; classical provenance applies directly.
+A determined specification may admit multiple outcomes at a given
+history (at different levels of refinement), but they form a chain
+under $\Ord$---no conflicting alternatives exist.
+Each such outcome has well-defined classical provenance at its own
+point in the history; no commitment is needed to choose among them.
 Ambiguity requiring determination arises only when $\Spec(H)$ contains
-$\Ord$-incomparable outcomes (as in Example~\ref{ex:spec}, where
-multiple serializations yield incomparable decision traces).
+$\Ord$-incomparable outcomes.
 
 
 \subsection{Commitments}
 
-Ambiguity is constrained via additional semantic commitments.
-Commitments are operators that narrow the admissible set;
+Ambiguity is constrained by making additional semantic commitments.
+We model commitments as operators that narrow the admissible set;
 applying a commitment at a specific history produces a
-\mbox{\emph{commitment event}.}
+\emph{commitment event}.
 
 \begin{definition}[Commitment and commitment event]
   \label{def:commitment}%
   A \emph{commitment} $\varphi$ is an operator that can be applied at a
   history $H$ to produce an extended history $H \cdot \varphi$ with
-  $\Spec(H \cdot \varphi) \subseteq \Spec(H) \wedge \Spec(H \cdot \varphi) \neq \emptyset$.
+  $\Spec(H \cdot \varphi) \subseteq \Spec(H)$ (nonempty).
   The effect of $\varphi$---which outcomes it excludes---depends on the
   history at which it is applied; a commitment has no
   history-independent semantics.
@@ -380,15 +367,9 @@ outcomes---this is what produces non-commutative commitments.
 \end{definition}
 
 \noindent
-The choice of commitment basis is a modeling decision as fundamental as
-the choice of outcome space ($O$, $\Ord$).
-Given an ambiguous specification (a relation), implementations select a
-single outcome on each run; the commitment basis lifts the strategies
-that such implementations use into a semantic domain, enabling
-reasoning across different implementations and their nondeterminism.
-(In Example~\ref{ex:example}, $\Phi = \{\varphi_{T_i \prec T_j}\}$:
-the set of all pairwise ordering operators, capturing shared
-aspects of 2PL, OCC and MVTO.)
+In Section~\ref{sec:transactions}, the basis consists of ordering and
+abort commitments; in Section~\ref{sec:negation-preview}, of sealing
+and choice predicates.
 
 \paragraph{Three forces on a history.}
 \label{sec:three-forces}%
@@ -398,10 +379,13 @@ forces~\cite{hellerstein2026complexity}:
 \emph{commitments} replace the admissible set with a subset
 (irrevocably constraining which outcomes remain possible);
 \emph{entailments} refine the observed outcome upward in $\Ord$
-without excluding any alternative (they add detail that is compatible
-with every remaining admissible outcome).
+without excluding alternatives (they add detail but make no
+irrevocable choice).
+An operation is \emph{monotone} if its output can only refine upward
+under $\Ord$ as the history grows; non-monotone operations require a
+sealing commitment to stabilize.
 In transactional systems, operation interleavings are environment and
-commit/abort decisions are commitments; in $\mbox{Datalog}^\neg$, EDB
+commit/abort decisions are commitments; in Datalog with negation, EDB
 facts are environment, sealing and choice predicates are commitments,
 and the alternating fixpoint's classifications are entailments.
 
@@ -416,7 +400,7 @@ A full resolution requires a collection of them:
   $\Phi$ is the subsequence of commitment events in $H$, listed in the
   order induced by $\rightarrow$:
   $D(H) = \varphi_1 \cdot \varphi_2 \cdot \cdots \cdot \varphi_m$.
-  Non-commitment events may occur between successive commitments; the
+  Environment events may occur between successive commitments; the
   effect of each $\varphi_i$ depends on the full history at its point
   of application.
 \end{definition}
@@ -428,21 +412,11 @@ Note that $\Spec$ itself is a fixed relation---it does not change as
 history grows.
 Commitment events can only narrow: $\Spec(H \cdot \varphi) \subseteq
 \Spec(H)$ by definition.
-Non-commitment events may change the admissible set in either direction;
-they provide the context in which commitments take effect (and hence
-why determinations are history-indexed).
+Non-commitment events may change the admissible set in either direction.
+The determination $D(H)$ identifies which commitment events in $H$ are
+responsible for narrowing; the non-commitment events in $H$
+provide the context in which those commitments take effect.
 When the history is clear from context we write $D$ for $D(H)$.
-
-\begin{example}[Determinations for Example~\ref{ex:example}]
-  \label{ex:det-intro}
-  The ordering decisions $\varphi_{T_2 \prec T_Q}$ and
-  $\varphi_{T_Q \prec T_3}$ are commitments: each excludes
-  serializations incompatible with the chosen order.
-  The determination $D_{\mathsf{in}} = \varphi_{T_2 \prec T_Q} \cdot
-  \varphi_{T_Q \prec T_3}$ resolves the specification so that $T_Q$
-  observes $T_2$'s insert; $D_{\mathsf{out}} = \varphi_{T_2 \prec T_3}
-  \cdot \varphi_{T_3 \prec T_Q}$ resolves it so that $d$ is absent.
-\end{example}
 
 \paragraph{Layer-sequencing notation.}
 Commitments in a determination are sequenced for two reasons.
@@ -463,8 +437,8 @@ We use $\seq$ to denote a sequence of such layers:
   determination $D$'s commitments are organized into $k$ layers, applied
   in order with non-commitment events possibly intervening between
   layers.
-  Within each $L_i$, commitments commute; across layers, order
-  matters.
+  Within each $L_i$, commitments may be applied in any order (by
+  within-layer commutativity); across layers, order matters.
 \end{definition}
 
 \noindent
@@ -512,10 +486,8 @@ resolved---when incompatible outcomes coexist.
   includes one being $0$).
   Since semiring provenance expresses only positive dependence on base
   facts~\cite{green2007provenance}, no single annotation can
-  explain both presence under $D_1$ and absence under $D_2$.
-  Hence any sound representation must distinguish $D_1$ from $D_2$.
-  Conversely, if all resolving determinations agree, the common
-  $K$-relation is sound and complete for all of them.
+  simultaneously explain presence under $D_1$ and absence under $D_2$.
+  Hence the representation must distinguish $D_1$ from $D_2$.
 \end{proof}
 
 %% ================================================================
@@ -542,9 +514,9 @@ Concretely, each element of $\mathcal{D}$ is a representative resolved
 history $H$ whose determination $D(H)$ is minimal
 (Definition~\ref{def:minimal-resolving}).
 Unlike abstract possible worlds, elements of $\mathcal{D}$ are
-grounded in event structure: the same commitment may have different
-effects at different histories, so determinations are history-indexed
-records, not symbolic labels.
+grounded in event structure: the same commitment operator may have
+different effects at different histories, so determinations are
+history-indexed records, not symbolic labels.
 
 \subsection{The Determination Semiring}
 \label{sec:det-semiring}
@@ -556,8 +528,9 @@ A \emph{$K$-relation} assigns each tuple a value in $K$: alternative
 derivations combine by $+$, joint use of facts by $\cdot$, absence by $0$.
 For a determination $D \in \mathcal{D}$ extracted from a resolved
 history $H$, the \emph{conditioned provenance} $P_D(t) \in K$ is the
-classical semiring provenance of tuple $t$ computed over the resolved
-outcome of $H$.
+classical semiring provenance of tuple $t$ computed over the maximal
+outcome in $\Spec(H)$ (which, in a resolved history, is unique up to
+query/provenance equivalence in both instantiations).
 
 Conditioned provenance suffices for explaining a single execution.
 But some questions require reasoning \emph{across} determinations:
@@ -566,39 +539,24 @@ contingent on a particular one?
 Answering such questions requires comparing provenance across multiple
 determinations.
 
-\paragraph{Observables and provenance queries.}
-To connect outcomes to provenance, we fix a relational schema
-$\mathbf{S}$ and an \emph{observation function}
-$\mathsf{obs}: O \to \mathrm{Inst}(\mathbf{S})$ mapping each outcome
-to a database instance.
-In our $\mbox{Datalog}^\neg$ examples, $\mathsf{obs}$ is the identity
-(outcomes are models, i.e., database instances); for transactions,
-$\mathsf{obs}$ maps a decision trace to the database state that
-results from applying committed transactions' writes.
-A \emph{provenance query} is a positive relational algebra expression
-over $\mathbf{S}$; conditioned provenance is the familiar
-$K$-relational evaluation of Green et
-al.~\cite{green2007provenance} applied to $\mathsf{obs}(\Spec(H))$.
-This is where the framework gains expressive power beyond
-per-commitment analysis: provenance queries can select individual
-tuples or join across transactions --- enabling fine-grained and
-cross-transaction sensitivity analysis.
-Throughout, ``tuple'' refers to a tuple in $\mathsf{obs}(o)$ or in a
-query result over it.
+The resulting structure is a Boolean algebra on supports.
+In both instantiations of this paper (transactions and $\mbox{Datalog}^\neg$),
+$\Spec(H)$ is finite and finitely many commitments from $\Phi$ are
+applicable at any history, so $\mathcal{D}$ is finite.
+The algebraic definitions and the filtration do not require finiteness;
+the complexity results (Section~\ref{sec:bypass}) do.
 
 \begin{definition}[Determination Provenance]
   \label{def:det-provenance}
-  Fix a specification $\Spec$ and a provenance query $Q$ over
-  $\mathbf{S}$.
-  Each determination $D \in \mathcal{D}$ corresponds to a resolved
-  history $H$; evaluating $Q$ over $\mathsf{obs}(\Spec(H))$ yields a
-  $K$-annotation for each tuple $t$.
-  The \emph{determination provenance} of $t$ is the function
+  For a specification $\Spec$, provenance query $P$, and tuple $t$, the
+  \emph{determination provenance} of $t$ is the function
   \[
     P_{\Spec}(t) : \mathcal{D} \to K
   \]
-  mapping each determination to the conditioned provenance $P_D(t)$
-  ($= 0_K$ when $t$ is absent).
+  that assigns to each $D(H) \in \mathcal{D}$ the conditioned
+  provenance $P_D(t)$ of $t$ in the resolved history $H$, recording
+  how $t$ is derived (or not: $P_D(t) = 0_K$ when $t \notin \Spec(H)$)
+  under every possible resolution.
   When $\Spec$ is clear from context, we write $P(t)$.
 \end{definition}
 
@@ -607,24 +565,23 @@ Determination provenance is an element of the product semiring
 $K^{\mathcal{D}}$ (pointwise addition and multiplication):
 it assigns each $D \in \mathcal{D}$ a semiring value
 recording how $t$ is derived under $D$.
-Conditioned provenance is the special case of evaluating at a single determination:
+Note that $\mathcal{D}$ depends on the specification and workload
+(unlike $\mathbb{N}[X]$, which is schema-level); the semiring
+$K^{\mathcal{D}}$ is instance-dependent by construction.
+Conditioned provenance is the special case of evaluating at a single point:
 $P(t)(D) = P_D(t)$.
 Classical provenance is the special case where $|\mathcal{D}| = 1$
 (the specification is already determined; no commitments needed).
 
-\begin{definition}[Support and the determination semiring]
-  The \emph{support} of a tuple $t$ is
-  $\mathrm{supp}(P(t))
-    \triangleq
-    \{\, D \in \mathcal{D} \mid P(t)(D) \neq 0 \,\}$:
-  the set of determinations under which $t$ holds.
-  Supports form a Boolean algebra
-  $(2^{\mathcal{D}}, \cup, \cap, \emptyset, \mathcal{D})$
-  under the operations induced by query evaluation (join intersects
-  supports; union merges them).
-\end{definition}
-
-\noindent
+The \emph{support}
+$\mathrm{supp}(P(t))
+  \triangleq
+  \{\, D \in \mathcal{D} \mid P(t)(D) \neq 0 \,\}$
+is the set of determinations under which $t$ holds.
+Supports form a Boolean algebra
+$(2^{\mathcal{D}}, \cup, \cap, \emptyset, \mathcal{D})$
+under the operations induced by query evaluation (join intersects
+supports; union merges them).
 This algebra is elementary; the non-trivial structure is the
 \emph{filtration} (Section~\ref{sec:filtration}), which reflects the
 layered commitment process.
@@ -665,48 +622,57 @@ as positive Boolean formulas over commitment variables
 \label{sec:filtration}
 
 The Boolean algebra on supports tells us \emph{whether} a tuple is
-contingent, but not \emph{why}---which commitment layer it depends on.
-Every determination $D$ is a sequence of commitment events
-(Definition~\ref{def:determination}); within that sequence, a
-\emph{layer} is a maximal contiguous set of commitments that commute
-pairwise in the history at which they are applied.
-The layers of $D$ are its Foata normal
-form~\cite{mazurkiewicz1977concurrent}: the coarsest grouping into
-commuting stages.
-Write $L_1(D), L_2(D), \ldots$ for the successive layers of $D$;
-the \emph{depth} of $D$ is its number of layers.
+contingent, but not \emph{why}---which layer of commitment it depends on.
+When commitments are organized into layers (some depending on others'
+outcomes), the determination semiring carries a finer structure: a
+\emph{filtration}---a nested chain of sub-semirings
+$\mathcal{F}_0 \subseteq \mathcal{F}_1 \subseteq \cdots \subseteq
+\mathcal{F}_d = 2^{\mathcal{D}}$---that records how much of the
+determination each tuple actually requires.
+A tuple whose support lies in $\mathcal{F}_k$ depends only on layers
+$1, \ldots, k$ (those discharged earliest); commitments at deeper
+layers are irrelevant to it.
 
-\begin{definition}[Level-$k$ agreement]
-  \label{def:level-k-agreement}
-  Two determinations $D, D' \in \mathcal{D}$ \emph{agree at level $k$},
-  written $D \equiv_k D'$, if they have the same history through
-  layer~$k$ (same events, same commitments, same order, including all
-  intervening non-commitment events).
+\begin{definition}[Layered commitment basis]
+  \label{def:layered-basis}
+  A \emph{layered commitment basis} is a commitment basis $\Phi$ equipped
+  with a \emph{layering function} $\lambda : \Phi \to \{1, \ldots, d\}$.
+  The layering is history-independent: it classifies commitments
+  (operators), not their effects at particular histories.
+  The classification must satisfy:
+  \begin{enumerate}[nosep,label=(\roman*)]
+    \item \emph{within-layer commutativity}: for all
+          $\varphi, \psi \in \Phi$ with $\lambda(\varphi) = \lambda(\psi)$
+          and all histories $H$ where both are applicable,
+          $\Spec(H \cdot \varphi \cdot \psi) = \Spec(H \cdot \psi \cdot \varphi)$;
+    \item \emph{cross-layer dependence}: commitments at layer $k$ may
+          depend on the outcomes of layers $1, \ldots, k{-}1$ (which
+          commitments are applicable and what they exclude may change
+          depending on the discharged prefix).
+  \end{enumerate}
+  The number $d$ is the \emph{depth} of the basis.
 \end{definition}
 
 \noindent
-Each $\equiv_k$ is an equivalence relation; classes refine as $k$
-increases.
-
-\begin{definition}[Filtration]
-  \label{def:filtration}
-  A set $S \subseteq \mathcal{D}$ is a \emph{level-$k$ support} if it
-  is a union of $\equiv_k$ classes (closed under level-$k$ agreement).
-  Define $\mathcal{F}_k \triangleq \{S \subseteq \mathcal{D} \mid
-  S \text{ is a level-}k\text{ support}\}$.
-  This yields a filtration:
-  $\mathcal{F}_0 \subseteq \mathcal{F}_1 \subseteq \cdots$, with
-  $\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$ and
-  $\mathcal{F}_d = 2^{\mathcal{D}}$ once all determinations are
-  distinguished.
-  The \emph{query-relative depth} (qdepth) of a tuple $t$ is the
-  smallest $k$ with $\mathrm{supp}(P(t)) \in \mathcal{F}_k$.
-\end{definition}
-
-\noindent
-A tuple with qdepth~$0$ is robust (full support) or impossible (empty
-support); positive qdepth reflects which layer first differentiates
-the tuple's membership across determinations.
+The layering function encodes the semantic structure of the domain
+(e.g., stratification layers in $\mbox{Datalog}^\neg$, conflict-independence
+structure in transactions).
+In the instantiations below, we use the coarsest layering consistent
+with the commutativity and dependency structure of $\Phi$.
+The universal quantifier in~(i) is conservative: if two commitments
+commute at some histories but not others, they must be placed in
+different layers.
+In both instantiations of this paper, commutativity is
+history-independent (it holds universally or not at all), so no
+precision is lost:
+for transactions, independent commit/abort decisions form a single layer
+while cycle-breaking decisions that depend on prior aborts form
+subsequent layers; for $\mbox{Datalog}^\neg$, stratum sealing forms layers
+$1, \ldots, k$ and choice predicates form layer $k{+}1$.
+Whether a history-dependent layering can be derived from local
+commutativity (a dynamic analog of Foata normal
+form~\cite{mazurkiewicz1977concurrent}) is left as future work
+(Appendix~\ref{app:open-questions}).
 
 \begin{observation}[Shared filtration across specifications]
   \label{obs:basis-entails-filtration}
@@ -723,27 +689,44 @@ the tuple's membership across determinations.
   conflict or dependency structure, not of the policy imposed on it.
 \end{observation}
 
-\noindent
-For cross-specification comparison, we fix an ambient determination
-space $\mathcal{D}^\star_\Phi$: the set of resolved-history classes
-generated by the basis before imposing any particular specification's
-admissibility predicate.
-Each specification $I$ selects a resolving subset
-$\mathcal{D}_I \subseteq \mathcal{D}^\star_\Phi$; supports and qdepth
-are then compared over this common carrier.
+Throughout this subsection, we fix a layered commitment basis
+$(\Phi, \lambda)$ with depth $d$.
+Two determinations $D(H), D'(H') \in \mathcal{D}$ \emph{agree at level $k$},
+written $D \equiv_k D'$, as defined inductively:
+\begin{itemize}[nosep,leftmargin=*]
+  \item $D \equiv_0 D'$ always (vacuous agreement).
+  \item $D \equiv_{k+1} D'$ iff $D \equiv_k D'$, the histories $H$ and
+        $H'$ are identical through all events preceding layer-$(k{+}1)$
+        commitment events (including intervening non-commitment events),
+        and the multisets of layer-$(k{+}1)$ commitment events are equal:
+        $\{\varphi \in D \mid \lambda(\varphi) = k{+}1\}
+        = \{\varphi \in D' \mid \lambda(\varphi) = k{+}1\}$.
+\end{itemize}
+Each $\equiv_k$ is an equivalence relation (reflexivity, symmetry, and
+transitivity follow from history-prefix identity and multiset equality
+at each layer).
+Write $[D]_k$ for the equivalence class of $D$ at level $k$.
+These classes refine as $k$ increases:
+$[D]_0 = \mathcal{D}$ and $[D]_k = \{D\}$ when $k$ equals the
+number of layers.
 
-\begin{remark}[Uniform layering in the instantiations]
-  \label{rem:uniform-layering}
-  In both instantiations of this paper, commutativity is
-  history-independent (it holds universally or not at all), so all
-  determinations share the same layer structure: for transactions,
-  independent ordering decisions form a single layer while
-  cycle-breaking decisions form subsequent layers; for
-  $\mbox{Datalog}^\neg$, stratum sealing forms layers $1, \ldots, k$
-  and choice predicates form layer $k{+}1$.
-  We exploit this uniform structure in the instantiation sections
-  without further comment.
-\end{remark}
+\begin{definition}[Level-$k$ support]
+  A set $S \subseteq \mathcal{D}$ is a \emph{level-$k$ support} if it is a
+  union of level-$k$ equivalence classes.
+  Equivalently, $S$ is closed under level-$k$ agreement:
+  if $D \in S$ and $D'$ agrees with $D$ at level $k$, then $D' \in S$.
+\end{definition}
+
+\begin{definition}[Filtration]
+  Define $\mathcal{F}_k \triangleq \{S \subseteq \mathcal{D} \mid
+  S \text{ is a level-}k\text{ support}\}$.
+  This yields:\\
+  $
+    \mathcal{F}_0 \;\subseteq\; \mathcal{F}_1 \;\subseteq\; \cdots
+    \;\subseteq\; \mathcal{F}_d \;=\; 2^{\mathcal{D}},
+  $
+  where $\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$.
+\end{definition}
 
 \noindent
 $\mathcal{F}_0$ captures the coarsest distinction: $\mathcal{D}$ is the
@@ -751,7 +734,7 @@ support of a robust outcome (holds under every determination) and
 $\emptyset$ is the support of an impossible one (holds under none).
 No layer information is needed to make this distinction.
 
-\begin{proposition}[Filtration respects the determination semiring]
+\begin{proposition}[Filtration respects the semiring]
   \label{prop:filtration-semiring}
   Each $\mathcal{F}_k$ is closed under $\cup$ and $\cap$, hence
   $(\mathcal{F}_k, \cup, \cap, \emptyset, \mathcal{D})$ is a
@@ -762,20 +745,20 @@ No layer information is needed to make this distinction.
   unions-of-equivalence-classes.
 \end{proof}
 
-\noindent
-Concretely, the filtration gives each support the structure of a
-\emph{trie} (layer~$k$ branches conditioned on layers $1,\ldots,k{-}1$).
-We discuss the analogy to $\mathbb{N}[X]$ universality---and its
-limits---in Appendix~\ref{app:open-questions}.
-
 \begin{proposition}[Single-layer case]
   \label{prop:collapse-depth-1}
-  When all commitments commute (a single layer), the filtration has
-  exactly two levels ($\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$ and
-  $\mathcal{F}_1 = 2^{\mathcal{D}}$), and supports coincide with
-  $\mathrm{PosBool}(\Phi)$---positive Boolean formulas over commitment
-  variables, interpreted over valid minimal determinations.
-  This connects to PDB lineage in Section~\ref{sec:discussion}.
+  When all commitments commute (a single layer), the filtration has exactly
+  two levels
+  ($\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$ and
+  $\mathcal{F}_1 = 2^{\mathcal{D}}$), and the determination semiring
+  coincides with $\mathrm{PosBool}(\Phi)$---positive Boolean formulas
+  over commitment variables, with $\vee$ as addition and $\wedge$ as
+  multiplication.
+  (Here each minimal determination is identified with its exact
+  commitment set, and each commitment variable indicates whether that
+  commitment was applied.
+  The formulas are interpreted over the set of valid minimal
+  determinations, not over all truth assignments to $\Phi$.)
 \end{proposition}
 \begin{proof}
   With a single layer, two determinations agree at level $1$ iff they
@@ -823,7 +806,7 @@ limits---in Appendix~\ref{app:open-questions}.
   Value $b$ has $\mathrm{qdepth}(b) = 0$: it holds under every
   determination (robust).
   Value $d$ has $\mathrm{qdepth}(d) = 1$: its support is a proper subset
-  of $\mathcal{D}$ (determinations where $T_Q$ observes $T_2$'s insert),
+  of $\mathcal{D}$ (determinations where $T_Q$ is serialized before $T_3$),
   which is not in $\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$.
   Classical provenance works for $b$; determination provenance is needed
   for $d$.
@@ -862,14 +845,14 @@ In transactional systems, semantic ambiguity arises from
 \emph{conflict resolution}: when concurrent transactions conflict,
 the system must decide which effects persist.
 We show that any isolation level forbidding a conflict cycle has
-worst-case determination depth $\Theta(n)$ (in the number of
-transactions) given scheduling
+worst-case determination depth $\Theta(n)$ given scheduling
 discretion---a result that holds regardless of concurrency control
 protocol.
-The filtration refines the classical incomparability of SER and
-SI~\cite{adya1999weak} to a per-tuple depth comparison, and extends
-per-transaction portability analysis~\cite{vandevoort2025mixed} to
-arbitrary provenance queries over the resulting database.
+The filtration also provides a per-tuple separation of isolation
+levels: serializability (SER) and snapshot isolation (SI) are
+incomparable in query-relative depth, yet isolation-sensitive queries
+can compose into isolation-insensitive ones when their supports are
+complementary.
 
 \subsection{Transactional Histories}
 
@@ -889,8 +872,8 @@ arbitrary provenance queries over the resulting database.
   write that a subsequent read observes).
   Under protocols with scheduling discretion, ordering decisions among
   conflicting operations are the commitment events
-  (Section~\ref{sec:scheduling-basis}); commit and abort outcomes
-  follow from the chosen orderings.
+  (Section~\ref{sec:scheduling-basis}); commit and abort events are
+  entailed consequences of those ordering decisions.
   All other events (arrivals, reads, writes) are non-commitment events;
   they extend the history and may introduce conflict edges but do not
   themselves exclude outcomes.
@@ -911,74 +894,59 @@ arbitrary provenance queries over the resulting database.
 
 \begin{definition}[Conflict graph]
   \label{def:conflict-graph}
-  The \emph{conflict graph} $G(H)$ derived from a transactional
-  history $H$ is a directed graph whose vertices are the \emph{active}
-  (uncommitted, non-aborted) transactions in $H$.
-  An edge $T_i \xrightarrow{\ell} T_j$ (labeled
-  $\ell \in \{\mathsf{ww}, \mathsf{wr}, \mathsf{rw}\}$) exists
-  whenever $T_i$ and $T_j$ conflict on some object with conflict type
-  $\ell$ and $T_i$'s conflicting operation precedes $T_j$'s in
-  $\rightarrow$.
+  The \emph{conflict graph} $G(H)$ of a transactional history $H$ is a
+  directed graph derived from $H$: its vertices are the \emph{active}
+  (uncommitted, non-aborted) transactions in $H$, and it has an edge
+  $T_i \to T_j$ whenever $T_i$ and $T_j$ conflict and $T_i$'s
+  conflicting operation precedes $T_j$'s in $\rightarrow$.
   For an extension $H \sqsubseteq H'$, the graph $G(H')$ omits from
-  $G(H)$ transactions that committed or aborted in $H'$.
+  $G(H)$ any transactions that committed or aborted in $H'$.
 \end{definition}
 
-\subsection{Commitment Basis and Specifications}
+\subsection{Isolation Levels as Specifications}
+
+The outcome space $O$ for transactions is the set of
+\emph{decision traces}: sequences of $\mathsf{start}(T_i)$,
+$\mathsf{commit}(T_i)$, and $\mathsf{abort}(T_i)$ events, quotiented
+by reordering of non-conflicting decisions (decisions on transactions
+sharing no conflict edge may be permuted freely).
+The outcome order is trace-prefix extension:
+$o_1 \Ord o_2$ when $o_2$ extends $o_1$ with additional decisions
+while preserving the fate (commit/abort) of every transaction already
+decided in $o_1$ and the ordering of every conflicting pair already
+ordered in $o_1$.
+
+Following Adya~\cite{adya1999weak}, each isolation level $L$
+constrains which conflict patterns are admissible among committed
+transactions;
+$\Spec_L(H)$ admits those extensions of the current outcome consistent
+with $L$'s constraint.
+We consider three levels:
+\emph{read committed} (RC; no constraint on conflict structure),
+\emph{serializability} (SER; forbids all directed cycles in the
+conflict graph), and \emph{snapshot isolation} (SI; each transaction
+reads from a consistent snapshot; concurrent writers on the same object
+are resolved by first-committer-wins;
+Appendix~\ref{sec:appendix-SI}).
+
+\subsection{Commitment Basis}
 \label{sec:scheduling-basis}
 
-Standard concurrency-control protocols all effectively order
-conflicting transactions: OCC
-via validation order, MVTO via timestamp assignment, 2PL via the time of first lock release
-or deadlock-driven abort.
-We capture this shared structure with an \emph{ordering commitment
-basis}:
+Whenever a protocol makes scheduling choices not entailed by the
+current state---buffering requests, selecting a deadlock victim, or
+choosing commit order---those choices are the commitments of interest.
+We model them with an \emph{ordering commitment basis}:
 
 \begin{definition}[Ordering commitments]
   \label{def:commit-commitment}
   The ordering basis is
   $\Phi = \{\varphi_{T_i \prec T_j} \mid T_i, T_j \text{ conflict}\}$,
   where $\varphi_{T_i \prec T_j}$ irrevocably records that $T_i$ is
-  serialized before $T_j$.
+  serialized before $T_j$ on a contested object.
+  (When $T_i$ and $T_j$ conflict on multiple objects, each object
+  contributes a separate commitment.)
   \label{def:ordering-commitment}%
 \end{definition}
-
-\noindent
-The transactional specification appeared in Example~\ref{ex:spec}:
-$O$ is the set of decision traces (commit/abort
-events, partially ordered by conflict edges), and $\Ord$ is
-sub-trace inclusion.
-Following Adya~\cite{adya1999weak}, each isolation level $L$
-constrains which labeled cycle patterns are admissible;
-$\Spec_L(H)$ admits extensions consistent with $L$'s constraint.
-We consider:
-\emph{read committed} (RC; no constraint),
-\emph{serializability} (SER; forbids all directed cycles regardless of
-edge labels), and \emph{snapshot isolation} (SI; permits rw-only
-cycles but enforces first-committer-wins on $\mathsf{ww}$ edges;
-Appendix~\ref{sec:appendix-SI}).
-
-\begin{example}[Running example: depth~$1$ under SER]
-  \label{ex:running-revisited}
-  Returning to Example~\ref{ex:example}: the conflict graph is
-  acyclic, so all ordering commitments commute and form a single layer.
-  Two equivalence classes of determinations arise:
-  $D_{\mathsf{in}} \triangleq
-    \varphi_{T_2 \prec T_Q} \cdot \varphi_{T_Q \prec T_3}$
-  (all orderings where $T_Q$ observes $T_2$'s insert)
-  and
-  $D_{\mathsf{out}} \triangleq
-    \varphi_{T_2 \prec T_3} \cdot \varphi_{T_3 \prec T_Q}$
-  (orderings where $d$ is absent).
-  The determination provenance is:
-  \[
-    P(b) = \mathcal{D} \times \{x_0\}, \qquad
-    P(d) = \{(D_{\mathsf{in}},\, x_2)\}.
-  \]
-  $b$ is robust ($\mathrm{qdepth} = 0$); $d$ is contingent
-  ($\mathrm{qdepth} = 1$).
-  Figure~\ref{fig:det-tables} summarizes the determination structure
-  across isolation levels.
-\end{example}
 
 \subsection{Determination Depth by Isolation Level}
 
@@ -1012,35 +980,30 @@ Appendix~\ref{sec:appendix-SI}).
 
   (b)~A fully reactive protocol processes each event deterministically
   given the current state.
-  Witness: textbook OCC (validate on commit request; abort iff cycle exists) or
-  textbook MVTO (assign timestamp on arrival; force abort on violation).
+  Witness: OCC (validate on commit request; abort iff cycle exists) or
+  MVTO (assign timestamp on arrival; force abort on violation).
   No system choice arises; depth~$0$.
 
   (c)~\emph{Upper bound}: each commitment resolves at least one
   transaction's fate; with $n$ transactions, at most $n$ sequential
   commitments suffice.
-  \emph{Lower bound}: a long-running transaction $T_\infty$ (reading
-  object $x$, writing object $y$) forms a two-edge rw-rw cycle with
-  each fresh arrival $T_i$ (which writes $x$ and reads $y$):
-  $T_\infty \xrightarrow{\mathsf{rw}} T_i$ and
-  $T_i \xrightarrow{\mathsf{rw}} T_\infty$.
-  Each round forces a binary decision: abort $T_\infty$ (resolving all
-  future conflicts) or abort $T_i$ (letting $T_\infty$ survive to the
-  next round).
+  \emph{Lower bound}: a transaction $T_\infty$ that participates in a
+  potential forbidden cycle at every round (e.g., by holding a
+  conflicting operation on a hot object indefinitely) forces a
+  binary decision each round---abort $T_\infty$ (resolving all future
+  conflicts) or abort its competitor (letting $T_\infty$ survive to
+  the next round).
   If the system keeps $T_\infty$ alive for $n{-}1$ rounds, each
   round's decision depends on the previous (had $T_\infty$ been
   aborted earlier, no further conflict would arise), giving
   depth~$n{-}1$.
   \emph{Per-batch}: within a sealed batch, the system makes a single
-  commitment: the choice of processing order $\pi$ (a total order on
-  pending transactions).
+  commitment: the choice of processing order $\pi$ for the batch
+  (a total order on pending requests).
   All consequences (conflict edges, aborts, commits) are entailed by
   $\pi$.
   Hence per-batch depth is~$2$: seal + order selection.
-  (Under 2PL the second layer is victim selection rather than order
-  selection, but the seal is still needed to prevent new cycles
-  from forming after resolution.  Details in
-  Appendix~\ref{app:protocols}.)
+  Full proof in Appendix~\ref{app:protocols}.
 \end{proof}
 
 \noindent
@@ -1049,42 +1012,36 @@ generable around a surviving transaction whose fate is discretionary
 (victim selection or deferred validation); this holds for SER and SI
 under the constructions in Appendix~\ref{app:protocols}.
 
-\begin{example}[Per-batch depth under OCC with batch validation]
+\begin{example}[Per-batch depth under 2PL deadlock detection]
   \label{ex:overlapping-cycles}
-  Three transactions $T_1, T_2, T_3$ execute concurrently and complete
-  their read/write phases.
-  The system seals the batch (layer~1): no further transactions will
-  join this validation round.
-  It then chooses a validation order $\pi$ (layer~2) --- say
-  $T_1 \prec T_2 \prec T_3$.
-  Under $\pi$, $T_2$'s write set is checked against $T_1$'s; if they
-  conflict, $T_2$ aborts (entailed by $\pi$, not a separate
-  commitment).
-  Choosing $T_2 \prec T_1 \prec T_3$ instead might let $T_2$ commit
-  and abort $T_1$.
-  The two layers do not commute: the seal determines which transactions
-  are in the batch; the order determines which survive validation.
+  Under 2PL, three transactions hold locks forming a wait-for cycle:
+  $T_1$ waits for $T_2$, $T_2$ waits for $T_3$, $T_3$ waits for $T_1$.
+  The system periodically runs deadlock detection.
+  Layer~1 (seal): the system runs detection now, observing the current
+  wait-for graph (had it waited longer, additional transactions might
+  have joined the cycle).
+  Layer~2 (victim selection): the system chooses a victim to abort---say
+  $T_1$---breaking the cycle and allowing $T_2$ and $T_3$ to proceed.
+  Choosing $T_2$ or $T_3$ instead yields a different determination with
+  different surviving transactions.
+  The two layers do not commute: the seal determines which cycle the
+  system sees; the victim choice determines how it is resolved.
 \end{example}
 
 \subsection{Per-Tuple Isolation Sensitivity}
 
-Vandevoort et al.~\cite{vandevoort2025mixed} certify individual
-transactions as isolation-insensitive --- a per-transaction result,
-like our commitment basis.
-Provenance queries over the resulting database enable a richer cut:
-both finer grain (a query selecting a single tuple) and
-cross-transaction questions (a join combining outputs of multiple
-transactions).
-The filtration's compositionality
-(Corollary~\ref{cor:propagation-filtration}) guarantees that
-insensitivity propagates through any such query.
+The filtration's key contribution to isolation-level analysis is
+\emph{compositionality}: isolation-insensitivity of base tuples
+propagates through queries.
 
-\begin{proposition}[Isolation-sensitive transactions]
+\begin{proposition}[Isolation-sensitive tuples]
   \label{prop:ser-si-incomparable}
-  In the Adya conflict-graph model, a transaction $T_i$ is
-  \emph{isolation-sensitive} ($\mathrm{qdepth}_{\mathrm{SER}}$ and
-  $\mathrm{qdepth}_{\mathrm{SI}}$ differ for its output tuples) iff
-  $T_i$ participates in one of two patterns:
+  Fix a conflict graph $G$ and a tuple $t$ derived directly from
+  transaction $T_i$'s writes.
+  In the Adya conflict-graph model, $t$ has
+  $\mathrm{qdepth}_{\mathrm{SER}}(t) \neq
+  \mathrm{qdepth}_{\mathrm{SI}}(t)$ iff $T_i$ participates in one of
+  two patterns:
   \begin{enumerate}[nosep,label=(\alph*)]
     \item \emph{Write skew} ($\mathrm{qdepth}_{\mathrm{SER}} >
           \mathrm{qdepth}_{\mathrm{SI}}$):
@@ -1097,8 +1054,8 @@ insensitivity propagates through any such query.
           SER commits both (ordering them; $t$ is robust); SI aborts
           one via FCW (making $t$ contingent).
   \end{enumerate}
-  Transactions not matching either pattern are
-  \emph{isolation-insensitive}: same qdepth under both levels.
+  Tuples not matching either pattern are \emph{isolation-insensitive}:
+  same qdepth under both levels.
 \end{proposition}
 \begin{proof}
   (a)~$T_A$ reads $x$, writes $y$; $T_B$ reads $y$, writes $x$
@@ -1120,32 +1077,76 @@ insensitivity propagates through any such query.
   constraints on $T_i$'s fate.
 \end{proof}
 
-\begin{corollary}[Compositional isolation insensitivity]
+\begin{corollary}[Compositional isolation migration]
   \label{cor:isolation-migration}
-  If every transaction contributing to a provenance query $Q$ is
-  isolation-insensitive, then every output tuple of $Q$ is also
-  isolation-insensitive: same qdepth under SER and SI.
+  Isolation sensitivity is not preserved by union: there exist
+  positive relational queries $Q_1, Q_2$ that are each
+  isolation-sensitive, yet whose union $Q = Q_1 \cup Q_2$ is
+  isolation-insensitive
+  ($\mathrm{qdepth}_{\mathrm{SER}}(Q) = \mathrm{qdepth}_{\mathrm{SI}}(Q) = 0$).
+  This occurs whenever the queries have complementary supports
+  ($\mathrm{supp}(Q_1) \cup \mathrm{supp}(Q_2) = \mathcal{D}$) under
+  both isolation levels.
 \end{corollary}
 \begin{proof}
-  Immediate from Corollary~\ref{cor:propagation-filtration}: positive
-  RA cannot increase qdepth beyond its inputs.
+  Union merges supports:
+  $\mathrm{supp}(Q) = \mathrm{supp}(Q_1) \cup \mathrm{supp}(Q_2) = \mathcal{D}$.
+  Full support implies $\mathrm{qdepth}(Q) = 0$ under both levels.
+  Example~\ref{ex:complement-union} witnesses the existential.
 \end{proof}
 
-\begin{example}[Compositional insensitivity]
+\begin{example}[Complementary isolation-sensitive queries]
   \label{ex:complement-union}
-  Transactions $T_1, T_2, T_3$ each insert into relations
-  $R_1, R_2, R_3$.
-  None participates in a write-skew or FCW pattern, so each is
-  isolation-insensitive.
-  A provenance query $Q = R_1 \bowtie R_2 \bowtie R_3$ joins their
-  outputs.
-  The corollary guarantees that every tuple in $Q$'s result is also
-  insensitive---without analyzing $Q$'s interaction with the conflict
-  graph.
-  This is the compositional extension of Vandevoort et
-  al.'s~\cite{vandevoort2025mixed} per-transaction certification:
-  the filtration certifies \emph{query results}, not just transactions.
+  Consider two transactions $T_A$ and $T_B$ exhibiting write skew:
+  $T_A$ reads $x$, writes $y$; $T_B$ reads $y$, writes $x$.
+  Under SI both commit (no write-write conflict); under SER the rw-rw
+  cycle forces exactly one to abort.
+  Let $Q_1(z) \drule R_A(z)$ return tuples written by $T_A$, and
+  $Q_2(z) \drule R_B(z)$ return tuples written by $T_B$.
+  Both are isolation-sensitive:
+  under SER, each query's result is contingent
+  ($\mathrm{qdepth}_{\mathrm{SER}} > 0$), while under SI both are
+  robust ($\mathrm{qdepth}_{\mathrm{SI}} = 0$).
+
+  Now consider the union $Q = Q_1 \cup Q_2$.
+  Under SER, the determinations partition into two classes:
+  $D_A$ (abort $T_A$, commit $T_B$) and $D_B$ (abort $T_B$, commit
+  $T_A$).
+  $Q_1$ has support $\{D_B\}$ and $Q_2$ has support $\{D_A\}$---these
+  are complements:
+  $\mathrm{supp}(Q_1) \cup \mathrm{supp}(Q_2) = \mathcal{D}$.
+  Under SI both have full support (both commit).
+  In either case the union has full support, so
+  $\mathrm{qdepth}_{\mathrm{SER}}(Q) = \mathrm{qdepth}_{\mathrm{SI}}(Q) = 0$:
+  the union is isolation-insensitive despite each component being
+  isolation-sensitive.
+  The complementary structure of the supports cancels the sensitivity.
+  Vandevoort et al.~\cite{vandevoort2025mixed} can certify individual
+  transactions as portable; the filtration additionally certifies
+  \emph{query results} compositionally, even when the components are
+  not individually portable.
 \end{example}
+
+\subsection{Running Example Revisited}
+
+Returning to Example~\ref{ex:example}: using ordering commitments
+(Section~\ref{sec:scheduling-basis}), two equivalence classes of
+determinations arise (quotienting by query-outcome equivalence):
+$D_{\mathsf{in}} \triangleq
+  \varphi_{T_2 \prec T_Q} \cdot \varphi_{T_Q \prec T_3}$
+(all orderings where $T_Q$ observes $T_2$'s insert)
+and
+$D_{\mathsf{out}} \triangleq
+  \varphi_{T_2 \prec T_3} \cdot \varphi_{T_3 \prec T_Q}$
+(orderings where $d$ is absent).
+The determination provenance is:
+\[
+  P(b) = \mathcal{D} \times \{x_0\}, \qquad
+  P(d) = \{(D_{\mathsf{in}},\, x_2)\}.
+\]
+$b$ is robust; $d$ is contingent.
+Figure~\ref{fig:det-tables} summarizes the determination structure across
+isolation levels.
 
 
 \begin{figure*}[t]
@@ -1205,7 +1206,7 @@ insensitivity propagates through any such query.
 \label{sec:negation-preview}
 % ================================================================
 
-In $\mbox{Datalog}^\neg$, the non-monotone operation is
+In Datalog with negation, the non-monotone operation is
 \emph{negation}: concluding $\neg p$ requires establishing that
 $p$ has no (further) derivation---a completeness guarantee
 that classical approaches handle via monus~\cite{dannert2021semiring}.
@@ -1213,11 +1214,12 @@ Determination provenance decomposes this into a \emph{commitment}
 (declaring a set of derivations complete, thereby licensing negation)
 followed by monotone evaluation (the entailment that propagates
 consequences of that commitment).
-The payoff is twofold: determination provenance explains \emph{why-not}
-under ambiguity (an atom can be absent because of a semantic
-commitment, not a blocked derivation), and the filtration's
-compositionality lets one check preservation across semantics
-algebraically.
+The filtration recovers, for the representative class below, the
+classical negation semantics---stratified, well-founded, and
+stable---as readings of a single determination at different depths;
+and determination provenance explains why-not under ambiguity: an atom
+can be absent because of a semantic commitment, not a blocked
+derivation.
 (Full details in Appendix~\ref{sec:appendix-datalog}.)
 
 \paragraph{Setup.}
@@ -1237,29 +1239,29 @@ $\{\mathbf{t}, \mathbf{f}, \mathbf{u}, \bot\}$
 ($\bot$ = not yet evaluated, $\mathbf{u}$ = genuinely ambiguous),
 ordered $\bot \Ord \mathbf{u} \Ord \mathbf{t}$ and
 $\bot \Ord \mathbf{u} \Ord \mathbf{f}$
-(with $\mathbf{t}$ and $\mathbf{f}$ incomparable); outcomes are total
-assignments over the Herbrand base (unevaluated atoms receive $\bot$),
-and $o_1 \Ord o_2$ iff $o_1(a) \Ord o_2(a)$ for every atom $a$.
-The commitment basis has one \emph{sealing predicate}
-$\varphi_{\seal}(p)$ (fixing $p$'s derivation, which
-licenses $\neg p$ in $q$'s rule) and two \emph{choice predicates}
-$\varphi_{a=v}$ (fixing a $\neg$-cycle atom to
+(with $\mathbf{t}$ and $\mathbf{f}$ incomparable), applied
+pointwise.
+The commitment basis has \emph{sealing predicates}
+$\varphi_{\seal}(S_i)$ (stratum $S_i$ is complete) and \emph{choice
+predicates} $\varphi_{a=v}$ ($\neg$-cycle atom $a$ is fixed to
 $v \in \{\mathbf{t}, \mathbf{f}\}$).
-The specification $\Spec$ admits all assignments consistent with the
+The specification $\Spec_P$ admits all assignments consistent with the
 program rules and EDB~\cite{gelfond1988stable}.
 After all commitments are discharged, two resolved outcomes remain:
 $o_r = \{a(c), p(c), r(c)\}$ and $o_s = \{a(c), p(c), s(c)\}$.
 
 The resolving determinations are $\mathcal{D} = \{D^{(r)}, D^{(s)}\}$:
 \[
-  D^{(r)} = \varphi_{\seal}(p) \seq
+  D^{(r)} = \varphi_{\seal}(S_1) \seq
     \varphi_{r(c)=\mathbf{t}} \cdot \varphi_{s(c)=\mathbf{f}},
   \qquad
-  D^{(s)} = \varphi_{\seal}(p) \seq
+  D^{(s)} = \varphi_{\seal}(S_1) \seq
     \varphi_{s(c)=\mathbf{t}} \cdot \varphi_{r(c)=\mathbf{f}},
 \]
-sharing the sealing layer (layer~1, one seal) and branching
-at the choice layer (layer~2).
+sharing the sealing layer (layer~1) and branching at the choice layer
+(layer~2).
+The seals for $\{a, p\}$ and $\{r, s\}$ commute (neither depends on
+the other's completion), so they form a single layer.
 The filtration index counts discharged layers:
 $\mathcal{F}_0$ is the state before any commitment;
 $\mathcal{F}_1$ reflects the sealing layer
@@ -1268,9 +1270,7 @@ $\mathcal{F}_2$ reflects the choice layer where the determinations
 diverge.
 Concretely:
 $\mathcal{F}_0 = \mathcal{F}_1 = \{\emptyset, \mathcal{D}\}$
-(all determinations agree through layer~1)
-and $\mathcal{F}_2 = 2^{\mathcal{D}}$ (once the choice layer is
-discharged, all determinations are distinguished so all subsets are possible).
+and $\mathcal{F}_2 = 2^{\mathcal{D}}$.
 
 \[
   \begin{array}{r@{\;=\;}l@{\qquad}r@{\;=\;}l}
@@ -1292,9 +1292,7 @@ values are not determined without discharging the choice layer.
 
 \begin{theorem}[Negation semantics as filtration levels]
   \label{thm:negation-filtration}
-  For a finite $\mbox{Datalog}^\neg$ program whose negative SCCs admit
-  a layered choice basis sound and complete for stable models
-  (Appendix~\ref{app:datalog-general}), with $k$ stratification
+  For a finite $\mbox{Datalog}^\neg$ program having $k$ stratification
   layers and $d$ negative SCCs in the longest dependency chain, the
   determination semiring has depth $k{+}d$.
   The classical negation semantics correspond to filtration levels:
@@ -1321,18 +1319,13 @@ values are not determined without discharging the choice layer.
 \end{proof}
 
 \noindent
-As in Section~\ref{sec:transactions}, the theorem's provenance payoff
-is compositionality: because supports at each filtration level compose
-through positive relational algebra
+Beyond offering a unified account of divergent semantics for negation,
+the theorem's provenance payoff is compositionality: because supports at each
+filtration level compose through positive relational algebra
 (Corollary~\ref{cor:propagation-filtration}), one can check whether a
 query result is preserved across semantics (e.g., stable $\to$
 well-founded) by inspecting supports algebraically, without re-running
 evaluation under each semantics separately.
-Note the structural contrast with transactions: negation semantics
-form a chain within the filtration (each is a deeper reading of the
-same structure), while isolation levels are incomparable resolving
-subsets of a shared filtration
-(Observation~\ref{obs:basis-entails-filtration}).
 
 % This is correct: sealed absence → 1_K, sealed presence → 0_K matches
 % monus (1_K ∸ v) for any naturally ordered K. Downstream derivability
@@ -1355,10 +1348,6 @@ $\neg b$ whose atom is sealed-absent contributes $1_K$ to
 downstream derivations (the negation succeeds).
 Within each determination, derivational provenance uses ordinary
 positive $K$-evaluation.
-For unstratified programs (multiple stable models), monus is undefined
---- there is no unique model to subtract against --- while
-determination provenance remains well-defined: each stable model is a
-determination, and supports track which models produce each atom.
 
 \begin{proof}
   See Appendix~\ref{sec:appendix-datalog}.
@@ -1366,6 +1355,7 @@ determination, and supports track which models produce each atom.
 
 % ================================================================
 \section{Consequences of the Filtration}
+\label{sec:bypass}
 \label{sec:discussion}
 % ================================================================
 
@@ -1376,99 +1366,90 @@ The preceding sections showed that isolation levels
 (Section~\ref{sec:transactions}) and negation semantics
 (Section~\ref{sec:negation-preview}) are both instances of this
 principle.
-We now develop two consequences: quantitative specification
-comparison and a connection to PDB query complexity.
+We now develop three consequences: layer bypass, quantitative
+specification comparison, and a connection to PDB query complexity.
 
-\subsection{Quantitative Measures}
+\subsection{Layer Bypass}
 
 The filtration assigns each tuple a depth relative to a provenance
 query $Q$ (Definition~\ref{def:det-provenance}).
 A tuple with $\mathrm{qdepth}(t) = j$ is settled once layers
-$1, \ldots, j$ are discharged --- layers $j{+}1, \ldots, d$ were
-irrelevant to it.
+$1, \ldots, j$ are discharged.
+This gives rise to \emph{layer bypass}: any provenance query whose
+outputs all have depth $< k$ can skip layer~$k$'s coordination.
 
-\begin{proposition}[Compositional depth bound]
-  \label{prop:depth-bound}
+\begin{proposition}[Bypass criterion]
+  \label{prop:bypass}
   If every input tuple of a positive relational provenance query $Q$
   has $\mathrm{qdepth} < k$, then every output tuple does too
-  (Corollary~\ref{cor:propagation-filtration}): layers $k, \ldots, d$
-  did not affect $Q$'s results.
+  (Corollary~\ref{cor:propagation-filtration}), and $Q$'s evaluation
+  can bypass layers $k, \ldots, d$.
 \end{proposition}
 
 \noindent
-Certifying this is coNP-complete in the residual width
-$W_{\geq k}$ (by reduction from robustness,
-Theorem~\ref{thm:robustness-conp}), but both instantiations admit
-polynomial sufficient checks:
+Bypass certification is coNP-complete in the residual width
+$W_{\geq k}$ --- a workload-complexity measure (the query is fixed;
+the number of commitments scales with the history) --- by reduction
+from robustness (Theorem~\ref{thm:robustness-conp}).
+Both instantiations admit polynomial sufficient checks:
 in transactions, absence from $L$-forbidden
-cycles~\cite{adya1999weak}; in $\mbox{Datalog}^\neg$,
+cycles~\cite{thomson2012calvin}; in $\mbox{Datalog}^\neg$,
 absence of transitive dependency on any negative
 SCC~\cite{gebser2012asp}.
+The filtration's contribution is compositional soundness: a bypass
+check on input tuples propagates to all outputs without per-query
+re-verification
+(Corollary~\ref{cor:propagation-filtration}).
 
-Because different specifications over the same commitment basis share
-a filtration (Observation~\ref{obs:basis-entails-filtration}), we can
-compare per-tuple qdepth across specifications.
+
+\subsection{Quantitative Relaxation Assessment}
+
+The shared filtration enables a per-tuple cost/benefit analysis of
+specification changes.
 Given a workload executed under specification $I$ (e.g., SER) and a
-candidate alternative $I'$ (e.g., SI), the difference decomposes into
-two components:
+candidate alternative $I'$ (e.g., SI), the per-tuple qdepth under
+both is measured in the same filtration
+(Observation~\ref{obs:basis-entails-filtration}).
+The difference decomposes into two components:
 
 \paragraph{Work regret.}
 Tuples that are robust under both $I$ and $I'$ but have
-$\mathrm{qdepth}_I(t) > \mathrm{qdepth}_{I'}(t)$ exhibit wasted
-coordination: the extra depth under $I$ did not change the outcome.
-For transactions this is bidirectional
-(Proposition~\ref{prop:ser-si-incomparable}).
+$\mathrm{qdepth}_I(t) > \mathrm{qdepth}_{I'}(t)$: the extra
+coordination under $I$ did not change the outcome.
+For transactions, this can be bidirectional: some tuples have deeper
+qdepth under SER (cycle-breaking that SI skips), others have deeper
+qdepth under SI (FCW aborts that SER avoids).
 
 \paragraph{Semantic shift.}
-Tuples whose support differs between $I$ and $I'$ --- robust under
-one, contingent under the other --- represent a genuine change in
-meaning, not wasted work.
-For transactions, write-skew and FCW patterns
-(Proposition~\ref{prop:ser-si-incomparable}) witness the shift in
-each direction; for $\mbox{Datalog}^\neg$, shifting from stable-model
-to well-founded semantics converts choice-layer atoms to $\mathbf{u}$.
+Tuples whose support differs between $I$ and $I'$: robust under one,
+contingent under the other.
+For transactions
+(Proposition~\ref{prop:ser-si-incomparable}): moving from SER to SI
+makes write-skew tuples robust (the rw-rw cycle is no longer
+forbidden), but makes FCW tuples contingent (under SI, concurrent
+writers to the same object cannot both commit because each has
+already read a snapshot that excludes the other's write; SER does
+not employ snapshots, so the constraint does not apply and the
+writes are simply ordered).
+For $\mbox{Datalog}^\neg$, shifting from stable-model to well-founded
+semantics converts choice-layer atoms from resolved
+($\mathbf{t}$/$\mathbf{f}$) to $\mathbf{u}$ --- a semantic shift
+with zero work regret (WFS is strictly cheaper).
 
 \noindent
-Section~\ref{sec:transactions} classified provenance queries as
-isolation-sensitive or not; this decomposition goes further by
-measuring \emph{how much} coordination each tuple costs (depth
-difference) and \emph{which} tuples change semantics (support
-difference).
-
-\subsection{Commitment Responsibility}
-
-Work regret identifies wasted layers; \emph{determination
-responsibility} identifies the individual commitment most responsible
-for a tuple's contingency.
-We adapt the Shapley value from cooperative game
-theory~\cite{livshits2021shapley}: each commitment in the
-determination is a player, and the game measures how much each
-commitment contributes to a tuple's contingency.
-The Shapley value of commitment $\varphi$ for tuple $t$ is
-$\varphi$'s average marginal contribution over all removal orderings
-(formal definition in Appendix~\ref{app:responsibility-details}).
-
-In Example~\ref{ex:running-revisited}, responsibility is concentrated
-on the ordering commitments that determine whether $T_Q$ observes
-$T_2$'s insert before an effective delete.
-In deeper filtrations (e.g., the $T_\infty$ construction),
-responsibility distributes across layers: each round's victim decision
-contributes a fraction of the total contingency, and the Shapley value
-quantifies how much.
-
-This lifts the classical tuple-level responsibility of Meliou et
-al.~\cite{meliou2010causality} from data tuples to semantic
-commitments: where they ask ``which input tuple is most responsible
-for an output,'' we ask ``which commitment is most responsible for the
-output holding under this resolution.''
-Full development, including hardness, approximation results, and a
-worked multi-layer example (Example~\ref{ex:multi-layer-resp}), appears
-in Appendix~\ref{app:responsibility-details}.
+This decomposition is finer-grained than the binary ``portable or
+not'' classification of Vandevoort et
+al.~\cite{vandevoort2025mixed}: it measures \emph{how much}
+coordination each tuple costs (depth difference) and \emph{which}
+tuples change semantics (support difference), enabling per-tuple
+cost/benefit analysis of isolation-level migration.
+The determination responsibility measure
+(Appendix~\ref{app:responsibility-details}) complements this by
+attributing each tuple's contingency to specific commitments via
+Shapley values --- identifying not just the depth of the coordination
+cost but the individual commitment most responsible for it.
 
 \subsection{Provenance Query Complexity}
-
-The filtration also connects determination provenance to the
-well-studied complexity landscape of probabilistic databases.
 
 \begin{proposition}[Depth-$1$ = tuple-independent PDB]
   \label{prop:layered-pdb}
@@ -1482,12 +1463,12 @@ well-studied complexity landscape of probabilistic databases.
 At higher depths, the filtration structures the correlations: within
 each layer, commitments commute (giving PDB-style lineage), while
 cross-layer dependencies introduce conditioning.
-Determination provenance thus sits between tuple-independent PDBs
-(depth~$1$) and general correlated PDBs (intractable): each layer
-admits the PDB complexity toolkit, and depth measures how many layers
-must be composed.
-Appendix~\ref{app:depth-reduction} develops transformations for
-reducing depth.
+Determination provenance thus occupies a position between
+tuple-independent PDBs (depth~$1$) and general correlated PDBs
+(intractable): each layer individually admits the PDB complexity
+toolkit, and depth measures how many layers must be composed.
+Appendix~\ref{app:depth-reduction} develops design transformations
+for reducing depth.
 
 % ================================================================
 \section{Related Work}
@@ -1498,33 +1479,50 @@ reducing depth.
 Semiring provenance~\cite{green2007provenance} and its extensions to
 probabilistic~\cite{suciu2011probabilistic},
 factorized~\cite{olteanu2015factorized}, and
-aggregate~\cite{senellart2018provenance} settings all assume a
-fixed, resolved semantics (depth~$0$ in our framework).
+aggregate~\cite{senellart2018provenance} settings all operate at
+depth~$0$: a fixed, resolved semantics.
 Why-not provenance~\cite{buneman2001why}, causal
 responsibility~\cite{meliou2010causality}, and counterfactual
 explanations~\cite{halpern2001causes} likewise condition on a single
 outcome.
 Determination provenance generalizes these by making the
 commitments that precede derivational provenance explicit and composable.
-Determination responsibility (Section~\ref{sec:discussion}) lifts
-Shapley-value attribution~\cite{meliou2010causality,livshits2021shapley}
-from data tuples to semantic commitments; the two games are sequential,
-not competing: determination
+Determination responsibility
+(Appendix~\ref{app:responsibility-details}) lifts
+responsibility from data tuples~\cite{meliou2010causality} to semantic
+commitments: where Meliou et al.\ ask ``which input tuple is most
+responsible for an output,'' we ask ``which semantic commitment is most
+responsible for the output holding under this resolution.''
+Livshits et al.~\cite{livshits2021shapley} compute Shapley values for
+data tuples in query answers under a fixed semantics.
+The two games are sequential, not competing: determination
 responsibility attributes the resolution; tuple-level responsibility
 attributes the derivation under that resolution.
 
 \smallskip
 \noindent\textbf{Possible-worlds and probabilistic provenance.}
 Probabilistic databases~\cite{suciu2011probabilistic} represent
-uncertainty via independent tuple-existence events; lineage is a
-Boolean formula over these events.
-A tuple-independent PDB is the depth-$1$ special case of our framework
-(Proposition~\ref{prop:collapse-depth-1}): all commitments commute in
-a single layer.
-The filtration generalizes this to layered, non-commuting commitments;
-PDB tractability dichotomies~\cite{suciu2011probabilistic} concern
-formula complexity within a single layer---an orthogonal axis that
-applies equally within each layer of a determination.
+uncertainty via possible worlds generated by independent
+tuple-existence events; provenance is a Boolean lineage formula over
+these events, and query evaluation preserves the formula structure.
+Determination provenance shares the support-set algebra---the
+determination semiring $(2^{\mathcal{D}}, \cup, \cap)$ is the same
+Boolean algebra that PDB lineage operates over---but the worlds
+themselves carry additional structure.
+In a PDB, all generating events are independent and commute (a single
+layer); the determination semiring generalizes this to layered,
+partially non-commuting commitments whose sequential dependencies
+induce the filtration.
+A tuple-independent PDB is the depth-$1$ special case
+(Proposition~\ref{prop:collapse-depth-1}): the filtration collapses to
+$\mathrm{PosBool}(\Phi)$ and query-relative depth is uniformly~$1$.
+The filtration, query-relative depth, and layer bypass have
+no PDB analog because PDB events lack the layered dependency structure
+that these concepts measure.
+Conversely, PDB tractability results (dichotomies for hierarchical
+queries~\cite{suciu2011probabilistic}) concern the formula complexity
+of lineage within a single layer---an orthogonal axis that applies
+equally within each layer of a determination.
 
 \smallskip
 \noindent\textbf{Provenance beyond the monotone fragment.}
@@ -1570,33 +1568,26 @@ ambiguity explicit and composable.
 Supports over resolving determinations form a filtered semiring;
 the filtration measures query-relative depth, is respected by positive
 relational algebra, and recovers classical provenance at depth~$0$.
-Transactions and $\mbox{Datalog}^\neg$ instantiate the framework;
-in both, classical semantic variants (isolation levels; negation
-semantics) correspond to different views of a shared filtration.
-The filtration enables quantitative diagnosis --- work regret,
-semantic shift, and per-commitment responsibility --- that goes beyond
-binary robustness to explain \emph{how much} and \emph{why} a tuple
-depends on each layer of resolution.
+Transactions and Datalog with negation instantiate the framework;
+for transactions, the filtration yields a per-tuple separation of
+isolation levels (SER and SI are incomparable in query-relative depth);
+for Datalog, the classical negation semantics correspond to
+filtration levels, and monus is eliminated by sealing.
 
-Determination provenance extends the tradition of algebraic data
-provenance~\cite{green2007provenance} to transactional databases and
-distributed systems --- settings where semantic ambiguity is the norm
-and where provenance could pay off in full.
-Appendix~\ref{app:systems-lineage} sketches a concrete systems
-agenda.
-The remaining appendices develop the framework further:
-robustness and responsibility proofs
-(Appendices~\ref{app:robustness-proofs}--\ref{app:responsibility-details}),
-full algebraic details and worked examples for transactions and
-$\mbox{Datalog}^\neg$
-(Appendices~\ref{app:algebra}--\ref{sec:appendix-datalog}),
-protocol-specific determination structures
-(Appendix~\ref{app:protocols}),
-heredity canonicalization
-(Appendix~\ref{app:persistence-canonicalization}),
-and open theory directions including universality, factorized support
-representations, and applications to incremental maintenance
-(Appendix~\ref{app:open-questions}).
+A long-standing promise of declarative approaches to systems---from
+relational transducers~\cite{abiteboul2011webdamlog} to
+CALM~\cite{hellerstein2010declarative,ameloot2013relational}---is that
+query-centric abstractions bring database theory to bear on distributed
+and transactional systems.
+Determination provenance is another step forward: the same
+algebraic machinery that explains query answers over a single instance
+now explains the semantic commitments that concurrent systems make.
+Appendix~\ref{app:systems-lineage} sketches a concrete systems agenda.
+Open theory directions (Appendix~\ref{app:open-questions}) include
+universality (a ``most general'' determination semiring analogous to
+$\mathbb{N}[X]$), factorized support representations exploiting the
+trie structure of $\mathcal{D}$, and applications of the filtration to
+incremental maintenance.
 
 \pagebreak
 \appendix
@@ -1622,7 +1613,7 @@ is $\psi$ true under every truth assignment?
 This problem is coNP-complete.
 
 \paragraph{Construction.}
-Using the ordering basis (Section~\ref{sec:scheduling-basis}) with all
+Using the enriched basis (Section~\ref{sec:scheduling-basis}) with all
 transactions committing:
 for each variable $x_i$, create two transactions $T_i^+$ and $T_i^-$,
 each writing to a distinct object $o_i$.
@@ -1688,15 +1679,53 @@ Condition~(i): a determination is a sequence of sealing and choice
 commitments, one per stratum plus one per $\neg$-cycle atom
 (polynomial-size).
 Condition~(ii): checking that a determination produces a valid stable
-model requires computing the Gelfond--Lifschitz
-reduct~\cite{gelfond1988stable} and verifying that the proposed model
-is its minimal model (polynomial time).
+model requires computing the Gelfond--Lifschitz reduct and verifying
+that the proposed model is its minimal model (polynomial time).
 Condition~(iii): evaluating a $\mbox{Datalog}^\neg$ query over a fixed model is in
 polynomial time.
 
 % ================================================================
-\section{Responsibility: Additional Results}
+\section{Multi-Layer Responsibility: Worked Example}
 \label{app:multi-layer-resp}
+% ================================================================
+
+We illustrate multi-layer responsibility using
+Example~\ref{ex:overlapping-cycles}: five transactions with two conflict
+cycles sharing $T_3$ ($T_1 \to T_2 \to T_3 \to T_1$ and
+$T_3 \to T_4 \to T_5 \to T_3$).
+The determination has depth~$2$.
+
+\paragraph{Layer 1.}
+The first layer resolves Cycle~1.
+Two commitments are available: $\varphi_{\mathsf{a}}(T_1)$ (abort $T_1$)
+and $\varphi_{\mathsf{a}}(T_3)$ (abort $T_3$).
+These do not commute: aborting $T_3$ also breaks Cycle~2, while aborting
+$T_1$ leaves Cycle~2 intact.
+The layer-1 game has two players with a single binary choice each.
+
+\paragraph{Layer 2 (conditioned on layer 1).}
+If layer~1 chose $\varphi_{\mathsf{a}}(T_3)$: both cycles are broken,
+no further commitments are needed, and layer-2 responsibility is zero
+for all commitments.
+If layer~1 chose $\varphi_{\mathsf{a}}(T_1)$: Cycle~2 remains, and
+layer~2 must resolve it (abort $T_4$ or $T_5$).
+The layer-2 game, conditioned on $\varphi_{\mathsf{a}}(T_1)$, has one
+binary commitment with responsibility equal to its marginal effect on
+the tuple of interest.
+
+\paragraph{Interpretation.}
+The layer-1 commitment $\varphi_{\mathsf{a}}(T_3)$ has higher
+responsibility than $\varphi_{\mathsf{a}}(T_1)$ for any tuple affected
+by both cycles: choosing $T_3$ resolves everything in one step, while
+choosing $T_1$ defers responsibility to layer~2.
+The filtration makes this visible: a tuple with
+$\mathrm{qdepth} = 1$ (affected only by Cycle~1) has zero layer-2
+responsibility regardless of the layer-1 choice; a tuple with
+$\mathrm{qdepth} = 2$ (affected by both cycles) has layer-2
+responsibility that depends on the layer-1 outcome.
+
+% ================================================================
+\section{Responsibility: Additional Results}
 \label{app:responsibility-details}
 \label{sec:responsibility}
 % ================================================================
@@ -1705,19 +1734,11 @@ This appendix develops determination responsibility: a Shapley-value
 measure of each commitment's contribution to a contingent tuple.
 
 Fix $n$ independent binary commitments
-$\varphi_1, \ldots, \varphi_n$, a realized determination $D^*$
-(the resolution that actually occurred), and a
+$\varphi_1, \ldots, \varphi_n$, a realized determination $D^*$, and a
 tuple $t$ with support $S \subseteq \mathcal{D}$.
-The \emph{presence game} is the cooperative game $(N, v)$ with player
-set $N = \{1,\ldots,n\}$: for a coalition $C \subseteq N$,
-\[
-v(C) \;\triangleq\;
-\frac{|\{D \in S \mid D \text{ agrees with } D^* \text{ on every }
-\varphi_i,\; i \in C\}|}{2^{n-|C|}}.
-\]
-Intuitively, $v(C)$ is the probability that $t$ holds when the
-outcomes of the commitments in $C$ have been revealed (matching $D^*$)
-and the remaining commitments are still unknown (uniformly random).
+The \emph{presence game} is the cooperative game $(N, v)$ where
+$v(C) \triangleq
+|\{D \in S \mid D \text{ agrees with } D^* \text{ on } C\}| / 2^{n-|C|}$.
 The \emph{determination responsibility} of $\varphi_i$ is its Shapley
 value in this game.
 
@@ -1725,16 +1746,6 @@ value in this game.
   Computing determination responsibility is $\mathrm{\#P}$-hard, even
   for single-layer determinations with support given as DNF.
 \end{theorem}
-\begin{proof}[Proof sketch]
-  We follow the approach of~\cite{livshits2021shapley}.
-  Reduction from counting satisfying assignments of a monotone DNF.
-  Given a DNF $\phi$ over variables $x_1,\ldots,x_n$, construct a
-  determination with one binary commitment per variable and support
-  $S = \mathrm{sat}(\phi)$.
-  Then $v(\{i\}) - v(\emptyset)$ requires computing
-  $|\mathrm{sat}(\phi|_{x_i = D^*_i})|$, which is $\mathrm{\#P}$-hard
-  for monotone DNF~\cite{livshits2021shapley}.
-\end{proof}
 
 \begin{theorem}[Tractability at bounded support treewidth]
   \label{thm:responsibility-tw}
@@ -1742,16 +1753,6 @@ value in this game.
   primal-graph treewidth $w$, determination responsibility is computable
   in time $O(2^w \cdot n^2 \cdot p(n))$---FPT in $w$.
 \end{theorem}
-\begin{proof}[Proof sketch]
-  We follow the approach of~\cite{livshits2021shapley}.
-  Computing $v(C)$ reduces to weighted model counting on the support
-  formula with variables in $C$ fixed.
-  On bounded-treewidth formulas, weighted model counting runs in
-  $O(2^w \cdot p(n))$ via dynamic programming on a tree
-  decomposition~\cite{livshits2021shapley}.
-  The Shapley value requires $O(n^2)$ such evaluations (one per
-  coalition size and player), giving the stated bound.
-\end{proof}
 
 \subsection{Additive Approximation}
 
@@ -1766,15 +1767,13 @@ additive approximation.
   $O(n/\varepsilon^2 \cdot \log(1/\delta) \cdot p(n))$.
 \end{proposition}
 \begin{proof}
-  We use the sampling approach of~\cite{livshits2021shapley}.
   Each sample is a (permutation, random-completion) pair: draw a random
   permutation $\pi$, let $C$ be the players preceding $i$, fix $C$ to
   $D^*$-values, sample a uniform completion of the remaining variables,
   and evaluate the query with $\varphi_i$ set to each of its two values.
   The difference ($\pm 1$ or $0$) is an unbiased estimate of
   $\rho(\varphi_i, t)$ (by the permutation characterization of Shapley
-  values~\cite{shapley1953value}, with the inner expectation over
-  completions giving $v(C)$).
+  values, with the inner expectation over completions giving $v(C)$).
   Each sample is bounded in $[-1,1]$; Hoeffding's inequality over
   $O(n/\varepsilon^2 \cdot \log(1/\delta))$ samples gives the bound.
 \end{proof}
@@ -1794,17 +1793,9 @@ additive approximation.
   \end{enumerate}
 \end{proposition}
 \begin{proof}
-  (a)~A joined tuple $t_1 \bowtie t_2$ holds only in determinations
-  where \emph{both} $t_1$ and $t_2$ hold, so
-  $\mathrm{supp}(t_1 \bowtie t_2) = S_1 \cap S_2$.
-  Since $|S_1 \cap S_2| \le \min(|S_1|, |S_2|)$, the support shrinks
-  and the budget grows:
-  $B(t_1 \bowtie t_2) = 1 - |S_1 \cap S_2|/2^n \ge \max(B(t_1), B(t_2))$.
-  (b)~A union tuple $t_1 \cup t_2$ holds whenever \emph{either} holds,
-  so $\mathrm{supp}(t_1 \cup t_2) = S_1 \cup S_2$.
-  Since $|S_1 \cup S_2| \ge \max(|S_1|, |S_2|)$, the support grows
-  and the budget shrinks:
-  $B(t_1 \cup t_2) = 1 - |S_1 \cup S_2|/2^n \le \min(B(t_1), B(t_2))$.
+  (a)~$|\mathrm{supp}(t_1 \bowtie t_2)| = |S_1 \cap S_2| \le |S_j|$,
+  so $B(t_1 \bowtie t_2) = 1 - |S_1 \cap S_2|/2^n \ge 1 - |S_j|/2^n$.
+  (b)~$|S_1 \cup S_2| \ge |S_j|$, so $B(t_1 \cup t_2) \le B(t_j)$.
 \end{proof}
 
 \noindent
@@ -1814,7 +1805,7 @@ reduce overall dependence).
 Individual commitments' responsibilities redistribute within the budget
 but are not individually monotone under join.
 
-\subsection{Worked Example: Multi-Layer Responsibility}
+\subsection{Multi-Layer Responsibility}
 
 For depth $d > 1$, responsibility is defined per layer: the
 responsibility of a commitment at layer $k$ is its Shapley value in the
@@ -1827,106 +1818,140 @@ The filtration provides the stopping criterion: if
 $\mathrm{qdepth}(t) = k$, only layers $1, \ldots, k$ contribute
 nonzero responsibility.
 
-\begin{example}[Multi-layer responsibility]
-  \label{ex:multi-layer-resp}
-  Three transactions with two overlapping directed 2-cycles:
-  $T_1 \rightleftharpoons T_2$ and $T_2 \rightleftharpoons T_3$.
-  Under the ordering basis, each 2-cycle requires exactly one abort.
-  Let $\varphi_1$ resolve the first cycle (abort $T_1$ or $T_2$) and
-  $\varphi_2$ resolve the second (abort $T_2$ or $T_3$).
-  If $\varphi_1$ aborts $T_2$, the second cycle is auto-resolved
-  (depth~$1$); otherwise both commitments are needed (depth~$2$).
+% ================================================================
+\section{Within a Determination: Algebraic Details}
+\label{app:algebra}
+% ================================================================
 
-  Tuple $t$ is written by $T_3$; it holds iff $T_3$ is not aborted.
-  The determination space is a tree (not a product): if $\varphi_1$
-  aborts $T_2$, layer~2 is never discharged.
-  %
-  \begin{center}\small
-  \begin{tabular}{lll}
-    & commitments & outcome \\
-    \hline
-    $D_1$: & abort $T_2$ & $t$ holds \\
-    $D_2$: & abort $T_1$,\; abort $T_2$ & $t$ holds \\
-    $D_3$: & abort $T_1$,\; abort $T_3$ & $t$ absent
-  \end{tabular}
-  \end{center}
-  %
-  Support: $|\mathrm{supp}(t)| = 2$ out of $3$.
-  Prior $\Pr[t \text{ holds}] = 2/3$ (uniform over determinations).
+This appendix gives precise structural content to the layered structure
+within a single determination, as introduced in Section~\ref{sec:algebra}.
+For the algebraic structure \emph{across} determinations (the
+determination semiring and its filtration), see
+Appendix~\ref{app:det-semiring-details}.
 
-  Responsibility at each layer is the change in $t$'s conditional
-  presence probability caused by that layer's realized commitment:
-  $\rho(\varphi_k) = \Pr[t \text{ holds} \mid \text{layers } 1{\ldots}k
-  \text{ fixed to } D^*] - \Pr[t \text{ holds} \mid \text{layers }
-  1{\ldots}(k{-}1) \text{ fixed}]$.
-  Total responsibility sums across layers to $1 - \Pr[t \text{ holds}]$
-  when $t$ holds in $D^*$ (the gain from prior uncertainty to certainty).
+\subsection{Sequential Discharge Versus Algebraic Combination}
 
-  For $D^* = D_2$ --- we observe $t$ holds, with both $T_1$ and $T_3$
-  surviving (aborts: $T_1$ at layer~1, $T_2$ at layer~2):
-  $\rho(\varphi_1) = 1/2 - 2/3 = -1/6$ (negative---keeping
-  $T_2$ alive reduced $t$'s probability from $2/3$ to $1/2$);
-  $\rho(\varphi_2) = 1 - 1/2 = 1/2$ (positive---directly
-  saving $T_3$ raised it from $1/2$ to certainty).
-  Total: $-1/6 + 1/2 = 1/3 = 1 - 2/3$.
+Commitments across layers compose by sequential discharge.
+Given a specification $\Spec$ and commitments $\varphi_1,\varphi_2$,
+\[
+  \Spec(H \cdot \varphi_1 \cdot \varphi_2)
+\]
+need not equal
+\[
+  \Spec(H \cdot \varphi_2 \cdot \varphi_1),
+\]
+because commitments may be ambiguity-sensitive.
+Accordingly, the inter-layer sequencing operator $\seq$ is not an algebraic
+operation: it is the mechanism that transitions from one monoid to
+the next by discharging the current layer and conditioning the specification
+for the layer below.
 
-  For $D^* = D_1$ --- we observe $t$ holds, with $T_2$ aborted
-  (resolving both cycles at layer~1):
-  $\rho(\varphi_1) = 1 - 2/3 = 1/3$, no layer-2 responsibility.
-  The same total budget ($1/3$) is concentrated entirely on the single
-  commitment that made $t$ certain.
+This distinction is essential.
+Commitments \emph{restrict} the space of admissible outcomes; they do not
+\emph{combine} explanations.
+Algebraic combination of explanations occurs only at the semiring foundation,
+after all commitment layers have been discharged.
 
-  For $D^* = D_3$ --- we observe $t$ absent ($T_3$ aborted):
-  $\rho(\varphi_1) = 1/2 - 2/3 = -1/6$;
-  $\rho(\varphi_2) = 0 - 1/2 = -1/2$.
-  Total: $-1/6 + (-1/2) = -2/3 = 0 - 2/3$.
-  Both commitments bear negative responsibility for $t$'s absence.
-\end{example}
+\subsection{Commutative Monoids Within a Layer}
+
+Within a single layer, commitments commute by construction.
+Fix a specification prefix $\Spec^{\ell}$ obtained after discharging all
+layers above layer~$\ell$.
+Let $L$ be the set of commitment events in layer~$\ell$.
+
+For $\varphi,\psi \in L$,
+\[
+  \Spec^{\ell}(H \cdot \varphi \cdot \psi)
+  \;=\;
+  \Spec^{\ell}(H \cdot \psi \cdot \varphi).
+\]
+Thus multisets of commitments drawn from $L$ form a commutative monoid
+under composition, with the empty multiset (no restriction) as identity.
+
+This monoid is \emph{conditional}: its carrier---which commitments are valid
+and what effect they have---depends on the determination prefix.
+No global algebra over commitments is assumed or required.
+Discharging the monoid (applying all commitment events in $L$) produces the
+specification prefix for the next layer.
+
+\subsection{The Semiring Foundation}
+
+The key algebraic transition occurs when the last commitment layer is
+discharged.
+
+\begin{proposition}[Determined specifications admit semiring provenance]
+  \label{prop:semiring}
+  If $\Spec(H)$ is determined (i.e., $H$ is resolved), then derivational
+  provenance over $\Spec(H)$ is captured by a commutative semiring.
+\end{proposition}
+\begin{proof}[Proof sketch]
+  By Theorem~\ref{thm:resolution-implies-monotone}, the determination
+  selects a concrete outcome.
+  Because $\Spec(H)$ is determined, no incompatible alternatives
+  remain; derivations compose exactly as in
+  monotone query evaluation: alternative derivations of the same fact
+  combine by semiring addition, and joint use of multiple facts combines by
+  semiring multiplication.
+  This is precisely the algebraic regime established
+  by Green et al.~\cite{green2007provenance} for positive relational queries.
+\end{proof}
+
+\subsection{The Layered Determination as a Whole}
+
+A determination of depth~$k$ over a provenance semiring $K$ consists of
+commutative monoids $M_1, M_2, \ldots, M_k$---where each $M_i$ is
+conditioned on the specification prefix obtained by discharging
+$M_1, \ldots, M_{i-1}$---followed by a commutative semiring $K$ at the
+foundation, exposed once all monoids have been discharged.
+Layers are numbered in discharge order: $M_1$ is the first layer
+discharged, $M_k$ the last.
+Classical provenance is the degenerate case $k = 0$: no commitment layers,
+just the semiring.
+
+Determination provenance recovers the algebraic conditions required for
+semiring provenance by explicitly discharging semantic ambiguity through the
+layered determination.
+Seen this way, a layered determination is a semantic prelude to algebraic
+provenance: it explains \emph{when} and \emph{why} classical provenance
+applies, rather than assuming a fixed monotone semantics from the outset.
+
+\subsection{Open Questions}
+\label{app:algebra-future}
+
+Several directions for algebraic development of the within-determination
+structure remain open.
+
+\paragraph{Collapse at depth 1.}
+When all commitments commute (a single layer), the determination reduces to a
+single commutative monoid tensored with the provenance semiring, and the
+determination semiring coincides with
+$\mathrm{PosBool}(\Phi)$~\cite{green2007provenance}.
+
+\paragraph{Universality.}
+Green et al.\ showed that $\mathbb{N}[X]$ is the most general provenance
+semiring for positive relational algebra.
+An analogous question: is there a ``most general'' layered determination
+from which all others are homomorphic images?
+The conditioning between layers (each monoid depends on the discharge of the
+previous) makes this non-trivial.
+
+\paragraph{Composition laws.}
+When two determinations share a common prefix, they share initial layers.
+A formal treatment of determination morphisms---how determinations relate
+under prefix extension, restriction, and substitution---would enable
+compositional reasoning across sub-specifications.
 
 % ================================================================
-\section{Algebraic Details}
-\label{app:algebra}
+\section{Across Determinations: The Determination Semiring}
 \label{app:det-semiring-details}
 % ================================================================
 
-This appendix develops the algebraic structures introduced in
-Section~\ref{sec:algebra}: first the structure \emph{within} a single
-determination, then the determination semiring and filtration that
-operate \emph{across} determinations.
+This appendix expands on the determination semiring and filtration
+introduced in Section~\ref{sec:det-semiring}.
+Where the body states results compactly, this appendix provides the
+full arguments.
 
-\subsection{Within a Determination}
-
-A single determination of depth~$k$ is a sequence of conditional
-commutative monoids connected by the sequencing operator $\seq$:
-\[
-  (M_1, \circ_1) \;\seq\; (M_2, \circ_2) \;\seq\; \cdots \;\seq\; (M_k, \circ_k)
-  \;\seq\; (K, +, \cdot).
-\]
-Each $M_\ell$ is the commutative monoid of commitments at layer~$\ell$:
-within a layer, commitments commute
-($\Spec^{\ell}(H \cdot \varphi \cdot \psi) = \Spec^{\ell}(H \cdot \psi \cdot \varphi)$);
-across layers they do not, because later commitments depend on which
-outcomes earlier commitments eliminated.
-The operator $\seq$ discharges one layer's monoid and conditions the
-specification for the next; it is not an algebraic operation.
-
-The terminal element is the derivational semiring $K$ of Green et
-al.~\cite{green2007provenance}, which requires a \emph{fixed} database
-instance.
-Prior to resolution, $\mathsf{obs}$ maps multiple admissible outcomes
-to different instances; after resolution, exactly one outcome remains
-and $K$-relational evaluation applies.
-Classical provenance is the degenerate case $k = 0$: no commitment
-layers, just $K$.
-
-\subsection{Support Propagation Under Relational Algebra}
-
-The set $2^{\mathcal{D}}$ of all supports forms a commutative semiring
-under $(\cup, \cap, \emptyset, \mathcal{D})$: union is addition,
-intersection is multiplication, and distributivity holds because
-$(2^{\mathcal{D}}, \cup, \cap)$ is a distributive lattice.
-The following proposition shows that positive RA evaluation respects
-this structure.
+\subsection{Supports Form a Semiring}
 
 \begin{proposition}
   The supports $\mathrm{supp}(P(t)) \subseteq \mathcal{D}$ compose
@@ -1962,13 +1987,13 @@ this structure.
   agree on projected attributes); selection can only remove them.
 \end{proof}
 
-\subsection{Filtration Details}
+\subsection{The Filtration in Detail}
 
 The filtration $\mathcal{F}_0 \subseteq \mathcal{F}_1 \subseteq \cdots
 \subseteq \mathcal{F}_d = 2^{\mathcal{D}}$ is defined in
 Section~\ref{sec:filtration}.
-Here we verify that it interacts correctly with the determination
-semiring operations and with query evaluation.
+Here we verify that it interacts correctly with the semiring operations
+and with query evaluation.
 
 \begin{proposition}[Filtration closure under semiring operations]
   For any $k$, if $S_1, S_2 \in \mathcal{F}_k$, then
@@ -1976,28 +2001,27 @@ semiring operations and with query evaluation.
   $S_1 \cap S_2 \in \mathcal{F}_k$.
 \end{proposition}
 \begin{proof}
-  A set is in $\mathcal{F}_k$ iff it is a union of $\equiv_k$ classes
-  (Definition~\ref{def:level-k-agreement}).
-  The union of two such sets is again a union of $\equiv_k$ classes.
-  For intersection: if $D \in S_1 \cap S_2$ and $D' \equiv_k D$,
-  then $D' \in S_1$ (since $S_1 \in \mathcal{F}_k$) and
+  A set is in $\mathcal{F}_k$ iff it is a union of level-$k$ equivalence
+  classes.
+  The union of two such sets is again a union of level-$k$ classes.
+  For intersection: if $D \in S_1 \cap S_2$ and $D'$ agrees with $D$ at
+  level $k$, then $D' \in S_1$ (since $S_1 \in \mathcal{F}_k$) and
   $D' \in S_2$ (since $S_2 \in \mathcal{F}_k$), so
   $D' \in S_1 \cap S_2$.
 \end{proof}
 
 \begin{corollary}[Query evaluation preserves filtration level]
-  If $\mathrm{supp}(P(t_1)) \in \mathcal{F}_j$ and
+  If $\mathrm{supp}(P(t_1)) \in \mathcal{F}_k$ and
   $\mathrm{supp}(P(t_2)) \in \mathcal{F}_k$, then
-  $\mathrm{supp}(P(t_1 \bowtie t_2)) \in \mathcal{F}_{\max(j,k)}$ and
-  $\mathrm{supp}(P(t_1 \cup t_2)) \in \mathcal{F}_{\max(j,k)}$.
-  Positive RA cannot increase query-relative depth beyond the
+  $\mathrm{supp}(P(t_1 \bowtie t_2)) \in \mathcal{F}_k$ and
+  $\mathrm{supp}(P(t_1 \cup t_2)) \in \mathcal{F}_k$.
+  Query evaluation cannot increase query-relative depth beyond the
   maximum depth of its inputs.
 \end{corollary}
 
-\begin{proposition}[Difference may increase depth]
+\begin{proposition}[Difference can increase depth]
   \label{prop:difference-increases-depth}
-  Relational difference does not preserve filtration level: there exist
-  inputs of depth~$0$ whose difference has depth~$> 0$.
+  Under relational difference, query-relative depth can strictly increase.
 \end{proposition}
 \begin{proof}
   Let $t_1$ be robust ($\mathrm{supp} = \mathcal{D}$, depth~$0$) and
@@ -2007,17 +2031,101 @@ semiring operations and with query evaluation.
   \notin \mathcal{F}_0$, so $\mathrm{qdepth}(t_1 \setminus t_2) > 0$.
 \end{proof}
 
+\begin{proposition}[Reachability]
+  For a determination of depth $d$ with non-trivial choices at each
+  layer, every level $0 \le k \le d$ is realized as the query-relative
+  depth of some tuple.
+\end{proposition}
+\begin{proof}
+  Level~$0$: any base tuple present in all determinations.
+  Level~$k$: a base tuple present in exactly the determinations that
+  choose a specific value at layer~$k$ has support that is a union of
+  level-$k$ classes but not of level-$(k{-}1)$ classes.
+\end{proof}
+
 % ===============================================================
-\section{Transactional Determination Provenance: SI and Cross-Level Comparison}
+\section{Transactional Worked Determination Provenance}
 \label{sec:appendix-concurrency}
 % ===============================================================
 
-The body develops determination provenance for serializability in
-detail (Examples~\ref{ex:example} and~\ref{ex:running-revisited}).
-This appendix extends the treatment to snapshot isolation (SI), where
-first-committer-wins (FCW) introduces a different commitment
-structure, and then characterizes the fine-grained separation between
-SER and SI in terms of query-relative depth.
+This appendix instantiates determination provenance for a richer
+transactional example than the body's running example
+(Example~\ref{ex:example}), illustrating multi-transaction
+conflict structures under the ordering commitment basis
+(Section~\ref{sec:scheduling-basis}).
+Once a resolving determination is fixed, the specification becomes
+determined and provenance reduces to ordinary derivational provenance.
+
+% ===============================================================
+\subsection{Serializability}
+% ===============================================================
+
+\paragraph{Determination structure.}
+Under conflict serializability, admissible outcomes are those with no
+directed cycles in the conflict graph (regardless of edge label).
+Using the ordering commitment basis
+(Section~\ref{sec:scheduling-basis}), each ordering decision
+$\varphi_{T_i \prec T_j}$ fixes the direction of a conflict edge.
+For the running example below, the conflict graph is
+acyclic---no aborts were needed---so the determination consists
+entirely of ordering commitments.
+\paragraph{Data, query, and history.}
+Let $S(k,y)$ be a relation and consider the query
+$Q(y) \drule S(k,y)$.
+The database is initially empty.
+Five transactions execute:
+\[
+  \begin{array}{ll}
+    T_1: \textsf{insert } S(1,b) \ (x_1) \qquad &
+    T_2: \textsf{insert } S(2,b) \ (x_2)          \\
+    T_3: \textsf{insert } S(3,c) \ (x_3) \qquad &
+    T_4: \textsf{insert } S(4,d) \ (x_4)          \\
+    T_5: \textsf{delete } S(4,d).               &
+  \end{array}
+\]
+A query transaction $T_Q$ evaluates $Q$.
+
+The history alone does not determine whether $d$ is visible to $T_Q$; this depends
+on the relative ordering of $T_4$, $T_5$, and $T_Q$.
+
+\paragraph{Resolving determinations.}
+Two valid resolving determinations under serializability are:
+\[
+  D_{\mathsf{in}} \triangleq
+  T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_Q \prec T_5,
+  \qquad
+  D_{\mathsf{out}} \triangleq
+  T_1 \prec T_2 \prec T_3 \prec T_4 \prec T_5 \prec T_Q.
+\]
+Both are conjunctions of ordering predicates and therefore arise in a single
+semantic stage.
+
+\paragraph{Provenance.}
+Once a resolving determination is fixed, provenance is purely derivational.
+Conditioned on $D_{\mathsf{in}}$, the resolved snapshot contains $b,c,d$:
+\[
+  P_{D_{\mathsf{in}}}(b)=x_1+x_2,\quad
+  P_{D_{\mathsf{in}}}(c)=x_3,\quad
+  P_{D_{\mathsf{in}}}(d)=x_4.
+\]
+Conditioned on $D_{\mathsf{out}}$, tuple $d$ is absent and classical why-not
+provenance applies.
+
+Determination provenance records the semantic assumption under which the
+derivation holds; e.g.,
+\[
+  P_{D_{\mathsf{in}}}(d) = x_4.
+\]
+
+\paragraph{Same observation, different derivational provenance.}
+Even when multiple serializations yield the same observation, they need not agree
+on derivational provenance.
+Adding
+$T_{-2}:\ \textsf{delete } S(2,b)$
+yields executions in which $b$ is observed with provenance $x_1$ or $x_1+x_2$,
+depending on the serialization.
+Thus determination provenance distinguishes semantic explanations even when the
+observable outcome is unchanged.
 
 % ===============================================================
 \subsection{Snapshot Isolation}
@@ -2044,7 +2152,7 @@ serializability.
   determination depth is $\Theta(n)$.
 \end{proposition}
 \begin{proof}
-  The construction mirrors Theorem~\ref{thm:txn-depth}.
+  The construction mirrors Proposition~\ref{prop:ser-depth-n}.
   Consider $n$ pairs of transactions $(T_1, T_1'), (T_2, T_2'), \ldots,
   (T_n, T_n')$, where $T_i$ and $T_i'$ both write object $x_i$
   (creating an FCW conflict), and $T_{i+1}$ reads $x_i$ before writing
@@ -2064,9 +2172,10 @@ serializability.
 \end{proof}
 
 \paragraph{Per-batch depth.}
-Within a single batch of pending requests, depth is~$2$
-(seal + commit-order selection), as in serializability
-(Theorem~\ref{thm:txn-depth}).
+Within a single batch of pending requests, the structure is depth~$2$
+(seal + scheduling order), identical to serializability: the system
+seals the batch and chooses a commit order; all FCW outcomes and
+snapshot assignments are entailed by that order.
 
 \paragraph{Worked example.}
 To illustrate FCW-induced depth concretely, consider two transactions
@@ -2078,9 +2187,8 @@ Assume the database initially contains $S(5,e)$, and:
     T_7: \textsf{write } S(5,e'').
   \end{array}
 \]
-A query transaction $T_Q$ reads the value of key $5$ in $S$ after both
-$T_6$ and $T_7$ request commit.
-Under SI, only one of $T_6$ or $T_7$ can commit (FCW on key $5$);
+A query transaction $T_Q$ reads $S(5,\_)$ after both request commit.
+Under SI, only one of $T_6$ or $T_7$ can commit (FCW on $S(5,\_)$);
 the other must abort.
 If the system has commit-order discretion, this is a genuine
 commitment: choosing $T_6$ as the FCW winner determines that $T_Q$
@@ -2095,6 +2203,16 @@ Under $D_{\mathrm{SI}}$, $T_Q$ reads $S(5,e')$; the derivational
 provenance is $P_{D_{\mathrm{SI}}}(e') = x_6$.
 Under the alternative $\varphi_{\mathrm{fcw}(S(5),T_7)}$, $T_Q$ reads
 $S(5,e'')$---a contingent outcome.
+
+\paragraph{Write-skew.}
+Write-skew (an SI anomaly requiring no FCW) arises from the classic
+pattern: $T_A$ reads $x$, writes $y$; $T_B$ reads $y$, writes $x$.
+Under SI with snapshots preceding both commits, both transactions
+commit (no write-write conflict, so FCW does not apply).
+The resulting rw-rw cycle is not serializable.
+Determination provenance records the snapshot assignments under which
+this anomaly arises; restricting to SI determinations whose snapshots
+admit a topological sort recovers exactly the serializable outcomes.
 
 % ===============================================================
 \subsection{Fine-Grained Separation of SER and SI}
@@ -2160,7 +2278,7 @@ Hence if all base tuples in a query have equal qdepth across SER and
 SI, the query result does too.
 A query result can have different qdepth across levels only if at least
 one of its base tuples participates in a write-skew or FCW pattern.
-This gives a sufficient condition for safe isolation-level change:
+This gives a sufficient condition for safe isolation-level migration:
 if no base tuple of a query is in the SER/SI gap, the query's
 provenance is identical under both levels.
 
@@ -2186,27 +2304,85 @@ questions require retaining more semantic information
 \label{app:protocols}
 % ===============================================================
 
-Theorem~\ref{thm:txn-depth} establishes protocol-agnostic depth
-bounds via the $T_\infty$ witness.
-Here we show how 2PL, OCC, and MVTO each instantiate the ordering
-basis, confirm that the bounds are tight for each, and detail the
-per-batch commitment structure.
+\subsection{Protocol-Agnostic Depth Bounds}
 
-\subsection{Per-Batch Structure}
+\paragraph{Read committed.}
+Under RC, no cycle type is forbidden, so no ordering or abort decision
+is needed to maintain the isolation constraint.
+Depth~$0$ regardless of protocol.
+
+\paragraph{Serializability under fully reactive protocols.}
+Under a fully reactive protocol---one that processes each event
+(start, read, write, commit request) immediately upon arrival with no
+buffering or scheduling discretion---every system response is
+determined by the current state.
+OCC validates deterministically (commit if no cycle, abort otherwise);
+MVTO assigns timestamps in arrival order and forces aborts
+deterministically when timestamp constraints are violated.
+In both cases the system makes no choices: depth~$0$.
+
+\paragraph{Serializability with discretion: depth $O(n)$.}
+When the protocol has discretion---victim selection (which transaction
+to abort when a cycle exists), batching (which requests to process
+together), or scheduling (in what order to process buffered
+requests)---depth can grow to $O(n)$ where $n$ is the number of
+transactions.
+
+\begin{proposition}[Worst-case SER depth]
+  \label{prop:ser-depth-n}
+  Under serializability with any protocol that permits either victim
+  selection or batched scheduling, worst-case determination depth is
+  $\Theta(n)$.
+\end{proposition}
+\begin{proof}
+  \emph{Upper bound.}
+  Each commitment resolves at least one transaction's fate (commit or
+  abort).
+  With $n$ transactions, at most $n$ sequential commitments are needed.
+
+  \emph{Lower bound.}
+  Consider a long-running transaction $T_\infty$ that reads object $x$
+  and writes object $y$ (and never completes).
+  A sequence of transactions $T_1, T_2, \ldots, T_{n-1}$ arrive one at
+  a time; each $T_i$ writes $x$ and reads $y$.
+  Each $T_i$ and $T_\infty$ form a directed cycle via two objects:
+  $T_\infty \xrightarrow{\mathsf{rw}} T_i$ (anti-dependency on $x$:
+  $T_\infty$ read $x$ before $T_i$ writes it) and
+  $T_i \xrightarrow{\mathsf{rw}} T_\infty$ (anti-dependency on $y$:
+  $T_i$ read $y$ before $T_\infty$ writes it).
+  The system must resolve the cycle: either abort $T_i$ (letting
+  $T_\infty$ survive) or abort $T_\infty$ (resolving all future
+  conflicts).
+  If the system aborts $T_i$ at each step (a valid choice under victim
+  selection), $T_\infty$ survives and the next arrival creates a new
+  cycle.
+  Each abort decision depends on the previous one (had $T_\infty$ been
+  aborted earlier, no further cycles would arise), so the decisions do
+  not commute across rounds.
+  After $n-1$ such rounds, depth is $n-1 = \Theta(n)$.
+\end{proof}
+
+\noindent
+The argument is protocol-agnostic: it requires only that the protocol
+permits choosing which transaction to abort (victim selection) or
+permits deferring a transaction's resolution across multiple rounds
+(batching).
+Under OCC with commit-order discretion, the same construction applies:
+the system chooses to validate $T_i$ before $T_\infty$ at each round,
+forcing $T_i$'s abort.
+Under 2PL, the construction maps to repeated deadlock detection with
+$T_\infty$ as the surviving lock holder.
+
+\subsection{Per-Round Structure}
+
+Within a single batch (a sealed set of pending requests), the depth
+structure is simpler.
 
 \paragraph{2PL with batching.}
-Under 2PL, lock acquisition and release are fully reactive (entailed
-by the arrival order of requests); the only discretion is
-\emph{victim selection} when a deadlock cycle forms.
-Without sealing, victim choices cascade: aborting a victim releases
-locks, enabling new requests that may form new cycles, giving
-$\Theta(n)$ depth.
-Sealing a batch (refusing new lock requests) cuts this feedback loop:
-all deadlock cycles in the sealed wait-for graph are present
-simultaneously, and victim choices across distinct cycles commute
-(aborting one victim cannot create a new cycle when no new edges can
-form).
-Per-batch depth: $2$ (seal + one commuting layer of victim selections).
+Each deadlock-detection episode has depth~$2$: one sealing commitment
+(declaring the current wait-for graph complete) followed by one layer
+of victim-selection commitments (all abort choices within the sealed
+graph commute, since node removal is order-independent).
 
 \paragraph{OCC with batching.}
 A batch of pending commit requests is sealed; the system then chooses
@@ -2227,25 +2403,27 @@ The system's only choice is the order in which to process the batch;
 all responses (timestamp assignments, read values, forced aborts for
 transactions that read between writes, commit acknowledgments) are
 entailed by the chosen order.
-Per-batch depth: $2$ (seal + action-ordering layer).
+Per-batch depth: $2$ (seal + scheduling order), isomorphic to OCC and
+2PL.
 
 \subsection{Two-Phase Locking (2PL)}
 
-Under strict 2PL, a transaction acquires locks before accessing objects
-and holds them until commit.
+Under 2PL, a transaction acquires locks before accessing objects and
+releases them only after its last access (the ``two phases'': growing and
+shrinking).
 The following details supplement the protocol-agnostic analysis above.
 
 \paragraph{Lock acquisition as ordering commitment.}
-Each lock acquisition implicitly fixes a serialization ordering:
-if $T_i$ holds a write lock on $x$ and $T_j$ requests a
-conflicting lock, $T_j$ blocks until $T_i$ commits (strict 2PL holds
-locks until commit), irrevocably establishing $T_i \prec T_j$.
-Under the ordering basis
+Each lock acquisition implicitly fixes an ordering on the locked
+object: if $T_i$ holds a write lock on $x$ and $T_j$ requests a
+conflicting lock, the system has irrevocably decided $T_i \prec T_j$ on $x$.
+Under the enriched scheduling basis
 (Section~\ref{sec:scheduling-basis}), this is exactly the ordering
 commitment $\varphi_{T_i \prec T_j}$.
-The key difference from the protocol-agnostic view is \emph{distribution}:
+The key difference from the protocol-agnostic view is \emph{timing}:
 ordering commitments are made incrementally as locks are acquired
-(throughout execution), rather than concentrated at commit time.
+(distributed throughout execution), rather than concentrated at commit
+time.
 
 \paragraph{Deadlock as forced abort.}
 A deadlock cycle $T_1 \to T_2 \to \cdots \to T_m \to T_1$ in the
@@ -2267,8 +2445,19 @@ In the fully reactive case (deadlock detected and resolved immediately
 on each lock request, with the requestor as victim), all decisions are
 entailed and depth is~$0$.
 With victim-selection discretion, depth grows to $O(n)$
-(Theorem~\ref{thm:txn-depth}): deadlock cycles in the wait-for
+(Proposition~\ref{prop:ser-depth-n}): deadlock cycles in the wait-for
 graph correspond to conflict cycles requiring resolution.
+
+\paragraph{Provenance implications.}
+Under 2PL, the determination records not just \emph{which} transactions
+committed but \emph{when} each ordering was fixed (at lock acquisition
+time).
+Two executions that produce the same serial order but acquire locks in
+different sequences yield the same resolved outcome but different
+determination provenance---the commitments were made at different points
+in the history.
+This finer-grained structure is invisible in the protocol-agnostic
+treatment but may matter for diagnostic queries about lock contention.
 
 \subsection{Multiversion Timestamp Ordering (MVTO)}
 
@@ -2279,65 +2468,61 @@ latest version of $x$ written by a transaction with timestamp
 $\le ts_i$, and $T_i$'s write of $x$ creates a new version tagged
 $ts_i$.
 A write by $T_i$ is rejected (and $T_i$ aborted) if some transaction
-$T_j$ with $ts_j > ts_i$ has already read an earlier version of $x$:
-$T_j$'s read arrived before $T_i$'s write, so the system already
-committed to $T_j$ seeing the old version, and $T_i$'s write would
-retroactively invalidate that commitment.
+$T_j$ with $ts_j > ts_i$ has already read the previous version of $x$
+--- the ordering $T_i \prec T_j$ is already committed, and $T_i$'s
+write would retroactively invalidate $T_j$'s read.
 
-\paragraph{Semantic commitments.}
-In the fully reactive case (timestamps assigned on arrival), the
-primary commitment is timestamp assignment: assigning $ts_i < ts_j$
-irrevocably fixes $T_i \prec T_j$ in the serial order on every object
-they both access.
-This is an ordering commitment $\varphi_{T_i \prec T_j}$ in the
-ordering basis (Section~\ref{sec:scheduling-basis}), with a structural
+\paragraph{Timestamp assignment as semantic commitment.}
+The primary semantic commitment in MVTO is the timestamp assignment itself.
+Assigning $ts_i < ts_j$ irrevocably fixes $T_i \prec T_j$ in the serial
+order on every object they both access.
+This is an ordering commitment
+$\varphi_{T_i \prec T_j}$ in the enriched scheduling basis
+(Section~\ref{sec:scheduling-basis}), but with a crucial structural
 property: a single timestamp assignment simultaneously fixes the
 ordering of $T_i$ relative to \emph{all} other active transactions.
-With batching, the commitment is finer-grained: the system chooses a
-processing order over individual \emph{actions} (reads, writes, starts),
-not just transactions.
-This action-level ordering subsumes timestamp assignment (timestamps
-are assigned when a transaction's start or first read/write operation is
-processed) and determines which reads see which versions, hence which
-transactions are forced to abort.
+Version reads are not separate commitments---they are consequences of
+the timestamp order.
 
 \paragraph{Forced aborts.}
 Unlike 2PL, MVTO never blocks: conflicting operations are either
 served from an appropriate version (reads) or rejected immediately
-(writes that arrive too late---after a higher-timestamped transaction
-has already read an earlier version).
+(writes that violate timestamp order).
 Rejection forces an abort, but this is not a free choice---it
 is entailed by the timestamp assignments already made.
 MVTO is therefore deadlock-free.
 
 \paragraph{Determination structure.}
-The determination under MVTO mirrors the other protocols (seal +
-ordering layer) but at action granularity rather than transaction
-granularity.
-The action ordering is quotiented by commutativity of adjacent
-non-conflicting actions (swapping two actions on disjoint objects has
-no observable effect), and forced aborts add no independent
-commitments---they are entailed by the ordering.
-Fully reactive MVTO has depth~$0$ (timestamp assignment is
-entailed by environment event arrival order, and aborts are forced).
-With batching, per-batch depth is~$2$: the seal commitment (declaring
-the batch complete) followed by a single commitment choosing the
-processing order over buffered actions (one total order determines all
-version visibility and forced aborts).
+Because timestamp assignments on non-conflicting transactions commute
+(the relative order is irrelevant if they access disjoint objects),
+and because aborts are forced (not chosen), the determination under
+MVTO has a particularly simple structure:
+\begin{itemize}[nosep]
+  \item All timestamp assignments commute on non-conflicting pairs,
+        forming a single layer of width equal to the number of
+        conflicting pairs.
+  \item Forced aborts are entailed by the timestamp layer---they add
+        no independent commitments and no additional depth.
+\end{itemize}
+Hence fully reactive MVTO has depth~$0$ (timestamp assignment is
+entailed by arrival order, and aborts are forced).
+With batched timestamp assignment (the system buffers arrivals and
+chooses timestamp order), per-batch depth is~$2$: the seal commitment
+(declaring the batch complete) followed by a single scheduling
+commitment (choosing the processing order within the batch).
 
 \paragraph{Comparison across protocols.}
-All three protocols share a common determination structure (seal +
-resolution layer) and the same worst-case depth bounds
-(Theorem~\ref{thm:txn-depth}): depth~$0$ when fully reactive,
-$\Theta(n)$ with discretion, depth~$2$ per batch.
-They differ in commitment basis:
-OCC uses a transaction-ordering basis (choose a validation order);
-MVTO uses an action-ordering basis (choose a processing order over starts,
-reads and writes);
-2PL uses a victim-selection basis (choose which transaction to abort
-on deadlock).
-These bases are incomparable---they record different aspects of the
-system's discretion---but yield the same depth structure.
+All three protocols implement serializability but differ in
+determination structure.
+Under fully reactive operation (no discretion), all three have
+depth~$0$: every decision is entailed by the environment.
+With discretion (victim selection, batching, or scheduling), worst-case
+depth is $O(n)$ for all three
+(Proposition~\ref{prop:ser-depth-n})---the ``bad transaction''
+construction applies regardless of protocol.
+Per-batch depth is~$2$ for all three (seal + resolution layer).
+The protocols differ in \emph{which} discretionary choices they expose,
+not in worst-case depth.
 
 \section[Datalog with Negation: Worked Determination Provenance]{Datalog$^{\neg}$ Worked Determination Provenance}
 \label{sec:appendix-datalog}
@@ -2594,10 +2779,10 @@ $c = 0_K$ by the zero-divisor-free property in the natural order).
 Hence both approaches assign the same annotation ($1_K$ or $0_K$) to
 each negated literal.
 Since all subsequent derivation uses only positive operations
-($+$ and $\cdot$), the final annotation of every atom is nonzero
-under sealing exactly when it is nonzero under monus.
-Supports (the zero/nonzero distinction) agree; we do not claim
-equality of full $K$-annotations.
+($+$ and $\cdot$), the final annotation of every atom is identical
+under both approaches.
+In particular, an atom has nonzero annotation (holds) under the same
+set of determinations: supports agree.
 \qed
 
 \subsection{General Case: Nested Negative Cycles}
@@ -2632,10 +2817,9 @@ longest dependency chain).
 
 \begin{proposition}[Soundness and completeness of the canonical basis]
   \label{prop:canonical-basis-sc}
-  For the class of finite $\mbox{Datalog}^\neg$ programs satisfying
-  the assumptions of Theorem~\ref{thm:negation-filtration}, the
-  canonical layered choice basis of
-  Definition~\ref{def:canonical-choice-basis} is sound and complete: each resolving determination produces a stable model,
+  For any finite $\mbox{Datalog}^\neg$ program, the canonical layered
+  choice basis of Definition~\ref{def:canonical-choice-basis} is sound
+  and complete: each resolving determination produces a stable model,
   and every stable model is produced by exactly one resolving
   determination.
 \end{proposition}
@@ -2794,19 +2978,6 @@ We map the framework's three levels of structure
 to concrete capabilities, then develop two orthogonal
 dimensions of parsimony that make the theory practical.
 
-\paragraph{Observation functions beyond relational databases.}
-The body defines an observation function
-$\mathsf{obs}: O \to \mathrm{Inst}(\mathbf{S})$ mapping outcomes to
-relational instances.
-In systems settings, observables are often partially-ordered,
-semi-structured records (distributed traces, replicated logs, event
-streams).
-The framework applies whenever provenance queries over such records
-can be expressed in a language equivalent to positive RA --- for
-example, the positive fragment of a semi-structured query language
-(select, filter, and join over JSON log entries, without negation or
-aggregation) is RA-equivalent and natural for log analysis.
-
 \subsection{Level 1: Repeatability from a Single Determination}
 
 A resolving determination records the non-deterministic commitments
@@ -2838,7 +3009,7 @@ log records).
 The algebraic structure enables queries that log-scanning cannot answer
 at all (e.g., ``under what fraction of admissible schedules does the
 SLA hold?''), and answers those it can more efficiently by routing
-through the determination semiring rather than correlating events.
+through the semiring rather than correlating events.
 
 \begin{example}[Distributed tracing {\`a} la Dapper~\cite{sigelman2010dapper}]
   \label{ex:dapper}
@@ -2928,7 +3099,7 @@ single determination; the determination semiring enables optimization
 Supports across variant specifications answer preservation questions:
 does an outcome that holds under one specification also hold under
 another?
-Examples include isolation-level comparison (does a transaction's result
+Examples include isolation-level migration (does a transaction's result
 survive a move from SI to
 serializability?~\cite{vandevoort2025mixed}), semantic-change queries
 (would a $\mbox{Datalog}^\neg$ result survive a change from stable to well-founded
@@ -3167,30 +3338,25 @@ execution, backtracking search), commitments can be undone.
 Extending the framework to reversible commitments---replacing monoids with
 groups at each layer---is open.
 
-\paragraph{Factorized supports and universality.}
+\paragraph{Universality.}
+Is there a ``most general'' determination semiring---analogous to
+$\mathbb{N}[X]$ for positive relational
+algebra~\cite{green2007provenance}---from which all others are
+homomorphic images?
+The conditioning between layers makes this non-trivial.
+
+\paragraph{Factorized supports.}
 Within-layer commutativity gives $\mathcal{D}$ the structure of a trie:
 each layer branches on the choice of commitment set, and a
 determination is a root-to-leaf path.
 A level-$k$ support is a union of complete subtrees rooted at depth~$k$,
 specified by its depth-$k$ prefixes without enumerating exponentially
 many leaves.
-This trie plays a role analogous to $\mathbb{N}[X]$ in classical
-provenance: one computes the support trie once and reads off robustness,
-qdepth, responsibility, or cross-spec comparison as different views.
-But the analogy is imperfect: $\mathbb{N}[X]$'s universality is
-algebraic (all specializations are semiring homomorphisms), whereas
-our specializations include combinatorial operations (Shapley values)
-and metric ones ($|\mathrm{supp}|/|\mathcal{D}|$) that are not
-semiring maps.
-Whether there is a formal category in which the support trie is
-universal---and what efficient algorithms the factorized representation
-enables~\cite{olteanu2015factorized}---remain open.
-
-\paragraph{Determination composition.}
-When two determinations share a common prefix, they share initial layers.
-A formal treatment of determination morphisms---how determinations relate
-under prefix extension, restriction, and substitution---would enable
-compositional reasoning across sub-specifications.
+Computing support intersection (join) and union directly on this
+factorized representation---without materializing $\mathcal{D}$---parallels
+factorized query evaluation~\cite{olteanu2015factorized};
+formalizing this connection may yield efficient algorithms for
+provenance queries over the determination semiring.
 
 \paragraph{Joint attribution.}
 Determination responsibility and tuple-level
@@ -3206,8 +3372,8 @@ In $\mbox{Datalog}^\neg$, depth is bounded by the program's dependency
 structure regardless of EDB size.
 Characterizing when a specification's depth is bounded by its static
 structure vs.\ when it grows with the input stream --- and whether
-recurring depth admits uniform depth certification (a single check
-covering all recurrences) --- is open.
+recurring depth admits uniform bypass (a single check covering all
+recurrences) --- is open.
 
 % ================================================================
 \section{Depth Reduction: Bounding Determination Complexity}
@@ -3229,7 +3395,7 @@ basis.
 
 \begin{definition}[Depth reduction mechanisms]
   \label{def:depth-reduction}
-  Let $\Spec$ have depth $d$ under commitment basis $\Phi$.
+  Let $\Spec$ have depth $d$ under commitment basis $(\Phi, \lambda)$.
   A \emph{depth reduction} to $d^* < d$ is achieved by one of:
   \begin{enumerate}[nosep,label=(\roman*)]
     \item \emph{Coarsening} $\Ord$: enlarge the outcome order to
@@ -3325,7 +3491,7 @@ mechanism applies at each layer.
 \end{proposition}
 \begin{proof}
   Follows directly from Definitions~\ref{def:determined},
-  \ref{def:filtration}, and~\ref{def:commitment}: (i)~comparable
+  \ref{def:layered-basis}, and~\ref{def:commitment}: (i)~comparable
   outcomes need no commitment; (ii)~commuting commitments form a single
   layer; (iii)~a deterministic commitment adds no branching.
 \end{proof}

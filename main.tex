@@ -208,8 +208,9 @@ $\mbox{Datalog}^\neg$; for each, classical semantic variants
         well-founded, stable) are different reading depths of a shared
         filtration; monus elimination shows that sealing is
         support-equivalent to semirings with monus for stratified
-        programs, and extends to unstratified negation where monus is
-        undefined
+        programs; the determination framework also handles unstratified
+        negation, where monus does not provide a single resolved
+        semantics
         (Section~\ref{sec:negation-preview},
         Appendix~\ref{sec:appendix-datalog}).
   \item \emph{Quantitative measures and semantic-change analysis}:
@@ -673,6 +674,11 @@ pairwise in the history at which they are applied.
 The layers of $D$ are its Foata normal
 form~\cite{mazurkiewicz1977concurrent}: the coarsest grouping into
 commuting stages.
+(In general, commutativity may be dynamic---dependent on the current
+admissible set---making canonical layering subtle; see
+Appendix~\ref{app:open-questions}.
+In both instantiations below, commutativity is history-independent,
+so the layer structure is unambiguous.)
 Write $L_1(D), L_2(D), \ldots$ for the successive layers of $D$;
 the \emph{depth} of $D$ is its number of layers.
 
@@ -1000,7 +1006,9 @@ Appendix~\ref{sec:appendix-SI}).
           Every response is entailed by the current state and the
           arriving request.
     \item Under any such $L$ with scheduling discretion (batching,
-          commit-order choice, or victim selection): worst-case
+          commit-order choice, or victim selection), whose forbidden
+          cycle pattern can be generated repeatedly around a surviving
+          discretionary transaction: worst-case
           depth~$\Theta(n)$, where $n$ is the number of transactions.
           Per-batch depth is~$2$ (seal the batch; choose a processing
           order within it).
@@ -1043,11 +1051,6 @@ Appendix~\ref{sec:appendix-SI}).
   Appendix~\ref{app:protocols}.)
 \end{proof}
 
-\noindent
-The lower bound assumes the forbidden cycle pattern is repeatably
-generable around a surviving transaction whose fate is discretionary
-(victim selection or deferred validation); this holds for SER and SI
-under the constructions in Appendix~\ref{app:protocols}.
 
 \begin{example}[Per-batch depth under OCC with batch validation]
   \label{ex:overlapping-cycles}
@@ -1509,8 +1512,9 @@ reducing depth.
 Semiring provenance~\cite{green2007provenance} and its extensions to
 probabilistic~\cite{suciu2011probabilistic},
 factorized~\cite{olteanu2015factorized}, and
-aggregate~\cite{senellart2018provenance} settings all assume a
-fixed, resolved semantics (depth~$0$ in our framework).
+aggregate~\cite{senellart2018provenance} settings operate after the
+semantic model is fixed---a single database instance with no
+unresolved ambiguity (depth~$0$ in our framework).
 Why-not provenance~\cite{buneman2001why}, causal
 responsibility~\cite{meliou2010causality}, and counterfactual
 explanations~\cite{halpern2001causes} likewise condition on a single
@@ -1526,9 +1530,9 @@ attributes the derivation under that resolution.
 
 \smallskip
 \noindent\textbf{Possible-worlds and probabilistic provenance.}
-Probabilistic databases~\cite{suciu2011probabilistic} represent
-uncertainty via independent tuple-existence events; lineage is a
-Boolean formula over these events.
+Probabilistic databases~\cite{suciu2011probabilistic} add flat
+uncertainty over tuple-existence events (no non-commuting commitment
+layers); lineage is a Boolean formula over these events.
 A tuple-independent PDB is the depth-$1$ special case of our framework
 (Proposition~\ref{prop:collapse-depth-1}): all commitments commute in
 a single layer.
@@ -1777,53 +1781,13 @@ additive approximation.
   $O(n/\varepsilon^2 \cdot \log(1/\delta) \cdot p(n))$.
 \end{proposition}
 \begin{proof}
-  We use the sampling approach of~\cite{livshits2021shapley}.
-  Each sample is a (permutation, random-completion) pair: draw a random
-  permutation $\pi$, let $C$ be the players preceding $i$, fix $C$ to
-  $D^*$-values, sample a uniform completion of the remaining variables,
-  and evaluate the query with $\varphi_i$ set to each of its two values.
-  The difference ($\pm 1$ or $0$) is an unbiased estimate of
-  $\rho(\varphi_i, t)$ (by the permutation characterization of Shapley
-  values~\cite{shapley1953value}, with the inner expectation over
-  completions giving $v(C)$).
-  Each sample is bounded in $[-1,1]$; Hoeffding's inequality over
-  $O(n/\varepsilon^2 \cdot \log(1/\delta))$ samples gives the bound.
+  By standard permutation sampling of Shapley
+  values~\cite{livshits2021shapley,shapley1953value}: each sample draws
+  a random permutation, fixes preceding players to $D^*$-values,
+  completes the rest uniformly, and measures $\varphi_i$'s marginal
+  effect.
+  Hoeffding's inequality gives the bound.
 \end{proof}
-
-\subsection{Budget Compositionality}
-
-\begin{proposition}[Responsibility budget under join and union]
-  \label{prop:resp-compose}
-  Let $B(t) = v(N) - v(\emptyset) = 1 - |\mathrm{supp}(t)|/2^n$ denote
-  the total responsibility budget for tuple $t$.
-  Then:
-  \begin{enumerate}[nosep,label=(\alph*)]
-    \item \emph{Join increases budget:}
-          $B(t_1 \bowtie t_2) \ge \max(B(t_1), B(t_2))$.
-    \item \emph{Union decreases budget:}
-          $B(t_1 \cup t_2) \le \min(B(t_1), B(t_2))$.
-  \end{enumerate}
-\end{proposition}
-\begin{proof}
-  (a)~A joined tuple $t_1 \bowtie t_2$ holds only in determinations
-  where \emph{both} $t_1$ and $t_2$ hold, so
-  $\mathrm{supp}(t_1 \bowtie t_2) = S_1 \cap S_2$.
-  Since $|S_1 \cap S_2| \le \min(|S_1|, |S_2|)$, the support shrinks
-  and the budget grows:
-  $B(t_1 \bowtie t_2) = 1 - |S_1 \cap S_2|/2^n \ge \max(B(t_1), B(t_2))$.
-  (b)~A union tuple $t_1 \cup t_2$ holds whenever \emph{either} holds,
-  so $\mathrm{supp}(t_1 \cup t_2) = S_1 \cup S_2$.
-  Since $|S_1 \cup S_2| \ge \max(|S_1|, |S_2|)$, the support grows
-  and the budget shrinks:
-  $B(t_1 \cup t_2) = 1 - |S_1 \cup S_2|/2^n \le \min(B(t_1), B(t_2))$.
-\end{proof}
-
-\noindent
-Joins increase the total responsibility budget (more
-commitment-sensitive); unions decrease it (alternative derivations
-reduce overall dependence).
-Individual commitments' responsibilities redistribute within the budget
-but are not individually monotone under join.
 
 \subsection{Worked Example: Multi-Layer Responsibility}
 
@@ -2450,9 +2414,15 @@ The determination depth is $k{+}d$.
 
 \begin{proposition}[Soundness and completeness]
   \label{prop:canonical-basis-sc}
-  The canonical layered choice basis is sound and complete: each
-  resolving determination produces a stable model, and every stable
-  model is produced by exactly one resolving determination.
+  For finite $\mbox{Datalog}^\neg$ programs whose negative SCCs admit
+  the layered choice decomposition of
+  Definition~\ref{def:canonical-choice-basis} (each SCC has finitely
+  many local stable extensions given its fixed context, and composing
+  local extensions in topological order is sound and complete for
+  global stable models), the canonical layered choice basis is sound
+  and complete: each resolving determination produces a stable model,
+  and every stable model is produced by exactly one resolving
+  determination.
 \end{proposition}
 \begin{proof}
   The full GL reduct decomposes along the SCC DAG: once atoms outside
@@ -2728,6 +2698,10 @@ a zero-test---the same behavior as sealing.
 The tricky aspect of monus is that $1_K \mathbin{\dot{-}} v$ could in
 principle be some nonzero value less than $1_K$ when $v \neq 0_K$; the
 zero-divisor-free condition rules this out.
+(For the Boolean support abstraction $\mathrm{PosBool}[X]$, where all
+nonzero elements are $\ge 1_K$, the result is immediate; the lemma
+below provides the stronger algebraic condition covering all standard
+provenance semirings.)
 
 \begin{lemma}
   \label{lem:monus-negation-value}
@@ -2884,10 +2858,12 @@ reduces the stored commitment sequence from $O(nd)$ to $O(nk)$.
 Within a retained layer, the full commitment may carry more detail than
 the query requires.
 We envision a \emph{certificate} for commitment $\varphi$: a predicate $C$ that
-over-approximates $\varphi$'s effect. Commitments must guarantee
-$\Spec(H \cdot \varphi) \subseteq \{o \mid C(o)\}$ (soundness---no
-outcome excluded by $\varphi$ is admitted by $C$), but may admit
-additional outcomes that $\varphi$ would have excluded.
+over-approximates $\varphi$'s effect.
+It must satisfy
+$\Spec(H \cdot \varphi) \subseteq \{o \mid C(o)\}$
+(soundness---every outcome that $\varphi$ retains is also retained by
+$C$), but may admit additional outcomes that $\varphi$ would have
+excluded.
 A certificate is \emph{sufficient} for a query family $\mathcal{Q}$ if
 replacing $\varphi$ with $C$ yields the same query answers.
 The space savings come from the gap between the full commitment (which

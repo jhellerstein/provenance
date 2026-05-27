@@ -394,7 +394,7 @@ aspects of 2PL, OCC and MVTO.)
 \paragraph{Three forces on a history.}
 \label{sec:three-forces}%
 A history evolves under three
-forces~\cite{hellerstein2026complexity}:
+forces~\cite{anon2026complexity}:
 \emph{environment events} extend the history but are not chosen;
 \emph{commitments} replace the admissible set with a subset
 (irrevocably constraining which outcomes remain possible);
@@ -1395,11 +1395,11 @@ comparison and a connection to PDB query complexity.
 
 \subsection{Quantitative Measures}
 
-The filtration assigns each tuple a depth relative to a provenance
+The filtration assigns depth to each tuple relative to provenance
 query $Q$ (Definition~\ref{def:det-provenance}).
 A tuple with $\mathrm{qdepth}(t) = j$ is settled once layers
 $1, \ldots, j$ are discharged --- layers $j{+}1, \ldots, d$ were
-irrelevant to it.
+irrelevant to $Q$.
 
 \begin{proposition}[Compositional depth bound]
   \label{prop:depth-bound}
@@ -1475,9 +1475,8 @@ al.~\cite{meliou2010causality} from data tuples to semantic
 commitments: where they ask ``which input tuple is most responsible
 for an output,'' we ask ``which commitment is most responsible for the
 output holding under this resolution.''
-Full development, including hardness, approximation results, and a
-worked multi-layer example (Example~\ref{ex:multi-layer-resp}), appears
-in Appendix~\ref{app:responsibility-details}.
+Full development, including hardness and approximation results,
+appears in Appendix~\ref{app:responsibility-details}.
 
 \subsection{Provenance Query Complexity}
 
@@ -1568,7 +1567,7 @@ resolutions (Appendix~\ref{app:systems-lineage}).
 
 \smallskip
 \noindent\textbf{Other related frameworks.}
-Hellerstein~\cite{hellerstein2026complexity} characterizes the cost of
+Anonymous~\cite{anon2026complexity} characterizes the cost of
 semantic resolution; we assume determinations are given and explain how
 observations depend on them.
 Arenas et al.~\cite{arenas1999consistent} define certain answers as

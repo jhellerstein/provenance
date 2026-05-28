@@ -25,11 +25,8 @@
 \newcommand{\drule}{\mathrel{:\!-}}
 \newcommand{\snap}{\mathsf{snap}}
 \newcommand{\seal}{\mathsf{seal}}
-\newcommand{\FCW}{\mathsf{FCW}}
 \newcommand{\seq}{\mathbin{\triangleright}}
-\newcommand{\Obs}{\mathsf{Obs}}
 \newcommand{\Ord}{\preceq}
-\newcommand{\jmh}[1]{\textcolor{red}{\textbf{[JMH:} #1\textbf{]}}}
 % ---------- Theorem environments ----------
 \newtheorem{definition}{Definition}
 \newtheorem{theorem}{Theorem}
@@ -58,10 +55,10 @@
 }
 \date{\today}
 
-\acmConference[Conference]{Full Conference Name}{Month Year}{Location}
-\acmBooktitle{Proceedings of the Conference}
+\acmConference[PODS '26]{Proceedings of the 45th ACM SIGMOD-SIGACT-SIGAI Symposium on Principles of Database Systems}{June 2026}{Berlin, Germany}
+\acmBooktitle{Proceedings of the 45th ACM SIGMOD-SIGACT-SIGAI Symposium on Principles of Database Systems (PODS '26)}
 \acmYear{2026}
-\acmISBN{123-4-56789-012-3}
+\acmISBN{978-x-xxxx-xxxx-x}
 
 
 \begin{document}
@@ -497,8 +494,6 @@ resolved---when incompatible outcomes coexist.
 
 \begin{theorem}[Classical provenance is pointwise in determinations]
   \label{thm:resolution-implies-monotone}
-  \label{thm:necessity}
-  \label{ass:prefix-closed}
   Classical semiring provenance (a single $K$-relation) correctly
   represents a specification $\Spec$ iff all resolving determinations
   produce the same tuple membership and derivational annotation.
@@ -705,8 +700,6 @@ increases.
   $\mathcal{F}_0 = \{\emptyset, \mathcal{D}\}$ and
   $\mathcal{F}_d = 2^{\mathcal{D}}$ once all determinations are
   distinguished.
-  The \emph{query-relative depth} (qdepth) of a tuple $t$ is the
-  smallest $k$ with $\mathrm{supp}(P(t)) \in \mathcal{F}_k$.
 \end{definition}
 
 \noindent
@@ -990,9 +983,6 @@ Appendix~\ref{sec:appendix-SI}).
 
 \begin{theorem}[Determination depth for transactions]
   \label{thm:txn-depth}
-  \label{prop:rc-depth-zero}
-  \label{prop:ser-depth}
-  \label{prop:si-depth}
   The following bounds depend only on the protocol's resolution class:
   \begin{enumerate}[nosep,label=(\alph*)]
     \item Under any isolation level that forbids no cycle type (e.g.,
@@ -1072,8 +1062,7 @@ Appendix~\ref{sec:appendix-SI}).
 \subsection{Per-Tuple Isolation Sensitivity}
 
 Vandevoort et al.~\cite{vandevoort2025mixed} certify individual
-transactions as isolation-insensitive --- a per-transaction result,
-like our commitment basis.
+transactions as isolation-insensitive --- a per-transaction result.
 Provenance queries over the resulting database enable a richer cut:
 both finer grain (a query selecting a single tuple) and
 cross-transaction questions (a join combining outputs of multiple
@@ -1174,8 +1163,8 @@ insensitivity propagates through any such query.
     $\varphi_{T_2 \prec T_3} \cdot \varphi_{T_3 \prec T_Q}$ & $1$ \\
     %
     SER, overlapping cycles &
-    $\varphi_{\mathsf{a}}(T_1) \seq \varphi_{\mathsf{a}}(T_4)$
-    \;\emph{(Ex.~\ref{ex:overlapping-cycles})} & $O(n)$ \\
+    $\varphi_{\mathsf{a}}(T_1) \seq \varphi_{\mathsf{a}}(T_2)$
+    \;\emph{(Thm.~\ref{thm:txn-depth}c)} & $O(n)$ \\
     %
     Snapshot isolation &
     $\{\varphi_{\snap(T_6){=}\emptyset},\, \varphi_{\snap(T_7){=}\emptyset}\}
@@ -1594,7 +1583,7 @@ depends on each layer of resolution.
 
 This work extends algebraic data
 provenance to settings like transactional databases and
-distributed systems, where semantic ambiguity is the norm
+distributed systems, where semantic ambiguity is the norm and where
 provenance can pay off in full.
 Appendix~\ref{app:systems-lineage} sketches a concrete systems
 agenda.

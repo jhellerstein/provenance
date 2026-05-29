@@ -54,21 +54,21 @@
 }
 \date{\today}
 
-\acmConference[PODS '26]{Proceedings of the 45th ACM SIGMOD-SIGACT-SIGAI Symposium on Principles of Database Systems}{June 2026}{Berlin, Germany}
-\acmBooktitle{Proceedings of the 45th ACM SIGMOD-SIGACT-SIGAI Symposium on Principles of Database Systems (PODS '26)}
-\acmYear{2026}
+\acmConference[PODS '27]{Proceedings of the 46th ACM SIGMOD-SIGACT-SIGAI Symposium on Principles of Database Systems}{June 2027}{Huntington Beach, CA, USA}
+\acmBooktitle{Proceedings of the 46th ACM SIGMOD-SIGACT-SIGAI Symposium on Principles of Database Systems (PODS '27)}
+\acmYear{2027}
 \acmISBN{978-x-xxxx-xxxx-x}
 
 
 \begin{document}
 
 \begin{abstract}
-  Data provenance explains how a query result was derived---but only
-  after the system's semantics have been fixed.
-  When multiple admissible outcomes coexist (concurrent transactions
-  may serialize differently; a logic program may have multiple stable
-  models), provenance cannot even pose its question until something
-  chooses among them.
+  Many data systems admit multiple admissible outcomes for the same
+  input: concurrent transactions may serialize in one of many orders; a logic
+  program may have multiple stable models.
+  Classical data provenance cannot even pose its question in such
+  settings---it explains how a result was derived, but only after
+  something has chosen which result to produce.
   We introduce \emph{determination provenance} to track the
   commitments that resolve this ambiguity.
   A tuple's \emph{support} is the set of resolutions under which it
@@ -78,7 +78,7 @@
   depth}---how many layers of semantic resolution it depends on.
   Positive relational algebra respects the filtration, enabling
   compositional robustness analysis and quantitative diagnosis of
-  coordination cost.
+  resolution cost.
   We instantiate the framework for transactional isolation and for
   $\mbox{Datalog}^\neg$; in both, classical semantic variants
   (isolation levels; negation semantics) correspond to different views
@@ -107,11 +107,12 @@ models; a distributed system may admit multiple orderings consistent
 with the same observed history.
 Classical provenance presupposes the very resolution that these
 systems leave open.
-The result is a semantic mismatch: provenance can explain \emph{how}
-a bank balance was computed, but not \emph{why} the money transfer that would
-have prevented a withdrawal rejection arrived too late---that requires
-identifying the scheduling commitment that ordered the balance check
-before the transfer posted.
+It can explain \emph{how} a bank balance was computed once the
+execution is fixed, but not \emph{why} a money transfer arrived too
+late to prevent a withdrawal rejection. The latter question concerns the
+scheduling commitment that ordered the balance check before the
+transfer posted, which is prior to and outside the scope of
+classical provenance.
 
 This paper introduces \emph{determination provenance} to capture the
 commitments that resolve semantic ambiguity.
@@ -159,32 +160,30 @@ Value $b$ has full support (every determination); $d$ has partial
 support (the determinations in which $T_Q$
 observes $T_2$'s insert).
 A provenance question like ``is $d$ robust?'' reduces to checking
-whether $d$'s support is full; counterfactual questions are read from
-the support; and quantitative diagnosis from the support's
-measure---recovering the three capabilities that classical semiring
-provenance provides in the resolved setting.
+whether $d$'s support is full.
+Counterfactual questions are read from the support, and quantitative
+diagnosis from its measure---recovering the three capabilities that
+classical semiring provenance provides in the resolved setting.
 Supports compose through relational operations (join intersects
 supports; union merges them).
 
 When commitments are layered---some depending on others' outcomes---the
 semiring carries a \emph{filtration}: a chain of sub-semirings
 reflecting how much resolution each tuple requires.
-A tuple with full or empty support has depth~$0$; a contingent tuple
-has positive depth reflecting which layer it depends on.
-Provenance query evaluation (positive RA) cannot make a result tuple
-depend on more layers than the tuples it reads from.
-The filtration supports three forms of reasoning:
-\emph{depth bounds} (queries reading only tuples settled before
-layer~$k$ are unaffected by layers $k, \ldots, d$);
-\emph{semantic-change analysis}
-(specifications over the same basis can be compared tuple-by-tuple,
-separating wasted coordination from genuine semantic differences); and
-a \emph{complexity connection} (depth-$1$ provenance coincides with
-PDB lineage; higher depths correspond to layered PDB evaluation).
+A robust or impossible tuple has depth~$0$; a contingent tuple has
+positive depth reflecting which layer it first depends on.
+
+The key property on filtrations: positive RA cannot increase a result tuple's depth
+beyond the maximum of its inputs.
+This enables \emph{depth bounds} (queries over shallow tuples are
+unaffected by deeper layers), \emph{semantic-change analysis}
+(comparing specifications tuple-by-tuple), and a \emph{complexity
+connection} (depth-$1$ coincides with PDB lineage; higher depths
+correspond to layered PDB evaluation).
 We instantiate the framework for transactional isolation and
-$\mbox{Datalog}^\neg$; for each, classical semantic variants
-  (isolation levels; negation semantics) correspond to different views
-  of a single filtration.
+$\mbox{Datalog}^\neg$; in both, classical semantic variants
+(isolation levels; negation semantics) are different views
+of a single filtration.
 
 \paragraph{Contributions.}
 \begin{enumerate}[label=(\roman*),nosep,leftmargin=*]
@@ -199,8 +198,8 @@ $\mbox{Datalog}^\neg$; for each, classical semantic variants
         (in the number of transactions) with scheduling discretion, and SER/SI are incomparable in
         per-tuple query-relative depth
         (Section~\ref{sec:transactions}).
-  \item \emph{Instantiation for $\mbox{Datalog}^\neg$}: for a representative
-        class of programs, negation semantics (stratified,
+  \item \emph{Instantiation for $\mbox{Datalog}^\neg$}: for programs
+        with stable models, negation semantics (stratified,
         well-founded, stable) are different reading depths of a shared
         filtration; monus elimination shows that sealing is
         support-equivalent to semirings with monus for stratified
@@ -210,12 +209,9 @@ $\mbox{Datalog}^\neg$; for each, classical semantic variants
         (Section~\ref{sec:negation-preview},
         Appendix~\ref{sec:appendix-datalog}).
   \item \emph{Quantitative measures and semantic-change analysis}:
-        queries whose inputs have depth below layer~$k$ are unaffected
-        by layers $k, \ldots, d$; specifications over the same basis can be
-        compared tuple-by-tuple, quantifying coordination \emph{work
-        regret} vs.\ genuine \emph{semantic shift}; depth-$1$
-        provenance coincides with PDB lineage, and higher depths
-        correspond to layered PDB evaluation
+        specifications over the same basis can be compared
+        tuple-by-tuple, quantifying \emph{work regret}
+        vs.\ genuine \emph{semantic shift}
         (Section~\ref{sec:discussion}).
   \item \emph{Complexity and attribution} (appendices):
         robustness is coNP-complete; a
@@ -229,16 +225,10 @@ $\mbox{Datalog}^\neg$; for each, classical semantic variants
 \label{sec:prelim}
 % ================================================================
 
-Classical data provenance assumes a fixed, resolved semantics: for each input
-instance, a query determines a unique result set, and provenance explains how
-each tuple in that set was derived.
-In many systems, however, concurrency, negation, or underspecification admit
-multiple admissible results for the same input.
-This section introduces a minimal semantic framework for reasoning about
-ambiguity.
-We model specifications with multiple admissible outcomes and the
-irrevocable choice structures—called \emph{determinations}—that restrict ambiguity until
-meaning is determinate.
+We now formalize the setting: specifications with multiple admissible
+outcomes and the irrevocable choice structures---called
+\emph{determinations}---that restrict ambiguity until meaning is
+determinate.
 
 \subsection{Histories}
 Histories are used to model ambiguity in distributed systems~\cite{lamport};
@@ -285,7 +275,8 @@ to rule out $o_1$ but rather to \emph{refine} it---$o_2$ adds detail
 without contradicting $o_1$.
 The order $\Ord$ is part of the specification---a modeling choice, not
 derived from execution structure. Changing $\Ord$ changes the
-specification (enlarging $\Ord$ relaxes coordination requirements).
+specification (enlarging $\Ord$ makes more outcomes compatible,
+reducing the commitments needed to resolve ambiguity).
 
 \begin{definition}[Specification]
   A \emph{specification} is a triple $(\Hist, O, \Ord)$ together with a
@@ -316,8 +307,8 @@ the maximal element of $\Spec(H)$ under $\Ord$.
   A specification is \emph{determined} at $H$ if $\Spec(H)$ forms a
   chain under $\Ord$ with a maximum element (all outcomes are pairwise
   comparable and a greatest one exists).
-  For a determined history, we write $\Spec(H)$ by abuse of notation
-  for this maximum (the resolved outcome).
+  For a determined history, we write $\Spec(H)$ as shorthand
+  for $\max_{\Ord} \Spec(H)$ (the resolved outcome).
   A specification is \emph{determined} if it is determined at every
   $H \in \Hist$.
 \end{definition}
@@ -1202,6 +1193,7 @@ insensitivity propagates through any such query.
 \label{sec:negation-preview}
 % ================================================================
 
+We now turn to our second instantiation.
 In $\mbox{Datalog}^\neg$, the non-monotone operation is
 \emph{negation}: concluding $\neg p$ requires establishing that
 $p$ has no (further) derivation---a completeness guarantee
@@ -1210,11 +1202,13 @@ Determination provenance decomposes this into a \emph{commitment}
 (declaring a set of derivations complete, thereby licensing negation)
 followed by monotone evaluation (the entailment that propagates
 consequences of that commitment).
-The payoff is twofold: determination provenance explains \emph{why-not}
-under ambiguity (an atom can be absent because of a semantic
-commitment, not a blocked derivation), and the filtration's
-compositionality lets one check whether a query result holds under
-multiple semantics by inspecting supports algebraically.
+The payoff is twofold.
+First, determination provenance explains \emph{why-not} under
+ambiguity: an atom can be absent because of a semantic commitment, not
+a blocked derivation.
+Second, the filtration's compositionality lets one check whether a
+query result holds under multiple semantics by inspecting supports
+algebraically.
 (Full details in Appendix~\ref{sec:appendix-datalog}.)
 
 \paragraph{Setup.}
@@ -1232,8 +1226,7 @@ Independently, the pair $(r, s)$ forms an unstratified cycle through negation.
 Outcomes assign each atom a value in
 $\{\mathbf{t}, \mathbf{f}, \mathbf{u}, \bot\}$
 ($\bot$ = not yet evaluated, $\mathbf{u}$ = genuinely ambiguous),
-ordered $\bot \Ord \mathbf{u} \Ord \mathbf{t}$ and
-$\bot \Ord \mathbf{u} \Ord \mathbf{f}$
+ordered $\bot \Ord \mathbf{u} \Ord \{\mathbf{t}, \mathbf{f}\}$
 (with $\mathbf{t}$ and $\mathbf{f}$ incomparable); outcomes are total
 assignments over the Herbrand base (unevaluated atoms receive $\bot$),
 and $o_1 \Ord o_2$ iff $o_1(a) \Ord o_2(a)$ for every atom $a$.
@@ -1328,18 +1321,13 @@ values are settled without discharging the choice layer.
 \end{proof}
 
 \noindent
-As in Section~\ref{sec:transactions}, the theorem's provenance payoff
-is compositionality: because supports at each filtration level compose
-through positive relational algebra
-(Corollary~\ref{cor:propagation-filtration}), one can check whether a
-query result holds under multiple semantics (e.g., stable $\to$
-well-founded) by inspecting supports algebraically, without re-running
-evaluation under each semantics separately.
-Note the structural contrast with transactions: negation semantics
-form a chain within the filtration (each is a deeper reading of the
-same structure), while isolation levels are incomparable resolving
-subsets of a shared filtration
-(Observation~\ref{obs:basis-entails-filtration}).
+The provenance payoff is compositionality: supports compose through
+positive RA (Corollary~\ref{cor:propagation-filtration}), so one can
+check whether a query result holds under multiple semantics by
+inspecting supports algebraically, not re-running evaluation.
+Note the structural contrast: negation semantics form a chain within
+the filtration, while isolation levels are incomparable resolving
+subsets (Observation~\ref{obs:basis-entails-filtration}).
 
 % This is correct: sealed absence → 1_K, sealed presence → 0_K matches
 % monus (1_K ∸ v) for any naturally ordered K. Downstream derivability
@@ -1355,22 +1343,20 @@ subsets of a shared filtration
   monus over $(K, \dot{-})$~\cite{dannert2021semiring}.
 \end{theorem}
 
-\noindent
-That is, sealing replaces monus: rather than subtracting provenance
-annotations, one commits to a stratum's completeness.
-An absent atom receives annotation $0_K$; a negated literal
-$\neg b$ whose atom is sealed-absent contributes $1_K$ to
-downstream derivations (the negation succeeds).
-Within each determination, derivational provenance uses ordinary
-positive $K$-evaluation.
-For unstratified programs (multiple stable models), monus is undefined
---- there is no unique model to subtract against --- while
-determination provenance remains well-defined: each stable model is a
-determination, and supports track which models produce each atom.
-
 \begin{proof}
   See Appendix~\ref{sec:appendix-datalog}.
 \end{proof}
+
+Sealing replaces monus: rather than subtracting provenance
+annotations, one commits to a stratum's completeness (sealed-absent
+atoms contribute $1_K$; sealed-present atoms contribute $0_K$).
+Within each determination, derivational provenance uses ordinary
+positive $K$-evaluation.
+For unstratified programs, monus is undefined (no unique model to
+subtract against), while determination provenance remains well-defined:
+each stable model is a determination, and supports track which models
+produce each atom.
+
 
 % ================================================================
 \section{Consequences of the Filtration}
@@ -1389,18 +1375,18 @@ comparison and a connection to PDB query complexity.
 
 \subsection{Quantitative Measures}
 
-The filtration assigns depth to each tuple relative to provenance
+The filtration assigns each tuple a depth relative to a provenance
 query $Q$ (Definition~\ref{def:det-provenance}).
 A tuple with $\mathrm{qdepth}(t) = j$ is settled once layers
-$1, \ldots, j$ are discharged --- layers $j{+}1, \ldots, d$ were
-irrelevant to $Q$.
+$1, \ldots, j$ are discharged; layers $j{+}1, \ldots, d$ were
+irrelevant.
 
 \begin{proposition}[Compositional depth bound]
   \label{prop:depth-bound}
   If every input tuple of a positive relational provenance query $Q$
-  has $\mathrm{qdepth} < k$, then every output tuple does too
-  (Corollary~\ref{cor:propagation-filtration}): layers $k, \ldots, d$
-  did not affect $Q$'s results.
+  has $\mathrm{qdepth} < k$, then so does every output tuple
+  (Cor.~\ref{cor:propagation-filtration}): layers $k, \ldots, d$
+  \mbox{are inert.}
 \end{proposition}
 
 \noindent
@@ -1422,8 +1408,9 @@ two components:
 
 \paragraph{Work regret.}
 Tuples that are robust under both $I$ and $I'$ but have
-$\mathrm{qdepth}_I(t) > \mathrm{qdepth}_{I'}(t)$ exhibit wasted
-coordination: the extra depth under $I$ did not change the outcome.
+$\mathrm{qdepth}_I(t) > \mathrm{qdepth}_{I'}(t)$ exhibit \emph{work
+regret}: the extra commitment layers under $I$ did not change the
+outcome.
 For transactions this is bidirectional
 (Proposition~\ref{prop:ser-si-incomparable}).
 
@@ -1439,7 +1426,7 @@ to well-founded semantics converts choice-layer atoms to $\mathbf{u}$.
 \noindent
 Section~\ref{sec:transactions} classified provenance queries as
 isolation-sensitive or not; this decomposition goes further by
-measuring \emph{how much} coordination each tuple costs (depth
+measuring \emph{how much} resolution each tuple costs (depth
 difference) and \emph{which} tuples change semantics (support
 difference).
 
@@ -1530,7 +1517,7 @@ A tuple-independent PDB is the depth-$1$ special case of our framework
 (Proposition~\ref{prop:collapse-depth-1}): all commitments commute in
 a single layer.
 The filtration generalizes this to layered, non-commuting commitments;
-PDB tractability dichotomies~\cite{suciu2011probabilistic} concern
+PDB tractability dichotomies~\cite{dalvi2012probabilistic,suciu2011probabilistic} concern
 formula complexity within a single layer---an orthogonal axis that
 applies equally within each layer of a determination.
 
@@ -1564,7 +1551,8 @@ resolutions (Appendix~\ref{app:systems-lineage}).
 Prior work characterizes the cost of
 semantic resolution~\cite{anon2026complexity}; we assume determinations are given and explain how
 observations depend on them.
-Arenas et al.~\cite{arenas1999consistent} define certain answers as
+Arenas et al.~\cite{arenas1999consistent} and
+Wijsen~\cite{wijsen2019certain} define certain answers as
 tuples holding in every repair---structurally analogous to robustness,
 but over flat repairs rather than layered determinations.
 
@@ -1590,26 +1578,169 @@ This work extends algebraic data
 provenance to settings like transactional databases and
 distributed systems, where semantic ambiguity is the norm and where
 provenance can pay off in full.
-Appendix~\ref{app:systems-lineage} sketches a concrete systems
-agenda.
-The remaining appendices develop the framework further:
+The practical implication is a recipe: given a system's event trace,
+define an outcome space and refinement order that identifies the
+commitments.
+The full algebraic machinery then applies---robustness,
+counterfactuals, responsibility attribution, cross-specification
+comparison---over existing observability infrastructure.
+Appendix~\ref{app:systems-lineage} develops this direction.
+
+Looking further ahead, the determination semiring has the structure of
+a probability space: $\mathcal{D}$ is a sample space, supports are
+measurable sets, and the filtration---which emerged here from the
+algebraic structure of layered commitments---is a filtration in the
+measure-theoretic sense (level-$k$ supports are exactly the
+$\mathcal{F}_k$-measurable sets).
+Under a probability measure on $\mathcal{D}$, support ratios become
+probabilities, robustness becomes a hypothesis test, and work regret
+becomes expected regret.
+That the algebraic structure of determination provenance lands so
+close to the machinery of stochastic processes suggests a deeper
+connection; developing it is a natural next step.
+
+The remaining appendices provide:
+algebraic details (Appendix~\ref{app:algebra}),
 robustness and responsibility proofs
-(Appendices~\ref{app:robustness-proofs}--\ref{app:responsibility-details}),
-full algebraic details and worked examples for transactions and
-$\mbox{Datalog}^\neg$
-(Appendices~\ref{app:algebra}--\ref{sec:appendix-datalog}),
-protocol-specific determination structures
-(Appendix~\ref{app:protocols}),
+(Appendices~\ref{app:robustness-proofs}
+and~\ref{app:responsibility-details}),
+worked examples for transactions
+(Appendices~\ref{sec:appendix-concurrency}
+and~\ref{app:protocols}) and $\mbox{Datalog}^\neg$
+(Appendix~\ref{sec:appendix-datalog}),
 heredity canonicalization
 (Appendix~\ref{app:persistence-canonicalization}),
-and open theory directions including universality, factorized support
-representations, and applications to incremental maintenance
+depth reduction (Appendix~\ref{app:depth-reduction}),
+and open theory directions
 (Appendix~\ref{app:open-questions}).
 
 \pagebreak
 \appendix
 
 % ================================================================
+\section{Algebraic Details}
+\label{app:algebra}
+\label{app:det-semiring-details}
+% ================================================================
+
+This appendix develops the algebraic structures introduced in
+Section~\ref{sec:algebra}: first the structure \emph{within} a single
+determination, then the determination semiring and filtration that
+operate \emph{across} determinations.
+
+\subsection{Within a Determination}
+
+A single determination of depth~$k$ is a sequence of conditional
+commutative monoids connected by the sequencing operator $\seq$:
+\[
+  (M_1, \circ_1) \;\seq\; (M_2, \circ_2) \;\seq\; \cdots \;\seq\; (M_k, \circ_k)
+  \;\seq\; (K, +, \cdot).
+\]
+Each $M_\ell$ is the commutative monoid of commitments at layer~$\ell$:
+within a layer, commitments commute
+($\Spec^{\ell}(H \cdot \varphi \cdot \psi) = \Spec^{\ell}(H \cdot \psi \cdot \varphi)$);
+across layers they do not, because later commitments depend on which
+outcomes earlier commitments eliminated.
+The operator $\seq$ discharges one layer's monoid and conditions the
+specification for the next; it is not an algebraic operation.
+
+The terminal element is the derivational semiring $K$ of Green et
+al.~\cite{green2007provenance}, which requires a \emph{fixed} database
+instance.
+Prior to resolution, $\mathsf{obs}$ maps multiple admissible outcomes
+to different instances; after resolution, exactly one outcome remains
+and $K$-relational evaluation applies.
+Classical provenance is the degenerate case $k = 0$: no commitment
+layers, just $K$.
+
+\subsection{Support Propagation Under Relational Algebra}
+
+The set $2^{\mathcal{D}}$ of all supports forms a commutative semiring
+under $(\cup, \cap, \emptyset, \mathcal{D})$: union is addition,
+intersection is multiplication, and distributivity holds because
+$(2^{\mathcal{D}}, \cup, \cap)$ is a distributive lattice.
+The following proposition shows that positive RA evaluation respects
+this structure.
+
+\begin{proposition}
+  The supports $\mathrm{supp}(P(t)) \subseteq \mathcal{D}$ compose
+  through positive relational algebra as follows
+  (assuming $K$ is zero-divisor-free, as holds for $\mathbb{N}[X]$
+  and all standard provenance semirings):
+  \begin{enumerate}[nosep,label=(\alph*)]
+    \item \emph{Join:}
+          $\mathrm{supp}(P(t_1 \bowtie t_2))
+          = \mathrm{supp}(P(t_1)) \cap \mathrm{supp}(P(t_2))$.
+    \item \emph{Union:}
+          $\mathrm{supp}(P(t_1) \cup P(t_2))
+          = \mathrm{supp}(P(t_1)) \cup \mathrm{supp}(P(t_2))$.
+    \item \emph{Projection/Selection:}
+          $\mathrm{supp}(P(\pi(t))) \supseteq \mathrm{supp}(P(t))$
+          and
+          $\mathrm{supp}(P(\sigma(t))) \subseteq \mathrm{supp}(P(t))$.
+  \end{enumerate}
+\end{proposition}
+\begin{proof}
+  (a)~A join requires both premises to hold simultaneously.
+  Under determination $D$, $t_1 \bowtie t_2$ is nonempty iff both
+  $P_D(t_1) \neq 0$ and $P_D(t_2) \neq 0$ (semiring multiplication
+  has no zero divisors in $\mathbb{N}[X]$).
+  Hence $D \in \mathrm{supp}(P(t_1 \bowtie t_2))$ iff
+  $D \in \mathrm{supp}(P(t_1)) \cap \mathrm{supp}(P(t_2))$.
+
+  (b)~A union provides alternative derivation paths.
+  $P_D(t_1 \cup t_2) = P_D(t_1) + P_D(t_2)$; this is nonzero iff at
+  least one summand is nonzero.
+
+  (c)~Projection can only add derivation paths (combining tuples that
+  agree on projected attributes); selection can only remove them.
+\end{proof}
+
+\subsection{Filtration Details}
+
+The filtration $\mathcal{F}_0 \subseteq \mathcal{F}_1 \subseteq \cdots
+\subseteq \mathcal{F}_d = 2^{\mathcal{D}}$ is defined in
+Section~\ref{sec:filtration}.
+Here we verify that it interacts correctly with the determination
+semiring operations and with query evaluation.
+
+\begin{proposition}[Filtration closure under semiring operations]
+  For any $k$, if $S_1, S_2 \in \mathcal{F}_k$, then
+  $S_1 \cup S_2 \in \mathcal{F}_k$ and
+  $S_1 \cap S_2 \in \mathcal{F}_k$.
+\end{proposition}
+\begin{proof}
+  A set is in $\mathcal{F}_k$ iff it is a union of $\equiv_k$ classes
+  (Definition~\ref{def:level-k-agreement}).
+  The union of two such sets is again a union of $\equiv_k$ classes.
+  For intersection: if $D \in S_1 \cap S_2$ and $D' \equiv_k D$,
+  then $D' \in S_1$ (since $S_1 \in \mathcal{F}_k$) and
+  $D' \in S_2$ (since $S_2 \in \mathcal{F}_k$), so
+  $D' \in S_1 \cap S_2$.
+\end{proof}
+
+\begin{corollary}[Query evaluation preserves filtration level]
+  If $\mathrm{supp}(P(t_1)) \in \mathcal{F}_j$ and
+  $\mathrm{supp}(P(t_2)) \in \mathcal{F}_k$, then
+  $\mathrm{supp}(P(t_1 \bowtie t_2)) \in \mathcal{F}_{\max(j,k)}$ and
+  $\mathrm{supp}(P(t_1 \cup t_2)) \in \mathcal{F}_{\max(j,k)}$.
+  Positive RA cannot increase query-relative depth beyond the
+  maximum depth of its inputs.
+\end{corollary}
+
+\begin{proposition}[Difference may increase depth]
+  \label{prop:difference-increases-depth}
+  Relational difference does not preserve filtration level: there exist
+  inputs of depth~$0$ whose difference has depth~$> 0$.
+\end{proposition}
+\begin{proof}
+  Let $t_1$ be robust ($\mathrm{supp} = \mathcal{D}$, depth~$0$) and
+  $t_2$ contingent ($\mathrm{supp} = S \subsetneq \mathcal{D}$,
+  depth~$> 0$).
+  Then $\mathrm{supp}(t_1 \setminus t_2) = \mathcal{D} \setminus S
+  \notin \mathcal{F}_0$, so $\mathrm{qdepth}(t_1 \setminus t_2) > 0$.
+\end{proof}
+
 % ================================================================
 \section{Robustness Proofs}
 \label{app:robustness-proofs}
@@ -1851,129 +1982,7 @@ nonzero responsibility.
   Both commitments bear negative responsibility for $t$'s absence.
 \end{example}
 
-% ================================================================
-\section{Algebraic Details}
-\label{app:algebra}
-\label{app:det-semiring-details}
-% ================================================================
 
-This appendix develops the algebraic structures introduced in
-Section~\ref{sec:algebra}: first the structure \emph{within} a single
-determination, then the determination semiring and filtration that
-operate \emph{across} determinations.
-
-\subsection{Within a Determination}
-
-A single determination of depth~$k$ is a sequence of conditional
-commutative monoids connected by the sequencing operator $\seq$:
-\[
-  (M_1, \circ_1) \;\seq\; (M_2, \circ_2) \;\seq\; \cdots \;\seq\; (M_k, \circ_k)
-  \;\seq\; (K, +, \cdot).
-\]
-Each $M_\ell$ is the commutative monoid of commitments at layer~$\ell$:
-within a layer, commitments commute
-($\Spec^{\ell}(H \cdot \varphi \cdot \psi) = \Spec^{\ell}(H \cdot \psi \cdot \varphi)$);
-across layers they do not, because later commitments depend on which
-outcomes earlier commitments eliminated.
-The operator $\seq$ discharges one layer's monoid and conditions the
-specification for the next; it is not an algebraic operation.
-
-The terminal element is the derivational semiring $K$ of Green et
-al.~\cite{green2007provenance}, which requires a \emph{fixed} database
-instance.
-Prior to resolution, $\mathsf{obs}$ maps multiple admissible outcomes
-to different instances; after resolution, exactly one outcome remains
-and $K$-relational evaluation applies.
-Classical provenance is the degenerate case $k = 0$: no commitment
-layers, just $K$.
-
-\subsection{Support Propagation Under Relational Algebra}
-
-The set $2^{\mathcal{D}}$ of all supports forms a commutative semiring
-under $(\cup, \cap, \emptyset, \mathcal{D})$: union is addition,
-intersection is multiplication, and distributivity holds because
-$(2^{\mathcal{D}}, \cup, \cap)$ is a distributive lattice.
-The following proposition shows that positive RA evaluation respects
-this structure.
-
-\begin{proposition}
-  The supports $\mathrm{supp}(P(t)) \subseteq \mathcal{D}$ compose
-  through positive relational algebra as follows
-  (assuming $K$ is zero-divisor-free, as holds for $\mathbb{N}[X]$
-  and all standard provenance semirings):
-  \begin{enumerate}[nosep,label=(\alph*)]
-    \item \emph{Join:}
-          $\mathrm{supp}(P(t_1 \bowtie t_2))
-          = \mathrm{supp}(P(t_1)) \cap \mathrm{supp}(P(t_2))$.
-    \item \emph{Union:}
-          $\mathrm{supp}(P(t_1) \cup P(t_2))
-          = \mathrm{supp}(P(t_1)) \cup \mathrm{supp}(P(t_2))$.
-    \item \emph{Projection/Selection:}
-          $\mathrm{supp}(P(\pi(t))) \supseteq \mathrm{supp}(P(t))$
-          and
-          $\mathrm{supp}(P(\sigma(t))) \subseteq \mathrm{supp}(P(t))$.
-  \end{enumerate}
-\end{proposition}
-\begin{proof}
-  (a)~A join requires both premises to hold simultaneously.
-  Under determination $D$, $t_1 \bowtie t_2$ is nonempty iff both
-  $P_D(t_1) \neq 0$ and $P_D(t_2) \neq 0$ (semiring multiplication
-  has no zero divisors in $\mathbb{N}[X]$).
-  Hence $D \in \mathrm{supp}(P(t_1 \bowtie t_2))$ iff
-  $D \in \mathrm{supp}(P(t_1)) \cap \mathrm{supp}(P(t_2))$.
-
-  (b)~A union provides alternative derivation paths.
-  $P_D(t_1 \cup t_2) = P_D(t_1) + P_D(t_2)$; this is nonzero iff at
-  least one summand is nonzero.
-
-  (c)~Projection can only add derivation paths (combining tuples that
-  agree on projected attributes); selection can only remove them.
-\end{proof}
-
-\subsection{Filtration Details}
-
-The filtration $\mathcal{F}_0 \subseteq \mathcal{F}_1 \subseteq \cdots
-\subseteq \mathcal{F}_d = 2^{\mathcal{D}}$ is defined in
-Section~\ref{sec:filtration}.
-Here we verify that it interacts correctly with the determination
-semiring operations and with query evaluation.
-
-\begin{proposition}[Filtration closure under semiring operations]
-  For any $k$, if $S_1, S_2 \in \mathcal{F}_k$, then
-  $S_1 \cup S_2 \in \mathcal{F}_k$ and
-  $S_1 \cap S_2 \in \mathcal{F}_k$.
-\end{proposition}
-\begin{proof}
-  A set is in $\mathcal{F}_k$ iff it is a union of $\equiv_k$ classes
-  (Definition~\ref{def:level-k-agreement}).
-  The union of two such sets is again a union of $\equiv_k$ classes.
-  For intersection: if $D \in S_1 \cap S_2$ and $D' \equiv_k D$,
-  then $D' \in S_1$ (since $S_1 \in \mathcal{F}_k$) and
-  $D' \in S_2$ (since $S_2 \in \mathcal{F}_k$), so
-  $D' \in S_1 \cap S_2$.
-\end{proof}
-
-\begin{corollary}[Query evaluation preserves filtration level]
-  If $\mathrm{supp}(P(t_1)) \in \mathcal{F}_j$ and
-  $\mathrm{supp}(P(t_2)) \in \mathcal{F}_k$, then
-  $\mathrm{supp}(P(t_1 \bowtie t_2)) \in \mathcal{F}_{\max(j,k)}$ and
-  $\mathrm{supp}(P(t_1 \cup t_2)) \in \mathcal{F}_{\max(j,k)}$.
-  Positive RA cannot increase query-relative depth beyond the
-  maximum depth of its inputs.
-\end{corollary}
-
-\begin{proposition}[Difference may increase depth]
-  \label{prop:difference-increases-depth}
-  Relational difference does not preserve filtration level: there exist
-  inputs of depth~$0$ whose difference has depth~$> 0$.
-\end{proposition}
-\begin{proof}
-  Let $t_1$ be robust ($\mathrm{supp} = \mathcal{D}$, depth~$0$) and
-  $t_2$ contingent ($\mathrm{supp} = S \subsetneq \mathcal{D}$,
-  depth~$> 0$).
-  Then $\mathrm{supp}(t_1 \setminus t_2) = \mathcal{D} \setminus S
-  \notin \mathcal{F}_0$, so $\mathrm{qdepth}(t_1 \setminus t_2) > 0$.
-\end{proof}
 
 % ===============================================================
 \section{Transactional Determination Provenance: SI and Cross-Level Comparison}
@@ -2760,123 +2769,6 @@ agree.
   (Appendix~\ref{app:open-questions}).
 \end{remark}
 
-
-% ================================================================
-\section{Systems Directions}
-\label{app:systems-lineage}
-\label{app:certificates}
-% ================================================================
-
-Algebraic data provenance~\cite{green2007provenance} offers powerful
-compositional analysis---robustness, counterfactuals, quantitative
-attribution---but applies only after semantics is fixed: a single
-database, a single execution, a single model.
-Systems observability (distributed
-tracing~\cite{sigelman2010dapper}, workflow
-provenance~\cite{seltzer2005provenance}) is broadly deployed but
-expressively weak: it records which events occurred, not how they
-combined or whether the outcome would survive a different execution.
-Determination provenance bridges the two. Here we sketch some
-opportunities and open problems.
-
-\paragraph{From traces to algebraic provenance.}
-Standard systems traces are histories in our sense: partially ordered
-event records.
-The only additional modeling step is to define an outcome space $O$ and
-refinement order $\Ord$ (e.g., consistent serializations ordered by
-sub-trace inclusion).
-The commitment events---those that narrow the admissible set---are then
-determined in principle, though identifying them efficiently requires
-domain structure (conflict graphs, dependency annotations) rather than
-brute-force comparison of $\Spec(H)$ before and after each event;
-developing general-purpose extraction algorithms is an open problem.
-The layer structure follows from the specification and the identified
-commitments.
-
-Once the determination is extracted, the full algebraic machinery
-applies to the trace: supports give robustness and fragility;
-the filtration gives depth bounds and layer-specific diagnosis;
-responsibility attributes root causes to individual commitments;
-cross-specification comparison answers ``what if'' questions about
-alternative policies.
-The framework applies whenever provenance queries can be expressed in
-positive RA over the observation function---including semi-structured
-settings (select, filter, join over trace spans or log entries).
-The determination also compresses: rather than retaining every
-intermediate state, the system stores only the commitment sequence and
-reconstructs derivational detail on demand.
-
-As a concrete example: in distributed
-tracing~\cite{sigelman2010dapper}, unsynchronized clocks leave the
-relative ordering of concurrent spans ambiguous.
-A determination commits to clock alignments between hosts, fixing a
-single timeline.
-The support of a critical-path predicate then answers questions that
-current tracing cannot: is the database \emph{robustly} on the
-critical path (full support), or only under certain clock assumptions
-(partial support)?
-Or one could ask a counterfactual: if the clock alignment had gone
-differently (a different determination in the same $\mathcal{D}$),
-would the ad server rather than the database have been the
-bottleneck?
-The support $\mathrm{supp}(P(\mathrm{cp}=A))$ answers this directly.
-
-\paragraph{Quantitative fragility and scheduler design.}
-The support ratio $|\mathrm{supp}(P(t))| / |\mathcal{D}|$ measures
-outcome fragility structurally---from the commitment basis and conflict
-graph rather than from repeated execution.
-Computing it exactly requires enumerating $\mathcal{D}$ (exponential in
-general), but compact representations (Boolean formulas at depth~$1$;
-factorized supports at higher depths) and the Shapley-value
-approximation of Appendix~\ref{app:responsibility-details} make
-tractable estimates feasible for bounded-treewidth conflict structures.
-Given a determination structure extracted from prior runs---and
-assuming the workload's conflict structure is stable across
-runs---a scheduler could minimize maximum responsibility for an
-SLA predicate by avoiding the high-responsibility commitments
-(e.g., preferring orderings that keep fragile tuples robust).
-This is a new optimization objective: optimize across the space of
-determinations rather than within a single execution.
-
-\paragraph{Parsimony: truncation and certificates.}
-A full determination may record far more than any particular query
-needs.
-Two orthogonal dimensions of compression apply.
-
-\emph{Vertical parsimony (truncation).}
-The filtration tells us which layers matter: if a query family depends
-only on tuples with $\mathrm{qdepth} \le k$, layers
-$k{+}1, \ldots, d$ are irrelevant and can be discarded from the
-stored determination.
-For a depth-$d$ determination with $n$ commitments per layer, this
-reduces the stored commitment sequence from $O(nd)$ to $O(nk)$.
-
-\emph{Horizontal parsimony (certificates).}
-Within a retained layer, the full commitment may carry more detail than
-the query requires.
-We envision a \emph{certificate} for commitment $\varphi$: a predicate $C$ that
-over-approximates $\varphi$'s effect.
-It must satisfy
-$\Spec(H \cdot \varphi) \subseteq \{o \mid C(o)\}$
-(soundness---every outcome that $\varphi$ retains is also retained by
-$C$), but may admit additional outcomes that $\varphi$ would have
-excluded.
-A certificate is \emph{sufficient} for a query family $\mathcal{Q}$ if
-replacing $\varphi$ with $C$ yields the same query answers.
-The space savings come from the gap between the full commitment (which
-may encode an entire conflict graph or the complete state of a
-stratum) and the minimal certificate (which need only record the
-aspects relevant to $\mathcal{Q}$---e.g., the ordering predicates in a
-tuple's conflict neighborhood rather than the full serialization order).
-Richer queries require stronger certificates:
-derivational provenance needs only local conflict information, while
-cross-specification queries need the full conflict-graph structure.
-
-Together, truncation and certificates define a parameterized design
-space for parsimonious determination storage; fixing the
-parameters---choosing the query family, computing minimal certificates,
-implementing adaptive retention---is the systems work that remains.
-
 % ================================================================
 \section{Heredity Canonicalization}
 \label{app:persistence-canonicalization}
@@ -3004,114 +2896,122 @@ preserved.
 Heredity is without loss of generality for the retrospective
 analysis that determination provenance performs.
 
+
 % ================================================================
-\section{Open Questions}
-\label{app:open-questions}
+\section{Systems Directions}
+\label{app:systems-lineage}
+\label{app:certificates}
 % ================================================================
 
-Several structural questions about determinations remain open.
+Algebraic data provenance~\cite{green2007provenance} offers powerful
+compositional analysis---robustness, counterfactuals, quantitative
+attribution---but applies only after semantics is fixed: a single
+database, a single execution, a single model.
+Systems observability (distributed
+tracing~\cite{sigelman2010dapper}, workflow
+provenance~\cite{seltzer2005provenance}) is broadly deployed but
+expressively weak: it records which events occurred, not how they
+combined or whether the outcome would survive a different execution.
+Determination provenance bridges the two. Here we sketch some
+opportunities and open problems.
 
-\paragraph{Algebraic structure of the determination space.}
-Three related questions concern the internal algebra of determinations.
-\emph{Equivalence:}
-In classical trace theory~\cite{mazurkiewicz1977concurrent}, the Foata
-normal form canonically represents a word in a partially commutative
-monoid as a sequence of maximal independent layers.
-The layered structure of a determination is the analog---but commutation
-is \emph{dynamic}: whether $\varphi$ and $\psi$ commute depends on the
-current admissible set, which changes as earlier layers are discharged.
-Characterizing when two determinations are equivalent (produce the same
-resolved specification) would give determinations a precise algebraic
-identity beyond their definition.
-\emph{Composition:}
-When two determinations share a common prefix, they share initial
-layers.
-A formal treatment of determination morphisms---how determinations
-relate under prefix extension, restriction, and substitution---would
-enable compositional reasoning across sub-specifications.
-\emph{Factorized representation:}
-Within-layer commutativity gives $\mathcal{D}$ the structure of a trie
-(each layer branches on the choice of commitment set; a determination
-is a root-to-leaf path), yielding a factorized
-representation~\cite{olteanu2015factorized} over the determination
-space.
-A level-$k$ support is a union of complete subtrees rooted at
-depth~$k$, specified by its depth-$k$ prefixes without enumerating
-exponentially many leaves.
-This trie plays a role analogous to $\mathbb{N}[X]$ in classical
-provenance: one computes the support trie once and reads off robustness,
-qdepth, responsibility, or cross-spec comparison as different views.
-But the analogy is imperfect: $\mathbb{N}[X]$'s universality is
-algebraic (all specializations are semiring homomorphisms), whereas
-our specializations include combinatorial operations (Shapley values)
-and metric ones ($|\mathrm{supp}|/|\mathcal{D}|$) that are not
-semiring maps.
-Whether there is a formal category in which the support trie is
-universal---and what efficient algorithms the factorized structure
-enables---remain open.
+\paragraph{From traces to algebraic provenance.}
+Standard systems traces are histories in our sense: partially ordered
+event records.
+The only additional modeling step is to define an outcome space $O$ and
+refinement order $\Ord$ (e.g., consistent serializations ordered by
+sub-trace inclusion).
+The commitment events---those that narrow the admissible set---are then
+determined in principle, though identifying them efficiently requires
+domain structure (conflict graphs, dependency annotations) rather than
+brute-force comparison of $\Spec(H)$ before and after each event;
+developing general-purpose extraction algorithms is an open problem.
+The layer structure follows from the specification and the identified
+commitments.
 
-\paragraph{Reversible commitments.}
-In settings with rollback (speculative execution, backtracking search,
-optimistic replication with conflict resolution), commitments can be
-undone.
-Extending the framework to reversible commitments---replacing monoids
-with groups at each layer, in the spirit of incremental computation
-via group-structured changes~\cite{budiu2023dbsp}---is open.
+Once the determination is extracted, the full algebraic machinery
+applies to the trace: supports give robustness and fragility;
+the filtration gives depth bounds and layer-specific diagnosis;
+responsibility attributes root causes to individual commitments;
+cross-specification comparison answers ``what if'' questions about
+alternative policies.
+The framework applies whenever provenance queries can be expressed in
+positive RA over the observation function---including semi-structured
+settings (select, filter, join over trace spans or log entries).
+The determination also compresses: rather than retaining every
+intermediate state, the system stores only the commitment sequence and
+reconstructs derivational detail on demand.
 
-\paragraph{Depth under history extension.}
-Under a hereditary basis
-(Appendix~\ref{app:persistence-canonicalization}), the admissible set
-can only shrink as history grows:
-$\Spec(H') \subseteq \Spec(H)$ for all $H \sqsubseteq H'$.
-One would expect that determination depth is also non-increasing---as
-more events arrive, fewer commitments should be needed to resolve the
-remaining ambiguity.
-\emph{Conjecture:} under a hereditary basis, determination depth is
-monotonically non-increasing under history extension.
+As a concrete example: in distributed
+tracing~\cite{sigelman2010dapper}, unsynchronized clocks leave the
+relative ordering of concurrent spans ambiguous.
+A determination commits to clock alignments between hosts, fixing a
+single timeline.
+The support of a critical-path predicate then answers questions that
+current tracing cannot: is the database \emph{robustly} on the
+critical path (full support), or only under certain clock assumptions
+(partial support)?
+Or one could ask a counterfactual: if the clock alignment had gone
+differently (a different determination in the same $\mathcal{D}$),
+would the ad server rather than the database have been the
+bottleneck?
+The support $\mathrm{supp}(P(\mathrm{cp}=A))$ answers this directly.
 
-\paragraph{Joint attribution.}
-Classical provenance asks ``which input tuples are most responsible for
-an output?''---a game where base tuples are players and the Shapley
-value measures each tuple's marginal contribution to the
-output~\cite{livshits2021shapley}.
-Determination responsibility (Appendix~\ref{app:responsibility-details})
-asks a different question: ``which commitments are most responsible for
-this output holding under this resolution?''---a game where commitments
-are players.
-These two games are currently sequential: first attribute the
-resolution (determination responsibility), then attribute the
-derivation within that resolution (tuple-level responsibility).
-Formalizing their composition into a single joint game---with both
-commitments and tuples as players, and a unified Shapley value
-measuring each player's contribution to the final output---would
-unify the two dimensions of provenance into a single attribution.
-The challenge is that the two player sets interact: a commitment can
-make a tuple relevant (by including it in the resolved model), and a
-tuple can make a commitment relevant (by participating in a conflict
-that forces the commitment).
+\paragraph{Quantitative fragility and scheduler design.}
+The support ratio $|\mathrm{supp}(P(t))| / |\mathcal{D}|$ measures
+outcome fragility structurally---from the commitment basis and conflict
+graph rather than from repeated execution.
+Computing it exactly requires enumerating $\mathcal{D}$ (exponential in
+general), but compact representations (Boolean formulas at depth~$1$;
+factorized supports at higher depths) and the Shapley-value
+approximation of Appendix~\ref{app:responsibility-details} make
+tractable estimates feasible for bounded-treewidth conflict structures.
+Given a determination structure extracted from prior runs---and
+assuming the workload's conflict structure is stable across
+runs---a scheduler could minimize maximum responsibility for an
+SLA predicate by avoiding the high-responsibility commitments
+(e.g., preferring orderings that keep fragile tuples robust).
+This is a new optimization objective: optimize across the space of
+determinations rather than within a single execution.
 
-\paragraph{Program-bounded vs.\ input-recurrent depth.}
-The $\Theta(n)$ transactional depth arises from recurring structure:
-the same seal-plus-victim pair repeated as new conflicts arrive.
-In $\mbox{Datalog}^\neg$, depth is bounded by the program's dependency
-structure regardless of EDB size.
-Characterizing when a specification's depth is bounded by its static
-structure vs.\ when it grows with the input stream --- and whether
-recurring depth admits uniform depth certification (a single check
-covering all recurrences) --- is open.
+\paragraph{Parsimony: truncation and certificates.}
+A full determination may record far more than any particular query
+needs.
+Two orthogonal dimensions of compression apply.
 
-\paragraph{Quantitative negation beyond zero-divisor-free semirings.}
-Theorem~\ref{thm:monus-elimination} shows that sealing and monus agree
-on supports under zero-divisor-free, $\omega$-continuous semirings.
-In semirings that violate zero-divisor-freeness (e.g., bounded
-lattice semirings $(\{0,\ldots,k\}, \max, \min, 0, k)$), monus can
-assign intermediate values $1_K \mathbin{\dot{-}} v \notin \{0_K, 1_K\}$
-to negated literals, encoding a quantitative residual---how much of a
-derivation was ``overcome'' by the negation.
-Sealing discards this information.
-Whether the determination framework can be extended to capture such
-quantitative negation---perhaps via graded commitments that record
-residual strength rather than binary presence/absence---remains open.
+\emph{Vertical parsimony (truncation).}
+The filtration tells us which layers matter: if a query family depends
+only on tuples with $\mathrm{qdepth} \le k$, layers
+$k{+}1, \ldots, d$ are irrelevant and can be discarded from the
+stored determination.
+For a depth-$d$ determination with $n$ commitments per layer, this
+reduces the stored commitment sequence from $O(nd)$ to $O(nk)$.
+
+\emph{Horizontal parsimony (certificates).}
+Within a retained layer, the full commitment may carry more detail than
+the query requires.
+We envision a \emph{certificate} for commitment $\varphi$: a predicate $C$ that
+over-approximates $\varphi$'s effect.
+It must satisfy
+$\Spec(H \cdot \varphi) \subseteq \{o \mid C(o)\}$
+(soundness---every outcome that $\varphi$ retains is also retained by
+$C$), but may admit additional outcomes that $\varphi$ would have
+excluded.
+A certificate is \emph{sufficient} for a query family $\mathcal{Q}$ if
+replacing $\varphi$ with $C$ yields the same query answers.
+The space savings come from the gap between the full commitment (which
+may encode an entire conflict graph or the complete state of a
+stratum) and the minimal certificate (which need only record the
+aspects relevant to $\mathcal{Q}$---e.g., the ordering predicates in a
+tuple's conflict neighborhood rather than the full serialization order).
+Richer queries require stronger certificates:
+derivational provenance needs only local conflict information, while
+cross-specification queries need the full conflict-graph structure.
+
+Together, truncation and certificates define a parameterized design
+space for parsimonious determination storage; fixing the
+parameters---choosing the query family, computing minimal certificates,
+implementing adaptive retention---is the systems work that remains.
 
 % ================================================================
 \section{Depth Reduction: Bounding Determination Complexity}
@@ -3122,7 +3022,7 @@ The filtration measures determination complexity: a specification with
 depth $d$ requires $d$ sequential, non-commuting commitment decisions
 to resolve.
 High depth means long chains of dependent decisions --- each contingent
-on the previous --- and correspondingly high coordination cost.
+on the previous --- and correspondingly high resolution cost.
 A natural question: given a specification with depth $d$, how can we
 reduce it to a target depth $d^* < d$?
 
@@ -3232,6 +3132,116 @@ mechanism applies at each layer.
           Each such SCC reduces $d$ by one.
   \end{itemize}
 \end{example}
+
+% ================================================================
+\section{Open Questions}
+\label{app:open-questions}
+% ================================================================
+
+Several structural questions about determinations remain open.
+
+\paragraph{Algebraic structure of the determination space.}
+Three related questions concern the internal algebra of determinations.
+\emph{Equivalence:}
+In classical trace theory~\cite{mazurkiewicz1977concurrent}, the Foata
+normal form canonically represents a word in a partially commutative
+monoid as a sequence of maximal independent layers.
+The layered structure of a determination is the analog---but commutation
+is \emph{dynamic}: whether $\varphi$ and $\psi$ commute depends on the
+current admissible set, which changes as earlier layers are discharged.
+Characterizing when two determinations are equivalent (produce the same
+resolved specification) would give determinations a precise algebraic
+identity beyond their definition.
+\emph{Composition:}
+When two determinations share a common prefix, they share initial
+layers.
+A formal treatment of determination morphisms---how determinations
+relate under prefix extension, restriction, and substitution---would
+enable compositional reasoning across sub-specifications.
+\emph{Factorized representation:}
+Within-layer commutativity gives $\mathcal{D}$ the structure of a trie
+(each layer branches on the choice of commitment set; a determination
+is a root-to-leaf path), yielding a factorized
+representation~\cite{olteanu2015factorized} over the determination
+space.
+A level-$k$ support is a union of complete subtrees rooted at
+depth~$k$, specified by its depth-$k$ prefixes without enumerating
+exponentially many leaves.
+This trie plays a role analogous to $\mathbb{N}[X]$ in classical
+provenance: one computes the support trie once and reads off robustness,
+qdepth, responsibility, or cross-spec comparison as different views.
+But the analogy is imperfect: $\mathbb{N}[X]$'s universality is
+algebraic (all specializations are semiring homomorphisms), whereas
+our specializations include combinatorial operations (Shapley values)
+and metric ones ($|\mathrm{supp}|/|\mathcal{D}|$) that are not
+semiring maps.
+Whether there is a formal category in which the support trie is
+universal---and what efficient algorithms the factorized structure
+enables---remain open.
+
+\paragraph{Reversible commitments.}
+In settings with rollback (speculative execution, backtracking search,
+optimistic replication with conflict resolution), commitments can be
+undone.
+Extending the framework to reversible commitments---replacing monoids
+with groups at each layer, in the spirit of incremental computation
+via group-structured changes~\cite{budiu2023dbsp}---is open.
+
+\paragraph{Depth under history extension.}
+Under a hereditary basis
+(Appendix~\ref{app:persistence-canonicalization}), the admissible set
+can only shrink as history grows:
+$\Spec(H') \subseteq \Spec(H)$ for all $H \sqsubseteq H'$.
+One would expect that determination depth is also non-increasing---as
+more events arrive, fewer commitments should be needed to resolve the
+remaining ambiguity.
+\emph{Conjecture:} under a hereditary basis, determination depth is
+monotonically non-increasing under history extension.
+
+\paragraph{Joint attribution.}
+Classical provenance asks ``which input tuples are most responsible for
+an output?''---a game where base tuples are players and the Shapley
+value measures each tuple's marginal contribution to the
+output~\cite{livshits2021shapley}.
+Determination responsibility (Appendix~\ref{app:responsibility-details})
+asks a different question: ``which commitments are most responsible for
+this output holding under this resolution?''---a game where commitments
+are players.
+These two games are currently sequential: first attribute the
+resolution (determination responsibility), then attribute the
+derivation within that resolution (tuple-level responsibility).
+Formalizing their composition into a single joint game---with both
+commitments and tuples as players, and a unified Shapley value
+measuring each player's contribution to the final output---would
+unify the two dimensions of provenance into a single attribution.
+The challenge is that the two player sets interact: a commitment can
+make a tuple relevant (by including it in the resolved model), and a
+tuple can make a commitment relevant (by participating in a conflict
+that forces the commitment).
+
+\paragraph{Program-bounded vs.\ input-recurrent depth.}
+The $\Theta(n)$ transactional depth arises from recurring structure:
+the same seal-plus-victim pair repeated as new conflicts arrive.
+In $\mbox{Datalog}^\neg$, depth is bounded by the program's dependency
+structure regardless of EDB size.
+Characterizing when a specification's depth is bounded by its static
+structure vs.\ when it grows with the input stream --- and whether
+recurring depth admits uniform depth certification (a single check
+covering all recurrences) --- is open.
+
+\paragraph{Quantitative negation beyond zero-divisor-free semirings.}
+Theorem~\ref{thm:monus-elimination} shows that sealing and monus agree
+on supports under zero-divisor-free, $\omega$-continuous semirings.
+In semirings that violate zero-divisor-freeness (e.g., bounded
+lattice semirings $(\{0,\ldots,k\}, \max, \min, 0, k)$), monus can
+assign intermediate values $1_K \mathbin{\dot{-}} v \notin \{0_K, 1_K\}$
+to negated literals, encoding a quantitative residual---how much of a
+derivation was ``overcome'' by the negation.
+Sealing discards this information.
+Whether the determination framework can be extended to capture such
+quantitative negation---perhaps via graded commitments that record
+residual strength rather than binary presence/absence---remains open.
+
 
 
 \bibliographystyle{ACM-Reference-Format}

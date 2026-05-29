@@ -300,7 +300,7 @@ relation; the goal of determination is to turn it into a function
 (a unique outcome per history).
 Since provenance analysis is retrospective---the full history is
 available---we define the \emph{resolved outcome} at a history $H$ as
-the maximal element of $\Spec(H)$ under $\Ord$.
+the maximum element of $\Spec(H)$ under $\Ord$.
 
 \begin{definition}[Determined specification]
   \label{def:determined}
@@ -837,15 +837,14 @@ limits---in Appendix~\ref{app:open-questions}.
   union computes $\mathrm{supp}(t_1) \cup \mathrm{supp}(t_2)$.
   By Proposition~\ref{prop:filtration-semiring}, both remain in
   $\mathcal{F}_{\max(k_1, k_2)}$.
-  Selection can only shrink supports (a subset of a level-$k$ support
-  is level-$k$); projection unions supports over matching tuples
-  (a union of level-$k$ supports is level-$k$).
+  Selection by a determination-independent predicate either preserves
+  a tuple's support or removes the tuple entirely, hence preserves
+  filtration membership.
+  Projection unions supports over matching tuples; since
+  $\mathcal{F}_k$ is closed under union, projection preserves
+  filtration membership.
 \end{proof}
 
-\noindent
-Conversely, relational difference can strictly increase depth
-(Proposition~\ref{prop:difference-increases-depth},
-Appendix~\ref{app:det-semiring-details}): the filtration is tight.
 
 
 % ================================================================
@@ -1085,8 +1084,6 @@ insensitivity propagates through any such query.
           SER commits both (ordering them; $t$ is robust); SI aborts
           one via FCW (making $t$ contingent).
   \end{enumerate}
-  Transactions not matching either pattern have the same qdepth under
-  both levels.
 \end{proposition}
 \begin{proof}
   (a)~$T_A$ reads $x$, writes $y$; $T_B$ reads $y$, writes $x$
@@ -1102,10 +1099,6 @@ insensitivity propagates through any such query.
   $\mathrm{qdepth}_{\mathrm{SER}}(t) = 0$.
   Under SI: FCW forces one to abort;
   $\mathrm{qdepth}_{\mathrm{SI}}(t) > 0$.
-
-  Conversely, if $T_i$ is on no rw-only cycle and has no write-write
-  conflict without an enclosing cycle, SER and SI impose the same
-  constraints on $T_i$'s fate.
 \end{proof}
 
 \begin{corollary}[Compositional isolation insensitivity]
@@ -1594,8 +1587,8 @@ algebraic structure of layered commitments---is a filtration in the
 measure-theoretic sense (level-$k$ supports are exactly the
 $\mathcal{F}_k$-measurable sets).
 Under a probability measure on $\mathcal{D}$, support ratios become
-probabilities, robustness becomes a hypothesis test, and work regret
-becomes expected regret.
+probabilities, robustness becomes a probability-one property, and work
+regret becomes expected regret.
 That the algebraic structure of determination provenance lands so
 close to the machinery of stochastic processes suggests a deeper
 connection; developing it is a natural next step.
@@ -1728,19 +1721,6 @@ semiring operations and with query evaluation.
   Positive RA cannot increase query-relative depth beyond the
   maximum depth of its inputs.
 \end{corollary}
-
-\begin{proposition}[Difference may increase depth]
-  \label{prop:difference-increases-depth}
-  Relational difference does not preserve filtration level: there exist
-  inputs of depth~$0$ whose difference has depth~$> 0$.
-\end{proposition}
-\begin{proof}
-  Let $t_1$ be robust ($\mathrm{supp} = \mathcal{D}$, depth~$0$) and
-  $t_2$ contingent ($\mathrm{supp} = S \subsetneq \mathcal{D}$,
-  depth~$> 0$).
-  Then $\mathrm{supp}(t_1 \setminus t_2) = \mathcal{D} \setminus S
-  \notin \mathcal{F}_0$, so $\mathrm{qdepth}(t_1 \setminus t_2) > 0$.
-\end{proof}
 
 % ================================================================
 \section{Robustness Proofs}
@@ -2624,10 +2604,10 @@ semiring, the tropical semiring, and the access-control
 semiring---but not by semirings with absorbing elements such as
 $(\{0,1,\ldots,k\}, \max, \min, 0, k)$ for finite $k > 1$.
 The $\omega$-continuity condition (directed suprema distribute over
-$+$ and $\cdot$) ensures that infinite descending chains in $K$
-stabilize; it holds for all the semirings above and is the standard
-assumption for datalog fixpoint semantics over
-semirings~\cite{green2007provenance,dannert2021semiring}.
+$+$ and $\cdot$) is the standard assumption for datalog fixpoint
+semantics over
+semirings~\cite{green2007provenance,dannert2021semiring}; it holds for
+all the semirings above.
 We prove that for every derived atom $a$, the support of $a$
 (the set of determinations under which $a$'s annotation is nonzero)
 is the same whether negation is handled via sealing or via monus.

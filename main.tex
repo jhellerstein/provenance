@@ -1424,7 +1424,7 @@ semantics across specifications.
 \subsection{Commitment Responsibility}
 
 Work regret identifies wasted layers; \emph{determination
-responsibility} identifies the individual commitment most responsible
+responsibility} identifies the single commitment most responsible
 for a tuple's contingency.
 We adapt the Shapley value from cooperative game
 theory~\cite{livshits2021shapley}: each commitment in the
@@ -1447,6 +1447,8 @@ al.~\cite{meliou2010causality} from data tuples to semantic
 commitments: where they ask ``which input tuple is most responsible
 for an output,'' we ask ``which commitment is most responsible for the
 output holding under this resolution.''
+Unifying the two into a single joint game is an open question
+in Appendix~\ref{app:open-questions}.
 Full development, including hardness and approximation results,
 appears in Appendix~\ref{app:responsibility-details}.
 
@@ -1583,12 +1585,12 @@ Appendix~\ref{app:systems-lineage} develops this direction.
 Looking further ahead, the determination semiring has the structure of
 a probability space: $\mathcal{D}$ is a sample space, supports are
 measurable sets, and the filtration---which emerged here from the
-algebraic structure of layered commitments---is a filtration in the
+algebraic structure of commitments---is a filtration in the
 measure-theoretic sense (level-$k$ supports are exactly the
 $\mathcal{F}_k$-measurable sets).
 Under a probability measure on $\mathcal{D}$, support ratios become
-probabilities, robustness becomes a probability-one property, and work
-regret becomes expected regret.
+probabilities, work regret becomes expected regret, and responsibility
+becomes conditional expectation.
 That the algebraic structure of determination provenance lands so
 close to the machinery of stochastic processes suggests a deeper
 connection; developing it is a natural next step.

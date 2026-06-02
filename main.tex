@@ -1046,32 +1046,40 @@ propagates through queries.
   constraints on $T_i$'s fate.
 \end{proof}
 
-\begin{corollary}[Compositional isolation migration]
+\begin{corollary}[Query-level isolation safety]
   \label{cor:isolation-migration}
-  If every base tuple of a positive relational query $Q$ is
-  isolation-insensitive, then $Q$'s result is also
-  isolation-insensitive: migrating from SER to SI (or vice versa)
-  does not change any result tuple's qdepth.
+  A query result can be isolation-insensitive even when its base tuples
+  are individually sensitive, provided their supports compose to full
+  or empty support under the semiring operations.
+  More conservatively: if every base tuple is isolation-insensitive,
+  the query result is too
+  (by Corollary~\ref{cor:propagation-filtration}).
 \end{corollary}
-\begin{proof}
-  Immediate from Corollary~\ref{cor:propagation-filtration}: positive
-  RA cannot increase qdepth beyond its inputs.
-  Equal qdepth at the inputs implies equal qdepth at the output under
-  both levels.
-\end{proof}
 
-\begin{example}[Compositional migration safety]
-  Transactions $T_1, T_2, T_3$ each insert tuples into relations
-  $R_1, R_2, R_3$.
-  A query $Q = R_1 \bowtie R_2 \bowtie R_3$ joins their outputs.
-  If none of $T_1, T_2, T_3$ participates in a write-skew or FCW
-  pattern, each base tuple is isolation-insensitive.
-  The corollary guarantees that $Q$'s result is also
-  insensitive---without analyzing $Q$'s interaction with the conflict
-  graph.
-  Vandevoort et al.~\cite{vandevoort2025mixed} can certify each
-  transaction individually as portable; the filtration additionally
-  certifies the \emph{query result} compositionally.
+\begin{example}[Query safety beyond transaction portability]
+  \label{ex:isolation-query}
+  $T_A$ reads $x$, writes $y$; $T_B$ reads $y$, writes $x$ (write
+  skew).
+  Under SER, the rw-rw cycle must be broken: one of $T_A$/$T_B$
+  aborts.
+  Both are individually SER-sensitive
+  ($\mathrm{qdepth}_{\mathrm{SER}} > 0$).
+  Vandevoort et al.~\cite{vandevoort2025mixed} would flag both as
+  non-portable.
+
+  But consider the query $Q = R_y \cup R_x$ (union of their outputs).
+  Under SER, whichever transaction survives contributes to $Q$: the
+  supports are complementary
+  ($\mathrm{supp}(R_y) \cup \mathrm{supp}(R_x) = \mathcal{D}$), so
+  $Q$ has full support and $\mathrm{qdepth}_{\mathrm{SER}}(Q) = 0$.
+  Under SI, both commit and $Q$ is trivially robust.
+  Hence $Q$ is isolation-insensitive---even though both of its input
+  transactions are sensitive.
+
+  The determination semiring reveals this: union composes supports by
+  $\cup$, and complementary supports merge to $\mathcal{D}$.
+  No per-transaction analysis can discover this; it requires reasoning
+  about the query's algebraic interaction with the support structure.
 \end{example}
 
 \subsection{Running Example Revisited}

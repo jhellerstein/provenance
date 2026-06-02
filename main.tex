@@ -1,4 +1,4 @@
-\documentclass[acmsmall,review,anonymous]{acmart}
+\documentclass[acmsmall]{acmart}
 
 \usepackage{microtype}
 \raggedbottom
@@ -54,9 +54,11 @@
 }
 \date{\today}
 
-\acmConference[PODS '27]{Proceedings of the 46th ACM SIGMOD-SIGACT-SIGAI Symposium on Principles of Database Systems}{June 2027}{Huntington Beach, CA, USA}
-\acmBooktitle{Proceedings of the 46th ACM SIGMOD-SIGACT-SIGAI Symposium on Principles of Database Systems (PODS '27)}
-\acmYear{2027}
+% \acmConference[PODS '27]{Proceedings of the 46th ACM SIGMOD-SIGACT-SIGAI Symposium on Principles of Database Systems}{June 2027}{Huntington Beach, CA, USA}
+% \acmBooktitle{Proceedings of the 46th ACM SIGMOD-SIGACT-SIGAI Symposium on Principles of Database Systems (PODS '27)}
+\acmConference[]{}
+\acmBooktitle{}
+\acmYear{2026}
 \acmISBN{978-x-xxxx-xxxx-x}
 
 
@@ -90,36 +92,27 @@
 % ================================================================
 \section{Introduction}
 \label{sec:intro}
+Algebraic data provenance explains the outputs of a deterministic query---a \emph{function}
+from an input database to an output relation~\cite{green2007provenance,suciu2011probabilistic}. 
+But production data systems are often based on a more ambiguous
+specification---a \emph{relation} that maps an input scenario to multiple admissible outputs.
+Examples include transactional databases (multiple acceptable schedules),
+distributed systems (multiple consensus decisions), and even 
+Datalog with negation (multiple stable models). 
+Classical data provenance cannot account for this ambiguity; it cannot even
+formulate a question about a particular outcome (e.g., why vs.\ why not)
+because the choice of outcome is undetermined.
 
-Algebraic provenance has given database theory a powerful language for
-explaining query results.
-When a query has well-defined semantics---a single correct answer for
-each instance---provenance traces derivations through a commutative
-semiring~\cite{green2007provenance,suciu2011probabilistic}, enabling
-compositional explanation, counterfactual reasoning, and quantitative
-confidence measures.
-
-But many settings admit multiple admissible outcomes for the same
-input---their semantics is a \emph{relation}, not a function.
-A transactional workload may have multiple serializable
-executions; a Datalog program with negation may have multiple stable
-models; a distributed system may admit multiple orderings consistent
-with the same observed history.
-Classical provenance presupposes the very resolution that these
-systems leave open.
-It can explain \emph{how} a bank balance was computed once the
-execution is fixed, but not \emph{why} a money transfer arrived too
-late to prevent a withdrawal rejection. The latter question concerns the
-scheduling commitment that ordered the balance check before the
-transfer posted, which is prior to and outside the scope of
-classical provenance.
-
-This paper introduces \emph{determination provenance} to capture the
+This paper lays the algebraic foundation for provenance over
+relational specifications.
+We introduce
+\emph{determination provenance}, a structure that captures the
 commitments that resolve semantic ambiguity.
 A \emph{determination} is a layered sequence of irrevocable,
 history-indexed
-commitment events that constrains a relational specification until no
-incompatible alternatives remain.
+commitment events that constrains a relational specification until
+it determines a single outcome for each input---the semantic
+counterpart of what a correct implementation achieves on each run.
 Classical provenance applies within each determination; determination
 provenance tracks which commitments were needed and how query results
 depend on them.
@@ -143,7 +136,7 @@ depend on them.
   delete precedes the insert and is a no-op).
   It is absent when the query precedes the insert or follows an
   effective delete.
-  Before resolving this ambiguity, even the \emph{form} of the
+  Before resolving this ambiguity, the
   provenance question for $d$ is undetermined: under one determination
   the question is \emph{why}; under another it is \emph{why-not}.
   Section~\ref{sec:transactions} formalizes this example.
@@ -159,14 +152,14 @@ To reason about such properties algebraically, we track each tuple's
 Value $b$ has full support (every determination); $d$ has partial
 support (the determinations in which $T_Q$
 observes $T_2$'s insert).
-A provenance question like ``is $d$ robust?'' reduces to checking
-whether $d$'s support is full.
-Counterfactual questions are read from the support, and quantitative
-diagnosis from its measure---recovering the three capabilities that
-classical semiring provenance provides in the resolved setting.
-Supports compose through relational operations (join intersects
-supports; union merges them).
+Supports form a Boolean semiring (join intersects supports; union
+merges them), and the familiar power of algebraic provenance transfers:
+robustness reduces to checking whether support is full;
+counterfactual questions are read from the support; quantitative
+diagnosis from its measure.
 
+Determination provenance provides richer structure than this flat
+semiring, however.
 When commitments are layered---some depending on others' outcomes---the
 semiring carries a \emph{filtration}: a chain of sub-semirings
 reflecting how much resolution each tuple requires.
@@ -186,6 +179,8 @@ $\mbox{Datalog}^\neg$; in both, classical semantic variants
 of a single filtration.
 
 \paragraph{Contributions.}
+Determination provenance provides new layered algebraic structure,
+expressivity, and applicability:
 \begin{enumerate}[label=(\roman*),nosep,leftmargin=*]
   \item The \emph{determination semiring} and its \emph{filtration}:
         supports over resolving determinations form a commutative
@@ -3227,13 +3222,12 @@ residual strength rather than binary presence/absence---remains open.
 
 
 
-\begin{acks}
-Generative AI tools (ChatGPT and Claude) were used as interactive
+\section*{Acknowledgments}
+Generative AI tools (Claude and ChatGPT) were used as interactive
 writing and reviewing assistants during the preparation of this work,
 including drafting and revising text, checking mathematical arguments,
 and suggesting edits.
-All content was reviewed, validated, and approved by the author.
-\end{acks}
+All content was reviewed, validated, and approved by the authors.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{references}

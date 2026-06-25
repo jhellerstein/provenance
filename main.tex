@@ -9,6 +9,9 @@
 \usepackage{tikz}
 \usepackage{xcolor}
 
+% ---------- Comment macro ----------
+\newcommand{\jmh}[1]{\textcolor{red}{\textit{#1 -- JMH}}}
+
 
 % ---------- Notation ----------
 \newcommand{\Hist}{\mathcal{H}}
@@ -37,6 +40,7 @@
 \numberwithin{example}{section}
 \numberwithin{observation}{section}
 \numberwithin{assumption}{section}
+
 
 \title{Determination Provenance: From Ambiguity to Algebra}
 \author{Joseph M. Hellerstein}
@@ -934,8 +938,9 @@ $\Spec_L(H)$ admits extensions consistent with $L$'s constraint.
 We consider:
 \emph{read committed} (RC; no constraint),
 \emph{serializability} (SER; forbids all directed cycles regardless of
-edge labels), and \emph{snapshot isolation} (SI; permits rw-only
-cycles but enforces first-committer-wins on $\mathsf{ww}$ edges;
+edge labels), and \emph{snapshot isolation} (SI; permits exactly those
+cycles containing two adjacent $\mathsf{rw}$ anti-dependency edges but
+enforces first-committer-wins on $\mathsf{ww}$ edges;
 Appendix~\ref{sec:appendix-SI}).
 
 \begin{example}[Running example: depth~$1$ under SER]
@@ -1062,7 +1067,9 @@ insensitivity propagates through any such query.
   \begin{enumerate}[nosep,label=(\alph*)]
     \item \emph{Write skew} ($\mathrm{qdepth}_{\mathrm{SER}} >
           \mathrm{qdepth}_{\mathrm{SI}}$):
-          $T_i$ is on an rw-rw cycle.
+          $T_i$ is on a cycle with two adjacent rw anti-dependency
+          edges---in the minimal case, an rw-rw cycle between two
+          transactions.
           SER must break the cycle (making $t$ contingent); SI
           allows it ($t$ is robust).
     \item \emph{FCW-forced abort} ($\mathrm{qdepth}_{\mathrm{SI}} >
@@ -2071,13 +2078,21 @@ when $T_i$ participates in a conflict pattern that one level must
 resolve but the other does not:
 
 \begin{enumerate}[label=(\alph*),nosep]
-  \item \emph{Write skew} ($\mathrm{qdepth}_{\mathrm{SER}}(t) >
+  \item \emph{Write skew / rw-anti-dependency cycle}
+        ($\mathrm{qdepth}_{\mathrm{SER}}(t) >
         \mathrm{qdepth}_{\mathrm{SI}}(t)$):
-        $T_i$ is on a cycle whose edges are all rw-type (anti-dependencies).
+        $T_i$ lies on a cycle that contains two \emph{adjacent}
+        rw-antidependency edges---meeting at a pivot transaction with
+        both an incoming and an outgoing rw edge---while its remaining
+        edges may be $\mathsf{wr}$- or $\mathsf{ww}$-dependencies
+        (Adya~\cite{adya1999weak}; Fekete et al.~\cite{fekete2005making}).
+        Write skew is the minimal such case: a two-transaction cycle of
+        two rw edges.
         SER forbids all cycles: at least one transaction on the cycle
         must abort, making $t$ contingent ($\mathrm{qdepth}_{\mathrm{SER}} > 0$).
-        SI allows rw-only cycles: all transactions commit in every SI
-        determination, so $t$ is robust ($\mathrm{qdepth}_{\mathrm{SI}} = 0$).
+        SI permits exactly these two-adjacent-rw cycles: every
+        transaction on the cycle commits in every SI determination, so
+        $t$ is robust ($\mathrm{qdepth}_{\mathrm{SI}} = 0$).
 
   \item \emph{FCW-forced abort} ($\mathrm{qdepth}_{\mathrm{SI}}(t) >
         \mathrm{qdepth}_{\mathrm{SER}}(t)$):
@@ -2093,9 +2108,10 @@ resolve but the other does not:
 \paragraph{Tight condition for qdepth equality.}
 $\mathrm{qdepth}_{\mathrm{SER}}(t) = \mathrm{qdepth}_{\mathrm{SI}}(t)$
 iff $T_i$ is not involved in either pattern above: it participates in
-no rw-only cycle (so SER and SI agree on whether the cycle must be
-broken) and in no write-write conflict without an enclosing cycle (so
-SER and SI agree on whether both writers commit).
+no cycle with two adjacent rw anti-dependency edges (so SER and SI
+agree on whether the cycle must be broken) and in no write-write
+conflict without an enclosing cycle (so SER and SI agree on whether
+both writers commit).
 These are exactly the transactions whose commit/abort fate is the same
 under both levels---the ``robustly portable'' transactions
 of~\cite{vandevoort2025mixed}.
@@ -3215,6 +3231,8 @@ residual strength rather than binary presence/absence---remains open.
 
 
 \section*{Acknowledgments}
+Thanks to Peter Alvaro for corrections on a prior draft.
+
 Generative AI tools (Claude and ChatGPT) were used as interactive
 writing and reviewing assistants during the preparation of this work,
 including drafting and revising text, checking mathematical arguments,

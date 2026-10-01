@@ -217,3 +217,16 @@ model to subtract against), while determination provenance remains
 well-defined---each stable model is a determination, and the support tracks
 which models produce each atom. Contingent atoms, which monus cannot annotate,
 are precisely the positive-support/partial-support atoms of the filtration.
+
+Operationally, this converts a \emph{why-not} question into a \emph{why}
+question. The non-monotone step is discharged by a commitment, so within each
+determination the program is positive (the Gelfond--Lifschitz reduct): every
+surviving derivation---including those licensed by a committed negation---is
+explained by ordinary positive $K$-relational provenance over the determined
+model. Determination provenance thus reduces negation to \emph{commitment plus
+grounded positive semiring provenance}, keeping the entire classical
+provenance apparatus intact within each determination and confining all
+non-monotonicity to the commitment layer that the filtration organizes. The
+reduction is per determination: within one, why-not becomes positive why
+provenance; \emph{across} determinations, the filtration records which
+commitments flip an atom's support and at what depth.

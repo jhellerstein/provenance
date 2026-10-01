@@ -37,7 +37,11 @@ the admissible models.
   commitment}---the choice $\varphi_{r(c)=\mathbf{t}}$ that resolves the
   negative cycle. Determination provenance records exactly this: $r(c)$ holds
   under the determinations that commit it true, and that \emph{support} is the
-  object provenance should annotate.
+  object provenance should annotate. From it we read more than why-not: that
+  $s(c)$ is exactly as contingent as $r(c)$ (each holds under one of two
+  determinations), that both are first settled at the single choice layer
+  (support depth~$1$), and---since the committed program is positive---an
+  ordinary $K$-provenance polynomial for each within its model.
 \end{example}
 \else
 \begin{example}[Why-not under ambiguity]
@@ -59,10 +63,28 @@ properties of the \emph{space} of all determinations, not of any single one.
 To reason about them algebraically we track each observable's \emph{support}:
 the set of determinations under which it holds. Supports form the Boolean
 shadow of a product provenance semiring, and the familiar power of algebraic
-provenance transfers---robustness is full support; why/why-not questions are
-read from the support; quantitative diagnosis from its measure.
+provenance transfers---and then exceeds why/why-not. Provenance semirings
+cannot answer why-not under ambiguity; but they cannot answer a great deal more
+either, even once an outcome is fixed, and our construction opens that wider
+family of questions. Reading them off the support and its measure, one can ask
+not only \emph{whether} a tuple appears (why/why-not) but \emph{how robustly}
+(the measure of its support), \emph{at what depth} its fate is sealed, \emph{how
+its explanation changes} from one specification or semantics to another, and
+\emph{which commitment is most responsible} for it---questions a single yes/no
+or a fixed-outcome derivation cannot express.
 
-Determination provenance carries more structure than this flat algebra.
+A second gain is that our treatment \emph{empowers} ordinary provenance
+semirings to handle negation at all. Discharging a negation into a commitment
+leaves a positive program within each determination, so classical
+$K$-relational provenance~\cite{green2007provenance} applies to a
+negation-licensed fact exactly as to any derived fact
+(Proposition~\ref{prop:kprov-negation}). This hands back the whole
+semiring-specialization toolkit on negation---counting derivations, confidence
+and probability, access control, minimum-cost derivation, factorized
+representations---a family of grounded, within-model provenance queries beyond
+why/why-not that fixed-outcome frameworks for negation do not target.
+
+Determination provenance carries more structure still than this flat algebra.
 Commitments are \emph{layered}: later ones may depend on earlier outcomes.
 This layering induces a \emph{filtration}---a nested chain of sub-algebras
 recording how much resolution each observable requires. A robust or impossible
@@ -75,14 +97,19 @@ probabilistic-database query complexity.
 
 \paragraph{Contributions.}
 \begin{enumerate}[label=(\roman*),nosep,leftmargin=*]
-  \item \emph{A determination algebra} (Sections~\ref{sec:prelim}--\ref{sec:algebra}):
-        a specification's resolutions form a complete determination space
-        $\Dets$; provenance lifts to the product semiring $K^{\Dets}$ via an
-        \emph{adequate consumer} whose sole law is that a nonzero annotation
-        marks a true observable; supports form a Boolean semiring, and the
-        canonical layer-prefix filtration measures support depth and is
-        respected by provenance composition. Ordinary relational semiring
-        provenance is recovered as the \emph{result-extensional} special case.
+  \item \emph{An algebra of provenance queries over ambiguity}
+        (Sections~\ref{sec:prelim}--\ref{sec:algebra}): a specification's
+        resolutions form a complete determination space $\Dets$; provenance
+        lifts to the product semiring $K^{\Dets}$ via an \emph{adequate
+        consumer} whose sole law is that a nonzero annotation marks a true
+        observable; supports form a Boolean semiring, and the canonical
+        layer-prefix filtration measures support depth and is respected by
+        provenance composition. Ordinary relational semiring
+        provenance~\cite{green2007provenance} is recovered as the
+        \emph{result-extensional} special case---and, applied within a
+        determination, is \emph{re-enabled on negation}, so counting,
+        probability, security, and cost queries apply to negation-licensed
+        facts (Proposition~\ref{prop:kprov-negation}).
   \ifleaddatalog
   \item \emph{Lead instantiation, $\mbox{Datalog}^\neg$}
         (Section~\ref{sec:datalog}): sealing and choice commitments give a
@@ -91,19 +118,25 @@ probabilistic-database query complexity.
         shared filtration; sealing reproduces the support behavior of
         semirings with monus on stratified programs and extends to
         unstratified negation, where monus is undefined.
-  \item \emph{Consequences} (Section~\ref{sec:discussion}): work regret vs.\
-        semantic shift across specifications; a commitment-responsibility
-        measure; and a bounded-treewidth algorithm for support and robustness.
-        A second instantiation---transactional isolation---appears in
+  \item \emph{Quantitative provenance queries}
+        (Section~\ref{sec:discussion}): beyond why/why-not, the support and its
+        filtration answer \emph{how robust} and \emph{at what depth} a tuple is
+        settled, \emph{work regret vs.\ semantic shift} when comparing
+        specifications, and \emph{which commitment is most responsible}; a
+        bounded-treewidth algorithm computes support and robustness. A second
+        instantiation---transactional isolation---appears in
         Appendix~\ref{sec:transactions}.
   \else
   \item \emph{Lead instantiation, transactions} (Section~\ref{sec:transactions}):
         isolation levels (RC, SI, SER) are different resolving subsets of one
         shared filtration; determination depth is $\Theta(n)$ under scheduling
         discretion; SER and SI are incomparable in per-tuple support depth.
-  \item \emph{Consequences} (Section~\ref{sec:discussion}): work regret vs.\
-        semantic shift; a commitment-responsibility measure; and a
-        bounded-treewidth algorithm for support and robustness. A second
+  \item \emph{Quantitative provenance queries}
+        (Section~\ref{sec:discussion}): beyond why/why-not, the support and its
+        filtration answer \emph{how robust} and \emph{at what depth} a tuple is
+        settled, \emph{work regret vs.\ semantic shift} across specifications,
+        and \emph{which commitment is most responsible}; a bounded-treewidth
+        algorithm computes support and robustness. A second
         instantiation---$\mbox{Datalog}^\neg$---appears in
         Appendix~\ref{sec:datalog}.
   \fi

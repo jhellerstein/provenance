@@ -230,3 +230,34 @@ non-monotonicity to the commitment layer that the filtration organizes. The
 reduction is per determination: within one, why-not becomes positive why
 provenance; \emph{across} determinations, the filtration records which
 commitments flip an atom's support and at what depth.
+
+We make the first half of that statement precise, since it is what re-enables
+the provenance-semiring toolkit on negation.
+
+\begin{proposition}[Negation-licensed atoms carry $K$-provenance]
+  \label{prop:kprov-negation}
+  Fix a determination $D$ with determined model $M = \rho(D)$. The
+  Gelfond--Lifschitz reduct $P^{M}$ is a positive program whose least model is
+  $M$, and the result-extensional consumer of Example~\ref{ex:gkt} applied to
+  $P^{M}$ is adequate: for every atom $\alpha$ and provenance query $Q$, the
+  $K$-relational annotation $P_D(a_{Q,\alpha}) = \Prov_K(\operatorname{Real}(M),
+  a_{Q,\alpha})$ is nonzero iff $\alpha \in Q(M)$, where $\operatorname{Real}(M)$
+  is the $K$-annotated instance obtained by positive $K$-evaluation of $P^{M}$.
+  This holds for atoms derived through committed negations, not only for
+  negation-free atoms.
+\end{proposition}
+
+\noindent
+Because $P_D(a_{Q,\alpha})$ is an ordinary provenance polynomial in
+$\mathbb{N}[X]$, every semiring homomorphism $h:\mathbb{N}[X]\to K'$ yields a
+sound specialization at level~$0$---counting of derivations ($K'=\mathbb{N}$),
+confidence or probability (a tuple-independent PDB homomorphism), access
+control and security ($K'$ the access-control semiring), minimum-cost
+derivation (the tropical semiring), and factorized representations---by the
+fundamental theorem of provenance semirings~\cite{green2007provenance}. These
+are a \emph{complementary} family of queries to a model-relative justification
+(which records rule-level derivation structure but not a semiring annotation):
+discharging negation into a commitment is exactly what brings a negated-licensed
+fact into the scope of this family. Above level~$0$, the filtration composes
+these annotations across determinations
+(Theorem~\ref{thm:filtration-respected}).

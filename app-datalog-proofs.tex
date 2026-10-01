@@ -110,3 +110,51 @@ $1_K \mathbin{\dot{-}} \mathrm{val}(b)$.
   every atom has the same zero/nonzero annotation under sealing and monus.
   Supports therefore agree.
 \end{proof}
+
+\subsection{$K$-Provenance for Negation-Licensed Atoms}
+
+\begin{proof}[Proof of Proposition~\ref{prop:kprov-negation}]
+  Let $M = \rho(D)$. By definition of a stable
+  model~\cite{gelfond1988stable}, the Gelfond--Lifschitz reduct $P^{M}$---obtained
+  by deleting every rule whose body contains a negative literal $\neg\beta$ with
+  $\beta \in M$, and striking the remaining (satisfied) negative literals from
+  the surviving rules---is a \emph{negation-free} Datalog program, and $M$ is
+  its least model. Thus $P^{M}$ is positive and $M = P^{M}{\uparrow}\omega$, the
+  least fixpoint of its immediate-consequence operator.
+
+  Positive Datalog admits $K$-relational provenance in the sense of Green et
+  al.~\cite{green2007provenance}: annotate each base fact by an indeterminate
+  (or an application-supplied element of $K$), evaluate the least fixpoint with
+  $+$ for alternative derivations and $\cdot$ for joint ones, and read the
+  annotation $\Prov_K(\operatorname{Real}(M), a_{Q,\alpha})$ of a query output
+  $\alpha$. Set $\operatorname{Real}(M)$ to this $K$-annotated least model of
+  $P^{M}$. Soundness and completeness of $K$-provenance for positive programs
+  give, under positivity of $K$, that the annotation is nonzero iff $\alpha$ is
+  derivable in $P^{M}$, i.e.\ iff $\alpha \in M$ (and, for a query $Q$, iff
+  $\alpha \in Q(M)$). This is precisely adequacy
+  (Definition~\ref{def:consumer}) for the result-extensional consumer with
+  $\Cond = \operatorname{Real}\circ\rho$, so the consumer of
+  Example~\ref{ex:gkt} instantiated at $P^{M}$ is adequate.
+
+  Crucially, an atom $\alpha$ whose derivation in $P^{M}$ uses a rule that
+  originally carried a negative literal $\neg\beta$ (with $\beta \notin M$) is
+  handled no differently: in $P^{M}$ that literal has been struck, so the rule
+  is an ordinary positive rule and contributes to $\alpha$'s annotation by the
+  same $+/\cdot$ rules. Hence negation-licensed atoms carry the same
+  $K$-provenance as any other derived atom. Finally, since $\mathbb{N}[X]$ is
+  the free commutative semiring on the base annotations, every commutative
+  semiring $K'$ is the image of a unique semiring homomorphism
+  $h:\mathbb{N}[X]\to K'$, and $h$ commutes with least-fixpoint
+  evaluation~\cite{green2007provenance}; applying $h$ to
+  $P_D(a_{Q,\alpha})\in\mathbb{N}[X]$ yields the corresponding specialized
+  annotation (counting in $\mathbb{N}$, probability via a tuple-independent PDB
+  homomorphism, access control, tropical cost, and so on), each sound for the
+  negation-licensed atoms as well.
+\end{proof}
+
+\noindent
+Proposition~\ref{prop:kprov-negation} is a level-$0$ (within-determination)
+statement; it says nothing about which determinations exist or how an atom's
+support varies across them. The cross-model structure is supplied separately by
+the support filtration (Section~\ref{sec:filtration}), and the two are composed
+by Theorem~\ref{thm:filtration-respected}.

@@ -1,0 +1,123 @@
+% ======================================================================
+% app-worked-queries.tex -- a worked "beyond why/why-not" example,
+% running the full query family end-to-end on the Datalog running example.
+% ======================================================================
+\section{A Worked Query Family (Beyond Why/Why-Not)}
+\label{app:worked-queries}
+
+This appendix runs the paper's provenance queries end to end on the running
+$\mbox{Datalog}^\neg$ program of Example~\ref{ex:datalog}, to show concretely
+what the support algebra answers that a single why/why-not cannot. Recall the
+program with EDB $a(c)$,
+\[
+  p(c) \leftarrow a(c); \quad
+  q(c) \leftarrow \neg p(c); \quad
+  r(c) \leftarrow \neg s(c); \quad
+  s(c) \leftarrow \neg r(c),
+\]
+with $\Dets = \{D^{(r)}, D^{(s)}\}$ sharing the seal of $p$ and branching at the
+single choice layer (depth $k{+}d = 2$). Annotate the EDB fact $a(c)$ by the
+indeterminate $x_a \in \mathbb{N}[X]$.
+
+\subsection{Determination provenance and supports}
+
+Evaluating within each determination (Proposition~\ref{prop:kprov-negation})
+gives the determination-provenance functions
+\[
+  \begin{array}{ll}
+    P(p(c)) = \{(D^{(r)}, x_a),\,(D^{(s)}, x_a)\}, &
+    P(q(c)) = \{\}, \\[2pt]
+    P(r(c)) = \{(D^{(r)}, 1)\}, &
+    P(s(c)) = \{(D^{(s)}, 1)\},
+  \end{array}
+\]
+with why-supports $Y_{p} = \Dets$ (robust), $Y_{q} = \emptyset$ (impossible),
+$Y_{r} = \{D^{(r)}\}$, and $Y_{s} = \{D^{(s)}\}$. A single why/why-not question
+is already ill-posed for $s(c)$---it is a why in $D^{(s)}$ and a why-not in
+$D^{(r)}$---whereas the support records both at once.
+
+\subsection{Querying the support: depth, composition, measure}
+
+\paragraph{Support depth.}
+Since $Y_p = \Dets$ and $Y_q = \emptyset$ lie in $\mathcal{F}_0$,
+$\sdepth(p(c)) = \sdepth(q(c)) = 0$: these are settled by the sealing prefix
+alone, with no choice. In contrast $Y_r, Y_s \notin \mathcal{F}_1 \setminus
+\mathcal{F}_0$ are proper nonempty subsets, so $\sdepth(r(c)) = \sdepth(s(c)) =
+1$: their fate is sealed only at the choice layer. Support depth thus answers
+``\emph{how much} resolution does this fact require,'' a question why/why-not
+cannot pose.
+
+\paragraph{Composition.}
+Add two derived predicates by positive rules,
+\[
+  t(c) \leftarrow r(c); \quad t(c) \leftarrow s(c);
+  \qquad u(c) \leftarrow r(c),\, s(c).
+\]
+By the support homomorphism (Proposition~\ref{prop:support-hom}),
+$Y_t = Y_r \cup Y_s = \Dets$ and $Y_u = Y_r \cap Y_s = \emptyset$. So $t(c)$ is
+\emph{robust} and $u(c)$ is \emph{impossible}, each of support depth $0$,
+although both are built from depth-$1$ inputs: composition can only
+\emph{forget} resolution (Theorem~\ref{thm:filtration-respected}), never
+manufacture it. A reader who knows only that $r$ and $s$ are each contingent
+cannot predict that their union is robust; the algebra computes it.
+
+\paragraph{Measure.}
+Put the uniform measure $\mu(D^{(r)}) = \mu(D^{(s)}) = \tfrac12$ on $\Dets$.
+Then the support densities---``how robustly does this hold''---are
+$\mu(Y_p) = \mu(Y_t) = 1$, $\mu(Y_q) = \mu(Y_u) = 0$, and
+$\mu(Y_r) = \mu(Y_s) = \tfrac12$: $r$ and $s$ hold under exactly half the
+resolutions. These are read directly off the support, with no re-evaluation.
+
+\subsection{Querying across semantics: regret and shift}
+
+Reading the \emph{same} filtration at different depths
+(Theorem~\ref{thm:negation-general}) compares the semantics tuple by tuple.
+Stable-model semantics reads $\mathcal{F}_{k+d} = \mathcal{F}_2$; well-founded
+semantics reads $\mathcal{F}_{k} = \mathcal{F}_1$ here (the single choice layer
+is not forced, so $d^\ast = 0$). Then:
+\begin{itemize}[nosep,leftmargin=*]
+  \item $p(c)$ and $q(c)$ are robust/impossible at $\mathcal{F}_0$, hence agree
+        under both semantics (WFS $\mathbf{t}$ and $\mathbf{f}$): no
+        \emph{semantic shift} and no \emph{work regret}
+        (Section~\ref{sec:regret-shift}), as their support depth is $0$ either
+        way.
+  \item $r(c)$ and $s(c)$ exhibit \emph{semantic shift}: contingent (partial
+        support) under stable, but read at $\mathcal{F}_1$ their partial support
+        is exactly the well-founded $\mathbf{u}$. Their support \emph{content}
+        differs across the two readings, so this is a genuine change of meaning,
+        not wasted computation.
+  \item $t(c)$ is robust at $\mathcal{F}_0$: under stable it holds in every
+        model and under WFS it is $\mathbf{t}$. Here reading the deeper
+        $\mathcal{F}_2$ (stable) buys nothing over $\mathcal{F}_0$: evaluating
+        $t$ to a stable model incurs \emph{work regret} of two layers, since the
+        answer was already settled before any choice.
+\end{itemize}
+
+\subsection{Querying responsibility}
+
+The choice commitment $\varphi_{r(c)=\mathbf{t}}$ occurs only in $D^{(r)}$, so
+$\Dets_{\varphi_{r=\mathbf{t}}} = \{D^{(r)}\}$. Withholding it removes the only
+determination in which $r(c)$ holds, flipping $r$'s support answer, so
+$\operatorname{Piv}_{r(c)}(\varphi_{r=\mathbf{t}}) = \{D^{(r)}\}$ and
+$\operatorname{resp}_{r(c)}(\varphi_{r=\mathbf{t}}) = 1$
+(Definition~\ref{def:responsibility}): the cycle-resolving choice is fully
+responsible for $r(c)$'s contingency. The seal $\varphi_{\seal}(p)$, by
+contrast, is pivotal for no cycle atom (it fixes the robust $p,q$ layer), so
+$\operatorname{resp}_{r(c)}(\varphi_{\seal}(p)) = 0$. Responsibility localizes
+the contingency to the commitment that actually causes it.
+
+\subsection{Querying the re-enabled $K$-provenance}
+
+Because each determination's program is positive
+(Proposition~\ref{prop:kprov-negation}), the within-model annotations are
+ordinary provenance polynomials and specialize by semiring homomorphism. For
+$p(c)$, the annotation $x_a$ specializes to: derivation count $1$
+($\mathbb{N}$); confidence $\Pr[a(c)]$ (a tuple-independent probability
+homomorphism); and the access level of $a(c)$ (the access-control semiring).
+For a negation-licensed atom such as $r(c)$, the committed program is $r(c)
+\leftarrow{}$ (the body $\neg s(c)$ is struck in the reduct of $D^{(r)}$), so
+its within-model annotation is $1_K$---a derivation count of $1$, confidence
+$1$ conditioned on $D^{(r)}$---and the \emph{cross-model} statement ``$r(c)$
+holds under half the resolutions'' is the support density $\mu(Y_r) = \tfrac12$
+from above. None of these $K$-queries is expressible as a bare why/why-not, and
+all of them now apply to the negation-licensed facts.

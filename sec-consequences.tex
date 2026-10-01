@@ -29,16 +29,18 @@ a candidate alternative $I'$ over the same basis, the difference decomposes.
 \paragraph{Work regret.}
 If $a$ is robust under both $I$ and $I'$ but $\sdepth_I(a) > \sdepth_{I'}(a)$,
 the extra commitment layers under $I$ did not change the answer---\emph{work
-regret}, resolution spent to no semantic effect. (For transactions this is
-bidirectional between SER and SI; for $\mbox{Datalog}^\neg$, stable-model
-evaluation of a stratified-equivalent atom regrets its choice layers.)
+regret}, resolution spent to no semantic effect. In $\mbox{Datalog}^\neg$,
+stable-model evaluation of an atom that is already settled by the stratified
+prefix regrets its choice layers (and the transaction instantiation of
+Appendix~\ref{sec:transactions} exhibits regret in both directions between
+isolation levels).
 
 \paragraph{Semantic shift.}
 If $a$'s why-support itself differs between $I$ and $I'$---robust under one,
 contingent under the other---the meaning genuinely changes. Moving from
 stable-model to well-founded semantics converts choice-layer atoms to
-$\mathbf{u}$ (Theorem~\ref{thm:negation-general}); write-skew and
-first-committer-wins patterns witness the shift for transactions
+$\mathbf{u}$ (Theorem~\ref{thm:negation-general}); the transaction
+instantiation witnesses the same phenomenon across isolation levels
 (Appendix~\ref{sec:transactions}).
 
 \begin{proposition}[Compositional depth bound]
@@ -51,10 +53,11 @@ first-committer-wins patterns witness the shift for transactions
 
 \noindent
 Certifying this exactly is coNP-complete in the number of commitments in the
-relevant layers (Appendix~\ref{app:robustness-proofs}), but both
-instantiations admit polynomial sufficient checks: in $\mbox{Datalog}^\neg$,
-absence of transitive dependency on any negative SCC~\cite{gebser2012asp}; in
-transactions, absence from $L$-forbidden cycles~\cite{adya1999weak}.
+relevant layers (Appendix~\ref{app:robustness-proofs}), but the lead
+instantiation admits a polynomial sufficient check: in $\mbox{Datalog}^\neg$,
+absence of transitive dependency on any negative SCC~\cite{gebser2012asp}
+guarantees support depth below the choice layers. (The transaction
+instantiation admits an analogous check; Appendix~\ref{sec:transactions}.)
 
 \subsection{Commitment Responsibility}
 \label{sec:responsibility}

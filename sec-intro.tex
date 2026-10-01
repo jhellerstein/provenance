@@ -21,8 +21,11 @@ introduce \emph{determination provenance}, which tracks the irrevocable
 sequence of commitments that narrows a relational specification until it
 determines a single output---the semantic counterpart of what a correct
 implementation does on one run. Classical provenance applies \emph{within}
-each determination; determination provenance records which commitments were
-needed and how query results depend on them.
+each determination (recent work extends why/why-not provenance to a single
+well-founded or stable model of a $\mbox{Datalog}^\neg$
+program~\cite{bogaerts2026whynot}); determination provenance instead records
+which commitments were needed and how query results depend on them \emph{across}
+the admissible models.
 
 \ifleaddatalog
 \begin{example}[Why-not under ambiguity]

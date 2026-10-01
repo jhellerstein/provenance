@@ -47,9 +47,23 @@ Theorem~\ref{thm:monus-elimination} shows sealing reproduces their
 \emph{support} behavior under positivity.
 Deutch et al.~\cite{deutch2014circuits} and
 K\"ohler et al.~\cite{kohler2012declarative} likewise assume a resolved
-semantics. Our contribution is unstratified negation, where multiple stable
-models coexist, monus is undefined, and the determination semiring tracks
-which models support each atom. The enriched outcome domain
+semantics. Most closely related, Bogaerts et
+al.~\cite{bogaerts2026whynot} define why- and why-not-provenance for
+$\mbox{Datalog}^\neg$ under both well-founded and stable semantics using
+justification theory, and analyze its data complexity. Their explanations are
+\emph{relative to a fixed model}: given a model under one semantics, a
+justification graph explains why a chosen literal holds (or fails) in it. This
+is complementary to, and composable with, our construction: a justification is
+exactly the kind of within-determination evidence an adequate consumer
+packages as the conditioned annotation $P_D(a)$ for a fixed determination $D$,
+whereas determination provenance tracks \emph{which} determinations (models)
+support a literal and relates the semantics themselves as reading depths of one
+filtration (Theorem~\ref{thm:negation-general}). In particular, their
+model-relative why-not becomes, in our terms, a why-not certificate at a
+determination, while ours is read off the complement of the why-support before
+any model is fixed. Our contribution is this cross-model, unstratified setting,
+where multiple stable models coexist, monus is undefined, and the determination
+semiring tracks which models support each atom. The enriched outcome domain
 ($\bot \OrdO \mathbf{u} \OrdO \{\mathbf{t},\mathbf{f}\}$) is Belnap's knowledge
 order~\cite{belnap1977four}; we use only its refinement structure.
 

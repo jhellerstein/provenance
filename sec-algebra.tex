@@ -261,3 +261,13 @@ default: it is appropriate exactly when both truth and annotation depend only
 on the determined result. The general carrier---needed, e.g., when distinct
 determinations reach the same result by different commitments---keeps the
 determination identity that this specialization discards.
+
+\begin{definition}[Provenance query]
+  \label{def:prov-query}
+  A \emph{provenance query} is a positive relational-algebra expression $Q$
+  over the schema; its observables are the pairs $a_{Q,t}$ of
+  Example~\ref{ex:gkt}, one per candidate output tuple $t$. We write $P(t)$
+  and $Y_t$ for $P(a_{Q,t})$ and $Y_{a_{Q,t}}$, and speak of the support and
+  support depth \emph{of the output tuple $t$ under $Q$}. All later uses of
+  ``tuple'' refer to a tuple of such a query result.
+\end{definition}

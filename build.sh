@@ -30,8 +30,9 @@ mkdir -p "$TECTONIC_CACHE_DIR" "$XDG_CACHE_HOME/fontconfig" "$HOME"
 
 BUILD="$(mktemp -d "$SCRATCH/build.XXXXXX")"
 trap 'rm -rf "$BUILD"' EXIT
-# Copy all .tex and the bib so modular \input files resolve.
+# Copy all .tex, .sty, and the bib so modular \input / \usepackage resolve.
 cp "$HERE"/*.tex "$BUILD"/ 2>/dev/null || true
+cp "$HERE"/*.sty "$BUILD"/ 2>/dev/null || true
 cp "$HERE"/*.bib "$BUILD"/ 2>/dev/null || true
 
 ( cd "$BUILD" && "$TEC" -X compile --keep-logs --keep-intermediates --outfmt pdf "$SRC" )

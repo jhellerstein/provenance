@@ -1,0 +1,54 @@
+% ======================================================================
+% det-notation.sty -- shared notation for the determination papers.
+%
+% Single source of truth for the core "determination" macros used across
+% the determination-framework papers (provenance, coordination criterion,
+% complexity). Keeping these in one package prevents notation drift between
+% the papers and the foundation reference.
+%
+% Conventions (matching the foundation):
+%   refinement orders are subscripted I / O;
+%   \Basis = commitment basis, \Dets = complete determination space,
+%   \Rho = result space; support/filtration vocabulary is \supp / \cdepth /
+%   \sdepth.
+%
+% This package deliberately contains ONLY cross-paper core macros. Macros
+% that are specific to one paper (e.g. provenance's \seal, \seq, \Cond,
+% \Prov, \Obs, \truth, or a paper-local bare-order alias) belong in that
+% paper's own preamble, not here.
+%
+% Usage:  \usepackage{det-notation}   (after amsmath/amssymb are available)
+% ======================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{det-notation}[2026/01/01 Shared determination notation]
+
+\RequirePackage{amsmath}
+% amssymb is needed for \npreceq. Guard the \Bbbk symbol, which both amssymb
+% and stmaryrd define, so this package loads cleanly regardless of whether a
+% paper has already loaded stmaryrd (which would otherwise make amssymb's
+% \Bbbk definition a clash).
+\@ifpackageloaded{amssymb}{}{%
+  \let\Bbbk\relax
+  \RequirePackage{amssymb}%
+}
+
+% ---------- Refinement orders (input / output) ----------
+\newcommand{\OrdI}{\preceq_I}        % input refinement order
+\newcommand{\OrdO}{\preceq_O}        % output refinement order
+\newcommand{\DroI}{\succeq_I}        % input, reversed
+\newcommand{\DroO}{\succeq_O}        % output, reversed
+\newcommand{\NordI}{\npreceq_I}
+\newcommand{\NordO}{\npreceq_O}
+
+% ---------- Core carriers ----------
+\newcommand{\Basis}{\Phi}            % commitment basis
+\newcommand{\Dets}{\mathcal{D}}      % complete determination space
+\newcommand{\Rho}{\mathcal{R}}       % result space
+\DeclareMathOperator{\Max}{Max}      % maximum under a refinement order
+
+% ---------- Support / filtration vocabulary ----------
+\DeclareMathOperator{\supp}{supp}        % support of an annotation
+\DeclareMathOperator{\cdepth}{cdepth}    % query-instance certificate depth
+\DeclareMathOperator{\sdepth}{sdepth}    % (uniform) support depth
+
+\endinput

@@ -26,34 +26,24 @@
 \newcommand{\jmh}[1]{\textcolor{red}{\textit{#1 -- JMH}}}
 
 % ---------- Notation ----------
-% This paper is self-contained but deliberately adopts the notation of a
-% determination framework: refinement orders are subscripted I/O, the
-% commitment basis is \Basis, the complete determination space is \Dets,
-% the result space is \Rho, and the result map is \rho.
+% Core determination macros (\OrdI, \OrdO, \Basis, \Dets, \Rho, \Max,
+% \supp, \cdepth, \sdepth) are shared across the determination papers and
+% live in det-notation.sty. This file keeps only provenance-specific or
+% paper-local macros.
+\usepackage{det-notation}
 \newcommand{\Hist}{\mathcal{H}}
 \newcommand{\Spec}{\boldsymbol{S}}
 \newcommand{\drule}{\mathrel{:\!-}}
 \newcommand{\snap}{\mathsf{snap}}
 \newcommand{\seal}{\mathsf{seal}}
 \newcommand{\seq}{\mathbin{\triangleright}}
-% Refinement orders (foundation notation): input and output.
-\newcommand{\OrdI}{\preceq_I}
-\newcommand{\OrdO}{\preceq_O}
-\newcommand{\DroO}{\succeq_O}
-% Backwards-compatible alias: the bare order used in the body is the
+% Paper-local convenience: the bare order used in this paper's body is the
 % OUTPUT refinement order.
-\newcommand{\Ord}{\preceq_O}
-% Core carriers.
-\newcommand{\Basis}{\Phi}            % commitment basis
-\newcommand{\Dets}{\mathcal{D}}      % complete determination space
-\newcommand{\Rho}{\mathcal{R}}       % result space
+\newcommand{\Ord}{\OrdO}
+% Provenance-consumer vocabulary (specific to this paper).
 \newcommand{\Obs}{\mathsf{Obs}}      % observable presentations
 \newcommand{\Cond}{\operatorname{Cond}}
 \newcommand{\Prov}{\operatorname{Prov}}
-\newcommand{\supp}{\operatorname{supp}}
-\newcommand{\cdepth}{\operatorname{cdepth}}
-\newcommand{\sdepth}{\operatorname{sdepth}}
-\DeclareMathOperator{\Max}{Max}
 \newcommand{\tru}{\mathsf{true}}
 \newcommand{\fls}{\mathsf{false}}
 \newcommand{\truth}[1]{\llbracket #1 \rrbracket}

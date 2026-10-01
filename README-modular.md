@@ -18,9 +18,15 @@ shared `sec-abstract.tex` and `sec-intro.tex` branch on.
 
 ## Shared, instantiation-agnostic modules
 
-- `preamble.tex` — packages, foundation-matching macros (`\OrdI`,`\OrdO`,
-  `\Basis`,`\Dets`,`\Rho`,`\Spec`, adequacy/consumer macros), theorem envs,
-  title metadata.
+- `det-notation.sty` — **shared** core determination macros (`\OrdI`,`\OrdO`,
+  `\Basis`,`\Dets`,`\Rho`,`\Max`,`\supp`,`\cdepth`,`\sdepth`), the single
+  source of truth intended for all determination papers (provenance,
+  coordination criterion, complexity) to prevent notation drift from the
+  foundation reference.
+- `preamble.tex` — loads `det-notation.sty`, then packages, theorem envs,
+  title metadata, and provenance-specific/paper-local macros (`\Spec`,
+  `\drule`,`\seal`,`\seq`,`\Cond`,`\Prov`,`\Obs`,`\truth`, the body's bare
+  output-order alias `\Ord`).
 - `sec-abstract.tex`, `sec-intro.tex`
 - `sec-prelim.tex` — the determination model (specification, residual state,
   commitment vs. exposure/entailment, parallel steps/layers, complete

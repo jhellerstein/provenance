@@ -118,14 +118,21 @@ probabilistic-database query complexity.
         shared filtration; sealing reproduces the support behavior of
         semirings with monus on stratified programs and extends to
         unstratified negation, where monus is undefined.
-  \item \emph{Quantitative provenance queries}
-        (Section~\ref{sec:discussion}): beyond why/why-not, the support and its
-        filtration answer \emph{how robust} and \emph{at what depth} a tuple is
-        settled, \emph{work regret vs.\ semantic shift} when comparing
-        specifications, and \emph{which commitment is most responsible}; a
-        bounded-treewidth algorithm computes support and robustness. A second
-        instantiation---transactional isolation---appears in
-        Appendix~\ref{sec:transactions}.
+    \item \emph{Quantitative provenance queries}
+          (Section~\ref{sec:discussion}): beyond why/why-not, the support and its
+          filtration answer \emph{how robust} and \emph{at what depth} a tuple is
+          settled, \emph{work regret vs.\ semantic shift} when comparing
+          specifications, and \emph{which commitment is most responsible}; a
+          bounded-treewidth algorithm computes support and robustness. The same
+          query machinery reaches well beyond logic programs: a second
+          instantiation (Appendix~\ref{sec:transactions}) asks these questions of
+          \emph{transactional isolation}---comparing a tuple's provenance across
+          isolation levels and certifying when a query result is
+          isolation-insensitive, compositionally and without re-analyzing the
+          conflict graph (the filtration lifts per-transaction robustness to
+          query outputs). Its structure makes the comparison sharp:
+          serializability and snapshot isolation turn out \emph{incomparable} in
+          per-tuple support depth.
   \else
   \item \emph{Lead instantiation, transactions} (Section~\ref{sec:transactions}):
         isolation levels (RC, SI, SER) are different resolving subsets of one

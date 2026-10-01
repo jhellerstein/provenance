@@ -34,8 +34,10 @@
   well-founded, stable) are different reading depths of a single shared
   filtration, and sealing commitments reproduce the support behavior of
   semirings with monus while also handling unstratified negation.
-  A second instantiation (transactional isolation) appears in an
-  appendix.
+  The same query machinery reaches a very different domain: a second
+  instantiation applies it to transactional isolation, comparing a tuple's
+  provenance across isolation levels and certifying when a query result is
+  insensitive to the choice of level.
   \else
   Our lead instantiation is transactional isolation: isolation levels
   (read committed, snapshot isolation, serializability) are different

@@ -1,0 +1,263 @@
+% ======================================================================
+% sec-algebra.tex -- the determination semiring, support homomorphism,
+% canonical layer-prefix filtration, and the result-extensional
+% (Green-Karvounarakis-Tannen) specialization.
+% ======================================================================
+\section{The Algebra of Determinations}
+\label{sec:algebra}
+
+Classical provenance owes its power to algebraic structure: derivations
+compose through a commutative semiring, and query evaluation preserves that
+structure~\cite{green2007provenance}. We now lift that machinery across the
+whole space of determinations. The construction has three parts: an
+\emph{adequate consumer} that supplies ordinary provenance conditioned on one
+determination; the \emph{product semiring} $K^{\Dets}$ that ranges this over
+all determinations; and the \emph{canonical layer-prefix filtration} that
+records when an observable's support becomes recognizable. Ordinary relational
+semiring provenance reappears as a special case.
+
+\subsection{Conditioned Provenance and Adequacy}
+\label{sec:adequacy}
+
+The framework does not fix one application provenance model. It fixes an
+interface and one law. Fix a commutative provenance semiring
+$K = (K, +, \cdot, 0_K, 1_K)$: $+$ combines alternative derivations, $\cdot$
+combines jointly required evidence, $0_K$ denotes absence of support, and
+$1_K$ unconditional support (e.g.\ the polynomial semiring $\mathbb{N}[X]$).
+
+\begin{definition}[Conditioned provenance consumer]
+  \label{def:consumer}
+  A \emph{conditioned provenance consumer} for a carrier $\Omega$ and semiring
+  $K$ supplies: a class $\mathcal{A}$ of conditioned application objects; a
+  \emph{conditioning map} $\Cond : \Omega \to \mathcal{A}$; a class $\Obs$ of
+  \emph{observable presentations}; a Boolean \emph{truth interpretation}
+  $\truth{-}_\Omega : \Obs \to (\Omega \to \{\fls, \tru\})$; and a
+  \emph{provenance evaluator} $\Prov_K : \mathcal{A} \times \Obs \to K$. The
+  consumer is \emph{adequate} when, for every $\omega \in \Omega$ and
+  $a \in \Obs$,
+  \[
+    \Prov_K(\Cond(\omega), a) \neq 0_K
+    \quad\Longleftrightarrow\quad
+    \truth{a}_\Omega(\omega) = \tru .
+  \]
+\end{definition}
+
+\noindent
+Adequacy---nonzero annotation exactly when the observable holds---is the sole
+law the construction imposes. The application supplies $\Cond$ and $\Prov_K$;
+the construction below is a structural \emph{lift} of an application
+evaluator, not a replacement for one. For determination provenance the carrier
+is the complete determination space, $\Omega = \Dets$, and we write
+$\truth{-}_{\Dets}$.
+
+\begin{definition}[Conditioned and determination provenance]
+  \label{def:det-provenance}
+  For an adequate consumer on $\Dets$, the \emph{conditioned provenance} of
+  $a \in \Obs$ under $D \in \Dets$ is $P_D(a) = \Prov_K(\Cond(D), a)$. The
+  \emph{determination provenance} of $a$ is
+  \[
+    P(a) : \Dets \longrightarrow K, \qquad P(a)(D) = P_D(a) .
+  \]
+\end{definition}
+
+\noindent
+Thus $P(a) \in K^{\Dets}$, the product semiring of $K$-valued functions on
+$\Dets$ with pointwise operations
+$(P_1 + P_2)(D) = P_1(D)+P_2(D)$ and
+$(P_1 \cdot P_2)(D) = P_1(D)\cdot P_2(D)$. Conditioned provenance is the value
+at one determination; classical provenance is the degenerate case
+$|\Dets| = 1$ (the specification is already determined, so no commitment is
+needed). Equal determined results need not receive equal annotations: the
+consumer may record the derivations and commitment choices that distinguish
+determinations.
+
+\subsection{Support and the Support Homomorphism}
+\label{sec:support}
+
+Many questions need only the Boolean shadow of the annotation: under which
+determinations does the observable hold?
+
+\begin{definition}[Support, truth set, why-support]
+  \label{def:support}
+  The \emph{support} of $P \in K^{\Dets}$ is
+  $\supp(P) = \{D \in \Dets \mid P(D) \neq 0_K\}$. For $a \in \Obs$, its
+  \emph{determination truth set} is $T_a = \{D \in \Dets \mid \truth{a}_{\Dets}(D) = \tru\}$
+  and its \emph{why-support} is $Y_a = \supp(P(a))$. Adequacy gives
+  $Y_a = T_a$. When $a$ is clear we write $Y$.
+\end{definition}
+
+The why-support answers the determination-level why-question---\emph{which
+determinations support this observable?}---while the value $P_D(a)$ supplies
+the conditioned derivation at each supporting determination. Under the usual
+positivity assumption on $K$, taking supports is a semiring homomorphism.
+
+\begin{proposition}[Support homomorphism]
+  \label{prop:support-hom}
+  Suppose $K$ is \emph{positive}: zerosumfree ($u + v = 0_K$ only when
+  $u = v = 0_K$) and free of zero divisors. Then for
+  $P_1, P_2 \in K^{\Dets}$,
+  \[
+    \supp(P_1 + P_2) = \supp(P_1) \cup \supp(P_2),
+    \qquad
+    \supp(P_1 \cdot P_2) = \supp(P_1) \cap \supp(P_2).
+  \]
+  Hence supports form the Boolean semiring
+  $B = (\mathcal{P}(\Dets), \cup, \cap, \emptyset, \Dets)$, the Boolean shadow
+  of $K^{\Dets}$.
+\end{proposition}
+\begin{proof}
+  Zerosumfreeness makes $P_1(D)+P_2(D) = 0_K$ hold exactly when both summands
+  vanish, giving the union law; absence of zero divisors makes
+  $P_1(D)\cdot P_2(D) = 0_K$ hold exactly when a factor vanishes, giving the
+  intersection law. $\mathbb{N}[X]$ and the standard provenance semirings are
+  positive.
+\end{proof}
+
+\noindent
+The Boolean identities on why-supports---$Y_{a \lor b} = Y_a \cup Y_b$,
+$Y_{a \land b} = Y_a \cap Y_b$, and $Y_{\neg a} = \Dets \setminus Y_a$---follow
+directly from adequacy whenever the observable family is closed under the
+corresponding operation, and need \emph{no} positivity assumption: each
+why-support is the preimage of a truth set, so the Boolean shadow has a
+complement even when $K$ has no negation. Positivity is needed only to make the
+support map a homomorphism of the $K$-annotations.
+
+\subsection{The Canonical Layer-Prefix Filtration}
+\label{sec:filtration}
+
+The support algebra tells us \emph{whether} an observable is contingent; the
+filtration tells us \emph{how deep} the resolution that settles it must go.
+The depth-$k$ observation of a determination is its labeled prefix through
+layer $k$.
+
+\begin{definition}[Agreement; cells; filtration]
+  \label{def:filtration}
+  For $k \ge 0$, determinations $D, D' \in \Dets$ \emph{agree through depth
+  $k$}, written $D \equiv_k D'$, when their labeled layer prefixes of length
+  $\min\{k,\operatorname{depth}(\cdot)\}$ coincide (prefix length included).
+  The \emph{cell} of $D$ is $C_k(D) = \{D' \mid D \equiv_k D'\}$. The family
+  \[
+    \mathcal{F}_k
+    = \Bigl\{\, \textstyle\bigcup_{D \in E} C_k(D) \;\big|\; E \subseteq \Dets \,\Bigr\}
+  \]
+  of unions of depth-$k$ cells, for $k = 0,1,\dots$, is the \emph{canonical
+  layer-prefix filtration} $\mathcal{F} = (\mathcal{F}_0, \mathcal{F}_1, \dots)$.
+\end{definition}
+
+\begin{proposition}[Filtration]
+  \label{prop:filtration}
+  Each $\mathcal{F}_k$ is a Boolean subalgebra of $\mathcal{P}(\Dets)$,
+  the levels are nested
+  $\mathcal{F}_0 \subseteq \mathcal{F}_1 \subseteq \cdots$, and
+  $\mathcal{F}_0 = \{\emptyset, \Dets\}$. Moreover
+  $C_{\operatorname{depth}(D)}(D) = \{D\}$ for every $D$, so every
+  determination is identified by its own full layer trace.
+\end{proposition}
+\begin{proof}
+  The classes of $\equiv_k$ partition $\Dets$, and unions, intersections, and
+  complements of unions of classes are again unions of classes, so each
+  $\mathcal{F}_k$ is a Boolean subalgebra containing $\emptyset$ and $\Dets$.
+  Truncating a depth-$(k{+}1)$ prefix to length $k$ recovers the depth-$k$
+  prefix, so $C_{k+1}(D) \subseteq C_k(D)$ and every union of depth-$k$ cells
+  is a union of depth-$(k{+}1)$ cells, giving nesting. At depth $0$ all
+  determinations share the empty observation, so the only cells are
+  $\emptyset$ and $\Dets$. Finally, if $D' \equiv_{m} D$ with
+  $m = \operatorname{depth}(D)$ then $D$ is a layer-prefix of $D'$; by
+  prefix-freeness of complete determinations $D' = D$.
+\end{proof}
+
+\begin{definition}[Support depth]
+  \label{def:sdepth}
+  The \emph{support depth} of an observable $a$ (or of a support
+  $Y \subseteq \Dets$) is
+  $\sdepth(a) = \min\{k \mid Y_a \in \mathcal{F}_k\}$, with $\min\emptyset =
+  \infty$. An observable is \emph{robust} if $Y_a = \Dets$ and
+  \emph{impossible} if $Y_a = \emptyset$; both have support depth $0$.
+\end{definition}
+
+\noindent
+Equivalently, $\sdepth(a) = \sup_{D} \cdepth_{\mathbf 1_{Y_a}}(D)$, where the
+pointwise \emph{certificate depth} $\cdepth_{\mathbf 1_{Y_a}}(D)$ is the least
+$k$ with $C_k(D) \subseteq Y_a$ or $C_k(D) \cap Y_a = \emptyset$: the first
+depth at which the observed prefix already decides support along $D$. A prefix
+that decides support is a \emph{why certificate} when $D \in Y_a$ and a
+\emph{why-not certificate} otherwise---the determination-level counterpart of
+why/why-not provenance, now well-defined under ambiguity.
+
+The point of the filtration is that provenance composition cannot deepen it.
+
+\begin{theorem}[Composition respects the filtration]
+  \label{thm:filtration-respected}
+  Assume $K$ is positive. For $P_1, P_2 \in K^{\Dets}$,
+  \[
+    \sdepth\bigl(\supp(P_1 + P_2)\bigr),\;
+    \sdepth\bigl(\supp(P_1 \cdot P_2)\bigr)
+    \;\le\;
+    \max\{\sdepth(\supp P_1), \sdepth(\supp P_2)\},
+  \]
+  and $\sdepth(\Dets \setminus Y) = \sdepth(Y)$.
+\end{theorem}
+\begin{proof}
+  Let $k$ be the maximum of the two support depths (the claim is immediate if
+  either is infinite). Both supports lie in $\mathcal{F}_k$; by
+  Proposition~\ref{prop:support-hom} their union and intersection are the
+  supports of $P_1+P_2$ and $P_1 \cdot P_2$, and $\mathcal{F}_k$ is closed
+  under $\cup$ and $\cap$ (Proposition~\ref{prop:filtration}). At every finite
+  level a set is a union of cells iff its complement is, giving the final
+  equality.
+\end{proof}
+
+\noindent
+Reading provenance queries through the support homomorphism, this says that a
+positive relational-algebra query cannot produce an output whose support is
+deeper than its deepest input: join computes an intersection of supports,
+union a union, projection a union over witnesses, and selection removes or
+preserves a tuple's whole support. The inequalities can be strict---two deep
+supports can combine into a shallow one, e.g.\
+$Y \cup (\Dets \setminus Y) = \Dets$ has depth $0$---so composition can
+\emph{forget} resolution, never manufacture it.
+
+\subsection{The Result-Extensional Specialization}
+\label{sec:result-extensional}
+
+The general consumer records which determination occurred. A common special
+case forgets the determination and depends only on the determined result;
+this is where ordinary relational semiring provenance lives.
+
+\begin{definition}[Result-extensional consumer]
+  \label{def:result-extensional}
+  A consumer on $\Dets$ is \emph{result-extensional} if there are maps
+  $\operatorname{Real} : \rho[\Dets] \to \mathcal{A}$ and
+  $\truth{-}_{\Rho} : \Obs \to (\rho[\Dets] \to \{\fls,\tru\})$ with
+  $\Cond = \operatorname{Real} \circ \rho$ and
+  $\truth{a}_{\Dets} = \truth{a}_{\Rho} \circ \rho$. Writing
+  $\overline{P}(a)(r) = \Prov_K(\operatorname{Real}(r), a)$, it satisfies
+  $P(a) = \overline{P}(a) \circ \rho$, and hence
+  $Y_a = \rho^{-1}(\overline{T}_a)$ for the result truth set $\overline{T}_a$.
+\end{definition}
+
+\begin{example}[Relational semiring provenance is result-extensional]
+  \label{ex:gkt}
+  Let $\mathcal{A}$ be the $K$-annotated instances on a fixed schema, let
+  $\operatorname{Real}(r)$ build the instance selected by the determined result
+  $r$ (with application-supplied base annotations), and for a positive
+  relational-algebra query $Q$ and output tuple $t$ let the observable
+  $a_{Q,t}$ be true at $r$ exactly when $t$ is in the ordinary result of $Q$,
+  with $\Prov_K(\operatorname{Real}(r), a_{Q,t})$ the standard $K$-relational
+  annotation of $t$ (union/alternative derivations use $+$, join/joint
+  derivations use $\cdot$, projection sums over witnesses). Under positivity
+  the annotation is nonzero exactly when $t$ is present, so the consumer is
+  adequate. This is precisely the $K$-relational provenance-semiring setting of
+  Green, Karvounarakis, and Tannen~\cite{green2007provenance}: ordinary
+  provenance runs \emph{within} each determined result, and factorization
+  through $\rho$ lifts it to all of $\Dets$. Presentation identity still
+  matters---$Q$ and $Q \cup Q$ can carry different $\mathbb{N}[X]$
+  annotations.
+\end{example}
+
+\noindent
+Result extensionality is thus a \emph{factorization through $\rho$}, not the
+default: it is appropriate exactly when both truth and annotation depend only
+on the determined result. The general carrier---needed, e.g., when distinct
+determinations reach the same result by different commitments---keeps the
+determination identity that this specialization discards.

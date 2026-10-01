@@ -1,0 +1,42 @@
+% ======================================================================
+% app-open-questions.tex -- open questions.
+% ======================================================================
+\section{Open Questions}
+\label{app:open-questions}
+
+\paragraph{Universality of the determination semiring.}
+Green et al.~\cite{green2007provenance} identify $\mathbb{N}[X]$ as the free
+(universal) object for positive-RA provenance. The determination semiring adds
+a filtration; is there a universal filtered object through which every
+adequate consumer factors? A positive answer would justify ``algebra'' in the
+strong sense and give a canonical normal form for determination provenance.
+
+\paragraph{Dynamic commutativity and canonical layering.}
+In both instantiations here commutativity is state-independent, so the layer
+structure of a trace is unambiguous. In general, whether two commitments
+commute may depend on the current residual, and canonical layering becomes
+subtle; characterizing when a canonical filtration still exists (and when
+competing sound factorizations must be compared instead) is open.
+
+\paragraph{Quantitative negation beyond positivity.}
+Theorem~\ref{thm:monus-elimination} matches sealing and monus on
+\emph{supports} under zero-divisor-free, $\omega$-continuous semirings. When
+$K$ has zero divisors (e.g.\ the bounded lattice semiring
+$(\{0,\dots,m\}, \max, \min, 0, m)$), monus can assign an intermediate value
+$1_K \mathbin{\dot{-}} v \notin \{0_K, 1_K\}$, a quantitative residual that
+sealing discards. Whether graded commitments can record \emph{how much} of a
+derivation a negation overcomes---recovering this residual within the
+determination framework---is open.
+
+\paragraph{A joint responsibility game.}
+Section~\ref{sec:responsibility} attributes contingency to commitments and
+tuple-level responsibility~\cite{meliou2010causality} attributes derivation to
+data tuples; the two are sequential. Unifying them into a single game whose
+players are both commitments and tuples---and understanding its Shapley
+value---remains open.
+
+\paragraph{Depth reduction.}
+A coarser output order $\OrdO' \supseteq \OrdO$ makes some layer's choices
+$\OrdO'$-comparable, eliminating that layer and lowering depth. Characterizing
+the minimal depth achievable by order coarsening (and its cost in lost
+distinctions) is open.

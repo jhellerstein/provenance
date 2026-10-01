@@ -1,0 +1,33 @@
+% ======================================================================
+% main-both.tex -- Full superset: both instantiations in the body.
+%
+% Closest to the original single-file paper; useful as the author's
+% complete reference. Build:  ./build.sh main-both.tex
+% ======================================================================
+\documentclass[acmsmall,nonacm]{acmart}
+\newif\ifleaddatalog \leaddatalogtrue
+\input{preamble}
+
+\begin{document}
+\input{sec-abstract}
+\maketitle
+
+\input{sec-intro}
+\input{sec-prelim}
+\input{sec-algebra}
+\input{inst-datalog-body}
+\input{inst-txn-body}
+\input{sec-consequences}
+\input{sec-related}
+\input{sec-conclusion}
+
+\appendix
+\input{app-algebra}
+\input{app-robustness}
+\input{app-responsibility}
+\input{app-datalog-proofs}
+\input{app-open-questions}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+\end{document}

@@ -1,0 +1,33 @@
+% ======================================================================
+% sec-conclusion.tex -- conclusion.
+% ======================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+Determination provenance makes the commitments that resolve semantic ambiguity
+explicit and composable. Provenance over the complete determination space
+forms a product semiring $K^{\Dets}$ whose Boolean shadow---supports---carries
+a canonical layer-prefix filtration; the filtration measures support depth, is
+respected by provenance composition, and recovers classical provenance (and
+the Green--Karvounarakis--Tannen relational semiring) as the result-extensional
+case at depth $0$. $\mbox{Datalog}^\neg$ instantiates the framework so that the
+classical negation semantics are different reading depths of one shared
+filtration; transactional isolation (Appendix~\ref{sec:transactions})
+instantiates it so that isolation levels are different resolving subsets of
+one. The filtration supports quantitative diagnosis---work regret, semantic
+shift, commitment responsibility---and a bounded-treewidth algorithm for
+support and robustness, going beyond binary robustness to explain \emph{how
+much} and \emph{why} an observable depends on each layer of resolution.
+
+The recipe is uniform: given a system's event trace, declare an outcome space
+and refinement order that identify the commitments, supply an adequate
+provenance consumer, and the algebra applies---robustness, why/why-not,
+responsibility, cross-specification comparison---over existing observability.
+
+Looking ahead, the determination semiring already has the shape of a
+probability space: $\Dets$ is a sample space, supports are measurable sets,
+and the canonical filtration is a filtration in the measure-theoretic sense.
+Under a measure on $\Dets$, support densities become probabilities, work
+regret becomes expected regret, and responsibility becomes conditional
+expectation. That the algebra lands so close to the machinery of stochastic
+processes suggests a deeper connection worth developing.

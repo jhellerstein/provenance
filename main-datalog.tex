@@ -1,0 +1,33 @@
+% ======================================================================
+% main-datalog.tex -- Datalog-led variant (the arXiv / PODS-facing paper).
+%
+% Datalog^neg leads the body; transactions are deferred to an appendix.
+% Build:  ./build.sh main-datalog.tex
+% ======================================================================
+\documentclass[acmsmall,nonacm]{acmart}
+\newif\ifleaddatalog \leaddatalogtrue
+\input{preamble}
+
+\begin{document}
+\input{sec-abstract}
+\maketitle
+
+\input{sec-intro}
+\input{sec-prelim}
+\input{sec-algebra}
+\input{inst-datalog-body}
+\input{sec-consequences}
+\input{sec-related}
+\input{sec-conclusion}
+
+\appendix
+\input{app-algebra}
+\input{inst-txn-appendix}
+\input{app-robustness}
+\input{app-responsibility}
+\input{app-datalog-proofs}
+\input{app-open-questions}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+\end{document}

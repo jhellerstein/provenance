@@ -1,0 +1,87 @@
+% ======================================================================
+% app-robustness.tex -- robustness complexity and bounded-treewidth
+% tractability (including the support-formula/locality clarification).
+% ======================================================================
+\section{Robustness and Treewidth}
+\label{app:robustness-proofs}
+
+\subsection{Robustness is coNP-complete}
+
+\begin{theorem}[Robustness is coNP-complete in width]
+  \label{thm:robustness-conp}
+  Consider any instantiation in which the relevant commitment layer has $n$
+  independent binary commitments, validity checking is polynomial, and query
+  evaluation is polynomial. Deciding robustness ($Y_a = \Dets$) is
+  coNP-complete.
+\end{theorem}
+\begin{proof}
+  Membership: $a$ is \emph{non}-robust iff some determination makes $a$ false,
+  a polynomial-size certificate (the layer's commitment choices) checkable in
+  polynomial time by the two conditions. Hardness is by reduction from
+  \textsc{DNF-Validity} (coNP-complete): given
+  $\psi = t_1 \vee \cdots \vee t_\ell$ over $x_1, \dots, x_n$, use $n$
+  independent binary commitments, one per variable, so $\Dets$ has $2^n$
+  elements, one per assignment $\alpha_D$. Build a UCQ
+  $Q = Q_1 \cup \cdots \cup Q_\ell$ whose distinguished tuple $t^\ast$ is
+  selected under $D$ iff $\alpha_D$ satisfies some term of $\psi$. Then
+  $t^\ast$ is robust iff $\psi$ is valid.
+\end{proof}
+
+\noindent
+In the $\mbox{Datalog}^\neg$ instantiation this coincides with the known
+coNP-completeness of skeptical reasoning under stable-model
+semantics~\cite{marek1991autoepistemic}: robustness ``$Y_a = \Dets$'' is
+exactly ``$a$ holds in every stable model.'' In the transactional
+instantiation the same gadget uses $n$ write--write pairs
+(Appendix~\ref{sec:transactions}).
+
+\subsection{Bounded-Treewidth Tractability}
+
+We restate Theorem~\ref{thm:treewidth} and make the locality condition
+precise. Fix a provenance query $Q$, an output observable $a$, and its
+single-layer support formula $\phi_a$ over commitment variables, obtained from
+base supports by the homomorphism of Proposition~\ref{prop:support-hom}
+($\cup \mapsto \vee$, $\cap \mapsto \wedge$).
+
+\begin{theorem}[Bounded-treewidth support and robustness]
+  \label{thm:treewidth-app}
+  If the primal graph of $\phi_a$ has treewidth $w$, then the why-support of
+  $a$---hence robustness and impossibility---is decidable in
+  $O(2^w \cdot \mathrm{poly}(n))$, and under a product measure on commitment
+  variables the support density $\mu(Y_a)$ is computable in the same time.
+\end{theorem}
+\begin{proof}
+  $\phi_a$ is a monotone Boolean combination of the base variables; validity,
+  satisfiability, and weighted model counting over a formula of primal-graph
+  treewidth $w$ run in $O(2^w \cdot \mathrm{poly}(n))$ by dynamic programming
+  on a width-$w$ tree decomposition. Robustness is validity of $\phi_a$;
+  impossibility is unsatisfiability; density is the weighted model count.
+\end{proof}
+
+\begin{definition}[Locality]
+  \label{def:locality}
+  A workload is \emph{local} if, for every output observable, each clause of
+  its support formula involves only commitments that share a
+  dependency/conflict edge (equivalently, the support formula introduces no
+  primal-graph edge absent from the conflict/dependency graph).
+\end{definition}
+
+\begin{proposition}[Conflict treewidth suffices under locality]
+  \label{prop:locality}
+  For a local workload, the primal-graph treewidth of every output's support
+  formula is at most the treewidth of the conflict/dependency graph.
+  Consequently Theorem~\ref{thm:treewidth-app} holds with $w$ the conflict
+  treewidth.
+\end{proposition}
+\begin{proof}
+  Locality makes the primal graph of each support formula a subgraph of the
+  conflict/dependency graph, and treewidth is monotone under subgraphs.
+\end{proof}
+
+\noindent
+Locality is why we state Theorem~\ref{thm:treewidth} over the \emph{support
+formula}'s treewidth rather than the conflict graph's: in general transitive
+ordering constraints can add primal-graph edges absent from the conflict
+graph, so the two can differ; under locality they agree, and both
+instantiations' natural workloads (bounded-degree negative dependency,
+bounded-contention conflict) are local.

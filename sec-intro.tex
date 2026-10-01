@@ -1,0 +1,107 @@
+% ======================================================================
+% sec-intro.tex -- introduction. Lead instantiation chosen by \ifleaddatalog.
+% ======================================================================
+\section{Introduction}
+\label{sec:intro}
+
+Algebraic data provenance explains the outputs of a deterministic query---a
+\emph{function} from an input database to an output
+relation~\cite{green2007provenance,suciu2011probabilistic}. But many data
+systems rest on a more ambiguous specification---a \emph{relation} that maps
+an input scenario to several admissible outputs. A logic program with negation
+may have several stable models; concurrent transactions may serialize in many
+orders; distributed systems may reach different consistent decisions.
+Classical data provenance cannot account for this ambiguity. It cannot even
+pose its question---why, or why-not, a tuple appears---because the choice of
+output is not yet made.
+
+This paper develops an algebra of provenance over ambiguous specifications. We
+introduce \emph{determination provenance}, which tracks the irrevocable
+\emph{commitments} that resolve ambiguity. A \emph{determination} is a layered
+sequence of commitments that narrows a relational specification until it
+determines a single output---the semantic counterpart of what a correct
+implementation does on one run. Classical provenance applies \emph{within}
+each determination; determination provenance records which commitments were
+needed and how query results depend on them.
+
+\ifleaddatalog
+\begin{example}[Why-not under ambiguity]
+  \label{ex:intro}
+  Take the program $r(c) \leftarrow \neg s(c);\ s(c) \leftarrow \neg r(c)$.
+  It has two stable models: $\{r(c)\}$ and $\{s(c)\}$. Classical provenance
+  cannot explain the absence of $s(c)$: in one model it is a why-not, in the
+  other a why. The absence is not a blocked derivation but a \emph{semantic
+  commitment}---the choice $\varphi_{r(c)=\mathbf{t}}$ that resolves the
+  negative cycle. Determination provenance records exactly this: $r(c)$ holds
+  under the determinations that commit it true, and that \emph{support} is the
+  object provenance should annotate.
+\end{example}
+\else
+\begin{example}[Why-not under ambiguity]
+  \label{ex:intro}
+  A relation $S(k,y)$ starts as $\{S(0,b)\}$; concurrent transactions
+  $T_1\!:\textsf{ins }S(1,b)$, $T_2\!:\textsf{ins }S(2,d)$,
+  $T_3\!:\textsf{del }S(2,d)$ run alongside a query
+  $T_Q\!: Q(y)\drule S(k,y)$. Value $b$ appears regardless of ordering
+  (\emph{robust}); value $d$ appears only when $T_Q$ observes $T_2$'s insert
+  before an effective delete (\emph{contingent}). Before the ambiguity is
+  resolved, the provenance question for $d$ is undetermined: under one
+  resolution it is a why, under another a why-not.
+\end{example}
+\fi
+
+\noindent
+Each execution is one determination. But robustness and contingency are
+properties of the \emph{space} of all determinations, not of any single one.
+To reason about them algebraically we track each observable's \emph{support}:
+the set of determinations under which it holds. Supports form the Boolean
+shadow of a product provenance semiring, and the familiar power of algebraic
+provenance transfers---robustness is full support; why/why-not questions are
+read from the support; quantitative diagnosis from its measure.
+
+Determination provenance carries more structure than this flat algebra.
+Commitments are \emph{layered}: later ones may depend on earlier outcomes.
+This layering induces a \emph{filtration}---a nested chain of sub-algebras
+recording how much resolution each observable requires. A robust or impossible
+observable has \emph{support depth}~$0$; a contingent one has positive depth,
+naming the layer that first settles it. The key law is that provenance
+composition cannot deepen the filtration: a positive relational-algebra query
+produces no output deeper than its deepest input. This yields depth bounds,
+compositional robustness, cross-specification comparison, and a connection to
+probabilistic-database query complexity.
+
+\paragraph{Contributions.}
+\begin{enumerate}[label=(\roman*),nosep,leftmargin=*]
+  \item \emph{A determination algebra} (Sections~\ref{sec:prelim}--\ref{sec:algebra}):
+        a specification's resolutions form a complete determination space
+        $\Dets$; provenance lifts to the product semiring $K^{\Dets}$ via an
+        \emph{adequate consumer} whose sole law is that a nonzero annotation
+        marks a true observable; supports form a Boolean semiring, and the
+        canonical layer-prefix filtration measures support depth and is
+        respected by provenance composition. Ordinary relational semiring
+        provenance is recovered as the \emph{result-extensional} special case.
+  \ifleaddatalog
+  \item \emph{Lead instantiation, $\mbox{Datalog}^\neg$}
+        (Section~\ref{sec:datalog}): sealing and choice commitments give a
+        canonical basis of depth $k{+}d$; the classical negation semantics
+        (stratified, well-founded, stable) are different reading depths of one
+        shared filtration; sealing reproduces the support behavior of
+        semirings with monus on stratified programs and extends to
+        unstratified negation, where monus is undefined.
+  \item \emph{Consequences} (Section~\ref{sec:discussion}): work regret vs.\
+        semantic shift across specifications; a commitment-responsibility
+        measure; and a bounded-treewidth algorithm for support and robustness.
+        A second instantiation---transactional isolation---appears in
+        Appendix~\ref{sec:transactions}.
+  \else
+  \item \emph{Lead instantiation, transactions} (Section~\ref{sec:transactions}):
+        isolation levels (RC, SI, SER) are different resolving subsets of one
+        shared filtration; determination depth is $\Theta(n)$ under scheduling
+        discretion; SER and SI are incomparable in per-tuple support depth.
+  \item \emph{Consequences} (Section~\ref{sec:discussion}): work regret vs.\
+        semantic shift; a commitment-responsibility measure; and a
+        bounded-treewidth algorithm for support and robustness. A second
+        instantiation---$\mbox{Datalog}^\neg$---appears in
+        Appendix~\ref{sec:datalog}.
+  \fi
+\end{enumerate}

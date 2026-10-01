@@ -1,0 +1,458 @@
+% ======================================================================
+% inst-txn-appendix.tex -- transactional-isolation instantiation (appendix).
+%
+% Carrier = schedules; commitments = ordering choices on the conflict graph
+% (OCC validation order, MVTO timestamping, 2PL victim/lock-release); isolation
+% levels (RC, SER, SI) are resolving subsets of ONE shared filtration. The
+% depth theorem, the SER/SI support-depth incomparability, compositional
+% insensitivity, SI worked depth, and protocol-specific structure all live
+% here. Shares theorem/eqn labels with inst-txn-body.tex (only one of the two
+% files is ever \input in a given build).
+% ======================================================================
+\section{Instantiation: Transactional Isolation}
+\label{sec:transactions}
+
+In a transactional system the non-monotone operation is \emph{conflict
+resolution}: when concurrent transactions touch the same objects, the system
+must decide which effects persist and in what apparent order. We instantiate
+the determination model so that these decisions become explicit
+\emph{commitments} over a conflict graph, leaving the operational interleaving
+(reads, writes, arrivals) a free, work-free environment process. Two payoffs
+follow. First, why/why-not under ambiguity becomes well-defined: a tuple can be
+absent because of a serialization commitment, not merely a missing write.
+Second, the classical isolation levels---read committed (RC), snapshot
+isolation (SI), serializability (SER)---turn out to be \emph{different resolving
+subsets of one shared filtration}, so their comparison reduces to a per-tuple
+support-depth comparison (Proposition~\ref{prop:ser-si-incomparable}).
+
+\subsection{The Carrier, Specification, and Commitment Basis}
+\label{sec:txn-setup}
+
+Fix a finite workload $W$: a set of transactions $T_1,\dots,T_n$ with their
+read and write sets over a set of objects, together with a query transaction
+$T_Q$. An \emph{outcome} is a decision trace: a per-transaction commit/abort
+verdict together with an apparent serialization order on the committed
+transactions, consistent with some execution of $W$. We take the output set
+$O$ to be these decision traces and the output refinement order $\OrdO$ to be
+\emph{sub-trace inclusion}: $o_1 \OrdO o_2$ when $o_2$ extends $o_1$ by
+resolving the fate or relative order of further transactions without
+contradicting any verdict already fixed. The acceptable relation
+$S(W) = \Spec(W)$ admits exactly the traces that correspond to some
+serializable (more generally, $L$-admissible, below) schedule of $W$; an
+individual schedule is the application carrier.
+
+The operations themselves---arrivals, reads, writes, and the interleaving the
+scheduler happens to observe---are \emph{environment events}. They extend the
+history and may \emph{introduce} conflict edges, but they do not by themselves
+exclude any admissible outcome; in the vocabulary of
+Definition~\ref{def:free} they are content-preserving free transitions and
+carry no work and no depth. The fateful acts are the ordering decisions among
+conflicting transactions.
+
+\begin{definition}[Conflict and conflict graph]
+  \label{def:txn-conflict}
+  Two operations of distinct transactions $T_i \neq T_j$ \emph{conflict} if
+  they access a common object and at least one is a write. Following
+  Adya~\cite{adya1999weak} we label the induced edge
+  $T_i \xrightarrow{\ell} T_j$ by its type
+  $\ell \in \{\mathsf{ww}, \mathsf{wr}, \mathsf{rw}\}$: write--write
+  ($\mathsf{ww}$), write--read ($\mathsf{wr}$), and read--write
+  ($\mathsf{rw}$, an \emph{anti-dependency}). The \emph{conflict graph}
+  $G(W)$ is the directed labeled multigraph on the active transactions carrying
+  one such edge per conflict, oriented by operation precedence.
+\end{definition}
+
+\begin{definition}[Ordering commitment basis]
+  \label{def:txn-basis}
+  The commitment basis is the set of \emph{ordering commitments}
+  \[
+    \Basis = \{\,\varphi_{T_i \prec T_j} \mid T_i, T_j \text{ conflict in } W\,\}
+      \;\cup\; \{\,\seal\,\},
+  \]
+  where $\varphi_{T_i \prec T_j}$ irrevocably records that $T_i$ is serialized
+  before $T_j$ on their contested objects, and $\seal$ (Definition~\ref{def:free}'s
+  fateful counterpart for a batch) closes a batch of pending requests so that no
+  further transaction may join the current resolution round. One ordering
+  commitment deletes from the residual every trace that orders the pair the
+  other way (and every trace in which an induced forbidden cycle would commit
+  both), hence it is fateful. A $\seal$ is fateful whenever the set of
+  transactions it fixes forces a verdict that an unsealed state left open.
+\end{definition}
+
+\noindent
+The abort of a transaction is \emph{not} a separate basis element: an abort is
+\emph{entailed} by the ordering commitments once a forbidden cycle is detected,
+exactly as a derived positive atom is entailed by a seal in the
+$\mbox{Datalog}^\neg$ instantiation. All standard protocols realize $\Basis$:
+OCC fixes order by \emph{validation order}, MVTO by \emph{timestamp
+assignment}, and 2PL by the time of first lock release (or by deadlock
+\emph{victim selection}); Section~\ref{sec:txn-protocols} shows these differ
+only in which commitments the environment makes for the system.
+
+\paragraph{Isolation levels as resolving subsets of one filtration.}
+Because the basis and hence $\Dets$ are fixed by $W$, every isolation level
+reads the \emph{same} layer-prefix filtration $\mathcal F$ of
+Section~\ref{sec:algebra}; the levels differ only in which commitments are
+\emph{forced}, i.e.\ which resolving subset of $\Dets$ each admits. Following
+Adya~\cite{adya1999weak}:
+\begin{itemize}[nosep]
+  \item \emph{RC} imposes no constraint on cycles: all traces are admissible,
+        so no ordering commitment is forced.
+  \item \emph{SER} forbids every directed cycle in $G(W)$ regardless of edge
+        labels: at least one transaction on each cycle must abort.
+  \item \emph{SI} permits exactly those cycles containing two
+        \emph{adjacent} $\mathsf{rw}$ anti-dependency edges, but enforces
+        \emph{first-committer-wins} (FCW) on $\mathsf{ww}$ edges: of two
+        concurrent writers of an object, only the first to request commit may
+        commit.
+\end{itemize}
+
+\subsection{Determination Depth by Isolation Level}
+\label{sec:txn-depth-section}
+
+\begin{theorem}[Determination depth for transactions]
+  \label{thm:txn-depth}
+  Over the ordering basis $\Basis$, the support depth of transaction fate
+  depends only on the protocol's resolution class:
+  \begin{enumerate}[nosep,label=(\alph*)]
+    \item \emph{No forbidden cycle (RC).} Every trace is admissible, so no
+          commitment is forced and every outcome is $\OrdO$-comparable:
+          support depth $0$.
+    \item \emph{Fully reactive protocol.} Under any level $L$ that forbids some
+          cycle but has \emph{no} scheduling discretion, each event is resolved
+          deterministically by the current state and the arriving request; the
+          determination has support depth $0$.
+    \item \emph{Scheduling discretion.} Under such an $L$ \emph{with}
+          discretion (batching, commit-order choice, or victim selection),
+          whose forbidden cycle pattern recurs around a surviving
+          discretionary transaction, the worst-case support depth is
+          $\Theta(n)$ in the number of transactions. The \emph{per-batch} depth
+          is exactly $2$: $\seal$ the batch, then $\seq$ a single
+          (commuting) layer choosing a processing/validation order within it.
+  \end{enumerate}
+\end{theorem}
+\begin{proof}
+  \emph{(a)} If no cycle type is forbidden, validation always passes and no
+  transaction need abort; all acceptable traces are comparable under $\OrdO$,
+  so $Y_a \in \{\emptyset, \Dets\}$ for every fate observable and
+  $\sdepth = 0$ by Definition~\ref{def:sdepth}.
+
+  \emph{(b)} A fully reactive protocol processes each event by the current
+  state alone. Witness: textbook OCC (validate at the commit request, abort iff
+  a cycle exists) or textbook MVTO (assign the timestamp at arrival, force the
+  abort entailed by it). The system exercises no choice, so $\Dets$ is a
+  singleton up to free transitions and every support lies in
+  $\mathcal F_0 = \{\emptyset,\Dets\}$.
+
+  \emph{(c) Upper bound.} Each ordering commitment settles at least one
+  transaction's fate; with $n$ transactions at most $n$ sequential commitments
+  suffice, so no support exceeds depth $n$, giving $O(n)$.
+
+  \emph{Lower bound (the $T_\infty$ witness).} Let $T_\infty$ be a long-running
+  transaction that reads an object $x$ and writes an object $y$. Each fresh
+  arrival $T_i$ writes $x$ and reads $y$, forming a two-edge $\mathsf{rw}$--$\mathsf{rw}$
+  cycle with $T_\infty$:
+  \[
+    T_\infty \xrightarrow{\mathsf{rw}} T_i
+    \qquad\text{and}\qquad
+    T_i \xrightarrow{\mathsf{rw}} T_\infty .
+  \]
+  Under a level that forbids this cycle, each round forces a \emph{binary}
+  decision: abort $T_\infty$ (resolving all future conflicts at once) or abort
+  $T_i$ (letting $T_\infty$ survive to meet $T_{i+1}$). If the scheduler keeps
+  $T_\infty$ alive for $n{-}1$ rounds, round $i$'s commitment depends on round
+  $i{-}1$'s---had $T_\infty$ been aborted earlier, no later cycle would
+  form---so the layers do not commute and the fate of $T_\infty$ is settled only
+  by a depth-$(n{-}1)$ prefix. Hence $\sdepth = \Theta(n)$.
+
+  \emph{Per-batch depth.} Within a sealed batch the only remaining discretion is
+  the choice of a processing (validation / timestamp / victim) order $\pi$, a
+  total order on the pending transactions; all aborts, commits, and read
+  verdicts are \emph{entailed} by $\pi$. Thus a batch resolves in two
+  non-commuting layers, $\seal \seq \pi$: the seal fixes \emph{which}
+  transactions are in the round, and the order fixes \emph{which} survive. These
+  do not commute (Remark~\ref{rem:layers}): the seal determines the vertex set
+  on which $\pi$ then acts. Hence per-batch depth is $2$. Under 2PL the second
+  layer is victim selection rather than order selection, but the seal is still
+  required so that aborting a victim cannot admit a new request that forms a
+  fresh cycle (Section~\ref{sec:txn-protocols}).
+\end{proof}
+
+\begin{example}[Per-batch depth under OCC with batch validation]
+  \label{ex:txn-batch}
+  Three transactions $T_1,T_2,T_3$ finish their read/write phases concurrently.
+  The system seals the batch (layer~$1$): no further transaction joins this
+  validation round. It then chooses a validation order $\pi$ (layer~$2$)---say
+  $T_1 \prec T_2 \prec T_3$. Under $\pi$, $T_2$'s write set is checked against
+  $T_1$'s; if they conflict, $T_2$ aborts---\emph{entailed} by $\pi$, not a
+  separate commitment. Choosing $T_2 \prec T_1 \prec T_3$ instead may let $T_2$
+  commit and abort $T_1$. The two layers do not commute, matching
+  Theorem~\ref{thm:txn-depth}(c): depth~$2$ per batch.
+\end{example}
+
+\subsection{A Running Example}
+\label{ex:txn-running}
+
+We revisit the teaser of Example~\ref{ex:intro}. A relation $S(k,y)$ starts as
+$\{S(0,b)\}$, and concurrent transactions
+\[
+  T_1\!:\textsf{ins } S(1,b),\quad
+  T_2\!:\textsf{ins } S(2,d),\quad
+  T_3\!:\textsf{del } S(2,d)
+\]
+run alongside the query transaction $T_Q\!: Q(y) \drule S(k,y)$. The relevant
+conflicts are: $T_2 \xrightarrow{\mathsf{ww}} T_3$ (both touch $S(2,\cdot)$) and
+the read--write edges relating $T_Q$ to $T_2,T_3$. Under SER the conflict graph
+is acyclic, so all ordering commitments commute and resolution occupies a single
+layer; two query-outcome classes of determinations arise, with representatives
+\[
+  D_{\mathsf{in}} = \varphi_{T_2 \prec T_Q} \cdot \varphi_{T_Q \prec T_3}
+  \quad(\text{$T_Q$ observes $d$}),
+  \qquad
+  D_{\mathsf{out}} = \varphi_{T_2 \prec T_3} \cdot \varphi_{T_3 \prec T_Q}
+  \quad(\text{$d$ absent}).
+\]
+Reading provenance through the support homomorphism of
+Section~\ref{sec:support}, the why-support of $b$ is all of $\Dets$ while that
+of $d$ is $\{D_{\mathsf{in}}\}$'s cell:
+\[
+  Y_b = \Dets, \qquad Y_d = \{\,D \in \Dets \mid D \text{ orders } T_2 \prec T_Q \prec T_3\,\}.
+\]
+Thus $b$ is \emph{robust} ($\sdepth(b) = 0$) and $d$ is \emph{contingent}
+($\sdepth(d) = 1$): value $b$ appears under every ordering, whereas $d$ appears
+exactly when $T_Q$ observes $T_2$'s insert before an effective delete.
+Figure~\ref{fig:det-tables} summarizes the determination structure of this
+example across isolation levels.
+
+\subsection{Per-Tuple Isolation Sensitivity}
+\label{sec:txn-sensitivity}
+
+Vandevoort et al.~\cite{vandevoort2025mixed} certify \emph{individual
+transactions} as isolation-insensitive. Provenance over the resulting database
+enables a finer and a broader cut at once: a query may select a single output
+tuple, or join tuples produced by several transactions. The filtration lifts
+per-transaction certification to \emph{query results}.
+
+\begin{proposition}[SER/SI support-depth incomparability]
+  \label{prop:ser-si-incomparable}
+  In the Adya conflict-graph model, the following two 2-transaction gadgets
+  witness both directions of SER/SI support-depth incomparability for a tuple
+  $t$ derived from a transaction $T_i$:
+  \begin{enumerate}[nosep,label=(\alph*)]
+    \item \emph{Write skew} ($\sdepth_{\mathrm{SER}}(t) > \sdepth_{\mathrm{SI}}(t)$).
+          $T_A$ reads $x$ and writes $y$; $T_B$ reads $y$ and writes $x$, forming
+          a two-edge $\mathsf{rw}$--$\mathsf{rw}$ cycle. SI permits the cycle:
+          both commit in every SI determination, so $t$ is robust,
+          $\sdepth_{\mathrm{SI}}(t) = 0$. SER forbids the cycle: one of $T_A,T_B$
+          must abort, so $t$ is contingent, $\sdepth_{\mathrm{SER}}(t) > 0$.
+    \item \emph{First-committer-wins forced abort}
+          ($\sdepth_{\mathrm{SI}}(t) > \sdepth_{\mathrm{SER}}(t)$).
+          $T_1$ writes $x$ and inserts $t$ into a relation $R$; $T_2$ writes $x$;
+          there is no enclosing cycle. SER orders them on $x$ and commits both,
+          so $t$ is robust, $\sdepth_{\mathrm{SER}}(t) = 0$. SI applies FCW on
+          $x$ and forces one writer to abort, so $t$ holds only if $T_1$ wins:
+          $\sdepth_{\mathrm{SI}}(t) > 0$.
+  \end{enumerate}
+\end{proposition}
+\begin{proof}
+  Both gadgets instantiate Definition~\ref{def:sdepth}. In (a) the SI resolving
+  subset contains both-commit traces exclusively, so $Y_t = \Dets_{\mathrm{SI}}
+  \in \mathcal F_0$ while under SER the surviving traces split by which
+  transaction aborts, so $Y_t$ first appears at $\mathcal F_1$. In (b) the roles
+  reverse: SER's acyclic graph fixes $t$'s presence in $\mathcal F_0$, whereas SI
+  must choose an FCW winner, placing $Y_t$ at $\mathcal F_1$. Neither depth
+  dominates the other across the two workloads, so the levels are incomparable.
+\end{proof}
+
+\begin{corollary}[Compositional isolation insensitivity]
+  \label{cor:txn-insensitivity}
+  If every transaction feeding a positive relational-algebra provenance query
+  $Q$ is isolation-insensitive---equal support depth under SER and SI---then so
+  is every output tuple of $Q$.
+\end{corollary}
+\begin{proof}
+  Positive relational algebra computes output supports from input supports by
+  the union and intersection of the support homomorphism
+  (Proposition~\ref{prop:support-hom}); by
+  Theorem~\ref{thm:filtration-respected} neither can raise support depth above
+  the deepest input. If every input tuple has equal SER and SI support depth,
+  the common bound transfers to each output tuple, so its support occupies the
+  same filtration level under both levels.
+\end{proof}
+
+\begin{example}[Compositional insensitivity]
+  \label{ex:txn-compose}
+  Transactions $T_1,T_2,T_3$ insert into relations $R_1,R_2,R_3$; none
+  participates in a write-skew or FCW pattern, so each is isolation-insensitive.
+  The query $Q = R_1 \bowtie R_2 \bowtie R_3$ joins their outputs.
+  Corollary~\ref{cor:txn-insensitivity} guarantees that every tuple of $Q$ is
+  insensitive too, \emph{without} re-analyzing $Q$'s interaction with the
+  conflict graph. This is the compositional extension of Vandevoort et al.'s
+  per-transaction certification~\cite{vandevoort2025mixed}: the filtration
+  certifies query results, not just transactions.
+\end{example}
+
+\begin{figure*}[t]
+  \centering
+  \footnotesize
+  \setlength{\tabcolsep}{4pt}
+  \renewcommand{\arraystretch}{1.15}
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    \textbf{Isolation / case} & \textbf{Resolving determination} & \textbf{Support depth} \\
+    \midrule
+    Read committed &
+    (none---no outcome contradicted) & $0$ \\
+    SER, acyclic graph &
+    $\{\varphi_{T_1 \prec T_2},\, \varphi_{T_2 \prec T_Q},\, \ldots\}$ (all commute) & $1$ \\
+    SER, $d$ visible &
+    $\varphi_{T_2 \prec T_Q} \cdot \varphi_{T_Q \prec T_3}$ & $1$ \\
+    SER, $d$ absent &
+    $\varphi_{T_2 \prec T_3} \cdot \varphi_{T_3 \prec T_Q}$ & $1$ \\
+    SER, recurring cycle &
+    $\varphi_{\mathsf{a}}(T_1) \seq \varphi_{\mathsf{a}}(T_2)$
+    \;\emph{(Thm.~\ref{thm:txn-depth}c)} & $O(n)$ \\
+    Snapshot isolation &
+    $\seal \seq \varphi_{\mathrm{fcw}(S(5),T_6)}
+      \seq \varphi_{\snap(T_Q)}$ & $O(n)$ \\
+    \bottomrule
+  \end{tabular}
+  \smallskip
+  {\footnotesize
+    $\varphi_{T_i \prec T_j}$ = ordering;\;
+    $\varphi_{\mathsf{a}}(T)$ = abort (entailed);\;
+    $\{\cdots\}$ = commuting set;\;
+    $\seq$ = non-commuting sequence.}
+  \caption{Determination structure of the running example
+    (Section~\ref{ex:txn-running}) across isolation levels, assuming scheduling
+    discretion. Support depth is $0$ under RC or a fully reactive protocol, and
+    $O(n)$ worst-case under SER or SI with discretion
+    (Theorem~\ref{thm:txn-depth}).}
+  \Description{Table showing resolving determinations and their support depth
+    across isolation levels under scheduling discretion.}
+  \label{fig:det-tables}
+\end{figure*}
+
+\subsection{Snapshot Isolation and the Fine-Grained SER/SI Separation}
+\label{sec:txn-si}
+
+Under a fully reactive SI implementation, snapshot assignment is deterministic
+(each transaction reads the committed state at its start time) and FCW is
+deterministic (whichever concurrent writer's commit request arrives first wins;
+the other aborts). All verdicts are entailed by the environment, so support
+depth is $0$. With discretion over commit ordering (which concurrent writer
+commits first) or over batching (when snapshots are assigned), support depth
+grows to $\Theta(n)$ by the same structure as SER.
+
+\begin{proposition}[Worst-case SI support depth]
+  \label{prop:txn-si-depth}
+  Under snapshot isolation with commit-order discretion, the worst-case
+  support depth is $\Theta(n)$.
+\end{proposition}
+\begin{proof}
+  Mirror the $T_\infty$ witness of Theorem~\ref{thm:txn-depth}(c). Take $n$
+  pairs $(T_i, T_i')$ in which $T_i$ and $T_i'$ both write object $x_i$ (an FCW
+  conflict), and $T_{i+1}$ reads $x_i$ before writing $x_{i+1}$, so $T_{i+1}$'s
+  snapshot depends on the FCW winner at $x_i$. At layer $i$ the system commits
+  an FCW winner on $x_i$; this fixes which version $T_{i+1}$ sees, hence whether
+  $T_{i+1}$ writes $x_{i+1}$, hence the FCW situation at layer $i{+}1$. The
+  decisions do not commute, giving a depth-$n$ chain; the $O(n)$ upper bound is
+  as before. Per batch the depth is again $2$ ($\seal \seq$ commit-order
+  selection).
+\end{proof}
+
+\paragraph{Worked SI depth.}
+Suppose the database holds $S(5,e)$, and $T_6\!:\textsf{write } S(5,e')$,
+$T_7\!:\textsf{write } S(5,e'')$ run concurrently; a query transaction $T_Q$
+reads key $5$ after both request commit. Under SI only one of $T_6,T_7$ may
+commit (FCW on key $5$); the other aborts. With commit-order discretion this is
+a genuine commitment: choosing $T_6$ makes $T_Q$ read $e'$, choosing $T_7$ makes
+it read $e''$. The determination has depth $2$,
+\[
+  D_{\mathrm{SI}} = \seal \seq \varphi_{\mathrm{fcw}(S(5),\,T_6)},
+\]
+and under it $T_Q$ reads $S(5,e')$ with conditioned provenance
+$P_{D_{\mathrm{SI}}}(e') = x_6$; the alternative
+$\varphi_{\mathrm{fcw}(S(5),T_7)}$ yields the contingent $e''$. Here $e'$ has
+$\sdepth = 1$ (its why-support is the FCW-winner cell at layer $1$ after the
+seal), illustrating Proposition~\ref{prop:txn-si-depth} at $n = 1$.
+
+\paragraph{Characterization of the SER/SI gap.}
+Fix a workload $W$ with conflict graph $G$. For each level
+$L \in \{\mathrm{SER},\mathrm{SI}\}$ the determination space $\Dets$ and
+filtration $\mathcal F$ are built over the same $\Basis$ but with $L$'s
+admissibility constraint selecting the resolving subset. A tuple $t$ derived
+from $T_i$ has $\sdepth_L(t) = 0$ iff $T_i$ commits in every resolving
+determination under $L$ (robust) and $\sdepth_L(t) > 0$ iff $T_i$'s fate varies
+(contingent). The two agree exactly when $T_i$ lies on no cycle with two
+adjacent $\mathsf{rw}$ anti-dependency edges (so SER and SI agree on whether a
+cycle must break; Adya~\cite{adya1999weak}, Fekete et
+al.~\cite{fekete2005making}) \emph{and} in no $\mathsf{ww}$ conflict without an
+enclosing cycle (so they agree on whether both writers commit). These are
+precisely the robustly portable transactions
+of~\cite{vandevoort2025mixed}; outside this class, the two directions of
+Proposition~\ref{prop:ser-si-incomparable} apply.
+
+\paragraph{Certificates and semantic-change queries.}
+A \emph{certificate} over-approximates a commitment's effect: it records which
+outcomes the commitment excludes, admitting possibly more but never fewer, and
+is exactly a why/why-not certificate in the sense of
+Section~\ref{sec:filtration}. Under SER a certificate need only record the
+ordering predicates sufficient to justify the observation; under SI, answering
+semantic-change queries---e.g.\ whether an SI outcome admits a serial
+explanation---requires retaining the snapshot structure as well. Certificates
+are thus query-parametric: richer questions demand deeper prefixes, in line with
+support depth.
+
+\subsection{Protocol-Specific Determination Structures}
+\label{sec:txn-protocols}
+
+Theorem~\ref{thm:txn-depth} gives protocol-agnostic bounds via the $T_\infty$
+witness. The three standard protocols instantiate $\Basis$ differently but share
+the $\seal + \text{resolution-layer}$ structure and the same depth bounds; their
+bases are pairwise incomparable in \emph{which} act the system commits.
+
+\paragraph{OCC (validation-order basis).}
+A sealed batch of pending commit requests is resolved by a chosen validation
+order; transactions validated earlier commit (if no cycle among those already
+committed), later ones may find a cycle and abort. The abort is entailed by the
+order, matching Example~\ref{ex:txn-batch}. Per-batch depth $2$: $\seal \seq$
+validation order.
+
+\paragraph{2PL (victim-selection basis).}
+Lock acquisition and release are fully reactive (entailed by the arrival order
+of requests); the only discretion is \emph{victim selection} when a deadlock
+cycle forms. Without sealing, victim choices cascade---aborting a victim
+releases locks, admitting new requests that may form new cycles, giving
+$\Theta(n)$ depth. Sealing the batch (refusing new lock requests) makes all
+deadlock cycles in the wait-for graph present simultaneously, so victim choices
+across distinct cycles commute. Each lock acquisition that blocks a conflicting
+request realizes an ordering commitment $\varphi_{T_i \prec T_j}$; a deadlock
+cycle means the acquisitions already made are jointly inconsistent with all
+committing, and the chosen victim is an entailed abort. Per-batch depth $2$:
+$\seal \seq$ one commuting layer of victim selections. Fully reactive (immediate
+deadlock resolution with the requestor as victim) gives depth $0$;
+victim-selection discretion gives $O(n)$ (Theorem~\ref{thm:txn-depth}).
+
+\paragraph{MVTO (action-ordering basis).}
+Under multiversion timestamp ordering~\cite{reed1978naming}, each transaction
+receives a timestamp at start; reads return the latest version with timestamp
+$\le$ the reader's, and a write is rejected (its transaction aborted) if a
+higher-timestamped transaction has already read an earlier version. In the fully
+reactive case the primary commitment is timestamp assignment: assigning
+$ts_i < ts_j$ fixes $T_i \prec T_j$ on every shared object at once---a single
+ordering commitment with wide reach. With batching, the system instead chooses a
+processing order over individual \emph{actions} (starts, reads, writes), which
+subsumes timestamp assignment and determines which reads see which versions and
+hence which transactions abort. MVTO never blocks, so it is deadlock-free; the
+determination again factors as $\seal \seq$ an action-ordering layer, at action
+rather than transaction granularity. Per-batch depth $2$.
+
+\paragraph{Shared structure, incomparable bases.}
+All three realize $\Basis$ and reach the same $\Theta(n)$ worst case and
+per-batch depth $2$, but their bases are incomparable: OCC commits a
+transaction-ordering act at validation time, 2PL commits victim choices
+distributed throughout execution, and MVTO commits an action-ordering act via
+timestamps. The common $\seal + \text{resolution-layer}$ shape is what lets the
+support-depth analysis---and Theorem~\ref{thm:txn-depth}---apply uniformly,
+independent of protocol.

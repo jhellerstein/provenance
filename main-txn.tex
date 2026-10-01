@@ -1,0 +1,33 @@
+% ======================================================================
+% main-txn.tex -- Transaction-led variant.
+%
+% Transactions lead the body; Datalog^neg is deferred to an appendix.
+% Build:  ./build.sh main-txn.tex
+% ======================================================================
+\documentclass[acmsmall,nonacm]{acmart}
+\newif\ifleaddatalog \leaddatalogfalse
+\input{preamble}
+
+\begin{document}
+\input{sec-abstract}
+\maketitle
+
+\input{sec-intro}
+\input{sec-prelim}
+\input{sec-algebra}
+\input{inst-txn-body}
+\input{sec-consequences}
+\input{sec-related}
+\input{sec-conclusion}
+
+\appendix
+\input{app-algebra}
+\input{inst-datalog-appendix}
+\input{app-robustness}
+\input{app-responsibility}
+\input{app-datalog-proofs}
+\input{app-open-questions}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+\end{document}

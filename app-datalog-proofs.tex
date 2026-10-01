@@ -1,0 +1,112 @@
+% ======================================================================
+% app-datalog-proofs.tex -- Datalog^neg: soundness/completeness of the
+% layered choice basis, the full negation-semantics proof, and the
+% support-level monus elimination proof.
+% ======================================================================
+\section{Datalog with Negation: Proofs}
+\label{sec:appendix-datalog}
+
+This appendix proves the claims of Section~\ref{sec:datalog}: soundness and
+completeness of the canonical layered choice basis, the negation-semantics
+correspondence, and support-level monus elimination.
+
+\subsection{Soundness and Completeness of the Choice Basis}
+
+\begin{proposition}[Soundness and completeness]
+  \label{prop:datalog-sc}
+  For finite $\mbox{Datalog}^\neg$ programs whose negative SCCs admit the
+  layered decomposition (each SCC has finitely many local stable extensions
+  given its fixed context, and composing them in topological order is sound
+  and complete for global stable models), the canonical layered choice basis
+  of Definition~\ref{def:datalog-canonical} is sound and complete: each
+  resolving determination yields a stable model, and every stable model is
+  yielded by exactly one resolving determination.
+\end{proposition}
+\begin{proof}
+  The Gelfond--Lifschitz reduct~\cite{gelfond1988stable} decomposes along the
+  SCC DAG: once atoms outside $C_i$ are fixed, the reduct of $C_i$'s rules
+  depends only on those atoms. \emph{Soundness:} composing local stable
+  extensions in topological order yields a global stable model, since each
+  local extension is a minimal model of its local reduct and their composition
+  is a minimal model of the full reduct. \emph{Completeness:} given a stable
+  model $M$, define $D_M$ by the shared sealing prefix followed by the choice
+  $\varphi_{C_i} = M|_{C_i}$ at each layer $k{+}i$; local minimality of
+  $M|_{C_i}$ follows from global minimality of $M$. The map $M \mapsto D_M$ is
+  injective, giving uniqueness.
+\end{proof}
+
+\subsection{Negation Semantics as Filtration Levels (Full Proof)}
+
+\begin{proof}[Proof of Theorem~\ref{thm:negation-general}]
+  \emph{Depth $k{+}d$.} The $k$ sealing layers are shared by all resolving
+  determinations (stratified evaluation is unique), so they add no cell
+  distinction. Each choice layer $k{+}i$ resolves $C_i$ using atoms fixed by
+  layers $k{+}1, \dots, k{+}i{-}1$; since $C_i$'s rules reference earlier
+  cycles, those layers do not commute, giving depth $k{+}d$.
+
+  \emph{(a) Stable models.} Each resolving determination discharges all $k{+}d$
+  layers, producing a two-valued assignment that is a stable model
+  (Proposition~\ref{prop:datalog-sc}); conversely every stable model is one
+  such determination. Hence stable models biject with $\Dets$, and
+  stable-model semantics reads $\mathcal{F}_{k+d} = \mathcal{P}(\Dets)$.
+
+  \emph{(b) Well-founded semantics.} WFS applies the alternating
+  fixpoint~\cite{vanGelder1991wellFounded} after the sealing prefix. At choice
+  layer $k{+}i$ the alternating fixpoint checks whether $C_i$ has a unique
+  stable extension given the discharged prefix; if so the layer is
+  \emph{forced} and WFS discharges it, otherwise $C_i$'s atoms are classified
+  $\mathbf{u}$ and no dependent layer is discharged. Let $d^\ast$ be the number
+  of consecutive forced layers from $k{+}1$. WFS reads
+  $\mathcal{F}_{k+d^\ast}$: atoms settled by layers $1, \dots, k{+}d^\ast$ have
+  full or empty support ($\mathbf{t}/\mathbf{f}$), and atoms depending on
+  layers beyond $k{+}d^\ast$ have partial support ($\mathbf{u}$).
+
+  \emph{(c) Stratified semantics.} When $d = 0$ the sealing prefix resolves
+  all atoms, $|\Dets| = 1$, and $\mathcal{F}_k = \{\emptyset, \Dets\}$.
+\end{proof}
+
+\noindent
+\emph{Existence of stable models.} The correspondence presumes stable models
+exist; programs such as $a \leftarrow \neg a$ have none, and are excluded by
+the decomposition hypothesis (an SCC with no local stable extension yields
+$\Dets = \emptyset$, where every $\mathcal{F}_k = \{\emptyset\}$). The
+WFS$\leftrightarrow$stable-support step uses the Van Gelder--Ross--Schlipf
+characterization of the well-founded model as the intersection structure of
+stable models~\cite{vanGelder1991wellFounded}.
+
+\subsection{Monus Elimination (Full Proof)}
+
+Let $P$ be finite and stratified with strata $S_0, \dots, S_k$, and let $K$ be
+naturally ordered, zero-divisor-free, and $\omega$-continuous. Both the
+sealing and monus~\cite{dannert2021semiring} strategies evaluate bottom-up by
+least fixpoint at each stratum over $(K,+,\cdot)$, agreeing on positive rules;
+they differ only on a negated literal $\neg b$ (with $b$ already evaluated to
+$\mathrm{val}(b) \in K$): sealing contributes $1_K$ if $\mathrm{val}(b) = 0_K$
+and $0_K$ otherwise, while monus contributes
+$1_K \mathbin{\dot{-}} \mathrm{val}(b)$.
+
+\begin{lemma}
+  \label{lem:monus}
+  In such $K$, $1_K \mathbin{\dot{-}} v = 1_K$ if $v = 0_K$ and
+  $1_K \mathbin{\dot{-}} v = 0_K$ if $v \neq 0_K$.
+\end{lemma}
+\begin{proof}
+  If $v = 0_K$ then $\max\{c \mid c \le 1_K\} = 1_K$. If $v \neq 0_K$, suppose
+  $c \neq 0_K$ with $v + c \le 1_K$. Monotonicity gives $vc \le v, c$, so
+  $vc + vc \le v + c \le 1_K$, and zero-divisor-freeness gives $vc \neq 0_K$.
+  Repeated squaring yields nonzero $(vc)^{2^n}$ all satisfying
+  $w + w \le 1_K$; by $\omega$-continuity their infimum $e$ is nonzero,
+  idempotent, with $e + e \le 1_K$. Writing $e + f = 1_K$: if $f \neq 0_K$
+  then $ef \neq 0_K$ and $ef + ef \le 1_K$, a nonzero element below $e$---%
+  contradicting infimality---so $f = 0_K$ and $e = 1_K$. But then
+  $1_K + 1_K \le 1_K$ forces $1_K \le 0_K$, a contradiction.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:monus-elimination}]
+  By Lemma~\ref{lem:monus} the two strategies assign the same zero/nonzero
+  value to every negated literal. Positive evaluation is identical, and $K$ is
+  zero-divisor-free (a product is nonzero iff all factors are) and zerosumfree
+  (a sum is nonzero iff some summand is), so induction on strata gives that
+  every atom has the same zero/nonzero annotation under sealing and monus.
+  Supports therefore agree.
+\end{proof}

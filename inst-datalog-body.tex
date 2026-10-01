@@ -1,0 +1,222 @@
+% ======================================================================
+% inst-datalog-body.tex -- lead instantiation (body): Datalog^neg.
+% Thin wrapper: supplies the body section header, then the shared core.
+% ======================================================================
+\section{Instantiation: Datalog with Negation}
+\label{sec:datalog}
+\input{inst-datalog-core}
+
+\endinput
+% ---- old inline content below retained (disabled by \endinput) ----
+\section{Instantiation: Datalog with Negation}
+\label{sec:datalog}
+
+In $\mbox{Datalog}^\neg$ the non-monotone operation is \emph{negation}:
+concluding $\neg p$ requires establishing that $p$ has no further
+derivation---a completeness guarantee that classical approaches encode via
+monus~\cite{dannert2021semiring}. We instantiate the determination model so
+that this completeness guarantee becomes an explicit \emph{commitment},
+leaving the surrounding evaluation monotone. The payoff is twofold. First,
+why-not under ambiguity becomes well-defined: an atom can be absent because of
+a semantic commitment, not a blocked derivation. Second, the three classical
+negation semantics---stratified, well-founded, stable---turn out to be
+\emph{different reading depths of one shared filtration}.
+
+\subsection{The Carrier, Specification, and Commitment Basis}
+\label{sec:datalog-setup}
+
+Fix a finite $\mbox{Datalog}^\neg$ program $P$ with EDB. An \emph{outcome} is
+a total truth assignment over the Herbrand base, with values in
+$\{\mathbf{t}, \mathbf{f}, \mathbf{u}, \bot\}$ ($\bot$ = not yet evaluated,
+$\mathbf{u}$ = genuinely ambiguous), ordered
+$\bot \OrdO \mathbf{u} \OrdO \{\mathbf{t},\mathbf{f}\}$ with $\mathbf{t}$ and
+$\mathbf{f}$ incomparable; $o_1 \OrdO o_2$ iff $o_1(x) \OrdO o_2(x)$ for every
+atom $x$. (This knowledge order is Belnap's four-valued order; we use only its
+refinement structure.) The acceptable relation $S$ admits the assignments
+consistent with the program rules and EDB~\cite{gelfond1988stable}. Because
+outcomes are models, the observation function is the identity: for the
+result-extensional reading of Section~\ref{sec:result-extensional}, the
+carrier object at a determined model is that model's instance, and
+$\Prov_K$ is ordinary $K$-relational evaluation.
+
+Two kinds of commitment generate determinations.
+
+\begin{definition}[Sealing and choice commitments]
+  \label{def:datalog-basis}
+  A \emph{sealing commitment} $\varphi_{\seal}(X)$ declares a set of atoms
+  $X$ complete---no further $X$-atom will be derived in any admissible
+  outcome---thereby licensing negation of $X$-atoms in later rules. A
+  \emph{choice commitment} $\varphi_{x = v}$ fixes a negative-cycle atom $x$
+  to a truth value $v \in \{\mathbf{t},\mathbf{f}\}$. The basis is
+  $\Basis = \{\varphi_{\seal}(X)\} \cup \{\varphi_{x=v}\}$. Sealing a stratum
+  removes outcomes in which that stratum is still open (fateful whenever an
+  atom's status is thereby forced); a choice commitment removes every outcome
+  disagreeing with it on $x$.
+\end{definition}
+
+\noindent
+Positive consequences of a sealed stratum are \emph{entailments}, not
+commitments: deriving $p$ from a sealed $a$ refines the observed model upward
+in $\OrdO$ without excluding an admissible alternative
+(Definition~\ref{def:free}). Only sealing and choice are fateful, so only they
+are counted in work and depth.
+
+\begin{example}[Running example]
+  \label{ex:datalog}
+  Consider $P$ with EDB $a(c)$:
+  \[
+    p(c) \leftarrow a(c); \quad
+    q(c) \leftarrow \neg p(c); \quad
+    r(c) \leftarrow \neg s(c); \quad
+    s(c) \leftarrow \neg r(c).
+  \]
+  The fragment $\{a,p,q\}$ is stratified (one stratum boundary at $\neg p$);
+  the pair $(r,s)$ is a single negative SCC. So $k = 1$ (one seal,
+  $S_1 = \{p\}$) and $d = 1$ (one SCC). After all commitments are discharged
+  two models remain, $o_r = \{a,p,r\}$ and $o_s = \{a,p,s\}$---the two stable
+  models---so $\Dets = \{D^{(r)}, D^{(s)}\}$ with
+  \[
+    D^{(r)} = \varphi_{\seal}(S_1) \seq
+      \varphi_{r(c)=\mathbf{t}} \cdot \varphi_{s(c)=\mathbf{f}},
+    \quad
+    D^{(s)} = \varphi_{\seal}(S_1) \seq
+      \varphi_{s(c)=\mathbf{t}} \cdot \varphi_{r(c)=\mathbf{f}} .
+  \]
+  Both share the sealing layer and branch at the choice layer, so depth
+  $= k + d = 2$.
+\end{example}
+
+\subsection{The Canonical Layered Choice Basis}
+\label{sec:datalog-basis}
+
+In general, let $P$ have $k$ stratification layers and, after condensing its
+negative SCCs, let $d$ be the length of the longest dependency chain of SCCs.
+Order the SCCs $C_1, \dots, C_d$ topologically (if $C_i$'s resolution affects
+$C_j$'s admissible models then $i < j$); SCCs incomparable in the DAG do not
+reference each other's atoms, so their choices commute and share a layer.
+
+\begin{definition}[Canonical layered choice basis]
+  \label{def:datalog-canonical}
+  The basis has $k$ sealing commitments
+  $\varphi_{\seal}(S_1), \dots, \varphi_{\seal}(S_k)$ followed by $d$ choice
+  layers; layer $k{+}i$ selects a local stable extension of $C_i$, applied
+  after layers $k{+}1,\dots,k{+}i{-}1$ are discharged. A resolving
+  determination has the form
+  \[
+    D = \bigl(\varphi_{\seal}(S_1) \seq \cdots \seq \varphi_{\seal}(S_k)\bigr)
+        \seq \varphi_{C_1} \seq \cdots \seq \varphi_{C_d},
+  \]
+  with $\varphi_{C_j}$ the commuting set of choices resolving $C_j$. Its depth
+  is $k + d$.
+\end{definition}
+
+\noindent
+This reformulates the Gelfond--Lifschitz reduct~\cite{gelfond1988stable}
+constructively: once atoms outside $C_j$ are fixed, the reduct of $C_j$'s
+rules depends only on those atoms, and its minimal models are exactly the
+local stable extensions the choice commitments enumerate. Under the standard
+decomposition hypothesis (each SCC has finitely many local stable extensions
+given its fixed context, and composing them in topological order is sound and
+complete for global stable models), the basis is sound and complete: each
+resolving determination yields a stable model and each stable model is yielded
+by exactly one resolving determination
+(Proposition~\ref{prop:datalog-sc}, Appendix~\ref{sec:appendix-datalog}).
+
+\subsection{Negation Semantics as Filtration Levels}
+\label{sec:datalog-filtration}
+
+The sealing prefix is shared by all resolving determinations, so no new
+distinction appears before the choice layers:
+$\mathcal{F}_0 = \cdots = \mathcal{F}_k = \{\emptyset, \Dets\}$. Distinctions
+accumulate as choice layers are discharged. The classical semantics read the
+same filtration at different depths.
+
+\begin{theorem}[Negation semantics are filtration levels]
+  \label{thm:negation-general}
+  For a finite $\mbox{Datalog}^\neg$ program satisfying the layered-choice
+  decomposition, with $k$ stratification layers and SCC-chain depth $d$, the
+  determination semiring under the canonical basis has depth $k + d$, and:
+  \begin{enumerate}[nosep,label=(\alph*)]
+    \item \emph{Stable-model semantics} reads $\mathcal{F}_{k+d}$: all choice
+          layers discharged, yielding a two-valued model per determination.
+    \item \emph{Well-founded semantics} reads $\mathcal{F}_{k+d^\ast}$, where
+          $d^\ast \le d$ is the number of consecutive choice layers (from
+          $k{+}1$) that are \emph{forced} by the preceding prefix. Atoms with
+          full or empty support are robust (WFS's $\mathbf{t}$ and
+          $\mathbf{f}$); atoms with partial support are contingent (WFS's
+          $\mathbf{u}$).
+    \item \emph{Stratified semantics} reads $\mathcal{F}_k$ and is defined
+          only when $d = 0$ (no negative cycles), where $|\Dets| = 1$.
+  \end{enumerate}
+\end{theorem}
+\begin{proof}[Proof sketch]
+  The $k$ sealing layers are shared (stratified evaluation is unique), so they
+  add no distinction. Layer $k{+}i$ resolves $C_i$ using atoms fixed by
+  earlier layers, so layers $k{+}1,\dots,k{+}d$ do not commute in general,
+  giving depth $k+d$. (a)~Each determination discharges all $k+d$ layers to a
+  stable model, and stable models biject with $\Dets$, so stable-model
+  semantics reads $\mathcal{F}_{k+d} = \mathcal{P}(\Dets)$. (b)~The
+  alternating fixpoint~\cite{vanGelder1991wellFounded} discharges a choice
+  layer only when the current prefix forces a unique local extension;
+  $d^\ast$ counts the consecutive forced layers, after which residual
+  ambiguity is reported as $\mathbf{u}$---exactly the atoms whose support is
+  partial at $\mathcal{F}_{k+d^\ast}$. (c)~When $d = 0$ the sealing prefix
+  resolves everything. Full proof in Appendix~\ref{sec:appendix-datalog}.
+\end{proof}
+
+\noindent
+The alternating fixpoint is an \emph{entailment}, not a commitment: it refines
+the observed model upward in $\OrdO$ without excluding alternatives
+(Definition~\ref{def:free}). WFS does not \emph{select} a determination; it
+reports contingent atoms as $\mathbf{u}$. Yet this reading is a genuine
+property of the determination provenance function---the why-support at
+$\mathcal{F}_{k+d^\ast}$---not a separate construction. In
+Example~\ref{ex:datalog}, $p(c)$ is robust (full support; WFS $\mathbf{t}$),
+$q(c)$ is impossible (empty support; WFS $\mathbf{f}$), and $r(c), s(c)$ are
+contingent (partial support; WFS $\mathbf{u}$), with
+$P(r(c)) = \{(D^{(r)},1)\}$ and $P(s(c)) = \{(D^{(s)},1)\}$.
+
+\begin{example}[Nested cycles: three stable models]
+  \label{ex:datalog-nested}
+  For $a \leftarrow \neg b;\ b \leftarrow \neg a;\ c \leftarrow a, \neg d;\
+  d \leftarrow \neg c$ with empty EDB, the $(a,b)$ cycle is at layer $k{+}1$
+  and $(c,d)$ at layer $k{+}2$ (it depends on $a$). When $a = \mathbf{t}$ the
+  $(c,d)$ cycle has two stable extensions ($\{a,c\}$ and $\{a,d\}$); when
+  $b = \mathbf{t}$, $c$ is underivable so $d = \mathbf{t}$ is forced. There are
+  therefore \emph{three} stable models: $\{a,c\}$, $\{a,d\}$, $\{b,d\}$. WFS
+  cannot force $(a,b)$, so $d^\ast = 0$ and all four atoms are $\mathbf{u}$;
+  adding the fact $a \leftarrow{}$ forces $(a,b)$, giving $d^\ast = 1$ and
+  then $c = d = \mathbf{u}$. The determination filtration records this exactly:
+  the three-element $\Dets$ branches at layer $k{+}1$ and (on the $a$ branch)
+  again at $k{+}2$.
+\end{example}
+
+\subsection{Monus Elimination at the Support Level}
+\label{sec:datalog-monus}
+
+Sealing replaces monus. For a sealed stratum, a negated literal $\neg b$
+contributes $1_K$ when $b$ is absent and $0_K$ when present---a zero-test,
+exactly the Boolean behavior that monus against $1_K$ produces under
+positivity. Within each determination, derivational provenance uses ordinary
+positive $K$-evaluation.
+
+\begin{theorem}[Monus elimination, support level]
+  \label{thm:monus-elimination}
+  For any finite \emph{stratified} $\mbox{Datalog}^\neg$ program and any
+  naturally ordered, zero-divisor-free, $\omega$-continuous commutative
+  semiring $K$, the support of every atom computed via sealing commitments
+  over $(K, +, \cdot)$ equals the support computed by least fixpoint with
+  monus over $(K, \mathbin{\dot{-}})$~\cite{dannert2021semiring}.
+\end{theorem}
+
+\noindent
+That is, sealing \emph{reproduces the support behavior} of semirings with
+monus on stratified programs (full proof in
+Appendix~\ref{sec:appendix-datalog}); it does not subsume their quantitative
+content, and where $K$ has zero divisors the two can differ on nonzero values
+(Appendix~\ref{app:open-questions}). The determination framework's gain is on
+the other side: for \emph{unstratified} programs monus is undefined (no unique
+model to subtract against), while determination provenance remains
+well-defined---each stable model is a determination, and the support tracks
+which models produce each atom. Contingent atoms, which monus cannot annotate,
+are precisely the positive-support/partial-support atoms of the filtration.

@@ -1,9 +1,54 @@
+% ======================================================================
+% main.tex -- canonical entry point: the Datalog-forward paper.
+%
+% This is identical to main-datalog.tex: Datalog with negation leads the
+% body; transactional isolation is deferred to an appendix. The other
+% variants are main-txn.tex (transaction-forward) and main-both.tex
+% (both instantiations in the body). See README-modular.md.
+%
+% The legacy single-file manuscript is preserved in git history and is
+% disabled below via \endinput.
+% ======================================================================
+\documentclass[acmsmall,nonacm]{acmart}
+\newif\ifleaddatalog \leaddatalogtrue
+\input{preamble}
+
+\begin{document}
+\input{sec-abstract}
+\maketitle
+
+\input{sec-intro}
+\input{sec-prelim}
+\input{sec-algebra}
+\input{inst-datalog-body}
+\input{sec-consequences}
+\input{sec-related}
+\input{sec-conclusion}
+
+\appendix
+\input{app-algebra}
+\input{inst-txn-appendix}
+\input{app-robustness}
+\input{app-responsibility}
+\input{app-datalog-proofs}
+\input{app-open-questions}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+\end{document}
+
+\endinput
+% ======================================================================
+% ===================  LEGACY SINGLE-FILE MANUSCRIPT  ==================
+% (disabled by \endinput above; retained for reference, see git history)
+% ======================================================================
 \documentclass[acmsmall,nonacm]{acmart}
 
 \usepackage{microtype}
 \raggedbottom
 \usepackage{enumitem}
 \usepackage{amsthm}
+\usepackage{stmaryrd}
 \usepackage{caption}
 \usepackage{booktabs}
 \usepackage{tikz}
@@ -14,13 +59,37 @@
 
 
 % ---------- Notation ----------
+% This paper is self-contained but deliberately adopts the notation of a
+% determination framework: refinement orders are subscripted I/O, the
+% commitment basis is \Basis, the complete determination space is \Dets,
+% the result space is \Rho, and the result map is \rho.
 \newcommand{\Hist}{\mathcal{H}}
-\newcommand{\Spec}{\mathsf{Spec}}
+\newcommand{\Spec}{\boldsymbol{S}}
 \newcommand{\drule}{\mathrel{:\!-}}
 \newcommand{\snap}{\mathsf{snap}}
 \newcommand{\seal}{\mathsf{seal}}
 \newcommand{\seq}{\mathbin{\triangleright}}
-\newcommand{\Ord}{\preceq}
+% Refinement orders (foundation notation): input and output.
+\newcommand{\OrdI}{\preceq_I}
+\newcommand{\OrdO}{\preceq_O}
+\newcommand{\DroO}{\succeq_O}
+% Backwards-compatible alias: the bare order used in the body is the
+% OUTPUT refinement order.
+\newcommand{\Ord}{\preceq_O}
+% Core carriers.
+\newcommand{\Basis}{\Phi}            % commitment basis
+\newcommand{\Dets}{\mathcal{D}}      % complete determination space
+\newcommand{\Rho}{\mathcal{R}}       % result space
+\newcommand{\Obs}{\mathsf{Obs}}      % observable presentations
+\newcommand{\Cond}{\operatorname{Cond}}
+\newcommand{\Prov}{\operatorname{Prov}}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\cdepth}{\operatorname{cdepth}}
+\newcommand{\sdepth}{\operatorname{sdepth}}
+\DeclareMathOperator{\Max}{Max}
+\newcommand{\tru}{\mathsf{true}}
+\newcommand{\fls}{\mathsf{false}}
+\newcommand{\truth}[1]{\llbracket #1 \rrbracket}
 % ---------- Theorem environments ----------
 \newtheorem{definition}{Definition}
 \newtheorem{theorem}{Theorem}

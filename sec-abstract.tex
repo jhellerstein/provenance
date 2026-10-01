@@ -1,0 +1,40 @@
+% ======================================================================
+% sec-abstract.tex -- abstract (lead instantiation chosen by \ifleaddatalog)
+% ======================================================================
+\begin{abstract}
+  Many data systems admit multiple admissible outcomes for the same
+  input: a logic program may have several stable models; concurrent
+  transactions may serialize in one of many orders.
+  Classical data provenance cannot even pose its question in such
+  settings---it explains how a result was derived, but only after
+  something has chosen \emph{which} result to produce.
+  We introduce \emph{determination provenance} to track the
+  commitments that resolve this ambiguity.
+  Modeling resolution as a sequence of irrevocable, state-indexed
+  \emph{commitments} drawn from a basis, each observable acquires a
+  \emph{support}: the set of complete resolutions---\emph{determinations}---under
+  which it holds.
+  Supports form the Boolean shadow of a product provenance semiring, and
+  the layering of commitments induces a \emph{filtration} measuring each
+  observable's \emph{support depth}: how many layers of semantic
+  resolution it depends on.
+  The filtration is respected by provenance composition, enabling
+  compositional robustness analysis and quantitative diagnosis of
+  resolution cost.
+  \ifleaddatalog
+  Our lead instantiation is $\mbox{Datalog}^\neg$: for programs with
+  stable models, the classical negation semantics (stratified,
+  well-founded, stable) are different reading depths of a single shared
+  filtration, and sealing commitments reproduce the support behavior of
+  semirings with monus while also handling unstratified negation.
+  A second instantiation (transactional isolation) appears in an
+  appendix.
+  \else
+  Our lead instantiation is transactional isolation: isolation levels
+  (read committed, snapshot isolation, serializability) are different
+  resolving subsets of one shared filtration, with determination depth
+  $\Theta(n)$ under scheduling discretion.
+  A second instantiation ($\mbox{Datalog}^\neg$ negation semantics)
+  appears in an appendix.
+  \fi
+\end{abstract}

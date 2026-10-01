@@ -1,0 +1,93 @@
+% ======================================================================
+% app-responsibility.tex -- the Shapley refinement of the responsibility
+% value: hardness, FPT at bounded treewidth, approximation, multi-layer.
+% (The false "join concentrates responsibility" proposition is omitted:
+%  Shapley values are not monotone under support containment.)
+% ======================================================================
+\section{Responsibility: The Shapley Refinement}
+\label{app:responsibility-details}
+
+Section~\ref{sec:responsibility} defined the responsibility value
+$\operatorname{resp}_a(e)$ as the density of a commitment's pivotal set. When
+an application supplies a value function on coalitions of commitments, this
+refines to a Shapley value, which we develop here.
+
+\subsection{Definition}
+
+Fix an observable $a$, a resolving determination $D^\ast$, and treat each
+commitment occurrence in $D^\ast$ as a player. For a coalition $C$ of
+commitments, let $v(C)$ be the probability (under the product measure on the
+remaining commitments) that $a$ holds when the commitments in $C$ are fixed to
+their $D^\ast$-values and the rest are drawn at random. The \emph{Shapley
+responsibility} of $\varphi_i$ is its average marginal contribution
+$v(C \cup \{i\}) - v(C)$ over all orderings---the standard Shapley
+value~\cite{shapley1953value} of this presence game. It is consistent with
+Definition~\ref{def:responsibility}: $\operatorname{resp}_a(e)$ is the
+expected pivotality of $e$, and the Shapley value distributes total
+contingency across commitments.
+
+\subsection{Hardness}
+
+\begin{theorem}[\#P-hardness]
+  \label{thm:resp-hard}
+  Computing the Shapley responsibility of a commitment is \#P-hard, already
+  for single-layer determinations.
+\end{theorem}
+\begin{proof}[Proof sketch]
+  We follow the Shapley-in-databases
+  reduction~\cite{livshits2021shapley}. The marginal
+  $v(\{i\}) - v(\emptyset)$ requires counting the satisfying assignments of
+  the support formula with $x_i$ fixed; for monotone support formulas this is
+  \#P-hard by the hardness of counting monotone-DNF models (equivalently,
+  weighted model counting over tuple-independent lineage). The gadget uses $n$
+  independent binary commitments whose support formula is the given monotone
+  DNF.
+\end{proof}
+
+\subsection{Tractability at Bounded Treewidth}
+
+\begin{theorem}[FPT in support treewidth]
+  \label{thm:resp-tw}
+  For a single-layer determination whose monotone support formula has
+  primal-graph treewidth $w$, Shapley responsibility is computable in
+  $O(2^w \cdot n^2 \cdot \mathrm{poly}(n))$---FPT in $w$.
+\end{theorem}
+\begin{proof}[Proof sketch]
+  Each $v(C)$ is a weighted model count of the support formula with the
+  variables in $C$ fixed; by Theorem~\ref{thm:treewidth-app} this is
+  $O(2^w \cdot \mathrm{poly}(n))$. The Shapley value aggregates
+  $O(n^2)$ such counts (one per coalition size and player), giving the bound.
+\end{proof}
+
+\begin{corollary}[Robustness is FPT in support treewidth]
+  \label{cor:robustness-fpt}
+  Under the hypothesis of Theorem~\ref{thm:resp-tw}, robustness and support
+  density are computable in $O(2^w \cdot \mathrm{poly}(n))$
+  (Theorem~\ref{thm:treewidth-app}).
+\end{corollary}
+
+\subsection{Approximation}
+
+\begin{proposition}[Additive approximation]
+  \label{prop:resp-approx}
+  Shapley responsibility admits an additive $\varepsilon$-approximation with
+  confidence $1-\delta$ in $O(\varepsilon^{-2} \log \delta^{-1})$ samples by
+  permutation sampling~\cite{shapley1953value,livshits2021shapley}: each
+  sample draws a random order, fixes the preceding players to their
+  $D^\ast$-values, completes the rest at random, and records
+  $\varphi_i$'s marginal.
+\end{proposition}
+
+\subsection{Multi-Layer Responsibility}
+\label{app:multi-layer-resp}
+
+For depth $d > 1$, responsibility is defined \emph{per layer}: the
+responsibility of a commitment at layer $k$ is its Shapley value in the
+presence game conditioned on layers $1, \dots, k{-}1$ being discharged. This
+respects non-commutativity---one never asks ``what if a layer-$2$ commitment
+preceded a layer-$1$ commitment,'' which the layer structure forbids---and
+each layer's game is the single-layer game of the preceding subsections over
+the cell fixed by the discharged prefix. We deliberately do \emph{not} claim
+that responsibility concentrates monotonically under joins: Shapley values are
+not monotone under support containment, so a join can redistribute rather than
+concentrate responsibility.

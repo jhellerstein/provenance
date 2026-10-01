@@ -1,0 +1,157 @@
+% ======================================================================
+% sec-consequences.tex -- consequences of the filtration:
+% quantitative comparison, commitment responsibility, a bounded-treewidth
+% algorithm (in the body), and the PDB connection.
+% ======================================================================
+\section{Consequences of the Filtration}
+\label{sec:discussion}
+
+When a domain's conflict or dependency structure fixes a natural commitment
+basis, different specifications over that basis share a single filtration:
+their resolutions are selected from one ambient space $\Dets$, and support
+depth is compared over it. For $\mbox{Datalog}^\neg$ the negation semantics
+are different reading depths of this shared filtration
+(Theorem~\ref{thm:negation-general}); for transactions the isolation levels
+are different resolving subsets of it (Appendix~\ref{sec:transactions}). We
+draw three consequences: quantitative comparison across specifications,
+responsibility attribution, and an algorithm.
+
+\subsection{Work Regret and Semantic Shift}
+\label{sec:regret-shift}
+
+Fix a provenance query and an observable $a$ with support depth
+$\sdepth_I(a)$ under specification $I$. Comparing a workload under $I$ against
+a candidate alternative $I'$ over the same basis, the difference decomposes.
+
+\paragraph{Work regret.}
+If $a$ is robust under both $I$ and $I'$ but $\sdepth_I(a) > \sdepth_{I'}(a)$,
+the extra commitment layers under $I$ did not change the answer---\emph{work
+regret}, resolution spent to no semantic effect. (For transactions this is
+bidirectional between SER and SI; for $\mbox{Datalog}^\neg$, stable-model
+evaluation of a stratified-equivalent atom regrets its choice layers.)
+
+\paragraph{Semantic shift.}
+If $a$'s why-support itself differs between $I$ and $I'$---robust under one,
+contingent under the other---the meaning genuinely changes. Moving from
+stable-model to well-founded semantics converts choice-layer atoms to
+$\mathbf{u}$ (Theorem~\ref{thm:negation-general}); write-skew and
+first-committer-wins patterns witness the shift for transactions
+(Appendix~\ref{sec:transactions}).
+
+\begin{proposition}[Compositional depth bound]
+  \label{prop:depth-bound}
+  If every input of a positive relational provenance query has support depth
+  $< k$, so does every output
+  (Theorem~\ref{thm:filtration-respected}): layers $k, k{+}1, \dots$ are inert
+  for that query.
+\end{proposition}
+
+\noindent
+Certifying this exactly is coNP-complete in the number of commitments in the
+relevant layers (Appendix~\ref{app:robustness-proofs}), but both
+instantiations admit polynomial sufficient checks: in $\mbox{Datalog}^\neg$,
+absence of transitive dependency on any negative SCC~\cite{gebser2012asp}; in
+transactions, absence from $L$-forbidden cycles~\cite{adya1999weak}.
+
+\subsection{Commitment Responsibility}
+\label{sec:responsibility}
+
+Work regret finds wasted layers; \emph{responsibility} finds the single
+commitment most accountable for an observable's contingency. For a commitment
+occurrence $e$ recorded in the traces, let $\Dets_e \subseteq \Dets$ be the
+determinations that commit $e$, and let $\operatorname{Piv}_a(e) \subseteq
+\Dets_e$ be those whose support answer for $a$ flips when $e$ is withheld.
+
+\begin{definition}[Responsibility value]
+  \label{def:responsibility}
+  The \emph{responsibility} of $e$ for $a$ is the density of its pivotal set
+  among the determinations that commit it,
+  \[
+    \operatorname{resp}_a(e)
+    = \frac{|\operatorname{Piv}_a(e)|}{|\Dets_e|}
+    \qquad (\Dets_e \neq \emptyset),
+  \]
+  under the counting measure on a finite $\Dets_e$ (or the conditional density
+  $\mu(\operatorname{Piv}_a(e) \mid \Dets_e)$ under a measure $\mu$).
+\end{definition}
+
+\noindent
+Responsibility $0$ means $e$ is never pivotal; $1$ means every determination
+committing $e$ has its answer settled by $e$. This is a determination-level
+query of the kind the filtration already handles: its value is fixed by any
+canonical prefix that fixes the pivotal set, so its certificate depth equals
+that of $\mathbf{1}_{\operatorname{Piv}_a(e)}$. When an application supplies a
+value function, one may further refine responsibility into a Shapley value
+over commitment occurrences~\cite{livshits2021shapley,shapley1953value}---the
+sequential counterpart of tuple-level
+responsibility~\cite{meliou2010causality}: there the players are data tuples
+and here they are semantic commitments. Hardness and an FPT algorithm for the
+Shapley refinement appear in Appendix~\ref{app:responsibility-details}.
+
+\subsection{An Algorithm: Support and Robustness at Bounded Treewidth}
+\label{sec:algorithm}
+
+Enumerating $\Dets$ is exponential in general, so support and robustness need
+a structural handle. Within a single commitment layer the commitments commute,
+and a support is a positive Boolean formula over commitment variables (the
+depth-$1$ case of Proposition~\ref{prop:pdb}). Robustness---is the support
+all of $\Dets$?---is then validity of that formula, and support membership is
+model counting. Both are tractable when the formula has bounded treewidth.
+
+\begin{theorem}[Bounded-treewidth support and robustness]
+  \label{thm:treewidth}
+  Fix a provenance query $Q$ and an output observable $a$ whose single-layer
+  support formula $\phi_a$ (over $n$ commitment variables) has primal-graph
+  treewidth $w$. Then:
+  \begin{enumerate}[nosep,label=(\alph*)]
+    \item the why-support of $a$, and hence robustness
+          ($Y_a = \Dets$) and impossibility ($Y_a = \emptyset$), can be
+          decided in time $O(2^w \cdot \mathrm{poly}(n))$;
+    \item under a product measure on commitment variables, the support
+          density $\mu(Y_a)$ is computable in the same time by weighted model
+          counting on a tree decomposition.
+  \end{enumerate}
+\end{theorem}
+\begin{proof}[Proof sketch]
+  By Proposition~\ref{prop:support-hom} the support of a positive-RA query is
+  obtained from base supports by $\cup$ and $\cap$, so $\phi_a$ is a monotone
+  Boolean combination of the base commitment variables; its primal graph has
+  treewidth $w$ by hypothesis. Validity, satisfiability, and (weighted) model
+  counting on a bounded-treewidth formula run in $O(2^w \cdot \mathrm{poly}(n))$
+  by dynamic programming over a tree decomposition. Robustness is validity of
+  $\phi_a$; impossibility is unsatisfiability; density is the weighted model
+  count. Full statement and proof in Appendix~\ref{app:robustness-proofs}.
+\end{proof}
+
+\noindent
+The treewidth here is that of the \emph{support formula}, not of the
+underlying conflict or dependency graph; the two coincide under a locality
+condition (each clause involves only commitments sharing a dependency edge)
+that both instantiations' natural workloads satisfy
+(Appendix~\ref{app:robustness-proofs}). Multi-layer supports are handled layer
+by layer: Theorem~\ref{thm:filtration-respected} bounds the depth that must be
+examined, and within each layer the single-layer algorithm applies.
+
+\subsection{Connection to Probabilistic Databases}
+\label{sec:pdb}
+
+The filtration locates determination provenance precisely within the
+probabilistic-database complexity landscape.
+
+\begin{proposition}[Depth-$1$ is tuple-independent]
+  \label{prop:pdb}
+  A depth-$1$ determination semiring over $n$ binary commitments is isomorphic
+  to a tuple-independent PDB over $n$ existence events: supports are positive
+  Boolean formulas, and query evaluation has the same complexity.
+\end{proposition}
+
+\noindent
+At higher depths the filtration structures the correlations: within a layer
+commitments commute (PDB-style lineage), while cross-layer dependencies
+introduce conditioning. Determination provenance thus sits between
+tuple-independent PDBs (depth $1$) and general correlated PDBs (intractable):
+the PDB dichotomy~\cite{dalvi2012probabilistic} applies \emph{within} each
+layer, and support depth measures how many layers must be composed. Under a
+probability measure on $\Dets$, support densities become probabilities and
+Theorem~\ref{thm:treewidth} becomes a weighted-model-counting bound of exactly
+the PDB kind.

@@ -1,0 +1,90 @@
+% ======================================================================
+% preamble.tex -- shared preamble for all determination-provenance variants.
+%
+% A driver file sets the lead-instantiation flag BEFORE \input{preamble}:
+%     \newif\ifleaddatalog  is declared here; the driver sets it true/false.
+% When \ifleaddatalog is true, the Datalog instantiation leads the body and
+% transactions are deferred to an appendix; when false, the reverse.
+%
+% The document class is chosen by the driver (acmart acmsmall), so this file
+% only loads packages, macros, theorem environments, and title metadata.
+% ======================================================================
+
+\usepackage{microtype}
+\raggedbottom
+\usepackage{enumitem}
+\usepackage{amsthm}
+% acmart loads amssymb (which defines \Bbbk). Load stmaryrd defensively:
+% neutralize its \Bbbk redefinition so the two packages coexist.
+\usepackage{stmaryrd}
+\usepackage{caption}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{xcolor}
+
+% ---------- Comment macro ----------
+\newcommand{\jmh}[1]{\textcolor{red}{\textit{#1 -- JMH}}}
+
+% ---------- Notation ----------
+% This paper is self-contained but deliberately adopts the notation of a
+% determination framework: refinement orders are subscripted I/O, the
+% commitment basis is \Basis, the complete determination space is \Dets,
+% the result space is \Rho, and the result map is \rho.
+\newcommand{\Hist}{\mathcal{H}}
+\newcommand{\Spec}{\boldsymbol{S}}
+\newcommand{\drule}{\mathrel{:\!-}}
+\newcommand{\snap}{\mathsf{snap}}
+\newcommand{\seal}{\mathsf{seal}}
+\newcommand{\seq}{\mathbin{\triangleright}}
+% Refinement orders (foundation notation): input and output.
+\newcommand{\OrdI}{\preceq_I}
+\newcommand{\OrdO}{\preceq_O}
+\newcommand{\DroO}{\succeq_O}
+% Backwards-compatible alias: the bare order used in the body is the
+% OUTPUT refinement order.
+\newcommand{\Ord}{\preceq_O}
+% Core carriers.
+\newcommand{\Basis}{\Phi}            % commitment basis
+\newcommand{\Dets}{\mathcal{D}}      % complete determination space
+\newcommand{\Rho}{\mathcal{R}}       % result space
+\newcommand{\Obs}{\mathsf{Obs}}      % observable presentations
+\newcommand{\Cond}{\operatorname{Cond}}
+\newcommand{\Prov}{\operatorname{Prov}}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\cdepth}{\operatorname{cdepth}}
+\newcommand{\sdepth}{\operatorname{sdepth}}
+\DeclareMathOperator{\Max}{Max}
+\newcommand{\tru}{\mathsf{true}}
+\newcommand{\fls}{\mathsf{false}}
+\newcommand{\truth}[1]{\llbracket #1 \rrbracket}
+
+% ---------- Theorem environments ----------
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+\newtheorem{example}{Example}
+\newtheorem{observation}{Observation}
+\newtheorem{assumption}{Assumption}
+
+\numberwithin{definition}{section}
+\numberwithin{theorem}{section}
+\numberwithin{lemma}{section}
+\numberwithin{corollary}{section}
+\numberwithin{proposition}{section}
+\numberwithin{remark}{section}
+\numberwithin{example}{section}
+\numberwithin{observation}{section}
+\numberwithin{assumption}{section}
+
+% ---------- Title metadata ----------
+\title{Determination Provenance: From Ambiguity to Algebra}
+\author{Joseph M. Hellerstein}
+\affiliation{%
+  \institution{University of California, Berkeley and Amazon Web Services}
+  \country{USA}
+}
+\date{\today}

@@ -1,0 +1,90 @@
+% ======================================================================
+% app-algebra.tex -- algebraic details: within-determination structure,
+% support propagation under positive RA, and the reachability construction.
+% ======================================================================
+\section{Algebraic Details}
+\label{app:algebra}
+
+This appendix develops the structure \emph{within} a single determination and
+verifies that support propagation and the filtration interact correctly with
+query evaluation.
+
+\subsection{Within a Determination}
+\label{app:within}
+
+A determination of depth $k$ is a sequence of conditional commutative monoids
+connected by the layer-sequencing operator $\seq$:
+\[
+  (M_1, \circ_1) \seq (M_2, \circ_2) \seq \cdots \seq (M_k, \circ_k)
+  \seq (K, +, \cdot).
+\]
+Each $M_\ell$ is the commutative monoid of layer-$\ell$ commitments (within a
+layer, commitments commute); across layers they do not, since a later layer
+depends on which outcomes earlier layers excluded. The operator $\seq$
+discharges one layer and conditions the specification for the next; it is not
+an algebraic operation. The terminal $K$ is the derivational semiring of Green
+et al.~\cite{green2007provenance}, which requires a fixed instance; before
+resolution the observation function maps several admissible outcomes to
+different instances, and after resolution exactly one remains. Classical
+provenance is the degenerate case $k = 0$.
+
+\subsection{Support Propagation under Positive Relational Algebra}
+\label{app:propagation}
+
+\begin{proposition}[Support propagation]
+  \label{prop:propagation}
+  Assume $K$ is positive (Proposition~\ref{prop:support-hom}). For observables
+  over a fixed instance selected by a determination,
+  \begin{enumerate}[nosep,label=(\alph*)]
+    \item $\supp(P(t_1 \bowtie t_2)) = \supp(P(t_1)) \cap \supp(P(t_2))$;
+    \item $\supp(P(t_1) \cup P(t_2)) = \supp(P(t_1)) \cup \supp(P(t_2))$;
+    \item $\supp(P(\pi(t))) \supseteq \supp(P(t))$ and
+          $\supp(P(\sigma(t))) \subseteq \supp(P(t))$.
+  \end{enumerate}
+\end{proposition}
+\begin{proof}
+  (a)~A join is nonzero at $D$ iff both inputs are, as $K$ has no zero
+  divisors. (b)~A union is nonzero at $D$ iff some summand is, by
+  zerosumfreeness. (c)~Projection adds derivation paths (a union over
+  witnesses), so can only enlarge support; selection removes a tuple or keeps
+  its whole support.
+\end{proof}
+
+\noindent
+Combined with Proposition~\ref{prop:filtration} (each $\mathcal{F}_k$ is closed
+under $\cup$ and $\cap$), this gives Theorem~\ref{thm:filtration-respected}:
+positive-RA composition keeps a support within the maximum level of its
+inputs.
+
+\subsection{Reachability of Every Depth}
+\label{app:reachability}
+
+The filtration is not degenerate: for every $k \le d$ there is an observable
+of support depth exactly $k$. The witness is a two-line construction.
+
+\begin{proposition}[Depth reachability]
+  \label{prop:reachability}
+  Let $\Dets$ have depth $d$ and let $0 < k \le d$. Suppose some layer-$k$
+  cell boundary is nontrivial: there are determinations $D, D'$ with
+  $D \equiv_{k-1} D'$ but $D \not\equiv_k D'$. Then there is an observable $a$
+  with $\sdepth(a) = k$.
+\end{proposition}
+\begin{proof}
+  Fix such $D \equiv_{k-1} D'$ with $D \not\equiv_k D'$: the two agree through
+  layer $k{-}1$ and first differ at layer $k$, say $D$ applies a commitment
+  $\varphi$ at layer $k$ that $D'$ does not. Introduce a base observable $a$
+  whose truth interpretation is ``$\varphi$ occurs at layer $k$,'' with
+  $\Prov_K(\Cond(D''), a) = 1_K$ exactly when $D''$ applies $\varphi$ at layer
+  $k$ and $0_K$ otherwise (an adequate consumer by construction). Then
+  $Y_a = \{D'' \mid D'' \text{ applies } \varphi \text{ at layer } k\}$ is a
+  union of layer-$k$ cells, so $Y_a \in \mathcal{F}_k$ and $\sdepth(a) \le k$.
+  It is not in $\mathcal{F}_{k-1}$: $D$ and $D'$ lie in the same
+  $(k{-}1)$-cell but $D \in Y_a$ while $D' \notin Y_a$, so $Y_a$ is not a union
+  of $(k{-}1)$-cells. Hence $\sdepth(a) = k$.
+\end{proof}
+
+\noindent
+In the result-extensional setting the same conclusion holds for a query
+observable whenever the layer-$k$ commitment changes the determined result of
+some tuple---the usual case---so query-relative support depth realizes every
+level the determination space exposes.

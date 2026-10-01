@@ -1,0 +1,189 @@
+% ======================================================================
+% sec-prelim.tex -- the determination model (instantiation-agnostic).
+%
+% Self-contained, but notation and definitions deliberately match a
+% determination framework: specifications are relations with input/output
+% refinement orders; commitments are fateful restrictions of a residual
+% specification; exposures/entailments are content-preserving free
+% transitions; determinations are first-hit complete layer traces.
+% ======================================================================
+\section{The Determination Model}
+\label{sec:prelim}
+
+We formalize the setting in which provenance questions become ambiguous:
+specifications that admit several admissible outcomes per input, and the
+irrevocable choices---\emph{commitments}---that narrow this ambiguity until a
+single outcome is determined. The development is self-contained; it isolates
+exactly the structure the provenance algebra of
+Section~\ref{sec:algebra} requires.
+
+\subsection{Specifications}
+
+A \emph{specification} relates inputs to the outputs considered acceptable
+for them. Both inputs and outputs carry a \emph{refinement order}: a partial
+order under which a larger element adds detail without contradicting a
+smaller one.
+
+\begin{definition}[Specification]
+  \label{def:spec}
+  A \emph{specification} is a tuple
+  $\Spec = (I, O, \OrdI, \OrdO, S)$ where $I$ is a set of inputs ordered by
+  $\OrdI$, $O$ is a set of outputs ordered by $\OrdO$, and
+  $S \subseteq I \times O$ is a relation assigning to each input at least one
+  acceptable output. We write $S(i) \triangleq \{o \in O \mid (i,o) \in S\}$
+  for the \emph{acceptable set} at $i$.
+\end{definition}
+
+\noindent
+The output order encodes which replacements are safe: when
+$o_1 \OrdO o_2$, replacing $o_1$ by $o_2$ \emph{refines} it (adds detail)
+rather than contradicting it. The order is part of the specification---a
+modeling choice, not something read off execution structure. Enlarging
+$\OrdO$ makes more outputs mutually compatible and so reduces the commitment
+needed to resolve ambiguity. When the input order is equality we recover an
+ordinary fixed-input problem; this paper's instantiations fix the input, so
+we write $\Spec$ for the fixed-input restriction and suppress $\OrdI$ except
+where it is needed.
+
+A specification is in general a \emph{relation}; the goal of determination is
+to turn it into a \emph{function}---one determined output per input. Because
+provenance analysis is retrospective, we read the determined output as the
+$\OrdO$-maximum of the acceptable set.
+
+\begin{definition}[Determined]
+  \label{def:determined}
+  $\Spec$ is \emph{determined} at $i$ if $S(i)$ is a chain under $\OrdO$ with
+  a maximum element; the determined output is $\Max_{\OrdO} S(i)$. $\Spec$ is
+  \emph{determined} if it is determined at every input. Ambiguity requiring
+  resolution arises exactly when $S(i)$ contains $\OrdO$-incomparable outputs.
+\end{definition}
+
+\noindent
+A determined specification is a function from inputs to outputs; classical
+provenance applies to it directly. Everything new in this paper concerns what
+happens \emph{before} determination, when incomparable outputs coexist.
+
+\subsection{Residual States and Commitments}
+
+Resolution proceeds by restricting the acceptable relation. We track its
+progress as a \emph{semantic state}.
+
+\begin{definition}[Semantic state]
+  \label{def:state}
+  A \emph{semantic state} over $\Spec$ on a finite input set $J \subseteq I$
+  is a pair $\sigma = (J, S_\sigma)$ with $S_\sigma \subseteq S|_J$ a residual
+  subrelation in which every input of $J$ retains at least one acceptable
+  output. The \emph{initial state} is $\sigma_0 = (J, S|_J)$. A state is
+  \emph{determined} when each input's residual fiber is a singleton.
+\end{definition}
+
+\noindent
+Resolution only ever \emph{removes} rows from the residual; it never adds
+them. Two kinds of event drive this process, and the distinction between them
+is the crux of the model.
+
+\begin{definition}[Commitment and basis]
+  \label{def:commitment}
+  A \emph{commitment} $\varphi$ is a labeled partial operator on semantic
+  states: where it is defined at $\sigma$ it leaves the input set unchanged
+  and deletes at least one row from the residual,
+  $S_{\varphi(\sigma)} \subsetneq S_\sigma$, with $S_{\varphi(\sigma)}$
+  nonempty. A commitment is \emph{irrevocable}: once applied, the deleted rows
+  do not return. A \emph{commitment basis} $\Basis$ is the set of commitments
+  available for a given specification; it is part of the application model
+  (the interface of binding acts the system can take), not merely a
+  mathematical generating set. Different bases yield different determination
+  structures and different provenance.
+\end{definition}
+
+\noindent
+A commitment is \emph{fateful}: some output that was acceptable before it is
+no longer attainable afterwards. We contrast this with changes that remove
+rows while preserving what is attainable.
+
+\begin{definition}[Content-preserving restriction; free transitions]
+  \label{def:free}
+  A state change from $\sigma$ to $\tau$ (with $S_\tau \subseteq S_\sigma$) is
+  \emph{content-preserving} if every removed row has, at the same input, a
+  retained row refining it under $\OrdO$; otherwise it is \emph{fateful}.
+  Commitments are fateful. An \emph{input update} (the environment supplying a
+  larger input, removing rows dominated under $\OrdI$) and an \emph{exposure}
+  (reporting a determined-enough output, narrowing a fiber content-preservingly)
+  are content-preserving \emph{free transitions}: they change the residual but
+  make no commitment, and---crucially for what follows---carry no work and no
+  depth. An \emph{entailment} is the output-side counterpart: it refines the
+  observed output upward in $\OrdO$ without excluding any admissible
+  alternative.
+\end{definition}
+
+\noindent
+Separating commitments (which exclude an alternative outright) from exposures
+and entailments (which only add compatible detail) is what lets us count
+\emph{resolution} without conflating it with reporting or with the arrival of
+new input. In our instantiations the free transitions are concrete: in
+$\mbox{Datalog}^\neg$, deriving a positive consequence of a sealed stratum is
+an entailment, whereas committing a negative-cycle atom to a truth value is a
+commitment; in transactions, an operation interleaving is an environment
+event, whereas a commit-order choice is a commitment.
+
+\subsection{Determinations}
+
+Several commitments typically commute; grouping them records that they could
+be issued together without ordering among them.
+
+\begin{definition}[Parallel step; layer]
+  \label{def:parallel-step}
+  A \emph{parallel step} at $\sigma$ is a finite nonempty set
+  $L \subseteq \Basis$ of commitments, each applicable at $\sigma$, whose
+  combined effect $\sigma \xrightarrow{L} \tau$ intersects their residual
+  restrictions. Within a step the commitments commute; the step occupies a
+  single \emph{layer} of resolution.
+\end{definition}
+
+\begin{definition}[Determination; work and depth]
+  \label{def:determination}
+  A \emph{determination} from $\sigma_0$ over $\Basis$ is a trace of parallel
+  steps
+  \[
+    D:\quad
+    \sigma_0 \xrightarrow{L_1} \sigma_1 \xrightarrow{L_2} \cdots
+    \xrightarrow{L_m} \sigma_m .
+  \]
+  It is \emph{complete} (first-hit) if $\sigma_m$ is the first determined
+  state on the trace. Its \emph{work} and \emph{depth} are
+  \[
+    \operatorname{work}(D) = \sum_{j=1}^{m} |L_j|,
+    \qquad
+    \operatorname{depth}(D) = m .
+  \]
+  Write $\Dets = \Dets_{\sigma_0,\Basis}$ for the space of complete
+  determinations. Free transitions are not parallel steps and are never
+  coalesced into a layer; an online trace is analyzed segment by segment
+  between its free transitions.
+\end{definition}
+
+\noindent
+Each concrete execution of a real system corresponds to one determination---the
+commitments it actually made. The complete determinations are prefix-free:
+no complete determination is a layer-prefix of another, since a trace stops at
+the \emph{first} determined state. Distinct determinations may reach the same
+determined result; the \emph{result map}
+\[
+  \rho : \Dets \longrightarrow \Rho(J)
+\]
+sends each complete determination to the determined (functional) result it
+produces, where $\Rho(J)$ is the set of functional relations on $J$ contained
+in $S$. The result records \emph{what} was determined, not \emph{which} trace
+led there.
+
+\begin{remark}[Why layers, not single commitments]
+  \label{rem:layers}
+  Commitments are grouped into layers for two reasons. First, non-commitment
+  events may intervene, so a later commitment may depend on an intervening
+  event and cannot be reordered before it. Second, even contiguous commitments
+  need not commute when one's effect depends on the other's exclusions. A
+  layer is a maximal set of commitments issued together that commute pairwise
+  at the state where they apply. In both instantiations of this paper
+  commutativity is state-independent, so the layer structure of a trace is
+  unambiguous.
+\end{remark}

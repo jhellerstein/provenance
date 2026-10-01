@@ -134,10 +134,15 @@ be issued together without ordering among them.
 \begin{definition}[Parallel step; layer]
   \label{def:parallel-step}
   A \emph{parallel step} at $\sigma$ is a finite nonempty set
-  $L \subseteq \Basis$ of commitments, each applicable at $\sigma$, whose
-  combined effect $\sigma \xrightarrow{L} \tau$ intersects their residual
-  restrictions. Within a step the commitments commute; the step occupies a
-  single \emph{layer} of resolution.
+  $L \subseteq \Basis$ of commitments, each applicable at the same source
+  $\sigma$, together with a declared semantic state $\tau$ whose residual is
+  their common-source conjunction,
+  $S_\tau = \bigcap_{\varphi\in L} S_{\varphi(\sigma)}$; we write
+  $\sigma \xrightarrow{L} \tau$. The recorded step occupies one
+  \emph{layer} of resolution. Validity is a property of the whole set $L$ at
+  its source: pairwise commutation alone need not suffice in the general
+  model, and a recorded step is not retrospectively enlarged to a maximal
+  one.
 \end{definition}
 
 \begin{definition}[Determination; work and depth]
@@ -183,9 +188,11 @@ led there.
   Commitments are grouped into layers for two reasons. First, non-commitment
   events may intervene, so a later commitment may depend on an intervening
   event and cannot be reordered before it. Second, even contiguous commitments
-  need not commute when one's effect depends on the other's exclusions. A
-  layer is a maximal set of commitments issued together that commute pairwise
-  at the state where they apply. In both instantiations of this paper
-  commutativity is state-independent, so the layer structure of a trace is
-  unambiguous.
+  need not commute when one's effect depends on the other's exclusions. The
+  constitutional notion is the \emph{actual valid common-source step} recorded
+  by the trace, not a maximal pairwise-commuting set. In both instantiations of
+  this paper, however, the declared commitment families are
+  state-independently independent, so their valid common-source conjunctions
+  are exactly the commuting batches used below; this is an instantiation
+  property, not part of the general definition.
 \end{remark}

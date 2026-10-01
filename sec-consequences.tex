@@ -80,13 +80,13 @@ Responsibility $0$ means $e$ is never pivotal; $1$ means every determination
 committing $e$ has its answer settled by $e$. This is a determination-level
 query of the kind the filtration already handles: its value is fixed by any
 canonical prefix that fixes the pivotal set, so its certificate depth equals
-that of $\mathbf{1}_{\operatorname{Piv}_a(e)}$. When an application supplies a
-value function, one may further refine responsibility into a Shapley value
-over commitment occurrences~\cite{livshits2021shapley,shapley1953value}---the
-sequential counterpart of tuple-level
-responsibility~\cite{meliou2010causality}: there the players are data tuples
-and here they are semantic commitments. Hardness and an FPT algorithm for the
-Shapley refinement appear in Appendix~\ref{app:responsibility-details}.
+that of $\mathbf{1}_{\operatorname{Piv}_a(e)}$. It is natural to refine this
+pivotal-set density into a \emph{Shapley value} over commitment
+occurrences---the sequential counterpart of tuple-level
+responsibility~\cite{meliou2010causality,livshits2021shapley}, with semantic
+commitments as players in place of data tuples. We leave that development,
+including its hardness and bounded-treewidth tractability, to the
+self-contained Appendix~\ref{app:responsibility-details}.
 
 \subsection{An Algorithm: Support and Robustness at Bounded Treewidth}
 \label{sec:algorithm}

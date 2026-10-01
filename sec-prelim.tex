@@ -92,12 +92,13 @@ is the crux of the model.
   do not return. A \emph{commitment basis} $\Basis$ is the set of commitments
   available for a given specification; it is part of the application model
   (the interface of binding acts the system can take), not merely a
-  mathematical generating set. Different bases yield different determination
-  structures and different provenance.
+  mathematical generating set.
 \end{definition}
 
 \noindent
-A commitment is \emph{fateful}: some output that was acceptable before it is
+The basis is a modeling choice: different bases yield different determination
+structures and so different provenance. A commitment
+is \emph{fateful}: some output that was acceptable before it is
 no longer attainable afterwards. We contrast this with changes that remove
 rows while preserving what is attainable.
 
@@ -150,7 +151,9 @@ be issued together without ordering among them.
     \xrightarrow{L_m} \sigma_m .
   \]
   It is \emph{complete} (first-hit) if $\sigma_m$ is the first determined
-  state on the trace. Its \emph{work} and \emph{depth} are
+  state on the trace; a complete determination is also called a
+  \emph{resolving} determination, as it resolves the specification to a
+  single output. Its \emph{work} and \emph{depth} are
   \[
     \operatorname{work}(D) = \sum_{j=1}^{m} |L_j|,
     \qquad

@@ -184,6 +184,29 @@ that decides support is a \emph{why certificate} when $D \in Y_a$ and a
 \emph{why-not certificate} otherwise---the determination-level counterpart of
 why/why-not provenance, now well-defined under ambiguity.
 
+The filtration is not degenerate: every level it exposes is realized by some
+observable, so support depth is a genuine measure rather than a formal
+artifact.
+
+\begin{proposition}[Depth reachability]
+  \label{prop:reachability}
+  Let $0 < k$ and suppose some layer-$k$ cell boundary is nontrivial---there
+  are determinations $D, D'$ with $D \equiv_{k-1} D'$ but $D \not\equiv_k D'$.
+  Then there is an observable $a$ with $\sdepth(a) = k$.
+\end{proposition}
+\begin{proof}
+  Take such $D \equiv_{k-1} D'$ differing first at layer $k$: say $D$ applies a
+  commitment $\varphi$ at layer $k$ that $D'$ does not. Let $a$ be the
+  observable ``$\varphi$ occurs at layer $k$,'' with $\Prov_K(\Cond(D''), a) =
+  1_K$ when $D''$ applies $\varphi$ at layer $k$ and $0_K$ otherwise---adequate
+  by construction. Then $Y_a$ is a union of layer-$k$ cells, so
+  $Y_a \in \mathcal{F}_k$ and $\sdepth(a) \le k$; but $D \in Y_a$ while
+  $D' \notin Y_a$ with $D \equiv_{k-1} D'$, so $Y_a$ is not a union of
+  $(k{-}1)$-cells and $Y_a \notin \mathcal{F}_{k-1}$. Hence $\sdepth(a) = k$. In
+  the result-extensional setting the same holds for a query observable whenever
+  the layer-$k$ commitment changes some tuple's determined result.
+\end{proof}
+
 The point of the filtration is that provenance composition cannot deepen it.
 
 \begin{theorem}[Composition respects the filtration]

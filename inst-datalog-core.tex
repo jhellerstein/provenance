@@ -137,11 +137,13 @@ same filtration at different depths.
     \item \emph{Stable-model semantics} reads $\mathcal{F}_{k+d}$: all choice
           layers discharged, yielding a two-valued model per determination.
     \item \emph{Well-founded semantics} reads $\mathcal{F}_{k+d^\ast}$, where
-          $d^\ast \le d$ is the number of consecutive choice layers (from
-          $k{+}1$) that are \emph{forced} by the preceding prefix. Atoms with
-          full or empty support are robust (WFS's $\mathbf{t}$ and
-          $\mathbf{f}$); atoms with partial support are contingent (WFS's
-          $\mathbf{u}$).
+          $d^\ast \le d$ is the length of the longest prefix of choice layers
+          $k{+}1, \dots, k{+}d^\ast$ each of which the alternating
+          fixpoint~\cite{vanGelder1991wellFounded} resolves two-valuedly given
+          the preceding prefix (we call such a layer \emph{forced}). Atoms the
+          well-founded model makes $\mathbf{t}$/$\mathbf{f}$ have full/empty
+          support (robust); atoms it leaves $\mathbf{u}$ have partial support
+          (contingent).
     \item \emph{Stratified semantics} reads $\mathcal{F}_k$ and is defined
           only when $d = 0$ (no negative cycles), where $|\Dets| = 1$.
   \end{enumerate}
@@ -152,13 +154,17 @@ same filtration at different depths.
   earlier layers, so layers $k{+}1,\dots,k{+}d$ do not commute in general,
   giving depth $k+d$. (a)~Each determination discharges all $k+d$ layers to a
   stable model, and stable models biject with $\Dets$, so stable-model
-  semantics reads $\mathcal{F}_{k+d} = \mathcal{P}(\Dets)$. (b)~The
-  alternating fixpoint~\cite{vanGelder1991wellFounded} discharges a choice
-  layer only when the current prefix forces a unique local extension;
-  $d^\ast$ counts the consecutive forced layers, after which residual
-  ambiguity is reported as $\mathbf{u}$---exactly the atoms whose support is
-  partial at $\mathcal{F}_{k+d^\ast}$. (c)~When $d = 0$ the sealing prefix
-  resolves everything. Full proof in Appendix~\ref{sec:appendix-datalog}.
+  semantics reads $\mathcal{F}_{k+d} = \mathcal{P}(\Dets)$. (b)~Run the
+  alternating fixpoint~\cite{vanGelder1991wellFounded} after the sealing
+  prefix; call choice layer $k{+}i$ \emph{forced} if, given the preceding
+  prefix, the fixpoint already assigns every atom of $C_i$ a two-valued
+  $\mathbf{t}$/$\mathbf{f}$ (equivalently, the well-founded model is total on
+  $C_i$). Let $d^\ast$ be the length of the longest such forced prefix of
+  choice layers; the well-founded model leaves every atom beyond it
+  $\mathbf{u}$. Forced atoms have full or empty support and are decided by
+  $\mathcal{F}_{k+d^\ast}$, while $\mathbf{u}$-atoms have partial support
+  there---so WFS reads $\mathcal{F}_{k+d^\ast}$. (c)~When $d = 0$ the sealing
+  prefix resolves everything. Full proof in Appendix~\ref{sec:appendix-datalog}.
 \end{proof}
 
 \noindent
@@ -249,15 +255,18 @@ the provenance-semiring toolkit on negation.
 
 \noindent
 Because $P_D(a_{Q,\alpha})$ is an ordinary provenance polynomial in
-$\mathbb{N}[X]$, every semiring homomorphism $h:\mathbb{N}[X]\to K'$ yields a
-sound specialization at level~$0$---counting of derivations ($K'=\mathbb{N}$),
-confidence or probability (a tuple-independent PDB homomorphism), access
-control and security ($K'$ the access-control semiring), minimum-cost
-derivation (the tropical semiring), and factorized representations---by the
-fundamental theorem of provenance semirings~\cite{green2007provenance}. These
-are a \emph{complementary} family of queries to a model-relative justification
+$\mathbb{N}[X]$, it specializes to any commutative provenance semiring $K'$ by
+the unique homomorphism $h:\mathbb{N}[X]\to K'$ fixed by the base
+annotations---the fundamental property of provenance
+semirings~\cite{green2007provenance}---yielding, at level~$0$, counting of
+derivations ($K'=\mathbb{N}$) and confidence or probability (a
+tuple-independent probability homomorphism), and, by evaluating the same
+polynomial in the appropriate semiring, access control, minimum-cost
+(tropical) derivation, and factorized representations. Each is sound for
+negation-licensed atoms, not only negation-free ones. These are a
+\emph{complementary} family of queries to a model-relative justification
 (which records rule-level derivation structure but not a semiring annotation):
-discharging negation into a commitment is exactly what brings a negated-licensed
-fact into the scope of this family. Above level~$0$, the filtration composes
-these annotations across determinations
+discharging negation into a commitment is exactly what brings a
+negation-licensed fact into the scope of this family. Above level~$0$, the
+filtration composes these annotations across determinations
 (Theorem~\ref{thm:filtration-respected}).

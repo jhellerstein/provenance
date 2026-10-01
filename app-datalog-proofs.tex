@@ -50,16 +50,25 @@ correspondence, and support-level monus elimination.
   such determination. Hence stable models biject with $\Dets$, and
   stable-model semantics reads $\mathcal{F}_{k+d} = \mathcal{P}(\Dets)$.
 
-  \emph{(b) Well-founded semantics.} WFS applies the alternating
-  fixpoint~\cite{vanGelder1991wellFounded} after the sealing prefix. At choice
-  layer $k{+}i$ the alternating fixpoint checks whether $C_i$ has a unique
-  stable extension given the discharged prefix; if so the layer is
-  \emph{forced} and WFS discharges it, otherwise $C_i$'s atoms are classified
-  $\mathbf{u}$ and no dependent layer is discharged. Let $d^\ast$ be the number
-  of consecutive forced layers from $k{+}1$. WFS reads
-  $\mathcal{F}_{k+d^\ast}$: atoms settled by layers $1, \dots, k{+}d^\ast$ have
-  full or empty support ($\mathbf{t}/\mathbf{f}$), and atoms depending on
-  layers beyond $k{+}d^\ast$ have partial support ($\mathbf{u}$).
+  \emph{(b) Well-founded semantics.} Run the alternating
+  fixpoint~\cite{vanGelder1991wellFounded} after the sealing prefix. Define
+  choice layer $k{+}i$ to be \emph{forced} (given the discharged prefix through
+  $k{+}i{-}1$) if the alternating fixpoint assigns every atom of $C_i$ a
+  two-valued value---equivalently, the well-founded model is total on $C_i$.
+  This is the exact condition for WFS to settle $C_i$: an atom of $C_i$ is left
+  $\mathbf{u}$ precisely when the fixpoint does not drive it to $\mathbf{t}$ or
+  $\mathbf{f}$. Let $d^\ast$ be the length of the longest prefix of choice
+  layers $k{+}1, \dots, k{+}d^\ast$ all of which are forced (once a layer is
+  unforced, the atoms it leaves $\mathbf{u}$ propagate undefinedness to every
+  dependent later layer, so no later layer is forced). Then the well-founded
+  model is total exactly on the atoms settled by layers $1, \dots, k{+}d^\ast$,
+  which therefore have full or empty support, while atoms depending on a later
+  layer are $\mathbf{u}$ and have partial support. Hence WFS reads
+  $\mathcal{F}_{k+d^\ast}$. Note we do \emph{not} claim ``forced $\Leftrightarrow$
+  unique stable extension'': an SCC may have several stable extensions yet have
+  some atoms pinned $\mathbf{t}$/$\mathbf{f}$ by the well-founded model, and the
+  argument above uses only the alternating fixpoint's own two-valued
+  assignment, not stable-model uniqueness.
 
   \emph{(c) Stratified semantics.} When $d = 0$ the sealing prefix resolves
   all atoms, $|\Dets| = 1$, and $\mathcal{F}_k = \{\emptyset, \Dets\}$.
@@ -144,12 +153,17 @@ $1_K \mathbin{\dot{-}} \mathrm{val}(b)$.
   $K$-provenance as any other derived atom. Finally, since $\mathbb{N}[X]$ is
   the free commutative semiring on the base annotations, every commutative
   semiring $K'$ is the image of a unique semiring homomorphism
-  $h:\mathbb{N}[X]\to K'$, and $h$ commutes with least-fixpoint
-  evaluation~\cite{green2007provenance}; applying $h$ to
-  $P_D(a_{Q,\alpha})\in\mathbb{N}[X]$ yields the corresponding specialized
-  annotation (counting in $\mathbb{N}$, probability via a tuple-independent PDB
-  homomorphism, access control, tropical cost, and so on), each sound for the
-  negation-licensed atoms as well.
+  $h:\mathbb{N}[X]\to K'$ determined by the base-annotation choice. For a finite
+  program the least fixpoint is reached in finitely many steps, so each atom's
+  annotation is a \emph{finite} $+/\cdot$ expression; $h$, being a semiring
+  homomorphism, commutes with these finite operations~\cite{green2007provenance}
+  (no $\omega$-continuity of $K'$ is needed). Applying $h$ to
+  $P_D(a_{Q,\alpha})\in\mathbb{N}[X]$ therefore yields the corresponding
+  specialized annotation---for instance counting of derivations in $\mathbb{N}$,
+  or confidence under a tuple-independent probability homomorphism---each sound
+  for negation-licensed atoms as well. Other provenance semirings in common use
+  (access-control, min-cost/tropical, factorized polynomials) are obtained the
+  same way, by evaluating the annotation in the target semiring.
 \end{proof}
 
 \noindent

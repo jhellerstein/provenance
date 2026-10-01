@@ -50,41 +50,29 @@ K\"ohler et al.~\cite{kohler2012declarative} likewise assume a resolved
 semantics. Most closely related, Bogaerts et
 al.~\cite{bogaerts2026whynot} define why- and why-not-provenance for
 $\mbox{Datalog}^\neg$ under both well-founded and stable semantics using
-justification theory, and show the associated decision problem is
-NP-complete. Their explanations are \emph{relative to a fixed model}: given a
-model under one semantics, a justification graph explains why a chosen literal
-holds (or fails) in it. This is complementary to our construction, and the two
-compose cleanly. A determination records every negative \emph{decision}---both
-the seals that force a literal false and the choices that resolve a negative
-cycle---and, conditioned on a determination $D$, the \emph{derivation} of each
-negative literal is reconstructible: once the choice commitments fix the cycle
-atoms, the Gelfond--Lifschitz reduct is positive, and the justification of
-$\neg\alpha$ in the resolved model is a closure over that reduct's positive
-provenance. An adequate consumer can therefore emit this as part of the
-conditioned annotation $P_D(a)$, for forced and chosen negatives alike. The
-cleanest way to see the relationship is as two complementary axes of cost that
-are most informative taken together. Bogaerts et al.\ fix a determination (one
-well-founded or stable model) and give a precise account of the
-\emph{computational} cost of provenance within it---the asymptotic complexity
-of deciding provenance membership, which they show is NP-complete, together
-with a uniform justification-graph representation across the two semantics.
-Determination provenance holds that within-model provenance fixed as classical
-positive $K$-provenance and instead measures the \emph{determination} axis: the
-support, and the support depth---how many layers of irrevocable commitment are
-needed to settle an atom and which commitments flip it across models
-(Theorem~\ref{thm:negation-general}). The two axes are independent---an atom can
-be computationally hard to justify inside a model yet have support depth $0$
-(robust across all models), or be trivial within every model yet contingent
-across them---so neither account subsumes the other, and together they give a
-fuller picture of what explaining a $\mbox{Datalog}^\neg$ fact costs: how much
-asymptotic computation \emph{and} how much semantic commitment. We take the
-admissible determinations $\Dets$ as given rather than certifying membership in
-them, precisely so as to isolate the determination axis; their model-relative
-why-not is, in our terms, a why-not certificate at a determination, whereas ours
-is read off the complement of the why-support before any model is fixed. Our
-contribution is this cross-model, unstratified setting,
-where multiple stable models coexist, monus is undefined, and the determination
-semiring tracks which models support each atom. The enriched outcome domain
+justification theory, and show the associated decision problem is NP-complete.
+Their explanations are \emph{relative to a fixed model}: a justification graph
+explains why a chosen literal holds or fails in a given model. The two works
+measure complementary axes of cost and are most informative together. Bogaerts
+et al.\ fix a determination (one model) and give the \emph{computational} cost
+of provenance within it, with a uniform justification-graph representation
+across the two semantics. Determination provenance holds within-model
+provenance fixed as classical positive $K$-provenance and measures the
+\emph{determination} axis: the support and its depth---how many layers of
+irrevocable commitment settle an atom, and which commitments flip it across
+models (Theorem~\ref{thm:negation-general}). The axes are independent: an atom
+can be hard to justify inside a model yet robust across all of them (support
+depth $0$), or trivial within every model yet contingent across them. We take
+the admissible determinations $\Dets$ as given, isolating the determination
+axis; their model-relative why-not is, in our terms, a why-not certificate at a
+determination, whereas ours is read from the why-support before any model is
+fixed. The two also compose: conditioned on a determination the derivation of
+each negative literal is reconstructible (the Gelfond--Lifschitz reduct is
+positive once the cycle atoms are committed), so a justification can serve as
+the within-model annotation $P_D(a)$. Our contribution is the cross-model,
+unstratified setting, where multiple stable models coexist, monus is undefined,
+and the determination semiring tracks which models support each atom. The
+enriched outcome domain
 ($\bot \OrdO \mathbf{u} \OrdO \{\mathbf{t},\mathbf{f}\}$) is Belnap's knowledge
 order~\cite{belnap1977four}; we use only its refinement structure.
 

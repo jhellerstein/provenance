@@ -59,32 +59,6 @@ inputs.
 \subsection{Reachability of Every Depth}
 \label{app:reachability}
 
-The filtration is not degenerate: for every $k \le d$ there is an observable
-of support depth exactly $k$. The witness is a two-line construction.
-
-\begin{proposition}[Depth reachability]
-  \label{prop:reachability}
-  Let $\Dets$ have depth $d$ and let $0 < k \le d$. Suppose some layer-$k$
-  cell boundary is nontrivial: there are determinations $D, D'$ with
-  $D \equiv_{k-1} D'$ but $D \not\equiv_k D'$. Then there is an observable $a$
-  with $\sdepth(a) = k$.
-\end{proposition}
-\begin{proof}
-  Fix such $D \equiv_{k-1} D'$ with $D \not\equiv_k D'$: the two agree through
-  layer $k{-}1$ and first differ at layer $k$, say $D$ applies a commitment
-  $\varphi$ at layer $k$ that $D'$ does not. Introduce a base observable $a$
-  whose truth interpretation is ``$\varphi$ occurs at layer $k$,'' with
-  $\Prov_K(\Cond(D''), a) = 1_K$ exactly when $D''$ applies $\varphi$ at layer
-  $k$ and $0_K$ otherwise (an adequate consumer by construction). Then
-  $Y_a = \{D'' \mid D'' \text{ applies } \varphi \text{ at layer } k\}$ is a
-  union of layer-$k$ cells, so $Y_a \in \mathcal{F}_k$ and $\sdepth(a) \le k$.
-  It is not in $\mathcal{F}_{k-1}$: $D$ and $D'$ lie in the same
-  $(k{-}1)$-cell but $D \in Y_a$ while $D' \notin Y_a$, so $Y_a$ is not a union
-  of $(k{-}1)$-cells. Hence $\sdepth(a) = k$.
-\end{proof}
-
-\noindent
-In the result-extensional setting the same conclusion holds for a query
-observable whenever the layer-$k$ commitment changes the determined result of
-some tuple---the usual case---so query-relative support depth realizes every
-level the determination space exposes.
+The non-degeneracy of the filtration---every exposed level is realized by some
+observable---is Proposition~\ref{prop:reachability}, proved in the body
+(Section~\ref{sec:filtration}).

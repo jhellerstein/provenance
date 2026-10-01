@@ -19,8 +19,8 @@ shared `sec-abstract.tex` and `sec-intro.tex` branch on.
 ## Shared, instantiation-agnostic modules
 
 - `det-notation.sty` — **shared** core determination macros (`\OrdI`,`\OrdO`,
-  `\Basis`,`\Dets`,`\Rho`,`\Max`,`\supp`,`\cdepth`,`\sdepth`), the single
-  source of truth intended for all determination papers (provenance,
+  `\States`,`\Spec`,`\Basis`,`\Dets`,`\Rho`,`\Max`,`\supp`,`\cdepth`,
+  `\sdepth`), the single source of truth intended for all determination papers (provenance,
   coordination criterion, complexity) to prevent notation drift from the
   foundation reference.
 - `preamble.tex` — loads `det-notation.sty`, then packages, theorem envs,
